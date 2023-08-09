@@ -4,7 +4,7 @@ nextflow_process {
     script "nf_modules/remove_dup_ids.nf"
     process "removeDupIDs"
 
-    test("Check default parameter value") {
+    test("Default - remove both") {
 
         when {
             params {
@@ -28,7 +28,32 @@ nextflow_process {
 
     }
     
-    test("Do not remove patch regions") {
+    test("Only remove patch regions") {
+
+        when {
+            params {
+                remove_nonunique_ids = 0
+                remove_patch_regions = 1
+            }
+            process {
+                """
+                input[0] = tuple("$baseDir/tests/data/test_dup_renamed.vcf.gz", "test_genome", "test_source", 1, "tbi")
+                """
+            }
+        }
+
+        then {
+            // assert process run correctly
+            assert process.success
+
+            // assert the content of the output file - one variant
+            assert path(process.out.get(0).get(0).get(0)).linesGzip.size() == 6
+
+        }
+
+    }
+    
+    test("Only remove non-unique ids") {
 
         when {
             params {
@@ -53,7 +78,7 @@ nextflow_process {
 
     }
     
-    test("Do not remove non-unique ids") {
+    test("Remove none") {
 
         when {
             params {

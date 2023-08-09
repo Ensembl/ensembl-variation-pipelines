@@ -4,7 +4,7 @@ nextflow_process {
     script "nf_modules/vcf_to_bed.nf"
     process "vcfToBed"
 
-    test("Should run without failures") {
+    test("Check default parameter value") {
 
         when {
             params {
@@ -87,11 +87,11 @@ nextflow_process {
             
             // vcf file line 5: ignored - redundant variant
             
-            // vcf file line 6 and 7: not comapatible variant - do not merge
+            // vcf file line 6 and 7: not compatible variant - do not merge
             assert lines[3] == "chr13 57932508 57932508 rs1555257542 insertion T TATATATATACACAC 5 intergenic_variant"
             assert lines[4] == "chr13 57932508 57932508 rs1555257544 insertion T TATATATATATACACACACACACAC 5 intergenic_variant"
             
-            // vcf file line 8 and 9: comapatible variant - so merge
+            // vcf file line 8 and 9: compatible variant - so merge
             assert (
               lines[5] == "chr19 60557 60558 rs1260281513 SNV A G,T 5 downstream_gene_variant" ||
               lines[5] == "chr19 60557 60558 rs1260281513 SNV A T,G 5 downstream_gene_variant"

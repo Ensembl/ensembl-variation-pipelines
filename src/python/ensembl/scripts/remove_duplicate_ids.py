@@ -33,7 +33,8 @@ if __name__ == "__main__":
     '''
     Removes variant based on uniqueness and sequence region. 
     About removing variant based on uniqueness -
-        1) By default, variant is discarded if the positioned identifier (chrom:position:id) is same for multiple variant record.
+        1) By default, variant is discarded if the positioned identifier (chrom:position:id) is same for multiple variant record. The assumption is
+        that the variants will be multi-allelic if needed be instead of bi-allelic in the source VCF file.
         2) Optionally, we can ask to remove variant with same ids even if they are in different location (using the remove_nonunique_ids argument).
         3) When removed, all the variant record is removed. For example, if there is two variant record with same positioned id then both of them
         will be removed.

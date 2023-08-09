@@ -19,12 +19,11 @@ def generate_removal_status(vcf_file: str, remove_patch_regions: bool = True) ->
     input_vcf = VCF(vcf_file)
     for variant in input_vcf:
         variant_identifier = get_identifier(variant)
-        
-        # Order is important here - first, check for patch sequence region and then for uniqueness
+        # Order is important here. Check for uniqueness is based on existance - we should check it first
+        removal_status[variant_identifier] = variant_identifier in removal_status
         if remove_patch_regions:
             chr = variant.CHROM
-            removal_status[variant_identifier] = ("CTG" in chr) or ("PATCH" in chr) or ("TEST" in chr)
-        removal_status[variant_identifier] = variant_identifier in removal_status
+            removal_status[variant_identifier] = removal_status[variant_identifier] or ("CTG" in chr) or ("PATCH" in chr) or ("TEST" in chr)
     input_vcf.close()
     
     return removal_status

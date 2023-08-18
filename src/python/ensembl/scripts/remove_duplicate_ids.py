@@ -9,8 +9,9 @@ def get_id(variant: Variant) -> str:
 
 def get_positioned_id(variant: Variant) -> str:
     'Get variant positioned id'
-    
-    return variant.CHROM + ":" + str(variant.POS) + ":" + variant.ID
+        
+    id = variant.ID or "unknown"
+    return variant.CHROM + ":" + str(variant.POS) + ":" + id
 
 def generate_removal_status(vcf_file: str, remove_patch_regions: bool = True) -> dict:
     'Generate hash against variant about its removal status'

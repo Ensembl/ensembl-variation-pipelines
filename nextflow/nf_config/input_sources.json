@@ -22,7 +22,7 @@
       "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vcfs/homo_sapiens_grch38/GWAS/input_gwas_catalog_v1.0.2-associations_e107_r2022-09-14.vcf"
     },
     {
-      "source_name": "10000 Genomes",
+      "source_name": "1000 Genomes",
       "file_location": "/nfs/production/flicek/ensembl/variation/data/1kg/updated_20170504/ALL.##CHR##_GRCh38.genotypes.20170504.vcf.gz"
     }
   ],

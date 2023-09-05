@@ -8,6 +8,7 @@ import groovy.json.JsonSlurper
 import java.io.File
 
 // params default
+params.repo_dir = "/hps/software/users/ensembl/repositories/${USER}"
 params.input_config = "${projectDir}/../nf_config/input_sources.json"
 params.output_dir = "/nfs/production/flicek/ensembl/variation/new_website"
 params.singularity_dir = "/hps/nobackup/flicek/ensembl/variation/snhossain/website/singularity-images"
@@ -22,7 +23,7 @@ params.rank_file = "${projectDir}/../../nextflow/nf_config/variation_consequnce_
 params.version = 108
 
 // module imports
-repo_dir = "/hps/software/users/ensembl/repositories/${USER}"
+repo_dir = params.repo_dir
 // pre
 include { createRankFile } from "${projectDir}/../nf_modules/create_rank_file.nf"
 include { createConfigs } from "${projectDir}/../nf_modules/create_configs.nf"

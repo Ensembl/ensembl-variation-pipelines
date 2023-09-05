@@ -20,10 +20,10 @@ process renameChr {
   file_name = file(input_file).getName()
   
   '''
+  # format file names
   output_file=!{output_dir}/!{file_name}
   output_file=${output_file/_VEP/}
   output_file=${output_file/.vcf.gz/_renamed_VEP.vcf.gz}
-  
   synonym_file=!{moduleDir}/../nf_config/synonyms/!{genome}.txt
   
   # rename chr synonyms
@@ -35,5 +35,8 @@ process renameChr {
   else
     index_type=csi
   fi
+  
+  # remove the input VCF files
+  rm !{input_file}*
   '''
 }

@@ -19,11 +19,15 @@ process removeDupIDs {
   remove_patch = params.remove_patch
   
   '''
-  # format input and output file name
+  # format input and output file names
   input_file=!{input_file}
   output_file=${input_file/_renamed_VEP.vcf.gz/_processed_VEP.vcf.gz}
   
+  # remove variant record with duplicated ids and optionally record in patched region
   pyenv local variation-eva
   python3 !{moduleDir}/../../src/python/ensembl/scripts/remove_duplicate_ids.py ${input_file} !{remove_patch}
+  
+  # remove the input VCF files
+  rm !{input_file}*
   '''
 }

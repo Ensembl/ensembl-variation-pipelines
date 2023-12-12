@@ -72,7 +72,7 @@ def get_variant_source(server: dict, variation_db: str, name: str) -> str:
         return None
     variation_id = process.stdout.decode().strip()
 
-    query = f"SELECT s.name FROM variation_feature AS vf, source AS s WHERE vf.source_id = s.source_id AND variation__id = {variation_id};"
+    query = f"SELECT s.name FROM variation_feature AS vf, source AS s WHERE vf.source_id = s.source_id AND variation_id = {variation_id};"
     process = subprocess.run(["mysql",
             "--host", server["host"],
             "--port", server["port"],

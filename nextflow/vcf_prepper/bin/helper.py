@@ -56,7 +56,7 @@ def get_division(server: dict, core_db: str) -> str:
     return process.stdout.decode().strip()
 
 def get_variant_source(server: dict, variation_db: str, name: str) -> str:
-    query = f"SELECT variation_id FROM variation WHERE name = "{name}";"
+    query = f"SELECT variation_id FROM variation WHERE name = \"{name}\";"
     process = subprocess.run(["mysql",
             "--host", server["host"],
             "--port", server["port"],

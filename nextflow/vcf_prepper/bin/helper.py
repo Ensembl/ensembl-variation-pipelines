@@ -55,6 +55,37 @@ def get_division(server: dict, core_db: str) -> str:
     )
     return process.stdout.decode().strip()
 
+def get_variant_source(server: dict, variation_db: str, name: str) -> str:
+    query = f"SELECT variation_id FROM variation WHERE name = "{name}";"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "--database", variation_db,
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    if process.returncode != 0:
+        return None
+    variation_id = process.stdout.decode().strip()
+
+    query = f"SELECT s.name FROM variation_feature AS vf, source AS s WHERE vf.source_id = s.source_id AND variation__id = {variation_id};"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "--database", variation_db,
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    return process.stdout.decode().strip()
+
 def get_fasta_species_name(species_production_name: str) -> str:
     return species_production_name[0].upper() + species_production_name[1:]
     

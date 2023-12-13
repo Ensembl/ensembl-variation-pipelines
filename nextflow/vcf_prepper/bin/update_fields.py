@@ -80,6 +80,25 @@ def main(args = None):
         variation_server = parse_ini(ini_file, "variation")
         variation_db = get_db_name(variation_server, version, species, type = "variation")
 
+        sources_meta = get_sources_meta_info(variation_server, variation_db)
+        for source_meta in sources_meta:
+            meta_line = "##"
+
+            if source_meta["name"] == "NULL":
+                continue
+            meta_line += f"source={source_meta["name"]}"
+
+            if source_meta["description"] != "NULL":
+                meta_line += f"description={source_meta["description"]}"
+
+            if source_meta["url"] != "NULL":
+                meta_line += f"url={source_meta["url"]}"
+
+            if source_meta["version"] != "NULL":
+                meta_line += f"version={source_meta["version"]}"
+
+            META += meta_line + "\n"
+
     with bgzf.open(output_file, "wt") as o_file:
         o_file.write(meta)
         o_file.write(HEADER)

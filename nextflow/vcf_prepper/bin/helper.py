@@ -86,6 +86,34 @@ def get_variant_source(server: dict, variation_db: str, name: str) -> str:
     )
     return process.stdout.decode().strip()
 
+def get_sources_meta_info(server: dict, variation_db: str) -> dict:
+    query = "SELECT name, description, url, version FROM source;"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "--database", variation_db,
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    if process.returncode != 0:
+        return []
+
+    sources_meta_raw = process.stdout.decode().strip()
+    sources_meta = []
+    for source_meta_line in sources_meta_raw.split("\n"):
+        (name, description, url, version) = source_meta_line.split("\t")
+        sources_meta.append({
+            "name": name,
+            "description": description,
+            "url": url,
+            "version": version
+        })
+    return sources_meta
+
 def get_fasta_species_name(species_production_name: str) -> str:
     return species_production_name[0].upper() + species_production_name[1:]
     

@@ -86,18 +86,18 @@ def main(args = None):
 
             if source_meta["name"] == "NULL":
                 continue
-            meta_line += f"source={source_meta['name']}"
+            meta_line += f"source=\"{source_meta['name']}\""
 
             if source_meta["description"] != "NULL":
-                meta_line += f"description={source_meta['description']}"
+                meta_line += f" description=\"{source_meta['description']}\""
 
             if source_meta["url"] != "NULL":
-                meta_line += f"url={source_meta['url']}"
+                meta_line += f" url=\"{source_meta['url']}\""
 
             if source_meta["version"] != "NULL":
-                meta_line += f"version={source_meta['version']}"
+                meta_line += f" version=\"{source_meta['version']}\""
 
-            META += meta_line + "\n"
+            meta += meta_line + "\n"
 
     with bgzf.open(output_file, "wt") as o_file:
         o_file.write(meta)

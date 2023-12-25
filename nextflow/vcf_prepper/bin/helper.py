@@ -55,36 +55,23 @@ def get_division(server: dict, core_db: str) -> str:
     )
     return process.stdout.decode().strip()
 
-def get_variant_source(server: dict, variation_db: str, name: str) -> str:
-    query = f"SELECT variation_id FROM variation WHERE name = \"{name}\";"
-    process = subprocess.run(["mysql",
-            "--host", server["host"],
-            "--port", server["port"],
-            "--user", server["user"],
-            "--database", variation_db,
-            "-N",
-            "--execute", query
-        ],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    if process.returncode != 0:
-        return None
-    variation_id = process.stdout.decode().strip()
+def dump_variant_source(server: dict, variation_db: str, dump_file: str) -> str:
+    query = "SELECT DISTINCT vf.variation_name, s.name FROM variation_feature AS vf, source AS s WHERE vf.source_id = s.source_id;"
 
-    query = f"SELECT s.name FROM variation_feature AS vf, source AS s WHERE vf.source_id = s.source_id AND variation_id = {variation_id};"
-    process = subprocess.run(["mysql",
-            "--host", server["host"],
-            "--port", server["port"],
-            "--user", server["user"],
-            "--database", variation_db,
-            "-N",
-            "--execute", query
-        ],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    return process.stdout.decode().strip()
+    with open(dump_file, "w") as file:
+        process = subprocess.run(["mysql",
+                "--host", server["host"],
+                "--port", server["port"],
+                "--user", server["user"],
+                "--database", variation_db,
+                "-N",
+                "--execute", query
+            ],
+            stdout = file,
+            stderr = subprocess.PIPE
+        )
+
+    return process.returncode
 
 def get_sources_meta_info(server: dict, variation_db: str) -> dict:
     query = "SELECT name, description, url, version FROM source;"

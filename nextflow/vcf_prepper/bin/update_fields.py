@@ -12,6 +12,7 @@ META = """##fileformat=VCFv4.2
 """
 HEADER="""#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO
 """
+VARIATION_SOURCE_DUMP_FILENAME = "variation_source.txt"
 
 
 def parse_args(args = None, description: bool = None):
@@ -45,6 +46,14 @@ def format_meta(meta: str, chromosomes: str = None, synonyms: list = None) -> st
         meta += f"##contig=<ID={chr_syn}>\n"
     return meta
 
+def get_variant_source(variation_name: str) -> str:
+    with open(VARIATION_SOURCE_DUMP_FILENAME, "r") as file:
+        for line in file:
+            if variation_name in line:
+                return line.split("\t")[1].strip()
+
+    return None
+
 def main(args = None):
     args = parse_args(args)
 
@@ -77,8 +86,11 @@ def main(args = None):
     query_source = False
     if source == "QUERY":
         query_source = True
+
         variation_server = parse_ini(ini_file, "variation")
         variation_db = get_db_name(variation_server, version, species, type = "variation")
+
+        dump_variant_source(variation_server, variation_db, VARIATION_SOURCE_DUMP_FILENAME)
 
         sources_meta = get_sources_meta_info(variation_server, variation_db)
         for source_meta in sources_meta:
@@ -107,7 +119,7 @@ def main(args = None):
         for variant in input_vcf:
 
             if query_source:
-                source = get_variant_source(variation_server, variation_db, variant.ID)
+                source = get_variant_source(variant.ID)
                 if source is None:
                     source = "."
 

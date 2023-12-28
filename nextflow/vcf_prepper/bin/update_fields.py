@@ -4,6 +4,7 @@ import sys
 from cyvcf2 import VCF, Writer
 from Bio import bgzf
 import argparse
+import gc
 
 from helper import *
 
@@ -46,13 +47,14 @@ def format_meta(meta: str, chromosomes: str = None, synonyms: list = None) -> st
         meta += f"##contig=<ID={chr_syn}>\n"
     return meta
 
-def get_variant_source(variation_name: str) -> str:
+def process_variant_source() -> dict:
+    variant_source = {}
     with open(VARIATION_SOURCE_DUMP_FILENAME, "r") as file:
         for line in file:
-            if variation_name in line:
-                return line.split("\t")[1].strip()
+            (variant_name, source) = [val.strip() for val in line.split("\t")]
+            variant_source[variant_name] = source
 
-    return None
+    return variant_source
 
 def main(args = None):
     args = parse_args(args)
@@ -91,6 +93,7 @@ def main(args = None):
         variation_db = get_db_name(variation_server, version, species, type = "variation")
 
         dump_variant_source(variation_server, variation_db, VARIATION_SOURCE_DUMP_FILENAME)
+        variant_source = process_variant_source()
 
         sources_meta = get_sources_meta_info(variation_server, variation_db)
         for source_meta in sources_meta:
@@ -119,7 +122,11 @@ def main(args = None):
         for variant in input_vcf:
 
             if query_source:
-                source = get_variant_source(variant.ID)
+                try:
+                    source = variant_source[variant.ID]
+                except:
+                    source = None
+
                 if source is None:
                     source = "."
 
@@ -135,6 +142,12 @@ def main(args = None):
                 ]) + "\n"
             )
         input_vcf.close()
+
+    try:
+        del variant_source
+        gc.collect()
+    except:
+        pass
     
 if __name__ == "__main__":
     sys.exit(main())

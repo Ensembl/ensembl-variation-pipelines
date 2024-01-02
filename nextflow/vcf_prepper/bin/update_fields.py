@@ -123,7 +123,7 @@ def main(args = None):
 
             if query_source:
                 try:
-                    source = variant_source[variant.ID]
+                    source = variant_source[variant.ID].replace(" ", "_")
                 except:
                     source = None
 

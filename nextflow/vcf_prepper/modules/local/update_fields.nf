@@ -1,5 +1,21 @@
 #!/usr/bin/env nextflow
 
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
 process UPDATE_FIELDS {
   input: 
   tuple val(meta), path(vcf), path(vcf_index)
@@ -8,22 +24,16 @@ process UPDATE_FIELDS {
   tuple val(meta), path(output_file)
   
   shell:
-  output_file =  "UPDATED_" + file(vcf).getName()
+  output_file =  "UPDATED_S_" + file(vcf).getName()
   source = meta.source
   synonym_file = meta.synonym_file
-  species = meta.species
-  version = params.version
-  ini_file = params.ini_file
   rename_clinvar_ids = params.rename_clinvar_ids ? "--rename_clinvar_ids" : ""
-
+  
   '''
   chrs=$(tabix !{vcf} -l | xargs | tr ' ' ',')
   update_fields.py !{vcf} !{source} !{synonym_file} \
     !{rename_clinvar_ids} \
     -O !{output_file} \
-    --chromosomes ${chrs} \
-    --species !{species} \
-    --version !{version} \
-    --ini_file !{ini_file}
+    --chromosomes ${chrs}
   '''
 }

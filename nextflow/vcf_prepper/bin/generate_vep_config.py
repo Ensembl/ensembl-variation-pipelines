@@ -55,7 +55,8 @@ PLUGINS = [
     "Phenotypes",
     "IntAct",
     "AncestralAllele",
-    "Conservation"
+    "Conservation",
+    "AlphaMissense"
 ]
 FREQUENCIES = {
     "1000genomes": "af_1kg 1",
@@ -212,6 +213,16 @@ def get_plugin_args(
             return None
             
         return f"Conservation,{file}"
+
+    if plugin == "AlphaMissense":
+        # Alphamissense do not have data file in e110 directory or below 
+        if version < 111:
+            plugin_data_dir = plugin_data_dir.replace(f"{version}", "111")
+        file = os.path.join(plugin_data_dir, "AlphaMissense_hg38.tsv.gz")
+
+        check_plugin_files(plugin, [file])
+
+        return f"AlphaMissense,file={file}"
         
     print(f"[ERROR] Unknown plugin argument requested - {plugin}. Exiting ...")
     exit(1)

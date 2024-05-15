@@ -106,7 +106,7 @@ def format_gnomad_args(source: str, metadata: dict) -> str:
             print(f"[ERROR] Frequency file does not exist - {file}. Exiting ...")
             exit(1)
         
-        gnomAD_custom_args.append(f"custom file={file},short_name={source},format=vcf,type=exact,coords=0," + \
+        custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0," + \
             "fields=AF%AC%AN" + \
             "%AF_afr%AC_afr%AN_afr" + \
             "%AF_amr%AC_amr%AN_amr" + \
@@ -115,7 +115,12 @@ def format_gnomad_args(source: str, metadata: dict) -> str:
             "%AF_fin%AC_fin%AN_fin" + \
             "%AF_nfe%AC_nfe%AN_nfe" + \
             "%AF_oth%AC_oth%AN_oth" + \
-            "%AF_sas%AC_sas%AN_sas")
+            "%AF_sas%AC_sas%AN_sas"
+
+        if source == "gnomAD_genomes":
+            custom_line += "%AF_mid%AC_mid%AN_mid%AF_ami%AC_ami%AN_ami"
+
+        gnomAD_custom_args.append(custom_line)
     
     return "\n".join(gnomAD_custom_args)
     

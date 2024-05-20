@@ -324,6 +324,9 @@ def generate_vep_config(
             
             for plugin in plugins:
                 file.write(f"plugin {plugin}\n")
+
+        # PhyloP
+        file.write(f"custom file=http://hgdownload.cse.ucsc.edu/goldenpath/,short_name={source},format=vcf,type=exact,coords=0")
     
     
 def main(args = None):

@@ -120,6 +120,12 @@ def format_gnomad_args(source: str, metadata: dict) -> str:
         custom_line += "fafmax_faf95_max"
             
         gnomAD_custom_args.append(custom_line)
+
+        # add discordant p-value from joint frequency file
+        file = f"/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/joint_frequencies/gnomad.joint.v4.1.sites.chr{ chromosome }.vcf.bgz"
+        custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0,fields=stat_union_p_value"
+
+        gnomAD_custom_args.append(custom_line)
     
     return "\n".join(gnomAD_custom_args)
     

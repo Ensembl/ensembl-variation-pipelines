@@ -52,7 +52,6 @@ PLUGINS = [
     "CADD",
     "REVEL",
     "SpliceAI",
-    "Phenotypes",
     "IntAct",
     "AncestralAllele",
     "Conservation",
@@ -310,6 +309,7 @@ def generate_vep_config(
         file.write("variant_class 1\n")
         file.write("protein 1\n")
         file.write("transcript_version 1\n")
+        file.write("hgvs 1\n")
         
         if sift:
             file.write(f"sift b\n")

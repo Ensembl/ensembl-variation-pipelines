@@ -25,7 +25,7 @@ from helper import parse_ini, get_db_name, get_division, get_fasta_species_name,
 
 CACHE_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/tabixconverted"
 FASTA_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/fasta"
-REPO_DIR = os.path.join("/hps/software/users/ensembl/repositories", os.environ.get("USER"))
+REPO_DIR = os.path.join("/hps/software/users/ensembl/variation", os.environ.get("USER"))
 PLUGIN_DATA_DIR = "/nfs/production/flicek/ensembl/variation/enseweb-data_tools/grch38/VERSION/vep/plugin_data"
 CONSERVATION_DATA_DIR = "/nfs/production/flicek/ensembl/variation/data/Conservation"
 SIFT_SPECIES = [

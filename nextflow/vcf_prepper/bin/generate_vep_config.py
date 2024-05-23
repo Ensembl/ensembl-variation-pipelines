@@ -52,30 +52,26 @@ PLUGINS = [
     "CADD",
     "REVEL",
     "SpliceAI",
-    "Phenotypes",
     "IntAct",
     "AncestralAllele",
-    "Conservation"
+    "Conservation",
+    "AlphaMissense",
+    "UTRAnnotator"
 ]
 FREQUENCIES = {
     "1000genomes": "af_1kg 1",
     "gnomAD_exomes": {
         "GRCh38": {
-            "version": "2.1.1",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v2.1.1/grch38/exomes",
-            "file_pattern": "gnomad.exomes.r2.1.1.sites.##CHR##.liftover_grch38_no_VEP.vcf.gz"
-        },
-        "GRCh37": {
-            "version": "2.1",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v2.1/grch37/exomes",
-            "file_pattern": "gnomad.exomes.r2.1.sites.chr##CHR##_noVEP.vcf.gz"
+            "version": "4.1",
+            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/exomes",
+            "file_pattern": "gnomad.exomes.v4.1.sites.chr##CHR##.vcf.bgz"
         }
     },
     "gnomAD_genomes": {
         "GRCh38": {
-            "version": "3.1.2",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v3.1.2/grch38/genomes",
-            "file_pattern": "gnomad.genomes.v3.1.2.sites.chr##CHR##_trimmed_info.vcf.bgz"
+            "version": "4.1",
+            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/genomes",
+            "file_pattern": "gnomad.genomes.v4.1.sites.chr##CHR##.vcf.bgz"
         }
     }
 }
@@ -106,16 +102,31 @@ def format_gnomad_args(source: str, metadata: dict) -> str:
             print(f"[ERROR] Frequency file does not exist - {file}. Exiting ...")
             exit(1)
         
-        gnomAD_custom_args.append(f"custom file={file},short_name={source},format=vcf,type=exact,coords=0," + \
+        custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0," + \
             "fields=AF%AC%AN" + \
-            "%AF_afr%AC_afr%AN_afr" + \
-            "%AF_amr%AC_amr%AN_amr" + \
-            "%AF_asj%AC_asj%AN_asj" + \
-            "%AF_eas%AC_eas%AN_eas" + \
-            "%AF_fin%AC_fin%AN_fin" + \
-            "%AF_nfe%AC_nfe%AN_nfe" + \
-            "%AF_oth%AC_oth%AN_oth" + \
-            "%AF_sas%AC_sas%AN_sas")
+            "%nhomalt_XX%AC_XX%AN_XX%nhomalt_XY%AC_XY%AN_XY" + \
+            "%nhomalt_afr_XX%AC_afr_XX%AN_afr_XX%nhomalt_afr_XY%AC_afr_XY%AN_afr_XY" + \
+            "%nhomalt_amr_XX%AC_amr_XX%AN_amr_XX%nhomalt_amr_XY%AC_amr_XY%AN_amr_XY" + \
+            "%nhomalt_asj_XX%AC_asj_XX%AN_asj_XX%nhomalt_asj_XY%AC_asj_XY%AN_asj_XY" + \
+            "%nhomalt_eas_XX%AC_eas_XX%AN_eas_XX%nhomalt_eas_XY%AC_eas_XY%AN_eas_XY" + \
+            "%nhomalt_fin_XX%AC_fin_XX%AN_fin_XX%nhomalt_fin_XY%AC_fin_XY%AN_fin_XY" + \
+            "%nhomalt_mid_XX%AC_mid_XX%AN_mid_XX%nhomalt_mid_XY%AC_mid_XY%AN_mid_XY" + \
+            "%nhomalt_nfe_XX%AC_nfe_XX%AN_nfe_XX%nhomalt_nfe_XY%AC_nfe_XY%AN_nfe_XY" + \
+            "%nhomalt_remaining_XX%AC_remaining_XX%AN_remaining_XX%nhomalt_remaining_XY%AC_remaining_XY%AN_remaining_XY" + \
+            "%nhomalt_sas_XX%AC_sas_XX%AN_sas_XX%nhomalt_sas_XY%AC_sas_XY%AN_sas_XY"
+
+        if source == "gnomAD_genomes":
+            custom_line += "%nhomalt_ami_XX%AC_ami_XX%AN_ami_XX%nhomalt_ami_XY%AC_ami_XY%AN_ami_XY"
+
+        custom_line += "fafmax_faf95_max"
+            
+        gnomAD_custom_args.append(custom_line)
+
+        # add discordant p-value from joint frequency file
+        file = f"/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/joint_frequencies/gnomad.joint.v4.1.sites.chr{ chromosome }.vcf.bgz"
+        custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0,fields=stat_union_p_value"
+
+        gnomAD_custom_args.append(custom_line)
     
     return "\n".join(gnomAD_custom_args)
     
@@ -207,6 +218,23 @@ def get_plugin_args(
             return None
             
         return f"Conservation,{file}"
+
+    if plugin == "AlphaMissense":
+        # Alphamissense do not have data file in e110 directory or below 
+        if version < 111:
+            plugin_data_dir = plugin_data_dir.replace(f"{version}", "111")
+        file = os.path.join(plugin_data_dir, "AlphaMissense_hg38.tsv.gz")
+
+        check_plugin_files(plugin, [file])
+
+        return f"AlphaMissense,file={file}"
+
+    if plugin == "UTRAnnotator":
+        file = "/nfs/production/flicek/ensembl/variation/data/DECIPHER/uORF_5UTR_GRCh38_PUBLIC.txt"
+
+        check_plugin_files(plugin, [file])
+
+        return f"UTRAnnotator,file={file}"
         
     print(f"[ERROR] Unknown plugin argument requested - {plugin}. Exiting ...")
     exit(1)
@@ -292,6 +320,9 @@ def generate_vep_config(
         file.write("pubmed 1\n")
         file.write("var_synonyms 1\n")
         file.write("variant_class 1\n")
+        file.write("protein 1\n")
+        file.write("transcript_version 1\n")
+        file.write("hgvs 1\n")
         
         if sift:
             file.write(f"sift b\n")
@@ -306,6 +337,9 @@ def generate_vep_config(
             
             for plugin in plugins:
                 file.write(f"plugin {plugin}\n")
+
+        # PhyloP
+        file.write(f"custom file=https://hgdownload.cse.ucsc.edu/goldenpath/hg38/phyloP100way/hg38.phyloP100way.bw,short_name=phlyoP100way,format=bigwig,type=exact")
     
     
 def main(args = None):

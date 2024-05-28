@@ -148,7 +148,7 @@ workflow VCF_PREPPER {
       }
       .set { ch_post_process }
     }
-    else if (params.skip_stats) {
+    else if (params.skip_stats && !params.skip_tracks) {
       ch_split_finish
       .join ( ch_post_api )
       .map {
@@ -157,8 +157,12 @@ workflow VCF_PREPPER {
       }
       .set { ch_post_process }
     }
-    else if (params.skip_tracks) {
+    else if (!params.skip_stats && params.skip_tracks) {
       ch_stats_finish
+      .set { ch_post_process }
+    }
+    else {
+      ch_post_api
       .set { ch_post_process }
     }
 

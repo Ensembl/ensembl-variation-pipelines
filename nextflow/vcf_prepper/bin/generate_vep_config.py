@@ -140,9 +140,13 @@ def get_frequency_args(assembly: str) -> str:
     
     return frequencies
     
-def check_plugin_files(plugin: str, files: list) -> bool:
+def check_plugin_files(plugin: str, files: list, exit_rule: str = "exit") -> bool:
     for file in files:
         if not os.path.isfile(file):
+            if exit_rule == "skip":
+                print(f"[INFO] Cannot get {plugin} data file - {file}. Skipping ...")
+                return None
+
             print(f"[INFO] Cannot get {plugin} data file - {file}. Exiting ...")
             exit(1)
     
@@ -186,11 +190,9 @@ def get_plugin_args(
         pl_assembly = f"_{assembly}" if species == "homo_sapiens" else ""
         file = os.path.join(plugin_data_dir, f"Phenotypes_data_files/Phenotypes.pm_{species}_{version}{pl_assembly}.gvf.gz")
         
-        if not os.path.isfile(file):
-            print(f"[INFO] Cannot get Phenotype data file - {file}. Skipping ...")
-            return None
+        check_plugin_files(plugin, [file], "skip")
             
-        return f"Phenotypes,file={file},phenotype_feature=1"
+        return f"Phenotypes,file={file},id_match=1,cols=phenotype&source&id&type&clinvar_clin_sig"
         
     if plugin == "IntAct":
         mutation_file = os.path.join(plugin_data_dir, "mutations.tsv")
@@ -212,20 +214,25 @@ def get_plugin_args(
     if plugin == "Conservation":
         file = os.path.join(conservation_data_dir, f"gerp_conservation_scores.{species}.{assembly}.bw")
         
-        if not os.path.isfile(file):
-            print(f"[INFO] Cannot get Conservation data file - {file}. Skipping ...")
-            return None
+        check_plugin_files(plugin, [file], "skip")
             
         return f"Conservation,{file}"
-
+    
+    if plugin == "MaveDB":
+        file = os.path.join(plugin_data_dir, "MaveDB_variants.tsv.gz")
+        
+        check_plugin_files(plugin, [file], "skip")
+            
+        return f"MaveDB,file={file},cols=MaveDB_score:MaveDB_urn,transcript_match=1"
+    
     if plugin == "AlphaMissense":
         # Alphamissense do not have data file in e110 directory or below 
         if version < 111:
             plugin_data_dir = plugin_data_dir.replace(f"{version}", "111")
         file = os.path.join(plugin_data_dir, "AlphaMissense_hg38.tsv.gz")
-
-        check_plugin_files(plugin, [file])
-
+        
+        check_plugin_files(plugin, [file], "skip")
+            
         return f"AlphaMissense,file={file}"
         
     print(f"[ERROR] Unknown plugin argument requested - {plugin}. Exiting ...")

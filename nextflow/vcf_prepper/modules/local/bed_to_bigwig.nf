@@ -17,6 +17,8 @@
  */
 
 process BED_TO_BIGWIG {
+  label 'process_long'
+  
   input: 
   tuple val(meta), path(bed)
   

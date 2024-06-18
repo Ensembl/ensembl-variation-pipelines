@@ -18,11 +18,15 @@
  
 
 process BED_TO_BIGBED {
+  label 'process_long'
+  
   input: 
   tuple val(meta), path(bed)
   
   output:
   path "variant-${source}-details.bb"
+
+  memory 1.G
   
   shell:
   source = meta.source.toLowerCase()

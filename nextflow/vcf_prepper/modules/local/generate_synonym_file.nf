@@ -17,6 +17,7 @@
  */
  
 process GENERATE_SYNONYM_FILE {
+  label 'process_low'
   cache false
   
   input:

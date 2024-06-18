@@ -17,6 +17,8 @@
  */
 
 process CREATE_RANK_FILE {
+  label 'process_low'
+
   input:
   val rank_file
   

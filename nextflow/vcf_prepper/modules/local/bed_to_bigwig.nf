@@ -17,14 +17,13 @@
  */
 
 process BED_TO_BIGWIG {
-  label 'bigmem'
-  
   input: 
   tuple val(meta), path(bed)
   
   output:
   path "variant-${source}-summary.bw"
   
+  memory { bed.size() * 4.B + 2.GB }
   afterScript 'rm all.bed'
   
   shell:

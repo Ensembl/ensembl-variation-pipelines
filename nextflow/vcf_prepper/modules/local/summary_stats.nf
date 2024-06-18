@@ -17,6 +17,8 @@
  */
  
 process SUMMARY_STATS {
+  label 'process_medium'
+  
   input: 
   tuple val(meta), path(vcf), path(vcf_index)
 

@@ -17,13 +17,13 @@
  */
  
 process REMOVE_VARIANTS {
-  label 'bigmem'
-  
   input:
   tuple val(meta), path(vcf)
   
   output:
   tuple val(meta), path(output_file)
+
+  memory { vcf.size() * 12.B + 2.GB }
   
   shell:
   output_file =  "REMOVED_" + file(vcf).getName()

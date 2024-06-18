@@ -17,6 +17,8 @@
  */
  
 process CONCAT_BEDS {
+  label 'process_long'
+  
   input: 
   tuple val(meta), path(bed_files)
   

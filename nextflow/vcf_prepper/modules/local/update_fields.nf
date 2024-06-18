@@ -17,6 +17,8 @@
  */
  
 process UPDATE_FIELDS {
+  label 'process_medium'
+
   input: 
   tuple val(meta), path(vcf), path(vcf_index)
   

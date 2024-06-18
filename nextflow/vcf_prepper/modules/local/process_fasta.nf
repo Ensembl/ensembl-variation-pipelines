@@ -17,6 +17,7 @@
  */
  
 process PROCESS_FASTA {
+  label 'process_medium'
   cache false
   
   input:

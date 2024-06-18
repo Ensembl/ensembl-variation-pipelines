@@ -47,7 +47,7 @@ workflow RUN_VEP {
       vep_meta.index_type = meta.index_type
       vep_meta.filters = "amino_acids not match X[A-Za-z*]?\\/"
 
-      [vep_meta, vcf, vcf_index, meta.vep_config]
+      [meta: vep_meta, file: vcf, index: vcf_index, vep_config: meta.vep_config]
   }
   .set { ch_vep }
   vep( ch_vep )

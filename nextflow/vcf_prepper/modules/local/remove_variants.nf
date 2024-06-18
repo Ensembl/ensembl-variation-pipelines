@@ -23,7 +23,7 @@ process REMOVE_VARIANTS {
   output:
   tuple val(meta), path(output_file)
 
-  memory { vcf.size() * 12.B + 2.GB }
+  memory { (vcf.size() * 12.B + 2.GB) * task.attempt }
   
   shell:
   output_file =  "REMOVED_" + file(vcf).getName()

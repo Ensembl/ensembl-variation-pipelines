@@ -17,15 +17,14 @@
  */
 
 process BED_TO_BIGWIG {
-  label 'process_long'
-  
   input: 
   tuple val(meta), path(bed)
   
   output:
   path "variant-${source}-summary.bw"
   
-  memory { bed.size() * 4.B + 2.GB }
+  memory  { (bed.size() * 4.B + 4.GB) * task.attempt }
+  time    { 48.hour * task.attempt }
   afterScript 'rm all.bed'
   
   shell:

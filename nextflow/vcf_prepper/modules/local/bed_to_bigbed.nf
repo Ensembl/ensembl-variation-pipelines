@@ -25,8 +25,6 @@ process BED_TO_BIGBED {
   
   output:
   path "variant-${source}-details.bb"
-
-  memory 1.G
   
   shell:
   source = meta.source.toLowerCase()

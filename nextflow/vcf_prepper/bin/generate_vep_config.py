@@ -55,8 +55,7 @@ PLUGINS = [
     "IntAct",
     "AncestralAllele",
     "Conservation",
-    "AlphaMissense",
-    "UTRAnnotator"
+    "AlphaMissense"
 ]
 FREQUENCIES = {
     "1000genomes": "af_1kg 1",
@@ -228,13 +227,6 @@ def get_plugin_args(
         check_plugin_files(plugin, [file])
 
         return f"AlphaMissense,file={file}"
-
-    if plugin == "UTRAnnotator":
-        file = "/nfs/production/flicek/ensembl/variation/data/DECIPHER/uORF_5UTR_GRCh38_PUBLIC.txt"
-
-        check_plugin_files(plugin, [file])
-
-        return f"UTRAnnotator,file={file}"
         
     print(f"[ERROR] Unknown plugin argument requested - {plugin}. Exiting ...")
     exit(1)

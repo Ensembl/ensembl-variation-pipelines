@@ -338,7 +338,7 @@ def generate_vep_config(
                 file.write(f"plugin {plugin}\n")
 
         # PhyloP
-        file.write(f"custom file=https://hgdownload.cse.ucsc.edu/goldenpath/hg38/phyloP100way/hg38.phyloP100way.bw,short_name=phlyoP100way,format=bigwig,type=exact")
+        file.write(f"custom file=/nfs/production/flicek/ensembl/variation/data/DECIPHER/hg38.phyloP100way.bw,short_name=phlyoP100way,format=bigwig,type=exact")
     
     
 def main(args = None):

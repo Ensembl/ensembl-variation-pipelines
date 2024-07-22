@@ -19,6 +19,7 @@ from cyvcf2.cyvcf2 import Variant
 from typing import Callable
 import subprocess
 import random
+from math import isclose
 import logging
 
 logger = logging.getLogger(__name__)
@@ -318,3 +319,145 @@ class TestContent:
                 assert csq_field_cnt[csq_field] == NO_VARIANTS
             else:
                 logger.info(f"{csq_field} count: {csq_field_cnt[csq_field]} expected: {NO_VARIANTS * 0.5}")
+
+class TestSummaryStatistics:
+    
+    PER_ALLELE_FIELDS = {
+        "variant_phenotype": "NVPHN",
+        "gene_phenotype": "NGPHN",
+    }
+
+    SKIP_CONSEQUENCE = [
+        "downstream_gene_variant",
+        "upstream_gene_variant",
+        "intergenic_variant",
+        "TF_binding_site_variant",
+        "TFBS_ablation",
+        "TFBS_amplification"
+    ]
+
+    def test_summary_statistics_per_variant(self, vcf_reader):
+        NO_VARIANTS = 100
+        NO_ITER = 100000
+        
+        csq_info_description = vcf_reader.get_header_type("CSQ")["Description"]
+        csq_list = [csq.strip() for csq in csq_info_description.split("Format: ")[1].split("|")]
+
+        csq_field_idx = {}
+        for csq_field in csq_list:
+                csq_field_idx[csq_field] = csq_list.index(csq_field)
+
+        chrs = vcf_reader.seqnames
+        variants = []
+        iter = 0
+        while(len(variants) < NO_VARIANTS and iter <= NO_ITER):
+            chr = random.choice(chrs)
+            start = random.choice(range(10000, 1000000))
+
+            for variant in vcf_reader(f"{chr}:{start}"):
+                transcript_consequence = set()
+                regulatory_consequence = set()
+                gene = set()
+                citation = set()
+
+                csqs = variant.INFO["CSQ"]
+                for csq in csqs.split(","):
+                    csq_values = csq.split("|")
+
+                    consequences = csq_values[csq_field_idx["Consequence"]]
+                    feature_stable_id = csq_values[csq_field_idx["Feature"]]
+
+                    for csq in consequences.split("&"):
+                        if csq not in self.SKIP_CONSEQUENCE:
+                            if csq.startswith("regulatory"):
+                                regulatory_consequence.add(f"{feature_stable_id}:{consequences}")
+                            else:
+                                transcript_consequence.add(f"{feature_stable_id}:{consequences}")
+                                gene.add(csq_values[csq_field_idx["Gene"]] )
+
+                    if "PUBMED" in csq_field_idx:
+                        cites = csq_values[csq_field_idx["PUBMED"]]
+                        for cite in cites.split("&"):
+                            if cite != "":
+                                citation.add(cite)
+
+                if len(transcript_consequence) > 0:
+                    assert len(transcript_consequence) == int(variant.INFO["NTCSQ"])
+                else:
+                    assert "NTCSQ" not in variant.INFO
+
+                if len(regulatory_consequence) > 0:
+                    assert len(regulatory_consequence) == int(variant.INFO["NRCSQ"])
+                else:
+                    assert "NRCSQ" not in variant.INFO
+
+                if len(gene) > 0:
+                    assert len(gene) == int(variant.INFO["NGENE"])
+                else:
+                    assert "NGENE" not in variant.INFO
+
+                if len(citation) > 0:
+                    assert len(citation) == int(variant.INFO["NCITE"])
+                else:
+                    assert "NCITE" not in variant.INFO
+            
+            iter += 1
+
+    def test_summary_statistics_per_allele(self, vcf_reader):
+        NO_VARIANTS = 100
+        NO_ITER = 100000
+        
+        csq_info_description = vcf_reader.get_header_type("CSQ")["Description"]
+        csq_list = [csq.strip() for csq in csq_info_description.split("Format: ")[1].split("|")]
+
+        csq_field_idx = {}
+        for csq_field in csq_list:
+                csq_field_idx[csq_field] = csq_list.index(csq_field)
+            
+        if "PHENOTYPES" not in csq_field_idx:
+            logger.info("There are no phenotypes for, skipping ...")
+
+        chrs = vcf_reader.seqnames
+        variants = []
+        iter = 0
+        while(len(variants) < NO_VARIANTS and iter <= NO_ITER):
+            chr = random.choice(chrs)
+            start = random.choice(range(10000, 1000000))
+
+            for variant in vcf_reader(f"{chr}:{start}"):
+                gene_phenotype = {}
+                variant_phenotype = {}
+
+                csqs = variant.INFO["CSQ"]
+                for csq in csqs.split(","):
+                    csq_values = csq.split("|")
+
+                    allele = csq_values[csq_field_idx["Allele"]]
+                    phenotypes = csq_values[csq_field_idx["PHENOTYPES"]]
+
+                    for phenotype in phenotypes.split("&"):
+                        pheno_per_allele_fields = phenotype.split("+")
+                        if len(pheno_per_allele_fields) != 3:
+                            continue
+
+                        (name, source, feature) = pheno_per_allele_fields
+                        if feature.startswith("ENS"):
+                            if allele not in gene_phenotype:
+                                gene_phenotype[allele] = set()
+                            gene_phenotype[allele].add(f"{name}:{source}:{feature}")
+                        else:
+                            if allele not in variant_phenotype:
+                                variant_phenotype[allele] = set()
+                            variant_phenotype[allele].add(f"{name}:{source}:{feature}")
+                
+                if len(gene_phenotype) > 0:
+                    assert sorted(gene_phenotype.values()) == sorted(variant.INFO["NGPHN"])
+                else:
+                    assert "NGPHN" not in variant.INFO
+
+                if len(variant_phenotype) > 0:
+                    assert sorted(variant_phenotype.values()) == sorted(variant.INFO["NVPHN"])
+                else:
+                    assert "NVPHN" not in variant.INFO
+            
+            iter += 1

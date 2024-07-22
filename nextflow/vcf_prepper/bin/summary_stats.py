@@ -39,11 +39,14 @@ PER_ALLELE_FIELDS = {
 }
 
 PER_VARIANT_FIELDS = {
+    "transcript_consequence": "NTCSQ",
+    "regulatory_consequence": "NRCSQ",
+    "gene": "NGENE",
     "citation": "NCITE"
 }
 
 FREQUENCY_FIELD = "RAF"
-# [csq_field, diplay_name]
+# [csq_field, display_name]
 FREQUENCY_META = {
     "homo_sapiens": ["gnomAD_genomes_AF", "gnomAD genomes v3.1.2"],
     "homo_sapiens_37": ["gnomAD_exomes_AF", "gnomAD exomes v2.1.1"]
@@ -142,7 +145,11 @@ def main(args = None):
                 items_per_allele[allele]["gene"].add(gene)
 
                 # transcipt consequences
+<<<<<<< HEAD
                 items_per_allele[allele]["transcipt_consequence"].add(f"{feature_stable_id}:{consequences}")
+=======
+                items_per_variant["transcript_consequence"].add(f"{feature_stable_id}:{consequences}")
+>>>>>>> 88ea902 (Fix some typo)
 
             # regualtory consequences
             if add_regulatory_feature:
@@ -153,11 +160,11 @@ def main(args = None):
                 phenotype_csq_idx = csq_header_idx["PHENOTYPES"]
                 phenotypes = csq_values[phenotype_csq_idx]
                 for phenotype in phenotypes.split("&"):
-                    pheno_PER_ALLELE_FIELDS = phenotype.split("+")
-                    if len(pheno_PER_ALLELE_FIELDS) != 3:
+                    pheno_per_allele_fields = phenotype.split("+")
+                    if len(pheno_per_allele_fields) != 3:
                         continue
                     
-                    (name, source, feature) = pheno_PER_ALLELE_FIELDS
+                    (name, source, feature) = pheno_per_allele_fields
                     if feature.startswith("ENS"):
                         items_per_allele[allele]["gene_phenotype"].add(f"{name}:{source}:{feature}")
                     else:

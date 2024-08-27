@@ -22,17 +22,20 @@ import json
 import subprocess
 import requests
 
-# IMPORTANT: currently this script only supports EVA - we should update the output to have Ensembl data manually; human will be manual as well
+## IMPORTANT: currently this script only supports EVA - we should update the output to have Ensembl data manually -
+# - triticum_aestivum
+# - vitis_vinifera
+# - solanum_lycopersicum
+# human will be manual as well
 
-EVA_REST_ENDPOINT = "https://www.ebi.ac.uk/eva/webservices/release/v1"
+
+EVA_REST_ENDPOINT = "https://www.ebi.ac.uk/eva/webservices/release"
 
 def parse_args(args = None):
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument(dest="release_candidates_file", type=str, help="path to a release_canidates.json file")
-    parser.add_argument(dest="version", type=str, help="Ensembl version")
-    parser.add_argument('-I', '--ini_file', dest="ini_file", type=str, required = False, help="full path database configuration file, default - DEFAULT.ini in the same directory.")
-    parser.add_argument('-O', '--output_file', dest="output_file", type=str, required = False)
+    parser.add_argument('-I', '--ini_file', dest="ini_file", type=str, default = "DEFAULT.ini", required = False, help="Config file with database server information")
+    parser.add_argument('-O', '--output_file', dest="output_file", type=str, default = "input_config.json", required = False, help="Full path to output file")
     
     return parser.parse_args(args)
     
@@ -54,41 +57,8 @@ def parse_ini(ini_file: str, section: str = "database") -> dict:
         "user": user
     }
 
-def get_db_name(server: dict, version: str, species: str = "homo_sapiens", type: str = "core") -> str:
-    query = f"SHOW DATABASES LIKE '{species}_{type}%{version}%';"
-    process = subprocess.run(["mysql",
-            "--host", server["host"],
-            "--port", server["port"],
-            "--user", server["user"],
-            "-N",
-            "--execute", query
-        ],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    return process.stdout.decode().strip()
-    
-def get_assembly_name(server: dict, core_db: str) -> str:
-    query = f"SELECT meta_value FROM meta where meta_key = 'assembly.default';"
-    process = subprocess.run(["mysql",
-            "--host", server["host"],
-            "--port", server["port"],
-            "--user", server["user"],
-            "--database", core_db,
-            "-N",
-            "--execute", query
-        ],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    return process.stdout.decode().strip()
-
-# TBD: currently this scripts only support EVA
-def get_source() -> str:
-    return "EVA"
-
-def get_genome_uuid(server: dict, meta_db: str, species, assembly) -> str:
-    query = f"SELECT genome_uuid FROM genome AS g, organism AS o, assembly AS a WHERE g.assembly_id = a.assembly_id and g.organism_id = o.organism_id and a.accession = '{assembly}' and o.ensembl_name = '{species}';"
+def get_ensembl_species(server: dict, meta_db: str) -> str:
+    query = f"SELECT g.genome_uuid, g.production_name, a.accession FROM genome AS g, assembly AS a WHERE g.assembly_id = a.assembly_id;"
     process = subprocess.run(["mysql",
             "--host", server["host"],
             "--port", server["port"],
@@ -101,75 +71,105 @@ def get_genome_uuid(server: dict, meta_db: str, species, assembly) -> str:
         stderr = subprocess.PIPE
     )
     
-    return process.stdout.decode().strip()
+    if process.returncode != 0:
+        print(f"[ERROR] Failed to retrieve Ensembl species - {process.stderr.decode().srip()}. \nExiting...")
+        exit(1)
+
+    ensembl_species = {}
+    for species_meta in process.stdout.decode().strip().split("\n"):
+        (genome_uuid, species, assembly) = species_meta.split()
+        ensembl_species[assembly] = {
+            "species"       : species,
+            "genome_uuid"   : genome_uuid
+        }
+
+    return ensembl_species
     
 def get_latest_eva_version() -> int:
-    url = EVA_REST_ENDPOINT + "/info/latest"
+    url = EVA_REST_ENDPOINT + "/v1/info/latest"
     headers = {"Accept": "application/json"}
 
     response = requests.get(url, headers = headers)
 
     if response.status_code != 200:
-        print(f"[WARNING] REST API call for retrieving EVA latest version failed with status - {response.status_code}")
+        print(f"[ERROR] REST API call for retrieving EVA latest version failed with status - {response.status_code}. Exiting..")
+        exit(1)
 
     try:
         content = response.json()
         release_version = content["releaseVersion"]
     except:
-        print(f"[WARNING] Could not get EVA latest version; default version ({EVA_DEFAULT_VERSION}) may be used")
-        release_version = None
+        print(f"[ERROR] Failed to retrieve EVA latest version. Exiting..")
+        exit(1)
 
     return release_version
+
+def get_eva_species(release_version: int) -> dict:
+    eva_species = {}
     
+    url = EVA_REST_ENDPOINT + "/v2/stats/per-species?releaseVersion=" + str(release_version)
+    headers = {"Accept": "application/json"}
+
+    response = requests.get(url, headers = headers)
+    if response.status_code != 200:
+        print(f"[ERROR] Could not get EVA species data; REST API call failed with status - {response.status_code}")
+        exit(1)
+
+    content = response.json()
+
+    for species in content:
+        for accession in species["assemblyAccessions"]:
+            new_assembly = {
+                "species"           : species["scientificName"],
+                "accession"         : accession,
+                "release_folder"    : species["releaseLink"] or None,
+                "taxonomy_id"       : species["taxonomyId"]
+            }
+
+            eva_species[accession] = new_assembly
+        
+    return eva_species
+
 def main(args = None):
     args = parse_args(args)
     
-    release_candidates_file = args.release_candidates_file
-    version = args.version
-    output_file = args.output_file or "input_config.json"
-    
-    coredb_server = parse_ini(args.ini_file, "core")
-    metadb_server = parse_ini(args.ini_file, "metadata")
-    
-    with open(release_candidates_file) as f:
-        release_candidates = json.load(f)
+    eva_release = get_latest_eva_version()
+    eva_species = get_eva_species(eva_release)
+
+    server = parse_ini(args.ini_file)
+
+    ensembl_species = get_ensembl_species(server=server, meta_db="ensembl_genome_metadata")
+
     input_set = {}
-    for candidate in release_candidates:
-        for assembly in release_candidates[candidate]["assembly"]:
-            genome_data = release_candidates[candidate]["assembly"][assembly]
-            species_production_name = genome_data["sp_production_name"]
+    for assembly in ensembl_species:
+        if assembly in eva_species:
+            species = ensembl_species[assembly]["species"]
+            genome_uuid = ensembl_species[assembly]["genome_uuid"]
+            release_folder = eva_species[assembly]["release_folder"]
+            taxonomy_id = eva_species[assembly]["taxonomy_id"]
             
-            file_type = "remote"
-            if species_production_name.startswith("homo_sapiens"):
-                file_type = "local"
-            
-            file_location = "TBD"
-            if file_type == "remote":
-                eva_release = get_latest_eva_version() or "TBD"
-                taxonomy_id = f"{genome_data['taxonomy_id']}_" if eva_release == 5 else ""
-                file_location = f"https://ftp.ebi.ac.uk/pub/databases/eva/rs_releases/release_{eva_release}/by_species/{species_production_name}/{assembly}/{taxonomy_id}{assembly}_current_ids.vcf.gz"
-                
-            core_db = get_db_name(coredb_server, version, species_production_name)
-            assembly_name = get_assembly_name(coredb_server, core_db) or "TBD"
-            source = get_source() or "TBD"
-            genome = f"{species_production_name}_{assembly_name}"
-            
-            genome_uuid = get_genome_uuid(metadb_server, "ensembl_genome_metadata", species_production_name, assembly) or "TBD"
-            
+            if species.startswith("homo"):
+                continue
+
+            genome = f"{species}_{assembly}"
             if genome not in input_set:
                 input_set[genome] = []
             
+            taxonomy_part = str(taxonomy_id) + "_" if eva_release >= 5 else ""  # EVA started adding taxonomy id in file name from release 5
+            file_location = os.path.join(release_folder, assembly, taxonomy_part + assembly + "_current_ids.vcf.gz")
+            
             input_set[genome].append({
                 "genome_uuid": genome_uuid,
-                "species": species_production_name,
-                "assembly": assembly_name,
-                "source_name": source,
-                "file_type": file_type,
+                "species": species,
+                "assembly": assembly,
+                "source_name": "EVA",
+                "file_type": "remote",
                 "file_location": file_location
             })
-            
-    with open(output_file, 'w') as file:
+    
+    with open(args.output_file, 'w') as file:
         json.dump(input_set, file, indent = 4)
+
     
 if __name__ == "__main__":
     sys.exit(main())

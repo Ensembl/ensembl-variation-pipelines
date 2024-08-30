@@ -58,7 +58,7 @@ def parse_ini(ini_file: str, section: str = "database") -> dict:
     }
 
 def get_ensembl_species(server: dict, meta_db: str) -> str:
-    query = f"SELECT g.genome_uuid, g.production_name, a.accession FROM genome AS g, assembly AS a WHERE g.assembly_id = a.assembly_id;"
+    query = f"SELECT g.genome_uuid, g.production_name, a.accession, a.assembly_default FROM genome AS g, assembly AS a WHERE g.assembly_id = a.assembly_id;"
     process = subprocess.run(["mysql",
             "--host", server["host"],
             "--port", server["port"],
@@ -72,15 +72,16 @@ def get_ensembl_species(server: dict, meta_db: str) -> str:
     )
     
     if process.returncode != 0:
-        print(f"[ERROR] Failed to retrieve Ensembl species - {process.stderr.decode().srip()}. \nExiting...")
+        print(f"[ERROR] Failed to retrieve Ensembl species - {process.stderr.decode().strip()}. \nExiting...")
         exit(1)
 
     ensembl_species = {}
     for species_meta in process.stdout.decode().strip().split("\n"):
-        (genome_uuid, species, assembly) = species_meta.split()
+        (genome_uuid, species, assembly, assembly_default) = species_meta.split()
         ensembl_species[assembly] = {
             "species"       : species,
-            "genome_uuid"   : genome_uuid
+            "genome_uuid"   : genome_uuid,
+            "assembly_name" : assembly_default
         }
 
     return ensembl_species
@@ -145,13 +146,14 @@ def main(args = None):
         if assembly in eva_species:
             species = ensembl_species[assembly]["species"]
             genome_uuid = ensembl_species[assembly]["genome_uuid"]
+            assembly_name = ensembl_species[assembly]["assembly_name"]
             release_folder = eva_species[assembly]["release_folder"]
             taxonomy_id = eva_species[assembly]["taxonomy_id"]
             
             if species.startswith("homo"):
                 continue
 
-            genome = f"{species}_{assembly}"
+            genome = f"{species}_{assembly_name}"
             if genome not in input_set:
                 input_set[genome] = []
             
@@ -161,7 +163,7 @@ def main(args = None):
             input_set[genome].append({
                 "genome_uuid": genome_uuid,
                 "species": species,
-                "assembly": assembly,
+                "assembly": assembly_name,
                 "source_name": "EVA",
                 "file_type": "remote",
                 "file_location": file_location

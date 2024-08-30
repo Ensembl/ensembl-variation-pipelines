@@ -24,6 +24,7 @@ import requests
 
 ## IMPORTANT: currently this script only supports EVA - we should update the output to have Ensembl data manually -
 # - triticum_aestivum
+# - triticum_turgidum
 # - vitis_vinifera
 # - solanum_lycopersicum
 # human will be manual as well

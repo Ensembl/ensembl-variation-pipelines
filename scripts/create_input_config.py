@@ -27,6 +27,7 @@ import requests
 # - triticum_turgidum
 # - vitis_vinifera
 # - solanum_lycopersicum
+# - ovis_aries_rambouillet
 # human will be manual as well
 
 

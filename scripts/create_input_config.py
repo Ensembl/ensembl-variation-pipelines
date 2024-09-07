@@ -121,6 +121,9 @@ def get_eva_species(release_version: int) -> dict:
     content = response.json()
 
     for species in content:
+        if species['currentRs'] < 5000:
+            continue
+
         for accession in species["assemblyAccessions"]:
             new_assembly = {
                 "species"           : species["scientificName"],

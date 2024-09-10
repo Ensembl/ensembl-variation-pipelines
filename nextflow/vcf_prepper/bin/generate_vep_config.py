@@ -117,7 +117,7 @@ def format_gnomad_args(source: str, metadata: dict) -> str:
         if source == "gnomAD_genomes":
             custom_line += "%nhomalt_ami_XX%AC_ami_XX%AN_ami_XX%nhomalt_ami_XY%AC_ami_XY%AN_ami_XY"
 
-        custom_line += "fafmax_faf95_max"
+        custom_line += "%fafmax_faf95_max"
             
         gnomAD_custom_args.append(custom_line)
 

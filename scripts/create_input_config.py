@@ -193,7 +193,7 @@ def main(args = None):
     eva_release = get_latest_eva_version()
     eva_species = get_eva_species(eva_release)
 
-    server = parse_ini(args.ini_file, "meta")
+    server = parse_ini(args.ini_file, "metadata")
     core_server = parse_ini(args.ini_file, "core")
 
     ensembl_species = get_ensembl_species(server=server, meta_db="ensembl_genome_metadata")

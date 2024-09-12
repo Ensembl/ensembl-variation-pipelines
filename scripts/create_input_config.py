@@ -107,6 +107,57 @@ def get_latest_eva_version() -> int:
 
     return release_version
 
+def get_db_name(server: dict, species: str = "homo_sapiens", type: str = "core") -> str:
+    query = f"SHOW DATABASES LIKE '{species}_{type}%';"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    return process.stdout.decode().strip()
+
+def seq_region_matches(eva_file: str, server: dict, core_db: str) -> bool:
+    process = subprocess.run(["tabix", "-D", eva_file, "-l"],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+
+    if process.returncode != 0:
+        print(f"[ERROR] Failed to retrieve seq regions from - {eva_file} \nerror: {process.stderr.decode().strip()}. \nExiting...")
+        exit(1)
+
+    eva_seq_regions = process.stdout.decode().strip().split('\n')
+
+    query = f"SELECT name FROM seq_region UNION SELECT synonym FROM seq_region_synonym;"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "--database", core_db,
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+
+    if process.returncode != 0:
+        print(f"[ERROR] Failed to retrieve seq regions from - {core_db} \nerror: {process.stderr.decode().strip()}. \nExiting...")
+        exit(1)
+
+    ensembl_seq_regions = process.stdout.decode().strip().split("\n")
+
+    # We accept only single seq region match
+    for seq_region in eva_seq_regions:
+        if seq_region in ensembl_seq_regions:
+            return True
+    return False
+
 def get_eva_species(release_version: int) -> dict:
     eva_species = {}
     
@@ -142,7 +193,8 @@ def main(args = None):
     eva_release = get_latest_eva_version()
     eva_species = get_eva_species(eva_release)
 
-    server = parse_ini(args.ini_file)
+    server = parse_ini(args.ini_file, "meta")
+    core_server = parse_ini(args.ini_file, "core")
 
     ensembl_species = get_ensembl_species(server=server, meta_db="ensembl_genome_metadata")
 
@@ -164,7 +216,11 @@ def main(args = None):
             
             taxonomy_part = str(taxonomy_id) + "_" if eva_release >= 5 else ""  # EVA started adding taxonomy id in file name from release 5
             file_location = os.path.join(release_folder, assembly, taxonomy_part + assembly + "_current_ids.vcf.gz")
-            
+
+            core_db = get_db_name(core_server, species, "core")
+            if not seq_region_matches(file_location, core_server, core_db):
+                continue
+
             input_set[genome].append({
                 "genome_uuid": genome_uuid,
                 "species": species,

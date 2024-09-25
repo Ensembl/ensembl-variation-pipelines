@@ -190,7 +190,8 @@ def get_plugin_args(
         pl_assembly = f"_{assembly}" if species == "homo_sapiens" else ""
         file = os.path.join(plugin_data_dir, f"Phenotypes_data_files/Phenotypes.pm_{species}_{version}{pl_assembly}.gvf.gz")
         
-        check_plugin_files(plugin, [file], "skip")
+        if check_plugin_files(plugin, [file], "skip") is None:
+            return None
             
         return f"Phenotypes,file={file},id_match=1,cols=phenotype&source&id&type&clinvar_clin_sig"
         
@@ -214,14 +215,16 @@ def get_plugin_args(
     if plugin == "Conservation":
         file = os.path.join(conservation_data_dir, f"gerp_conservation_scores.{species}.{assembly}.bw")
         
-        check_plugin_files(plugin, [file], "skip")
+        if check_plugin_files(plugin, [file], "skip") is None:
+            return None
             
         return f"Conservation,{file}"
     
     if plugin == "MaveDB":
         file = os.path.join(plugin_data_dir, "MaveDB_variants.tsv.gz")
         
-        check_plugin_files(plugin, [file], "skip")
+        if check_plugin_files(plugin, [file], "skip") is None:
+            return None
             
         return f"MaveDB,file={file},cols=MaveDB_score:MaveDB_urn,transcript_match=1"
     
@@ -231,7 +234,8 @@ def get_plugin_args(
             plugin_data_dir = plugin_data_dir.replace(f"{version}", "111")
         file = os.path.join(plugin_data_dir, "AlphaMissense_hg38.tsv.gz")
         
-        check_plugin_files(plugin, [file], "skip")
+        if check_plugin_files(plugin, [file], "skip") is None:
+            return None
             
         return f"AlphaMissense,file={file}"
         

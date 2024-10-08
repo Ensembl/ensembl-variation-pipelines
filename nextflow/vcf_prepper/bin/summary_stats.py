@@ -39,9 +39,6 @@ PER_ALLELE_FIELDS = {
 }
 
 PER_VARIANT_FIELDS = {
-    "transcript_consequence": "NTCSQ",
-    "regulatory_consequence": "NRCSQ",
-    "gene": "NGENE",
     "citation": "NCITE"
 }
 
@@ -71,11 +68,30 @@ def parse_args(args = None, description: bool = None):
     
     return parser.parse_args(args)
 
-def minimise_allele(ref: str, alt: str) -> str:
-    minimised_allele_string = alt
-    if ref[0] == alt[0]:
-        minimised_allele_string = alt[1:] if len(alt) > 1 else "-" 
-    return minimised_allele_string
+def header_match(want_header: dict, got_header: dict) -> bool:
+    got_header.pop("IDX")
+
+    return want_header['ID'] == got_header['ID'] and \
+        want_header['Type'] == got_header['Type'] and \
+        want_header['Number'] == got_header['Number'] and \
+        f'"{ want_header["Description"] }"' == got_header['Description']
+
+def minimise_allele(ref: str, alts: list) -> str:
+    alleles = [ref] + alts
+    first_bases = {allele[0] for allele in alleles}
+
+    if len(first_bases) == 1:
+        ref = ref[1:] or "-"
+
+        temp_alts = []
+        for alt in alts:
+            if "*" in alt:
+                temp_alts.append(alt)
+            else:
+                temp_alts.append(alt[1:] or "-")
+        alts = temp_alts
+
+    return (ref, alts)
 
 def main(args = None):
     args = parse_args(args)
@@ -95,10 +111,36 @@ def main(args = None):
     # add to header and write header to output vcf
     if freq_info_display != "":
         HEADERS[0]['Description'] = HEADERS[0]['Description'] + f" ({freq_info_display})"
+    
+    use_input_vcf_for_h = True
     for header in HEADERS:
-        input_vcf.add_info_to_header(header)
+        h_id = header['ID']
+        if input_vcf.contains(h_id) and not header_match(header, input_vcf.get_header_type(key=h_id)):
+            use_input_vcf_for_h = False
 
-    output_vcf = Writer(output_file, input_vcf, mode="w")
+    if use_input_vcf_for_h:
+        for header in HEADERS:
+            input_vcf.add_info_to_header(header)
+
+        output_vcf = Writer(output_file, input_vcf, mode="wz")
+    else:
+        h_vcf_file = "header.vcf"
+        raw_h = input_vcf.raw_header
+        header_hash = {info['ID']: info for info in HEADERS}
+
+        with open(h_vcf_file, "w") as file:
+            for line in raw_h.split("\n"):
+                for iid in header_hash:
+                    if f"ID={ iid }" in line:
+                        line = f"##INFO=<ID={ iid },Number={ header_hash[iid]['Number'] },Type={ header_hash[iid]['Type'] },Description=\"{ header_hash[iid]['Description'] }\">"
+                        break
+                file.write(line + "\n")
+
+        h_vcf = VCF(h_vcf_file)
+        output_vcf = Writer(output_file, h_vcf, mode="w")
+
+        h_vcf.close()
+        os.remove(h_vcf_file)
 
     # parse csq header and get index of each field
     csq_list = input_vcf.get_header_type("CSQ")['Description'].split("Format: ")[1].split("|")
@@ -109,10 +151,7 @@ def main(args = None):
     # iterate through the file
     for variant in input_vcf:
         # create minimalized allele order
-        allele_order = []
-        ref = variant.REF
-        for alt in variant.ALT:
-            allele_order.append(minimise_allele(ref, alt))
+        (ref, allele_order) = minimise_allele(variant.REF, variant.ALT)
 
         items_per_variant = {item: set() for item in PER_VARIANT_FIELDS}
         items_per_allele = {}
@@ -145,11 +184,7 @@ def main(args = None):
                 items_per_allele[allele]["gene"].add(gene)
 
                 # transcipt consequences
-<<<<<<< HEAD
                 items_per_allele[allele]["transcipt_consequence"].add(f"{feature_stable_id}:{consequences}")
-=======
-                items_per_variant["transcript_consequence"].add(f"{feature_stable_id}:{consequences}")
->>>>>>> 88ea902 (Fix some typo)
 
             # regualtory consequences
             if add_regulatory_feature:

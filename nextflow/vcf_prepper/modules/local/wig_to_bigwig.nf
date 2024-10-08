@@ -15,28 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
 
-process BED_TO_BIGBED {
-  label 'process_high'
-  
+process WIG_TO_BIGWIG {
   input: 
-  tuple val(meta), path(bed)
+  tuple val(meta), path(wig)
   
   output:
-  path "variant-${source}-details.bb"
+  path "variant-${source}-summary.bw"
+  
+  memory  { (wig.size() * 10.B + 1.GB) * task.attempt }
+  time    { 48.hour * task.attempt }
   
   shell:
   source = meta.source.toLowerCase()
-  output_bb = "${meta.genome_tracks_outdir}/variant-${source}-details.bb"
+  output_bw = "${meta.genome_tracks_outdir}/variant-${source}-summary.bw"
   chrom_sizes = meta.chrom_sizes
   
   '''
-  bedToBigBed -type=bed3+6 !{bed} !{chrom_sizes} !{output_bb}
-  ln -sf !{output_bb} "variant-!{source}-details.bb"
+  wigToBigWig -clip -keepAllChromosomes -fixedSummaries \
+    !{wig} \
+    !{chrom_sizes} \
+    !{output_bw}
+    
+  ln -sf !{output_bw} "variant-!{source}-summary.bw"
   
   # temp: for one source we create symlink for focus
   cd !{meta.genome_tracks_outdir}
-  ln -sf variant-!{source}-details.bb variant-details.bb
+  ln -sf variant-!{source}-summary.bw variant-summary.bw
   '''
 }

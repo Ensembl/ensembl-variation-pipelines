@@ -35,7 +35,8 @@ include { SPLIT_VCF } from "../subworkflows/local/split_vcf.nf"
 include { VCF_TO_BED } from "../modules/local/vcf_to_bed.nf"
 include { CONCAT_BEDS } from "../modules/local/concat_beds.nf"
 include { BED_TO_BIGBED } from "../modules/local/bed_to_bigbed.nf"
-include { BED_TO_BIGWIG } from "../modules/local/bed_to_bigwig.nf"
+include { BED_TO_WIG } from "../modules/local/bed_to_wig.nf"
+include { WIG_TO_BIGWIG } from "../modules/local/wig_to_bigwig.nf"
 include { SUMMARY_STATS } from "../modules/local/summary_stats.nf"
 
 def parse_config (config) {
@@ -117,7 +118,8 @@ workflow VCF_PREPPER {
     // create source tracks
     // TODO: remove symlink creation for focus track when we have multiple source
     BED_TO_BIGBED( CONCAT_BEDS.out )
-    BED_TO_BIGWIG( CONCAT_BEDS.out )
+    BED_TO_WIG( CONCAT_BEDS.out )
+    WIG_TO_BIGWIG( BED_TO_WIG.out )
 
     // if track generation is run vep-ed VCF file move needs to wait for this step to finish
     SPLIT_VCF.out

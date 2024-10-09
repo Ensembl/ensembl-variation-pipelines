@@ -28,7 +28,12 @@ import requests
 # - vitis_vinifera
 # - solanum_lycopersicum
 # - ovis_aries_rambouillet
-# human will be manual as well
+# - canis_lupus_familiarisboxer
+## These species we can probably ignore until we have EVA data
+# - ornithorhynchus_anatinus
+# - monodelphis_domestica
+# - tetraodon_nigroviridis
+## Human will be manual as well
 
 
 EVA_REST_ENDPOINT = "https://www.ebi.ac.uk/eva/webservices/release"

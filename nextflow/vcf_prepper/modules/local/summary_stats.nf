@@ -16,15 +16,15 @@
  * limitations under the License.
  */
  
-process SUMMARY_STATS {
-  label 'process_medium'
-  
+process SUMMARY_STATS { 
   input: 
   tuple val(meta), path(vcf), path(vcf_index)
 
   output:
   tuple val(meta), path(output_file), path(vcf_index)
-  
+
+  memory 32.GB
+
   shell:
   species = meta.species
   assembly = meta.assembly

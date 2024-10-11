@@ -211,7 +211,7 @@ def main(args = None):
                 variant_count = get_variant_count(api_vcf)
                 if variant_count is not None:
                     attribute = {}
-                    attribute["name"] = "variation.short_variants"
+                    attribute["name"] = "variation.stats.short_variants"
                     attribute["value"] = str(variant_count)
                     dataset_attribute.append(attribute)
 

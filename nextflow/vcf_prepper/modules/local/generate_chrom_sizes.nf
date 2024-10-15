@@ -17,6 +17,7 @@
  */
  
 process GENERATE_CHROM_SIZES {
+  label 'process_low'
   cache false
   
   input:

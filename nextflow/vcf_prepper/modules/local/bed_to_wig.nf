@@ -16,35 +16,22 @@
  * limitations under the License.
  */
 
-process BED_TO_BIGWIG {
-  label 'bigmem'
-  
+process BED_TO_WIG {
   input: 
   tuple val(meta), path(bed)
   
   output:
-  path "variant-${source}-summary.bw"
+  tuple val(meta), path(output_wig)
   
+  memory  { (bed.size() * 4.B + 8.GB) * task.attempt }
+  time    { 48.hour * task.attempt }
   afterScript 'rm all.bed'
   
   shell:
   source = meta.source.toLowerCase()
   output_wig = "variant-${source}-summary.wig"
-  output_bw = "${meta.genome_tracks_outdir}/variant-${source}-summary.bw"
-  chrom_sizes = meta.chrom_sizes
   
   '''
   bed_to_wig !{bed} !{output_wig}
-    
-  wigToBigWig -clip -keepAllChromosomes -fixedSummaries \
-    !{output_wig} \
-    !{chrom_sizes} \
-    !{output_bw}
-    
-  ln -sf !{output_bw} "variant-!{source}-summary.bw"
-  
-  # temp: for one source we create symlink for focus
-  cd !{meta.genome_tracks_outdir}
-  ln -sf variant-!{source}-summary.bw variant-summary.bw
   '''
 }

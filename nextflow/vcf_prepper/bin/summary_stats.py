@@ -122,7 +122,7 @@ def main(args = None):
         for header in HEADERS:
             input_vcf.add_info_to_header(header)
 
-        output_vcf = Writer(output_file, input_vcf, mode="w")
+        output_vcf = Writer(output_file, input_vcf, mode="wz")
     else:
         h_vcf_file = "header.vcf"
         raw_h = input_vcf.raw_header

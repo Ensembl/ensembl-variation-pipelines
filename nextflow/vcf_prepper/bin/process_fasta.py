@@ -122,8 +122,7 @@ def main(args = None):
     fasta_glob = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.*.fa.gz")
 
     fasta = None
-    # for human --force won't work; we check and delete fasta manually if needed 
-    if glob.glob(fasta_glob) and (not args.force or species.startswith("homo_sapiens")):
+    if glob.glob(fasta_glob) and not args.force:
         print(f"[INFO] {fasta_glob} exists. Skipping ...")
         
         fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.primary_assembly.fa.gz")
@@ -134,7 +133,7 @@ def main(args = None):
             exit(1)
     else:
         if glob.glob(fasta_glob):
-            print(f"[INFO] {fasta_glob} exists. Will be oerwritten ...")
+            print(f"[INFO] {fasta_glob} exists. Will be overwritten ...")
             for f in glob.glob(fasta_glob):
                 os.remove(f)
         

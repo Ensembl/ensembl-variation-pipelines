@@ -58,7 +58,7 @@ def main(args = None):
             print(f"[INFO] {conservation_bw} exists. Skipping ...")
             exit(0)
         else:
-            print(f"[INFO] {conservation_bw} exists. Will be oerwritten ...")
+            print(f"[INFO] {conservation_bw} exists. Will be overwritten ...")
             os.remove(conservation_bw)
         
     src_conservation_bw = get_ftp_path(species, assembly, division, version, "conservation")

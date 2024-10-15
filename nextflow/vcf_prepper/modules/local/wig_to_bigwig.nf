@@ -15,33 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-process UPDATE_FIELDS {
-  label 'process_medium'
 
+process WIG_TO_BIGWIG {
   input: 
-  tuple val(meta), path(vcf), path(vcf_index)
+  tuple val(meta), path(wig)
   
   output:
-  tuple val(meta), path(output_file)
+  path "variant-${source}-summary.bw"
+  
+  memory  { (wig.size() * 10.B + 1.GB) * task.attempt }
+  time    { 48.hour * task.attempt }
   
   shell:
-  output_file = "UPDATED_S_" + file(vcf).getName()
-  source = meta.source
-  synonym_file = meta.synonym_file
-  species = meta.species
-  version = params.version
-  ini_file = params.ini_file
-  rename_clinvar_ids = params.rename_clinvar_ids ? "--rename_clinvar_ids" : ""
-
+  source = meta.source.toLowerCase()
+  output_bw = "${meta.genome_tracks_outdir}/variant-${source}-summary.bw"
+  chrom_sizes = meta.chrom_sizes
+  
   '''
-  chrs=$(tabix !{vcf} -l | xargs | tr ' ' ',')
-  update_fields.py !{vcf} !{source} !{synonym_file} \
-    !{rename_clinvar_ids} \
-    -O !{output_file} \
-    --chromosomes ${chrs} \
-    --species !{species} \
-    --version !{version} \
-    --ini_file !{ini_file}
+  wigToBigWig -clip -keepAllChromosomes -fixedSummaries \
+    !{wig} \
+    !{chrom_sizes} \
+    !{output_bw}
+    
+  ln -sf !{output_bw} "variant-!{source}-summary.bw"
+  
+  # temp: for one source we create symlink for focus
+  cd !{meta.genome_tracks_outdir}
+  ln -sf variant-!{source}-summary.bw variant-summary.bw
   '''
 }

@@ -91,6 +91,9 @@ def main(args = None):
         source = species_metadata[genome_uuid]["source_name"]
         species = species_metadata[genome_uuid]["species"]
 
+        source.replace("%20", " ")
+        source.replace("%2F", "/")
+
         source_info = get_source_info(source)
         source_url = get_source_url(source)
 

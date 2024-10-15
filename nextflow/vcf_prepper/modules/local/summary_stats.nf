@@ -16,18 +16,19 @@
  * limitations under the License.
  */
  
-process SUMMARY_STATS {
+process SUMMARY_STATS { 
   input: 
   tuple val(meta), path(vcf), path(vcf_index)
 
   output:
   tuple val(meta), path(output_file), path(vcf_index)
-  
+
+  memory  { ((vcf.size() * 1.25 * 1.B) + 2.GB) * task.attempt }
+
   shell:
   species = meta.species
   assembly = meta.assembly
   output_file =  "UPDATED_SS_" + file(vcf).getName()
-  uncomressed_output_file = output_file.replaceFirst(/.gz$/, "")
   index_type = meta.index_type
   flag_index = (index_type == "tbi" ? "-t" : "-c")
   vcf_index = output_file + ".${index_type}"
@@ -37,9 +38,8 @@ process SUMMARY_STATS {
     !{species} \
     !{assembly} \
     !{vcf} \
-    -O !{uncomressed_output_file}
+    -O !{output_file}
   
-  bgzip !{uncomressed_output_file}
   bcftools index !{flag_index} !{output_file}
   '''
 }

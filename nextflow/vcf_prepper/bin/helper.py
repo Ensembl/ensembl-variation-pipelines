@@ -143,9 +143,13 @@ def get_ftp_path(
     ) -> str:
     
     version = str(version)
+    if species == "homo_sapiens_37":
+        species = "homo_sapiens"
     
     if mode == "local":
         base = "/nfs/production/flicek/ensembl/production/ensemblftp"
+    elif mode == "remote" and assembly == "GRCh37":
+        base = "ftp.ensembl.org/pub/grch37"
     elif mode == "remote" and division == "EnsemblVertebrates":
         base = "ftp.ensembl.org/pub"
     else:

@@ -50,6 +50,7 @@ POLYPHEN_SPECIES = [
 ]
 PLUGINS = [
     "CADD",
+    "REVEL",
     "SpliceAI",
     "Phenotypes",
     "IntAct",
@@ -57,44 +58,68 @@ PLUGINS = [
     "Conservation",
     "MaveDB",
     "AlphaMissense",
-    "Downstream"
+    "Downstream",
+    "ClinPred"
 ]
 FREQUENCIES = {
     "1000genomes": "af_1kg 1",
     "gnomAD_exomes": {
         "GRCh38": {
             "version": "4.1",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/exomes",
-            "file_pattern": "gnomad.exomes.v4.1.sites.chr##CHR##.vcf.bgz"
+            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/exomes",
+            "file_pattern": "gnomad.exomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz"
         },
         "GRCh37": {
             "version": "4.1",
-            "directory": "/hps/nobackup/flicek/ensembl/variation/snhossain/website/gnomad_liftover/remapped/exomes/grch37",
-            "file_pattern": "gnomad.exomes.v4.1.sites.chr##CHR##.liftover_grch38.vcf.gz"
+            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/exomes",
+            "file_pattern": "gnomad.exomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz"
         },
-        "T2T-CHM13v2.0": {
+        "HPRCs": {
             "version": "4.1",
-            "directory": "/hps/nobackup/flicek/ensembl/variation/snhossain/website/gnomad_liftover/remapped/exomes/T2T-CHM13v2.0",
-            "file_pattern": "gnomad.exomes.v4.1.sites.chr##CHR##.liftover_grch38.vcf.gz"
-        }
+            "directory": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY##/ensembl/variation/2022_10/vcf/2024_07/",
+            "file_pattern": "gnomad.exomes.v4.1.sites.##ASSEMBLY##.trimmed_liftover.vcf.gz"            
+        } 
     },
     "gnomAD_genomes": {
         "GRCh38": {
             "version": "4.1",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/genomes",
-            "file_pattern": "gnomad.genomes.v4.1.sites.chr##CHR##.vcf.bgz"
+            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/genomes",
+            "file_pattern": "gnomad.genomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz"
         },
         "GRCh37": {
             "version": "4.1",
-            "directory": "/hps/nobackup/flicek/ensembl/variation/snhossain/website/gnomad_liftover/remapped/genomes/grch37",
-            "file_pattern": "gnomad.genomes.v4.1.sites.chr##CHR##.liftover_grch38.vcf.gz"
+            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/genomes",
+            "file_pattern": "gnomad.genomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz"
         },
-        "T2T-CHM13v2.0": {
+        "HPRCs": {
             "version": "4.1",
-            "directory": "/hps/nobackup/flicek/ensembl/variation/snhossain/website/gnomad_liftover/remapped/genomes/T2T-CHM13v2.0",
-            "file_pattern": "gnomad.genomes.v4.1.sites.chr##CHR##.liftover_grch38.vcf.gz"
-        }
+            "directory": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY##/ensembl/variation/2022_10/vcf/2024_07/",
+            "file_pattern": "gnomad.genomes.v4.1.sites.##ASSEMBLY##.trimmed_liftover.vcf.gz"            
+        } 
     }
+}
+GNOMAD_CUSTOM_FIELDS={
+    "gnomAD_exomes": "AF%AC%AN" + \
+            "%AF_afr%AC_afr%AN_afr" + \
+            "%AF_amr%AC_amr%AN_amr" + \
+            "%AF_asj%AC_asj%AN_asj" + \
+            "%AF_eas%AC_eas%AN_eas" + \
+            "%AF_fin%AC_fin%AN_fin" + \
+            "%AF_mid%AC_mid%AN_mid" + \
+            "%AF_nfe%AC_nfe%AN_nfe" + \
+            "%AF_remaining%AC_remaining%AN_remaining" + \
+            "%AF_sas%AC_sas%AN_sas",
+    "gnomAD_genomes": "AF%AC%AN" + \
+            "%AF_afr%AC_afr%AN_afr" + \
+            "%AF_amr%AC_amr%AN_amr" + \
+            "%AF_asj%AC_asj%AN_asj" + \
+            "%AF_eas%AC_eas%AN_eas" + \
+            "%AF_fin%AC_fin%AN_fin" + \
+            "%AF_mid%AC_mid%AN_mid" + \
+            "%AF_nfe%AC_nfe%AN_nfe" + \
+            "%AF_remaining%AC_remaining%AN_remaining" + \
+            "%AF_sas%AC_sas%AN_sas" + \
+            "%AF_ami%AC_ami%AN_ami" 
 }
 
 def parse_args(args = None):
@@ -122,42 +147,43 @@ def format_gnomad_args(source: str, metadata: dict) -> str:
         if not os.path.isfile(file):
             print(f"[ERROR] Frequency file does not exist - {file}. Exiting ...")
             exit(1)
-        
-        custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0," + \
-            "fields=AF%AC%AN" + \
-            "%AF_afr%AC_afr%AN_afr" + \
-            "%AF_amr%AC_amr%AN_amr" + \
-            "%AF_asj%AC_asj%AN_asj" + \
-            "%AF_eas%AC_eas%AN_eas" + \
-            "%AF_fin%AC_fin%AN_fin" + \
-            "%AF_mid%AC_mid%AN_mid" + \
-            "%AF_nfe%AC_nfe%AN_nfe" + \
-            "%AF_remaining%AC_remaining%AN_remaining" + \
-            "%AF_sas%AC_sas%AN_sas"
-    
-        if source == "gnomAD_genomes":
-            custom_line += "%AF_ami%AC_ami%AN_ami"
 
+        custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0,fields={GNOMAD_CUSTOM_FIELDS[source]}"
         gnomAD_custom_args.append(custom_line)
 
     return "\n".join(gnomAD_custom_args)
     
-def get_frequency_args(assembly: str) -> str:
+def get_frequency_args(species: str, assembly: str) -> str:
     frequencies = []
     for source in FREQUENCIES:
         if source.startswith("gnomAD"):
             if assembly in FREQUENCIES[source]:
                 frequencies.append(format_gnomad_args(source, FREQUENCIES[source][assembly]))
+            elif species.startswith("homo_sapiens_gca"):
+                # add gnomAD frequency for HPRC assembly (other than T2T)
+                metadata = FREQUENCIES[source]["HPRCs"]
+                assembly_acc =  species.split("_")[2].replace("gca", "GCA_").replace("v", ".")
+                file = os.path.join(metadata["directory"].replace("##ASSEMBLY##", assembly_acc), metadata["file_pattern"].replace("##ASSEMBLY##", assembly_acc))
+
+                if os.path.exists(file):
+                    custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0,fields={GNOMAD_CUSTOM_FIELDS[source]}"
+                    frequencies.append(custom_line)
         else:
             frequencies.append(FREQUENCIES[source])
-    
+
     return frequencies
     
-def check_plugin_files(plugin: str, files: list) -> bool:
+def check_plugin_files(plugin: str, files: list, exit_rule: str = "exit") -> bool:
     for file in files:
         if not os.path.isfile(file):
+            if exit_rule == "skip":
+                print(f"[INFO] Cannot get {plugin} data file - {file}. Skipping ...")
+                return False
+
             print(f"[INFO] Cannot get {plugin} data file - {file}. Exiting ...")
             exit(1)
+
+    return True
     
 def get_plugin_args(
         plugin: str, 
@@ -172,12 +198,29 @@ def get_plugin_args(
         plugin_data_dir = plugin_data_dir.replace("grch38", "grch37")
         
     if plugin == "CADD":
-        snv = os.path.join(plugin_data_dir, f"CADD_{assembly}_1.6_whole_genome_SNVs.tsv.gz")
-        indels = os.path.join(plugin_data_dir, f"CADD_{assembly}_1.6_InDels.tsv.gz")
-        
+        # CADD have data v1.7 data file from e113
+        if version < 113:
+            plugin_data_dir = plugin_data_dir.replace(f"{version}", "113")
+
+        if species == "sus_scrofa":
+            snv = os.path.join(plugin_data_dir, f"ALL_pCADD-PHRED-scores.tsv.gz")
+            check_plugin_files(plugin, [snv])
+            
+            return f"CADD,{snv}"
+
+        snv = os.path.join(plugin_data_dir, f"CADD_{assembly}_1.7_whole_genome_SNVs.tsv.gz")
+        indels = os.path.join(plugin_data_dir, f"CADD_{assembly}_1.7_InDels.tsv.gz")
+
         check_plugin_files(plugin, [snv, indels])
-        
+
         return f"CADD,{snv},{indels}"
+    
+    if plugin == "REVEL":
+        data_file = f"/nfs/production/flicek/ensembl/variation/data/REVEL/2021-may/new_tabbed_revel_{assembly.lower()}.tsv.gz"
+
+        check_plugin_files(plugin, [data_file])
+
+        return f"REVEL,{data_file}"
         
     if plugin == "SpliceAI":
         ucsc_assembly = "hg38" if assembly == "GRCh38" else "hg19"
@@ -192,8 +235,7 @@ def get_plugin_args(
         pl_assembly = f"_{assembly}" if species == "homo_sapiens" else ""
         file = os.path.join(plugin_data_dir, f"Phenotypes_data_files/Phenotypes.pm_{species}_{version}{pl_assembly}.gvf.gz")
         
-        if not os.path.isfile(file):
-            print(f"[INFO] Cannot get Phenotype data file - {file}. Skipping ...")
+        if not check_plugin_files(plugin, [file], "skip"):
             return None
             
         return f"Phenotypes,file={file},id_match=1,cols=phenotype&source&id&type&clinvar_clin_sig"
@@ -218,8 +260,7 @@ def get_plugin_args(
     if plugin == "Conservation":
         file = os.path.join(conservation_data_dir, f"gerp_conservation_scores.{species}.{assembly}.bw")
         
-        if not os.path.isfile(file):
-            print(f"[INFO] Cannot get Conservation data file - {file}. Skipping ...")
+        if not check_plugin_files(plugin, [file], "skip"):
             return None
             
         return f"Conservation,{file}"
@@ -227,7 +268,8 @@ def get_plugin_args(
     if plugin == "MaveDB":
         file = os.path.join(plugin_data_dir, "MaveDB_variants.tsv.gz")
         
-        check_plugin_files(plugin, [file])
+        if not check_plugin_files(plugin, [file], "skip"):
+            return None
             
         return f"MaveDB,file={file},cols=MaveDB_score:MaveDB_urn,transcript_match=1"
     
@@ -237,9 +279,22 @@ def get_plugin_args(
             plugin_data_dir = plugin_data_dir.replace(f"{version}", "111")
         file = os.path.join(plugin_data_dir, "AlphaMissense_hg38.tsv.gz")
         
-        check_plugin_files(plugin, [file])
+        if not check_plugin_files(plugin, [file], "skip"):
+            return None
             
         return f"AlphaMissense,file={file}"
+
+    if plugin == "ClinPred":
+        # ClinPred do not have data file in e113 directory or below
+        if version < 113:
+            plugin_data_dir = plugin_data_dir.replace(f"{version}", "113")
+        file_name = "ClinPred_hg38_sorted_tabbed.tsv.gz" if assembly == "GRCh38" else "ClinPred_tabbed.tsv.gz"
+        file = os.path.join(plugin_data_dir, "ClinPred", file_name)
+        
+        if not check_plugin_files(plugin, [file], "skip"):
+            return None
+            
+        return f"ClinPred,file={file}"
 
     # some plugin do not need any arguments, for example - Downstream plugin
     return plugin
@@ -387,7 +442,7 @@ def main(args = None):
     
     frequencies = []
     if species.startswith("homo_sapiens"):
-        frequencies = get_frequency_args(assembly)
+        frequencies = get_frequency_args(species, assembly)
         
     plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
     

@@ -46,9 +46,9 @@ workflow PREPARE_GENOME {
         genome_tracks_outdir = "${params.output_dir}/tracks/${meta.genome_uuid}"
         file(genome_tracks_outdir).mkdirs()
         
-        cache_dir = meta.species ==~ "homo_sapiens.*" ? params.cache_dir : genome_temp_dir
-        fasta_dir = meta.species ==~ "homo_sapiens.*" ? params.fasta_dir : genome_temp_dir
-        conservation_data_dir = meta.species ==~ "homo_sapiens.*" ? params.conservation_data_dir : genome_temp_dir
+        cache_dir = params.cache_dir ? params.cache_dir : genome_temp_dir
+        fasta_dir = params.fasta_dir ? params.fasta_dir : genome_temp_dir
+        conservation_data_dir = params.conservation_data_dir ? params.conservation_data_dir : genome_temp_dir
         
         [ meta + [
             synonym_file: synonym_file,

@@ -21,3 +21,20 @@ WorkflowMain.initialise(workflow, params, log)
 workflow {
   VCF_PREPPER()
 }
+
+// Print summary
+workflow.onComplete {
+  println ( workflow.success ? """
+        Workflow summary
+        ----------------
+        Completed at: ${workflow.complete}
+        Duration    : ${workflow.duration}
+        Success     : ${workflow.success}
+        workDir     : ${workflow.workDir}
+        exit status : ${workflow.exitStatus}
+        """ : """
+        Failed: ${workflow.errorReport}
+        exit status : ${workflow.exitStatus}
+        """
+  )
+}

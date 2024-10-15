@@ -71,11 +71,6 @@ def main(args = None):
             print(f"[INFO] {genome_cache_dir} directory exists. Skipping ...")
             exit(0)
         else:
-            # for human we check and delete cache dir manually if needed - DO NOT OVERWRITE
-            if species.startswith("homo_sapiens"):
-                print(f"[ERROR] {genome_cache_dir} directory exists for human. Won't be overwritten ...")
-                exit(1)
-
             print(f"[INFO] {genome_cache_dir} directory exists. Will be overwritten ...")
             shutil.rmtree(genome_cache_dir)
         

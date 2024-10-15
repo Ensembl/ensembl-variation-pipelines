@@ -47,7 +47,7 @@ workflow RUN_VEP {
       vep_meta.index_type = meta.index_type
       vep_meta.filters = "amino_acids not match X[A-Za-z*]?\\/"
 
-      [vep_meta, vcf, vcf_index, meta.vep_config]
+      [meta: vep_meta, file: vcf, index: vcf_index, vep_config: meta.vep_config]
   }
   .set { ch_vep }
   vep( ch_vep )
@@ -56,7 +56,9 @@ workflow RUN_VEP {
   .map {
     meta, vcf ->
       // tag here is the output vcf file from nextflow-vep
-      tag = "${meta.genome_temp_dir}/${meta.genome}-${meta.source}_VEP.vcf.gz"    
+      filename = file("${meta.genome}-${meta.source}").getSimpleName() + "_VEP.vcf.gz"
+      tag = "${meta.genome_temp_dir}/${filename}"
+
       [tag, meta]
   }
   .join ( vep.out, failOnDuplicate: true )
@@ -64,6 +66,10 @@ workflow RUN_VEP {
     tag, meta ->
       vcf = tag
       vcf_index = "${tag}.${meta.index_type}"
+
+      if (! file(vcf).exists() || ! file(vcf_index).exists()){
+        exit 1, "ERROR: Could not find nextflow-vep output files. Check the following - \n\tVCF - ${vcf}\n\tVCF index - ${vcf_index}"
+      }
       
       [meta, vcf, vcf_index]
   }.set { ch_post_vep }

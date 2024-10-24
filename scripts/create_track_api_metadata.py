@@ -101,7 +101,7 @@ def main(args = None):
         metadata[genome_uuid]["datafiles"]["details"] = f"variant-{source.lower()}-details.bb"
         metadata[genome_uuid]["datafiles"]["summary"] = f"variant-{source.lower()}-summary.bw"
 
-        metadata[genome_uuid]["description"] = f"All short variants (SNPs and indel) data from {source_info}"
+        metadata[genome_uuid]["description"] = f"All short variants (SNPs and indels) data from {source_info}"
         
         metadata[genome_uuid]["source"] = {}
         metadata[genome_uuid]["source"]["name"] = source

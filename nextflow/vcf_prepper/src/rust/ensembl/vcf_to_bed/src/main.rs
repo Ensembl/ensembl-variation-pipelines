@@ -205,6 +205,15 @@ fn main() -> Result<(), VCFError> {
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         
+        // check if the variant is a SV
+        let mut is_sv = false;
+        for alt in alts.iter() {
+            if ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
+                is_sv = true;
+                break
+            }
+        }
+
         for id in ids.iter() {
             let mut variant_group = 0;
             let mut most_severe_csq = "";
@@ -228,15 +237,9 @@ fn main() -> Result<(), VCFError> {
             let mut variety = class[0].to_string();
             
             // if sequence_alteration we check if we can convert it to indel (the condition is that all the variant allele is eiter insertion or deletion or indel)
-            if variety.eq(&String::from("sequence_alteration")) {
+            if variety.eq(&String::from("sequence_alteration")) && !is_sv {
                 let mut convert_sequence_alteration = true;
                 for alt in alts.iter() {
-                    // check if the variant is a SV
-                    if ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
-                        convert_sequence_alteration = false;
-                        break;
-                    }
-
                     // note that we are not minimilizing the variant alleles here 
                     let calc_variety = match (alt.len()<2, reference.len()<2, alt.len() == reference.len()) {
                         (true, true, true) => { "SNV" },
@@ -275,6 +278,28 @@ fn main() -> Result<(), VCFError> {
             if variety.eq(&String::from("insertion")) {
                 start += 1;
                 end = start;
+            }
+            // TBD: multi-allelic variant; we need to parse multiple SVLEN/END
+            if is_sv {
+                let svlen: Result<u64, _> = String::from_utf8_lossy(&record.info(b"SVLEN")
+                                    .unwrap_or(&vec![vec![]])[0])
+                                    .parse();
+                match svlen {
+                    Ok(number) => { end = start + number; },
+                    Err(_) => {
+                        let info_end: Result<u64, _> = String::from_utf8_lossy(&record.info(b"END")
+                                    .unwrap_or(&vec![vec![]])[0])
+                                    .parse();
+
+                        match info_end {
+                            Ok(number) => { end = number; }
+                            Err(_) => {
+                                println!("[WARNING] Neither SVLEN nor END can be parsed");
+                                continue
+                            }
+                        }
+                    }
+                }
             }
             
             let more = Line {

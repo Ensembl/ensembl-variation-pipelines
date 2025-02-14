@@ -18,7 +18,7 @@ use std::{io::{BufReader,Write}, fs::File, env, collections::HashMap, collection
 use vcf::{VCFError, VCFReader};
 use flate2::read::MultiGzDecoder;
 
-const VARIANTGROUP : [(&str, u8); 45] = [
+const VARIANTGROUP : [(&str, u8); 46] = [
     ("frameshift_variant", 1),
     ("inframe_deletion", 1),
     ("inframe_insertion", 1),
@@ -41,6 +41,7 @@ const VARIANTGROUP : [(&str, u8); 45] = [
     ("mature_miRNA_variant", 3),
     ("NMD_transcript_variant", 3),
     ("non_coding_transcript_exon_variant", 3),
+    ("coding_transcript_variant", 3),
     ("non_coding_transcript_variant", 3),
     ("start_retained_variant", 3),
     ("stop_retained_variant", 3),
@@ -186,6 +187,7 @@ fn main() -> Result<(), VCFError> {
             String::from_utf8(a.clone())
         }).collect::<Result<HashSet<_>,_>>().unwrap();
         
+        // TBD: replace hardcoded index value - .nth(1)
         let csq = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
@@ -195,6 +197,7 @@ fn main() -> Result<(), VCFError> {
         // if csq is empty we won't have most severe consequence
         if csq.is_empty(){ continue; }
         
+        // TBD: replace hardcoded index value - .nth(21)
         let class = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
@@ -228,6 +231,12 @@ fn main() -> Result<(), VCFError> {
             if variety.eq(&String::from("sequence_alteration")) {
                 let mut convert_sequence_alteration = true;
                 for alt in alts.iter() {
+                    // check if the variant is a SV
+                    if ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
+                        convert_sequence_alteration = false;
+                        break;
+                    }
+
                     // note that we are not minimilizing the variant alleles here 
                     let calc_variety = match (alt.len()<2, reference.len()<2, alt.len() == reference.len()) {
                         (true, true, true) => { "SNV" },

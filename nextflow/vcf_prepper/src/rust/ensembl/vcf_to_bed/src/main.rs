@@ -18,7 +18,7 @@ use std::{io::{BufReader,Write}, fs::File, env, collections::HashMap, collection
 use vcf::{VCFError, VCFReader};
 use flate2::read::MultiGzDecoder;
 
-const VARIANTGROUP : [(&str, u8); 46] = [
+const VARIANTGROUP : [(&str, u8); 45] = [
     ("frameshift_variant", 1),
     ("inframe_deletion", 1),
     ("inframe_insertion", 1),
@@ -41,7 +41,6 @@ const VARIANTGROUP : [(&str, u8); 46] = [
     ("mature_miRNA_variant", 3),
     ("NMD_transcript_variant", 3),
     ("non_coding_transcript_exon_variant", 3),
-    ("coding_transcript_variant", 3),
     ("non_coding_transcript_variant", 3),
     ("start_retained_variant", 3),
     ("stop_retained_variant", 3),

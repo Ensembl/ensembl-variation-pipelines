@@ -285,7 +285,8 @@ fn main() -> Result<(), VCFError> {
                 let svlens = record.info(b"SVLEN").map(|svlen| {
                     svlen.iter().map(|svlen| {
                         let s = String::from_utf8_lossy(svlen);
-                        s.parse().unwrap_or(0)
+                        let i: i64 = s.parse().unwrap_or(0); // SVLEN can be negative in old software
+                        u64::try_from(i.abs()).unwrap_or(0)
                     }).collect::<Vec<u64>>()
                 }).unwrap_or(vec![]);
 
@@ -307,7 +308,7 @@ fn main() -> Result<(), VCFError> {
                     Some(number) => { end = start + number; }
                 }
             }
-            
+
             let more = Line {
                 chromosome: String::from_utf8(record.chromosome.to_vec()).unwrap(),
                 start: start,

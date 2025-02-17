@@ -186,6 +186,7 @@ fn main() -> Result<(), VCFError> {
             String::from_utf8(a.clone())
         }).collect::<Result<HashSet<_>,_>>().unwrap();
         
+        // TBD: replace hardcoded index value - .nth(1)
         let csq = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
@@ -195,6 +196,7 @@ fn main() -> Result<(), VCFError> {
         // if csq is empty we won't have most severe consequence
         if csq.is_empty(){ continue; }
         
+        // TBD: replace hardcoded index value - .nth(21)
         let class = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
@@ -202,6 +204,15 @@ fn main() -> Result<(), VCFError> {
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         
+        // check if the variant is a SV
+        let mut is_sv = false;
+        for alt in alts.iter() {
+            if ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
+                is_sv = true;
+                break
+            }
+        }
+
         for id in ids.iter() {
             let mut variant_group = 0;
             let mut most_severe_csq = "";
@@ -225,7 +236,7 @@ fn main() -> Result<(), VCFError> {
             let mut variety = class[0].to_string();
             
             // if sequence_alteration we check if we can convert it to indel (the condition is that all the variant allele is eiter insertion or deletion or indel)
-            if variety.eq(&String::from("sequence_alteration")) {
+            if variety.eq(&String::from("sequence_alteration")) && !is_sv {
                 let mut convert_sequence_alteration = true;
                 for alt in alts.iter() {
                     // note that we are not minimilizing the variant alleles here 
@@ -268,6 +279,36 @@ fn main() -> Result<(), VCFError> {
                 end = start;
             }
             
+            // unlike short variants and VCF specification, for insertion here end = POS + SVLEN - 1
+            // this is because we cannot know the number of inserted bps otherwise
+            if is_sv {
+                let svlens = record.info(b"SVLEN").map(|svlen| {
+                    svlen.iter().map(|svlen| {
+                        let s = String::from_utf8_lossy(svlen);
+                        let i: i64 = s.parse().unwrap_or(0); // SVLEN can be negative in old software
+                        u64::try_from(i.abs()).unwrap_or(0)
+                    }).collect::<Vec<u64>>()
+                }).unwrap_or(vec![]);
+
+                let max_svlen = svlens.iter().max();
+                match max_svlen {
+                    Some(0) | None => {
+                        let info_end: Result<u64, _> = String::from_utf8_lossy(&record.info(b"END")
+                                    .unwrap_or(&vec![vec![]])[0])
+                                    .parse();
+
+                        match info_end {
+                            Ok(number) => { end = number; }
+                            Err(_) => {
+                                println!("[WARNING] Neither SVLEN nor END can be parsed");
+                                continue
+                            }
+                        }
+                    }
+                    Some(number) => { end = start + number; }
+                }
+            }
+
             let more = Line {
                 chromosome: String::from_utf8(record.chromosome.to_vec()).unwrap(),
                 start: start,

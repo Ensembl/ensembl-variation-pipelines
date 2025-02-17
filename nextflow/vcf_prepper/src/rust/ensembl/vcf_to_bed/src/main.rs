@@ -279,14 +279,20 @@ fn main() -> Result<(), VCFError> {
                 start += 1;
                 end = start;
             }
-            // TBD: multi-allelic variant; we need to parse multiple SVLEN/END
+            
+            // unlike short variants and VCF specification, for insertion here end = POS + SVLEN - 1
+            // this is because we cannot know the number of inserted bps otherwise
             if is_sv {
-                let svlen: Result<u64, _> = String::from_utf8_lossy(&record.info(b"SVLEN")
-                                    .unwrap_or(&vec![vec![]])[0])
-                                    .parse();
-                match svlen {
-                    Ok(number) => { end = start + number; },
-                    Err(_) => {
+                let svlens = record.info(b"SVLEN").map(|svlen| {
+                    svlen.iter().map(|svlen| {
+                        let s = String::from_utf8_lossy(svlen);
+                        s.parse().unwrap_or(0)
+                    }).collect::<Vec<u64>>()
+                }).unwrap_or(vec![]);
+
+                let max_svlen = svlens.iter().max();
+                match max_svlen {
+                    Some(0) | None => {
                         let info_end: Result<u64, _> = String::from_utf8_lossy(&record.info(b"END")
                                     .unwrap_or(&vec![vec![]])[0])
                                     .parse();
@@ -299,6 +305,7 @@ fn main() -> Result<(), VCFError> {
                             }
                         }
                     }
+                    Some(number) => { end = start + number; }
                 }
             }
             

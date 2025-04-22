@@ -26,6 +26,7 @@ import requests
 
 EVA_REST_ENDPOINT = "https://www.ebi.ac.uk/eva/webservices/release/v1"
 
+
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
     

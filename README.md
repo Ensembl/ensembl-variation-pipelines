@@ -10,3 +10,5 @@ Create input config JSON file as required by vcf_prepper pipeline.
 Create payloads with statistics and variation example for submission to metadata database
 - [create_track_api_metadata.py](scripts/create_track_api_metadata.py)
 Create JSON with metadata about tracks needed for track API
+
+

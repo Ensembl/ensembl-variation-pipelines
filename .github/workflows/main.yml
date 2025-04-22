@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: nf-core/setup-nextflow@v1
       - name: setup
         run: curl -fsSL https://code.askimed.com/install/nf-test | bash
       - name: test

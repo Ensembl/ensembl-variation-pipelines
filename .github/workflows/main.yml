@@ -10,4 +10,4 @@ jobs:
         run: curl -fsSL https://code.askimed.com/install/nf-test | bash
       - name: test
         working-directory: nextflow/vcf_prepper
-        run: ${GITHUB_WORKSPACE}/nf-test test nextflow/vcf_prepper/tests
+        run: ${GITHUB_WORKSPACE}/nf-test test tests

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
  
-use std::{io::{BufReader,Write}, fs::File, env, collections::HashMap, collections::HashSet};
+use std::{io::{BufReader,Write}, fs::File, env, process::exit, collections::HashMap, collections::HashSet};
 use vcf::{VCFError, VCFReader};
 use flate2::read::MultiGzDecoder;
 
@@ -64,6 +64,41 @@ const VARIANTGROUP : [(&str, u8); 45] = [
     ("upstream_gene_variant", 5),
     ("downstream_gene_variant", 5),
     ("intergenic_variant", 5)
+];
+
+const SV_VARIANTGROUP : [(&str, u8); 32] = [
+    ("Alu_deletion", 11),
+    ("Alu_insertion", 13),
+    ("HERV_deletion", 11),
+    ("HERV_insertion", 13),
+    ("LINE1_deletion", 11),
+    ("LINE1_insertion", 13),
+    ("SVA_deletion", 11),
+    ("SVA_insertion", 13),
+    ("complex_chromosomal_rearrangement", 15),
+    ("complex_structural_alteration", 15),
+    ("complex_substitution", 15),
+    ("copy_number_gain", 13),
+    ("copy_number_loss", 11),
+    ("copy_number_variation", 12),
+    ("duplication", 13),
+    ("chromosome_breakpoint", 15),
+    ("interchromosomal_breakpoint", 15),
+    ("interchromosomal_translocation", 15),
+    ("intrachromosomal_breakpoint", 15),
+    ("intrachromosomal_translocation", 15),
+    ("inversion", 14),
+    ("loss_of_heterozygosity", 11),
+    ("mobile_element_deletion", 11),
+    ("mobile_element_insertion", 13),
+    ("novel_sequence_insertion", 13),
+    ("tandem_repeat", 12),
+    ("short_tandem_repeat_variation", 12),
+    ("tandem_duplication", 13),
+    ("translocation", 12),
+    ("deletion", 11),
+    ("indel", 15),
+    ("insertion", 13)
 ];
 
 struct Line {
@@ -142,6 +177,11 @@ fn main() -> Result<(), VCFError> {
     )?)))?;
     let mut out = File::create(&args[2]).unwrap();
     let json = std::fs::read_to_string(&args[3]).unwrap();
+
+    let mut is_sv = false;
+    if args.len() == 5 && String::from(&args[4]) == "1" {
+        is_sv = true;
+    }
         
     let severity = {
         serde_json::from_str::<HashMap<String, String>>(&json).unwrap()
@@ -149,8 +189,15 @@ fn main() -> Result<(), VCFError> {
     
     // create the severity hash
     let mut variant_groups = HashMap::new();
-    for (csq, value) in &VARIANTGROUP {
-        variant_groups.insert(csq.to_string(), *value);
+    if is_sv {
+        for (csq, value) in &SV_VARIANTGROUP {
+            variant_groups.insert(csq.to_string(), *value);
+        }
+    } 
+    else {
+        for (class, value) in &VARIANTGROUP {
+            variant_groups.insert(class.to_string(), *value);
+        }
     }
     
     let mut record = reader.empty_record();
@@ -204,12 +251,12 @@ fn main() -> Result<(), VCFError> {
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         
-        // check if the variant is a SV
-        let mut is_sv = false;
+        // check for SV
         for alt in alts.iter() {
-            if ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
-                is_sv = true;
-                break
+            if !is_sv && ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
+                println!("[ERROR] structural variant detected, but not running in structural variant mode. 
+                    If you are running this script for structural variant please re-run setting the 4th argument field to 1.");
+                exit(1)
             }
         }
 
@@ -282,6 +329,9 @@ fn main() -> Result<(), VCFError> {
             // unlike short variants and VCF specification, for insertion here end = POS + SVLEN - 1
             // this is because we cannot know the number of inserted bps otherwise
             if is_sv {
+                // overwrite variant group to come from variant class instead of consequence
+                variant_group = *variant_groups.get(&variety).unwrap_or(&0);
+                
                 let svlens = record.info(b"SVLEN").map(|svlen| {
                     svlen.iter().map(|svlen| {
                         let s = String::from_utf8_lossy(svlen);

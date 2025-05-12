@@ -326,8 +326,6 @@ fn main() -> Result<(), VCFError> {
                 end = start;
             }
             
-            // unlike short variants and VCF specification, for insertion here end = POS + SVLEN - 1
-            // this is because we cannot know the number of inserted bps otherwise
             if is_sv {
                 // overwrite variant group to come from variant class instead of consequence
                 variant_group = *variant_groups.get(&variety).unwrap_or(&0);
@@ -356,6 +354,13 @@ fn main() -> Result<(), VCFError> {
                         }
                     }
                     Some(number) => { end = start + number; }
+                }
+
+                // how to keep the svlen info for insertion types?
+                if variety.ends_with(&String::from("insertion")) || 
+                        variety.ends_with(&String::from("breakpoint")) {
+                    start += 1;
+                    end = start;
                 }
             }
 

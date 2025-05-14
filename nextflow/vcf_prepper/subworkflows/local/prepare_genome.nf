@@ -22,6 +22,7 @@ include { GENERATE_CHROM_SIZES } from "../../modules/local/generate_chrom_sizes.
 include { GENERATE_VEP_CONFIG } from "../../modules/local/generate_vep_config.nf"
 include { GENERATE_SYNONYM_FILE } from "../../modules/local/generate_synonym_file.nf"
 include { PROCESS_CACHE } from "../../modules/local/process_cache.nf"
+include { PROCESS_GFF } from "../../modules/local/process_gff.nf"
 include { PROCESS_FASTA } from "../../modules/local/process_fasta.nf"
 include { PROCESS_CONSERVATION_DATA } from "../../modules/local/process_conservation_data.nf"
 include { PROCESS_INPUT } from "../../modules/local/process_input.nf"
@@ -47,6 +48,7 @@ workflow PREPARE_GENOME {
         file(genome_tracks_outdir).mkdirs()
         
         cache_dir = params.cache_dir ? params.cache_dir : genome_temp_dir
+        gff_dir = params.gff_dir ? params.gff_dir : genome_temp_dir
         fasta_dir = params.fasta_dir ? params.fasta_dir : genome_temp_dir
         conservation_data_dir = params.conservation_data_dir ? params.conservation_data_dir : genome_temp_dir
         
@@ -58,6 +60,7 @@ workflow PREPARE_GENOME {
             genome_api_outdir: genome_api_outdir,
             genome_tracks_outdir: genome_tracks_outdir,
             cache_dir: cache_dir,
+            gff_dir: gff_dir,
             fasta_dir: fasta_dir,
             conservation_data_dir: conservation_data_dir
           ], vcf
@@ -84,7 +87,12 @@ workflow PREPARE_GENOME {
     if (!params.skip_vep) {
       ch_synonym_file_done = GENERATE_SYNONYM_FILE( ch_prepare_genome_meta )
     
-      ch_processed_cache = PROCESS_CACHE( ch_prepare_genome_meta )
+      if(params.use_vep_cache){
+        ch_processed_cache_or_gff = PROCESS_CACHE( ch_prepare_genome_meta )
+      }
+      else {
+        ch_processed_cache_or_gff = PROCESS_GFF( ch_prepare_genome_meta )
+      }
       ch_processed_fasta = PROCESS_FASTA( ch_prepare_genome_meta )
       ch_processed_conservation = PROCESS_CONSERVATION_DATA( ch_prepare_genome_meta )
       
@@ -93,7 +101,7 @@ workflow PREPARE_GENOME {
         meta -> 
           [meta.genome, meta]
       }
-      .join( ch_processed_cache )
+      .join( ch_processed_cache_or_gff )
       .join( ch_processed_fasta )
       .join( ch_processed_conservation )
       .map {

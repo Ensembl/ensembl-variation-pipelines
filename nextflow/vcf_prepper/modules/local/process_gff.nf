@@ -16,6 +16,9 @@
  * limitations under the License.
  */
  
+
+select ds.*, dt.*, da.*, a.* from dataset as d, dataset_attribute as da, attribute as a, dataset_source as ds, dataset_type as dt, genome_dataset as gd, genome as g WHERE da.attribute_id = a.attribute_id AND d.dataset_source_id = ds.dataset_source_id AND d.dataset_id = da.dataset_id AND d.dataset_type_id = dt.dataset_type_id AND d.dataset_id =  gd.dataset_id and gd.genome_id = g.genome_id AND g.genome_uuid = "a7335667-93e7-11ec-a39d-005056b38ce3" AND a.name = "vep.gff_location" AND gd.release_id = 1;
+
 process PROCESS_GFF {
   cache false
   
@@ -26,19 +29,16 @@ process PROCESS_GFF {
   val genome
   
   shell:
-  genome = meta.genome
-  species = meta.species
-  assembly = meta.assembly
-  version = params.version
+  genome_uuid = meta.genome_uuid
+  release_id = meta.release_id
   ini_file = params.ini_file
   gff_dir = meta.gff_dir
   force_create_config = params.force_create_config ? "--force" : ""
   
   '''
   process_gff.py \
-    !{species} \
-    !{assembly} \
-    !{version} \
+    !{genome_uuid} \
+    !{release_id} \
     --ini_file !{ini_file} \
     --gff_dir !{gff_dir} \
     !{force_create_config}

@@ -45,8 +45,9 @@ PER_VARIANT_FIELDS = {
 FREQUENCY_FIELD = "RAF"
 # [csq_field, display_name]
 FREQUENCY_META = {
-    "homo_sapiens": ["gnomAD_genomes_AF", "gnomAD genomes v3.1.2"],
-    "homo_sapiens_37": ["gnomAD_exomes_AF", "gnomAD exomes v2.1.1"]
+    "homo_sapiens": ["gnomAD_genomes_AF", "gnomAD genomes v4.1"],
+    "homo_sapiens_37": ["gnomAD_genomes_AF", "gnomAD genomes v4.1"],
+    "homo_sapiens_gca009914755v4": ["gnomAD_genomes_AF", "gnomAD genomes v4.1"]
 }
 
 SKIP_CONSEQUENCE = [

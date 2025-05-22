@@ -23,33 +23,36 @@ process GENERATE_VEP_CONFIG {
   val meta
     
   output:
-  val genome
+  val genome_uuid
   
   shell:
   force_create_config = params.force_create_config
-  genome = meta.genome
+  version = params.version
   species = meta.species
   assembly = meta.assembly
-  version = params.version
+  genome_uuid = meta.genome_uuid
   ini_file = params.ini_file
   vep_config = meta.vep_config
   cache_dir = meta.cache_dir
   fasta_dir = meta.fasta_dir
   conservation_data_dir = meta.conservation_data_dir
   repo_dir = params.repo_dir
+  population_data_file = params.population_data_file
   
   '''
   if [[ ! -e !{vep_config} || !{force_create_config} == 1 ]]; then
     generate_vep_config.py \
+      !{version} \
       !{species} \
       !{assembly} \
-      !{version} \
+      --genome_uuid !{genome_uuid} \
       --ini_file !{ini_file} \
       --vep_config !{vep_config} \
       --cache_dir !{cache_dir} \
       --fasta_dir !{fasta_dir} \
       --conservation_data_dir !{conservation_data_dir} \
-      --repo_dir !{repo_dir}
+      --repo_dir !{repo_dir} \
+      --population_data_file !{population_data_file}
   fi
   '''
 }

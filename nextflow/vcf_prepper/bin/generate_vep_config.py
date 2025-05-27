@@ -20,8 +20,17 @@ import argparse
 import subprocess
 import os
 import json
+import re
+import glob
 
-from helper import parse_ini, get_db_name, get_division, get_fasta_species_name, get_relative_version
+from helper import (
+        parse_ini,
+        get_db_name,
+        get_division,
+        get_fasta_species_name,
+        get_relative_version,
+        Placeholders
+    )
 
 CACHE_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/tabixconverted"
 FASTA_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/fasta"
@@ -61,73 +70,14 @@ PLUGINS = [
     "Downstream",
     "ClinPred"
 ]
-FREQUENCIES = {
-    "1000genomes": "af_1kg 1",
-    "gnomAD_exomes": {
-        "GRCh38": {
-            "version": "4.1",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/exomes",
-            "file_pattern": "gnomad.exomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz"
-        },
-        "GRCh37": {
-            "version": "4.1",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/exomes",
-            "file_pattern": "gnomad.exomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz"
-        },
-        "HPRCs": {
-            "version": "4.1",
-            "directory": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY##/ensembl/variation/2022_10/vcf/2024_07/",
-            "file_pattern": "gnomad.exomes.v4.1.sites.##ASSEMBLY##.trimmed_liftover.vcf.gz"            
-        } 
-    },
-    "gnomAD_genomes": {
-        "GRCh38": {
-            "version": "4.1",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/genomes",
-            "file_pattern": "gnomad.genomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz"
-        },
-        "GRCh37": {
-            "version": "4.1",
-            "directory": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/genomes",
-            "file_pattern": "gnomad.genomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz"
-        },
-        "HPRCs": {
-            "version": "4.1",
-            "directory": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY##/ensembl/variation/2022_10/vcf/2024_07/",
-            "file_pattern": "gnomad.genomes.v4.1.sites.##ASSEMBLY##.trimmed_liftover.vcf.gz"            
-        } 
-    }
-}
-GNOMAD_CUSTOM_FIELDS={
-    "gnomAD_exomes": "AF%AC%AN" + \
-            "%AF_afr%AC_afr%AN_afr" + \
-            "%AF_amr%AC_amr%AN_amr" + \
-            "%AF_asj%AC_asj%AN_asj" + \
-            "%AF_eas%AC_eas%AN_eas" + \
-            "%AF_fin%AC_fin%AN_fin" + \
-            "%AF_mid%AC_mid%AN_mid" + \
-            "%AF_nfe%AC_nfe%AN_nfe" + \
-            "%AF_remaining%AC_remaining%AN_remaining" + \
-            "%AF_sas%AC_sas%AN_sas",
-    "gnomAD_genomes": "AF%AC%AN" + \
-            "%AF_afr%AC_afr%AN_afr" + \
-            "%AF_amr%AC_amr%AN_amr" + \
-            "%AF_asj%AC_asj%AN_asj" + \
-            "%AF_eas%AC_eas%AN_eas" + \
-            "%AF_fin%AC_fin%AN_fin" + \
-            "%AF_mid%AC_mid%AN_mid" + \
-            "%AF_nfe%AC_nfe%AN_nfe" + \
-            "%AF_remaining%AC_remaining%AN_remaining" + \
-            "%AF_sas%AC_sas%AN_sas" + \
-            "%AF_ami%AC_ami%AN_ami" 
-}
 
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
     
-    parser.add_argument(dest="species", type=str, help="species production name")
-    parser.add_argument(dest="assembly", type=str, help="assembly default")
     parser.add_argument(dest="version", type=int, help="Ensembl release version")
+    parser.add_argument(dest="species", type=str, help="Species production name")
+    parser.add_argument(dest="assembly", type=str, help="Assembly default")
+    parser.add_argument('--genome_uuid', dest="genome_uuid", type=str, help="Genome UUID")
     parser.add_argument('--division', dest="division", type=str, required = False, help="Ensembl division the species belongs to")
     parser.add_argument('-I', '--ini_file', dest="ini_file", type=str, required = False, help="full path database configuration file, default - DEFAULT.ini in the same directory.")
     parser.add_argument('--vep_config', dest="vep_config", type=str, required = False, help="VEP configuration file, default - <species>_<assembly>.ini in the same directory.")
@@ -135,53 +85,47 @@ def parse_args(args = None):
     parser.add_argument('--fasta_dir', dest="fasta_dir", type=str, required = False, help="Directory containing toplevel FASTA ")
     parser.add_argument('--conservation_data_dir', dest="conservation_data_dir", type=str, required = False, help="Conservation plugin data dir")
     parser.add_argument('--repo_dir', dest="repo_dir", type=str, required = False, help="Ensembl repositories directory")
+    parser.add_argument('--population_data_file', dest="population_data_file", type=str, required = False, help="A JSON file containing population information for all species.")
     
     return parser.parse_args(args)
 
-def format_gnomad_args(source: str, metadata: dict) -> str:
-    chromosomes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', 'X', 'Y']
-    
-    gnomAD_custom_args = []
-    for chromosome in chromosomes:
-        file = os.path.join(metadata["directory"], metadata["file_pattern"].replace("##CHR##", chromosome))
-        if not os.path.isfile(file):
-            print(f"[ERROR] Frequency file does not exist - {file}. Exiting ...")
-            exit(1)
+def format_custom_args(file: str, short_name: str, format: str = "vcf", type: str = "exact", coords: int = 0, fields: list = []) -> str:
+    check_file_path = file.replace("##CHR##", "*")
+    if len(glob.glob(check_file_path)) == 0:
+        print(f"[ERROR] Custom annotation file does not exist - {file}. Exiting ...")
+        exit(1)
 
-        custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0,fields={GNOMAD_CUSTOM_FIELDS[source]}"
-        gnomAD_custom_args.append(custom_line)
+    fields = "%".join(fields)
 
-    return "\n".join(gnomAD_custom_args)
+    custom_line = f"custom file={file},short_name={short_name},format={format},type={type},coords={coords},fields={fields}"
+
+    return custom_line
     
-def get_frequency_args(species: str, assembly: str) -> str:
+def get_frequency_args(population_data_file: str, species: str, placeholders: dict) -> list:
+    with open(population_data_file, "r") as file:
+        population_data = json.load(file)
+
+    possible_placeholders = ["ASSEMBLY_ACC"]
     frequencies = []
-    for source in FREQUENCIES:
-        if source.startswith("gnomAD"):
-            if assembly in FREQUENCIES[source]:
-                frequencies.append(format_gnomad_args(source, FREQUENCIES[source][assembly]))
-            elif species.startswith("homo_sapiens_gca"):
-                # add gnomAD frequency for HPRC assembly (other than T2T)
-                metadata = FREQUENCIES[source]["HPRCs"]
-                assembly_acc =  species.split("_")[2].replace("gca", "GCA_").replace("v", ".")
-                file = os.path.join(metadata["directory"].replace("##ASSEMBLY##", assembly_acc), metadata["file_pattern"].replace("##ASSEMBLY##", assembly_acc))
+    for species_patt in population_data:
+        if re.fullmatch(species_patt, species):
+            for population in population_data[species_patt]:
+                for file in population["files"]:
+                    short_name = file["short_name"]
+                    file_location = file["file_location"]
+                    fields = [field for pop in file["include_fields"] for field in list(pop["fields"].values()) ]
 
-                if os.path.exists(file):
-                    custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0,fields={GNOMAD_CUSTOM_FIELDS[source]}"
-                    frequencies.append(custom_line)
-        else:
-            frequencies.append(FREQUENCIES[source])
+                    placeholders.source_text = file_location
+                    for placeholder in possible_placeholders:
+                        placeholders.add_placeholder(placeholder)
+                    placeholders.replace()
+                    file_location = placeholders.source_text
 
-    if species == "mus_musculus":
-        files = [
-            "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/mus_musculus/GRCm39/variation_genotype/mgp.v3.snps.sorted.rsIDdbSNPv137.GRCm39.vcf.gz",
-            "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/mus_musculus/GRCm39/variation_genotype/mgp.v3.indels.sorted.rsIDdbSNPv137.GRCm39.vcf.gz"
-        ]
-        source = "MGP"
-        fields = "AC%AN"
+                    frequencies.append(format_custom_args(short_name=short_name, file=file_location, fields=fields))
 
-        for file in files:
-            custom_line = f"custom file={file},short_name={source},format=vcf,type=exact,coords=0,fields={fields}"
-            frequencies.append(custom_line)
+    # Add 1kg population to be included from cache for human GRCh38 and GRCh37
+    if species == "homo_sapiens" or species == "homo_sapiens_37":
+        frequencies.append("af_1kg 1")
 
     return frequencies
     
@@ -413,12 +357,15 @@ def generate_vep_config(
 def main(args = None):
     args = parse_args(args)
     
+    version = args.version
     species = args.species
     assembly = args.assembly
-    version = args.version
+    genome_uuid = args.genome_uuid or None
     vep_config = args.vep_config or f"{species}_{assembly}.ini"
     ini_file = args.ini_file or "DEFAULT.ini"
     repo_dir = args.repo_dir or REPO_DIR
+
+    # get species division
     core_server = parse_ini(ini_file, "core")
     core_db = get_db_name(core_server, args.version, species, type = "core")
     division = args.division or get_division(core_server, core_db)
@@ -452,9 +399,19 @@ def main(args = None):
     if species in POLYPHEN_SPECIES:
         polyphen = True
     
-    frequencies = []
-    if species.startswith("homo_sapiens") or species == "mus_musculus":
-        frequencies = get_frequency_args(species, assembly)
+    population_data_file = args.population_data_file or os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "../assets/population_data.json"
+        )
+
+    placeholders = Placeholders(
+        data = {
+            "genome_uuid": genome_uuid,
+            "server": parse_ini(ini_file, "metadata"),
+            "metadata_db": "ensembl_genome_metadata"
+        }
+    )
+    frequencies = get_frequency_args(population_data_file, species, placeholders)
         
     plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
     

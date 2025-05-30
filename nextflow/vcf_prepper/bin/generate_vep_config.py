@@ -135,6 +135,7 @@ def parse_args(args = None):
     parser.add_argument('--fasta_dir', dest="fasta_dir", type=str, required = False, help="Directory containing toplevel FASTA ")
     parser.add_argument('--conservation_data_dir', dest="conservation_data_dir", type=str, required = False, help="Conservation plugin data dir")
     parser.add_argument('--repo_dir', dest="repo_dir", type=str, required = False, help="Ensembl repositories directory")
+    parser.add_argument('--structural_variant', dest="structural_variant", action="store_true", help="Run for structural variants")
     
     return parser.parse_args(args)
 
@@ -443,20 +444,22 @@ def main(args = None):
         exit(1)
 
     conservation_data_dir = args.conservation_data_dir or CONSERVATION_DATA_DIR
+    structural_variant = args.structural_variant
 
     sift = False
-    if species in SIFT_SPECIES:
+    if species in SIFT_SPECIES and not structural_variant:
         sift = True
         
     polyphen = False
-    if species in POLYPHEN_SPECIES:
+    if species in POLYPHEN_SPECIES and not structural_variant:
         polyphen = True
     
-    frequencies = []
-    if species.startswith("homo_sapiens") or species == "mus_musculus":
-        frequencies = get_frequency_args(species, assembly)
+    (frequencies, plugins) = ([], [])
+    if not structural_variant:
+        if species.startswith("homo_sapiens") or species == "mus_musculus":
+            frequencies = get_frequency_args(assembly)
         
-    plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
+        plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
     
     generate_vep_config(
         vep_config = vep_config,

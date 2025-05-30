@@ -86,6 +86,7 @@ def parse_args(args = None):
     parser.add_argument('--conservation_data_dir', dest="conservation_data_dir", type=str, required = False, help="Conservation plugin data dir")
     parser.add_argument('--repo_dir', dest="repo_dir", type=str, required = False, help="Ensembl repositories directory")
     parser.add_argument('--population_data_file', dest="population_data_file", type=str, required = False, help="A JSON file containing population information for all species.")
+    parser.add_argument('--structural_variant', dest="structural_variant", action="store_true", help="Run for structural variants")
     
     return parser.parse_args(args)
 
@@ -390,29 +391,30 @@ def main(args = None):
         exit(1)
 
     conservation_data_dir = args.conservation_data_dir or CONSERVATION_DATA_DIR
+    structural_variant = args.structural_variant
 
     sift = False
-    if species in SIFT_SPECIES:
+    if species in SIFT_SPECIES and not structural_variant:
         sift = True
         
     polyphen = False
-    if species in POLYPHEN_SPECIES:
+    if species in POLYPHEN_SPECIES and not structural_variant:
         polyphen = True
-    
-    population_data_file = args.population_data_file or os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            "../assets/population_data.json"
-        )
 
-    placeholders = Placeholders(
-        data = {
-            "genome_uuid": genome_uuid,
-            "server": parse_ini(ini_file, "metadata"),
-            "metadata_db": "ensembl_genome_metadata"
-        }
-    )
-    frequencies = get_frequency_args(population_data_file, species, placeholders)
-        
+    frequencies = []
+    population_data_file = args.population_data_file or ""
+    if os.path.isfile(population_data_file):
+        placeholders = Placeholders(
+            data = {
+                "genome_uuid": genome_uuid,
+                "server": parse_ini(ini_file, "metadata"),
+                "metadata_db": "ensembl_genome_metadata"
+            }
+        )
+        frequencies = get_frequency_args(population_data_file, species, placeholders)
+    else:
+        print(f"[WARNING] Invalid population config file - {population_data_file}")
+    
     plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
     
     generate_vep_config(

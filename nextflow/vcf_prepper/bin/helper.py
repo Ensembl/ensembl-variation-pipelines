@@ -142,7 +142,7 @@ def get_db_name(server: dict, version: str, species: str = "homo_sapiens", type:
 
     results = process.stdout.decode().strip().split("\n")
     if len(results) > 1:
-        print("[WARNING] Multiple core db match found - only returning the first match")
+        print(f"[WARNING] Multiple {type} database found - returning the first match only")
 
     return results[0]
 

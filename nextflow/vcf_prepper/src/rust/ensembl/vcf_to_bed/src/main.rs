@@ -330,37 +330,39 @@ fn main() -> Result<(), VCFError> {
                 // overwrite variant group to come from variant class instead of consequence
                 variant_group = *variant_groups.get(&variety).unwrap_or(&0);
                 
-                let svlens = record.info(b"SVLEN").map(|svlen| {
-                    svlen.iter().map(|svlen| {
-                        let s = String::from_utf8_lossy(svlen);
-                        let i: i64 = s.parse().unwrap_or(0); // SVLEN can be negative in old software
-                        u64::try_from(i.abs()).unwrap_or(0)
-                    }).collect::<Vec<u64>>()
-                }).unwrap_or(vec![]);
-
-                let max_svlen = svlens.iter().max();
-                match max_svlen {
-                    Some(0) | None => {
-                        let info_end: Result<u64, _> = String::from_utf8_lossy(&record.info(b"END")
-                                    .unwrap_or(&vec![vec![]])[0])
-                                    .parse();
-
-                        match info_end {
-                            Ok(number) => { end = number; }
-                            Err(_) => {
-                                println!("[WARNING] Neither SVLEN nor END can be parsed");
-                                continue
-                            }
-                        }
-                    }
-                    Some(number) => { end = start + number; }
-                }
-
-                // how to keep the svlen info for insertion types?
+                // for insertions and breakpoints the variant is on single point
                 if variety.ends_with(&String::from("insertion")) || 
                         variety.ends_with(&String::from("breakpoint")) {
                     start += 1;
                     end = start;
+                }
+                // for other types check INFO/SVLEN or INFO/END to get the end position
+                else {
+                    let svlens = record.info(b"SVLEN").map(|svlen| {
+                        svlen.iter().map(|svlen| {
+                            let s = String::from_utf8_lossy(svlen);
+                            let i: i64 = s.parse().unwrap_or(0); // SVLEN can be negative in old software
+                            u64::try_from(i.abs()).unwrap_or(0)
+                        }).collect::<Vec<u64>>()
+                    }).unwrap_or(vec![]);
+
+                    let max_svlen = svlens.iter().max();
+                    match max_svlen {
+                        Some(0) | None => {
+                            let info_end: Result<u64, _> = String::from_utf8_lossy(&record.info(b"END")
+                                        .unwrap_or(&vec![vec![]])[0])
+                                        .parse();
+
+                            match info_end {
+                                Ok(number) => { end = number; }
+                                Err(_) => {
+                                    println!("[WARNING] Neither SVLEN nor END can be parsed");
+                                    continue
+                                }
+                            }
+                        }
+                        Some(number) => { end = start + number; }
+                    }
                 }
             }
 

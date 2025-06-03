@@ -215,10 +215,13 @@ def main(args = None):
 
             # frequency
             if freq_csq_field:
-                af_csq_idx = csq_header_idx[freq_csq_field]
-                frequency = csq_values[af_csq_idx]
-                if frequency != "":
-                    items_per_allele[allele]["frequency"] = frequency
+                try:
+                    af_csq_idx = csq_header_idx[freq_csq_field]
+                    frequency = csq_values[af_csq_idx]
+                    if frequency != "":
+                        items_per_allele[allele]["frequency"] = frequency
+                except:
+                    pass    
 
         # create summary info for per allele fields
         for field in PER_ALLELE_FIELDS:

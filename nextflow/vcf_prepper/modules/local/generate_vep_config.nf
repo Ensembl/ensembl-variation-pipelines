@@ -37,6 +37,7 @@ process GENERATE_VEP_CONFIG {
   fasta_dir = meta.fasta_dir
   conservation_data_dir = meta.conservation_data_dir
   repo_dir = params.repo_dir
+  structural_variant = params.structural_variant ? "--structural_variant" : ""
   
   '''
   if [[ ! -e !{vep_config} || !{force_create_config} == 1 ]]; then
@@ -49,7 +50,8 @@ process GENERATE_VEP_CONFIG {
       --cache_dir !{cache_dir} \
       --fasta_dir !{fasta_dir} \
       --conservation_data_dir !{conservation_data_dir} \
-      --repo_dir !{repo_dir}
+      --repo_dir !{repo_dir} \
+      !{structural_variant}
   fi
   '''
 }

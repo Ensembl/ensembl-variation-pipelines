@@ -24,6 +24,8 @@ from helper import *
 
 META = """##fileformat=VCFv4.2
 ##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=SVLEN,Number=.,Type=String,Description="Difference in length between REF and ALT alleles">
 """
 HEADER="""#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO
 """
@@ -134,7 +136,8 @@ def main(args = None):
 
         input_vcf = VCF(input_file)
         for variant in input_vcf:
-
+            
+            info_fields = ""
             if query_source:
                 try:
                     source = variant_source[variant.ID].replace(" ", "_")
@@ -143,6 +146,13 @@ def main(args = None):
 
                 if source is None:
                     source = "."
+            info_fields += f"SOURCE={source}"
+
+            if variant.INFO.get("SVLEN"):
+                info_fields += f";SVLEN={variant.INFO['SVLEN']}"
+
+            if variant.INFO.get("END"):
+                info_fields += f";END={variant.INFO['END']}"
 
             o_file.write("\t".join([
                     synonyms[variant.CHROM] if variant.CHROM in synonyms else variant.CHROM,
@@ -152,7 +162,7 @@ def main(args = None):
                     ",".join(variant.ALT),
                     ".",
                     ".",
-                    f"SOURCE={source}"
+                    info_fields
                 ]) + "\n"
             )
         input_vcf.close()

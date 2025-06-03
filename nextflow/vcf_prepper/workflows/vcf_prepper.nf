@@ -44,16 +44,19 @@ def parse_config (config) {
   
   genomes = config.keySet()
   for (genome in genomes) {
-    for (source_data in params.config.get(genome)) {
-      vcf = source_data.file_location
+    source_data = params.config.get(genome)
+    multiple_source = source_data.size() > 1 ? true : false
+    for (source_datum in source_data) {
+      vcf = source_datum.file_location
       
       meta = [:]
       meta.genome = genome
-      meta.genome_uuid = source_data.genome_uuid
-      meta.species = source_data.species
-      meta.assembly = source_data.assembly
-      meta.source = source_data.source_name.replace(" ", "_")
-      meta.file_type = source_data.file_type
+      meta.genome_uuid = source_datum.genome_uuid
+      meta.species = source_datum.species
+      meta.assembly = source_datum.assembly
+      meta.source = source_datum.source_name.replace(" ", "_")
+      meta.file_type = source_datum.file_type
+      meta.multiple_source = multiple_source
 
       // replace whitespace and / character which causes issue in file name
       meta.source = meta.source.replace(" ", "%20")
@@ -177,8 +180,10 @@ workflow VCF_PREPPER {
     .map {
       meta, vcf, vcf_index ->
         // TODO: when we have multiple source per genome we need to delete source specific files
-        new_vcf = "${meta.genome_api_outdir}/variation.vcf.gz"
-        new_vcf_index = "${meta.genome_api_outdir}/variation.vcf.gz.${meta.index_type}"
+        new_vcf = meta.multiple_source ? 
+          "${meta.genome_api_outdir}/variation_${meta.source}.vcf.gz"
+          : "${meta.genome_api_outdir}/variation.vcf.gz"
+        new_vcf_index = "${new_vcf}.${meta.index_type}"
         
         // in -resume vcf and vcf_index may not exists as already renamed
         // moveTo instead of renameTo - in -resume dest file may exists from previous run

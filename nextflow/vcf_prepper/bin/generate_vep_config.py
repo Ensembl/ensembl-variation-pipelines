@@ -317,7 +317,8 @@ def generate_vep_config(
     plugins: dict = None,
     repo_dir: str = REPO_DIR,
     fork: int = 2,
-    force: bool = False) -> None:
+    force: bool = False,
+    structural_variant: bool = False) -> None:
     if os.path.exists(vep_config) and not force:
         print(f"[INFO] {vep_config} file already exists, skipping ...")
         return
@@ -353,6 +354,10 @@ def generate_vep_config(
             
             for plugin in plugins:
                 file.write(f"plugin {plugin}\n")
+
+        if structural_variant:
+            file.write(f"buffer_size 50\n")
+            file.write(f"max_sv_size 1000000000\n")
     
     
 def main(args = None):
@@ -428,7 +433,8 @@ def main(args = None):
         polyphen = polyphen,
         frequencies = frequencies,
         plugins = plugins,
-        repo_dir = repo_dir
+        repo_dir = repo_dir,
+        structural_variant = structural_variant
     )
     
 if __name__ == "__main__":

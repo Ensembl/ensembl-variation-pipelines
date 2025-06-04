@@ -29,10 +29,9 @@ process UPDATE_FIELDS {
   output_file = "UPDATED_S_" + file(vcf).getName()
   source = meta.source
   synonym_file = meta.synonym_file
-  species = meta.species
-  version = params.version
-  ini_file = params.ini_file
   rename_clinvar_ids = params.rename_clinvar_ids ? "--rename_clinvar_ids" : ""
+  sources = params.sources
+  sources_meta_file = params.sources_meta_file
 
   '''
   chrs=$(tabix !{vcf} -l | xargs | tr ' ' ',')
@@ -40,8 +39,7 @@ process UPDATE_FIELDS {
     !{rename_clinvar_ids} \
     -O !{output_file} \
     --chromosomes ${chrs} \
-    --species !{species} \
-    --version !{version} \
-    --ini_file !{ini_file}
+    --sources !{sources}
+    --sources_meta_file !{sources_meta_file}
   '''
 }

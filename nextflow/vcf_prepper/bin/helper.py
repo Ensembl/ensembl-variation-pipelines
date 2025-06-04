@@ -17,7 +17,8 @@
 import subprocess
 import configparser
 import os
-import pwd
+import json
+from deprecated import deprecated
 
 def parse_ini(ini_file: str, section: str = "database") -> dict:
     config = configparser.ConfigParser()
@@ -69,6 +70,7 @@ def get_division(server: dict, core_db: str) -> str:
     )
     return process.stdout.decode().strip()
 
+@deprecated(version='June 2025', reason="Variation database with old schema should not be used anymore")
 def dump_variant_source(server: dict, variation_db: str, dump_file: str) -> str:
     query = "SELECT DISTINCT vf.variation_name, s.name FROM variation_feature AS vf, source AS s WHERE vf.source_id = s.source_id;"
 
@@ -87,32 +89,15 @@ def dump_variant_source(server: dict, variation_db: str, dump_file: str) -> str:
 
     return process.returncode
 
-def get_sources_meta_info(server: dict, variation_db: str) -> dict:
-    query = "SELECT name, description, url, version FROM source;"
-    process = subprocess.run(["mysql",
-            "--host", server["host"],
-            "--port", server["port"],
-            "--user", server["user"],
-            "--database", variation_db,
-            "-N",
-            "--execute", query
-        ],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    if process.returncode != 0:
-        return []
+@deprecated(version='June 2025', reason="Variation database with old schema should not be used anymore")
+def get_sources_meta_info(sources_meta_file: str) -> dict:
+    if not os.path.isfile(sources_meta_file):
+        print("[WARNING] no such file - {sources_meta_file}, cannot get variant sources metadata.")
+        return {}
+    
+    with open(sources_meta_file, "r") as f:
+        sources_meta = json.load(f)
 
-    sources_meta_raw = process.stdout.decode().strip()
-    sources_meta = []
-    for source_meta_line in sources_meta_raw.split("\n"):
-        (name, description, url, version) = source_meta_line.split("\t")
-        sources_meta.append({
-            "name": name,
-            "description": description,
-            "url": url,
-            "version": version
-        })
     return sources_meta
 
 def get_fasta_species_name(species_production_name: str) -> str:

@@ -55,8 +55,15 @@ def parse_config (config) {
       meta.source = source_data.source_name.replace(" ", "_")
       meta.file_type = source_data.file_type
 
+      // replace whitespace and / character which causes issue in file name
       meta.source = meta.source.replace(" ", "%20")
       meta.source = meta.source.replace("/", "%2F")
+
+      // if source is MULTIPLE there are multiple sources; they must be listed  in sources field in the input config
+      if (meta.source == "MULTIPLE"){
+        meta.sources = meta.sources.join(",")
+        meta.sources = meta.sources.replace(" ", "%20") // we cannot use whitespace in cmd argument
+      }
       
       input_set.add([meta, vcf])
     }  

@@ -33,15 +33,14 @@ VARIATION_SOURCE_DUMP_FILENAME = "variation_source.txt"
 def parse_args(args = None, description: bool = None):
     parser = argparse.ArgumentParser(description = description)
     
-    parser.add_argument(dest="input_file", type=str, help="input VCF file")
-    parser.add_argument(dest="source", type=str, help="input VCF file source")
-    parser.add_argument(dest="synonym_file", type=str, help="text file with chrmosome synonyms")
+    parser.add_argument(dest="input_file", type=str, help="Input VCF file")
+    parser.add_argument(dest="source", type=str, help="Input VCF file source")
+    parser.add_argument(dest="synonym_file", type=str, help="Text file with chrmosome synonyms")
     parser.add_argument('--rename_clinvar_ids', dest="rename_clinvar_ids", action="store_true")
-    parser.add_argument('--chromosomes', dest="chromosomes", type=str, help="comma separated list of chromosomes to put in header")
+    parser.add_argument('--chromosomes', dest="chromosomes", type=str, help="Comma separated list of chromosomes to put in header")
     parser.add_argument('-O', '--output_file', dest="output_file", type=str)
-    parser.add_argument('--species', dest="species", type=str, help="species production name")
-    parser.add_argument('--version', dest="version", type=int, help="Ensembl release version")
-    parser.add_argument('-I', '--ini_file', dest="ini_file", type=str, required = False, help="full path database configuration file, default - DEFAULT.ini in the same directory.")
+    parser.add_argument('--sources', dest="sources", type=str, help="Comma separated list of sources if there are multiple sources")
+    parser.add_argument('--sources_meta_file', dest="sources_meta_file", type=str, required = False, help="JSON file with metadata about variant sources")
     
     return parser.parse_args(args)
 
@@ -78,10 +77,17 @@ def main(args = None):
     synonym_file = args.synonym_file
     chromosomes = args.chromosomes or None
     output_file = args.output_file or os.path.join(os.path.dirname(input_file), "UPDATED_S_" + os.path.basename(input_file))
-    # args required for querying database
-    species = args.species
-    version = args.version
-    ini_file = args.ini_file or "DEFAULT.ini"
+    sources = args.sources or []
+    sources_meta_file = args.sources_meta_file or os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "../assets/source_meta.json"
+        )
+
+    if source == "MULTIPLE" and not sources:
+        print("[ERROR] {source} source type requires source list to be provided. See --sources option.")
+        exit(1)
+
+    sources = [s.replace("%20", " ") for s in sources.split(",")]
 
     synonyms = {}
     with open(synonym_file) as file:
@@ -98,35 +104,28 @@ def main(args = None):
     
     meta = format_meta(META, chromosomes, synonyms)
 
-    # if source is of type QUERY we query database to get source information
-    query_source = False
-    if source == "QUERY":
-        query_source = True
+    # get metadata information for all sources and dump that to a dictionary
+    sources_meta = get_sources_meta_info(sources_meta_file)
+    for source_meta in sources_meta:
+        if source_meta["name"] != source and source_meta["name"] not in sources:
+            continue
 
-        variation_server = parse_ini(ini_file, "variation")
-        variation_db = get_db_name(variation_server, version, species, type = "variation")
+        meta_line = "##"
+        meta_line += f"source=\"{source_meta['name']}\""
 
-        dump_variant_source(variation_server, variation_db, VARIATION_SOURCE_DUMP_FILENAME)
-        variant_source = process_variant_source()
+        if "description" in source_meta:
+            meta_line += f" description=\"{source_meta['description']}\""
 
-        sources_meta = get_sources_meta_info(variation_server, variation_db)
-        for source_meta in sources_meta:
-            meta_line = "##"
+        if "url" in source_meta:
+            meta_line += f" url=\"{source_meta['url']}\""
 
-            if source_meta["name"] == "NULL":
-                continue
-            meta_line += f"source=\"{source_meta['name']}\""
+        if "version" in source_meta:
+            meta_line += f" version=\"{source_meta['version']}\""
 
-            if source_meta["description"] != "NULL":
-                meta_line += f" description=\"{source_meta['description']}\""
+        if "accession_url" in source_meta:
+            meta_line += f" accession_url=\"{source_meta['accession_url']}\""
 
-            if source_meta["url"] != "NULL":
-                meta_line += f" url=\"{source_meta['url']}\""
-
-            if source_meta["version"] != "NULL":
-                meta_line += f" version=\"{source_meta['version']}\""
-
-            meta += meta_line + "\n"
+        meta += meta_line + "\n"
 
     with bgzf.open(output_file, "wt") as o_file:
         o_file.write(meta)
@@ -135,14 +134,16 @@ def main(args = None):
         input_vcf = VCF(input_file)
         for variant in input_vcf:
 
-            if query_source:
+            variant_source = source
+            if source == "MULTIPLE":
                 try:
-                    source = variant_source[variant.ID].replace(" ", "_")
+                    # we expect the first field in the INFO to have the source information
+                    # e.g. - 1A      539     1A_539  ACGGGA  GCGGGA,GCGGAG   .       .       Watkins-exome-capture;TSA=substitution
+                    for (key, _) in variant.INFO:
+                        variant_source = key
+                        break
                 except:
-                    source = None
-
-                if source is None:
-                    source = "."
+                    variant_source = "."
 
             o_file.write("\t".join([
                     synonyms[variant.CHROM] if variant.CHROM in synonyms else variant.CHROM,
@@ -152,7 +153,7 @@ def main(args = None):
                     ",".join(variant.ALT),
                     ".",
                     ".",
-                    f"SOURCE={source}"
+                    f"SOURCE={variant_source}"
                 ]) + "\n"
             )
         input_vcf.close()

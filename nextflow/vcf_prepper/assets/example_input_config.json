@@ -1,0 +1,41 @@
+{
+  "homo_sapiens_grch38": [
+    {
+      "genome_uuid": "a7335667-93e7-11ec-a39d-005056b38ce3",
+      "species": "homo_sapiens",
+      "assembly": "GRCh38",
+      "source_name": "dbSNP",
+      "file_type": "local",
+      "file_location": "/nfs/production/flicek/ensembl/variation/data/dbSNP/latest/GCF_000001405.40.gz"
+    }
+  ],
+  "homo_sapiens_grch37": [
+    {
+      "genome_uuid": "3704ceb1-948d-11ec-a39d-005056b38ce3",
+      "species": "homo_sapiens_37",
+      "assembly": "GRCh37",
+      "source_name": "dbSNP",
+      "file_type": "local",
+      "file_location": "/nfs/production/flicek/ensembl/variation/data/dbSNP/latest/GCF_000001405.25.gz"
+    }
+  ],
+  "triticum_aestivum_IWGSC": [
+    {
+        "genome_uuid": "a73357ab-93e7-11ec-a39d-005056b38ce3",
+        "species": "triticum_aestivum",
+        "assembly": "IWGSC",
+        "source_name": "MULTIPLE",
+        "sources": [
+          "CerealsDB",
+          "EMS-induced mutation",
+          "Inter-homoeologous",
+          "Nottingham_WRC",
+          "Watkins-exome-capture",
+          "Exome_Capture_Diversity",
+          "Watkins_collection"
+        ],
+        "file_type": "remote",
+        "file_location": "https://ftp.ebi.ac.uk/ensemblgenomes/pub/release-57/plants/variation/vcf/triticum_aestivum/triticum_aestivum.vcf.gz"
+    }
+  ]
+}

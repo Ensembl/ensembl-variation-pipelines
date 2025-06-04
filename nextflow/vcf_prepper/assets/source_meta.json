@@ -1,0 +1,142 @@
+[
+  {
+    "name": "dbSNP",
+    "version": "157",
+    "description": "NCBI db of human variants",
+    "url": "https://www.ncbi.nlm.nih.gov/snp/",
+    "accession_url": "https://www.ncbi.nlm.nih.gov/snp/"
+  },
+  {
+    "name": "EVA",
+    "version": "7",
+    "description": "European Variation Archive",
+    "url": "https://www.ebi.ac.uk/eva",
+    "accession_url": "https://www.ebi.ac.uk/eva/?variant&accessionID="
+  },
+  {
+    "name": "The_1001_Genomes_Project",
+    "version": "2016",
+    "description": "The 1001 Genomes Project provides a catalog of genetic variation in the reference plant Arabidopsis thaliana. Launched at the beginning of 2008 to discover sequence variation in at least 1001 strains (accessions). Since 2010, several sets of genomes have been released. The first phase of the project was completed in 2016 with publication of a detailed analysis of 1,135 genomes.",
+    "url": "http://1001genomes.org/"
+  },
+  {
+    "name": "Nordborg",
+    "description": "Variation annotations from Nordborg"
+  },
+  {
+    "name": "IBSC",
+    "version": "0",
+    "description": "International Barley Sequencing Consortium, remapped to MorexV3_pseudomolecules_assembly",
+    "url": "http://europepmc.org/abstract/MED/23075845"
+  },
+  {
+    "name": "Ensembl_Plants",
+    "version": "0",
+    "description": "Previous release of Ensembl Plants"
+  },
+  {
+    "name": "iSelect",
+    "version": "0",
+    "description": "Illumina iSelect SNP chip IDs",
+    "url": "http://bioinf.hutton.ac.uk/iselect/app/"
+  },
+  {
+    "name": "JHI",
+    "version": "0",
+    "description": "James Hutton Institute, Dundee, United Kingdom",
+    "url": "https://ics.hutton.ac.uk/50k/"
+  },
+  {
+    "name": "Gramene_QTLdb",
+    "version": "1",
+    "description": "QTLs from the legacy Gramene QTL Database",
+    "url": "http://archive.gramene.org/db/qtl/"
+  },
+  {
+    "name": "gramene-marker",
+    "version": "1",
+    "description": "gramene markers",
+    "url": "http://archive.gramene.org/markers"
+  },
+  {
+    "name": "Qtaro_QTLdb",
+    "version": "1",
+    "description": "QTLs from the Qtaro Database and remapped to IRGSPv1 assembly by keygen",
+    "url": "http://qtaro.abr.affrc.go.jp/qtab/table"
+  },
+  {
+    "name": "The_150_TGRSP",
+    "version": "1",
+    "description": "The 150 Tomato Genome ReSequencing Project (150 TGRSP) is revealing the genetic variation available in tomato, one of the most important vegetable crops, for breeding in the face of climate change, sustainability, and demand for more and better food",
+    "url": "http://www.tomatogenome.net/"
+  },
+  {
+    "name": "Addo-Quayes_study",
+    "description": "Whole-Genome Sequence Accuracy Is Improved by Replication in a Population of EMS Mutagenized Sorghum"
+  },
+  {
+    "name": "Yinping-Jiao-2016-Study",
+    "description": "(Recalls projected against sorghum bicolor v3.1) EMS induced mutations in Sorghum as an Efficient Platform for Gene Discovery in Grasses"
+  },
+  {
+    "name": "Lozano_study",
+    "description": "Whole genome resequencing of 499 sorghum lines from three sources - Mace (42), TERRA-MEPP (254), and TERRA-REF (203) to study deleterious mutations in sorghum."
+  },
+  {
+    "name": "Sorghum_QTL_Atlas",
+    "version": "1",
+    "description": "QTLs from the the Sorghum QTL Atlas Database developed by Emma Mace group",
+    "url": "https://aussorgm.org.au/sorghum-qtl-atlas/"
+  },
+  {
+    "name": "Lozano_study",
+    "version": "1",
+    "description": "QTLs from the Qtaro Database and remapped to IRGSPv1 assembly by keygen",
+    "url": "http://qtaro.abr.affrc.go.jp/qtab/table"
+  },
+  {
+    "name": "CerealsDB",
+    "description": "Markers from Axiom 820K and 35K SNP Array  provided by <a href='http://www.cerealsdb.uk.net/cerealgenomics/CerealsDB/indexNEW.php'>CerealsDB<a/>n"
+  },
+  {
+    "name": "EMS-induced mutation",
+    "description": "<a href='http://plants.ensembl.org/Triticum_aestivum/Info/Annotation/#variation'>EMS-induced mutations</a> from sequenced wheat TILLING populations. Seeds can be ordered from <a href='https://www.seedstor.ac.uk/shopping-cart-tilling.php'>UK SeedStor</a> or <a href='http://dubcovskylab.ucdavis.edu/wheat-tilling'>US Dubcovsky lab</a>. Line identifier is variant name up to dot (e.g Kronos3128)."
+  },
+  {
+    "name": "Inter-homoeologous",
+    "description": "Inter-Homoeologous Variants (IHVs) called by alignments of the A,B and D component genomes"
+  },
+  {
+    "name": "Nottingham_WRC",
+    "description": "Markers from Axiom Wheat Relatives Array provided by <a href='https://www.cerealsdb.uk.net/cerealgenomics/CerealsDB/axiom_download.php'>CerealsDB</a> and from <a href='https://europepmc.org/article/MED/31465620'> Grewal et al., 2020</a>"
+  },
+  {
+    "name": "Watkins-exome-capture",
+    "description": "103 accessions of the Watkins landrace collection"
+  },
+  {
+    "name": "Exome_Capture_Diversity",
+    "description": "890 diverse wheat landraces and cultivars from <a href='http://wheatgenomics.plantpath.ksu.edu/1000EC/'>He et al</a>"
+  },
+  {
+    "name": "Watkins_collection",
+    "description": "Variants from the the Watkins Collection which is a diverse assortment of heritage wheat varieties from the 1930s, preserved for its unique genetic potential in modern breeding"
+  },
+  {
+    "name": "CNR-ITB",
+    "description": "Markers from Axiom 820K, 35K and iSelect 90K SNP Infinium are provided by <a href='http://www.cerealsdb.uk.net'>CerealsDB</a>. Markers from TaBW280K Affymetrix arrary refer to <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5749704/#!po=58.6957'>Rimbert, H. et al.</a>"
+  },
+  {
+    "name": "CSHL/Cornell",
+    "version": "1",
+    "description": "Cold Spring Harbor Laboratory / Cornell University [remapped to PN40024.v4]"
+  },
+  {
+    "name": "HapMap2",
+    "description": "Remapped to Zm-B73-REFERENCE-NAM-5.0"
+  },
+  {
+    "name": "Panzea_2.7GBS",
+    "description": "Remapped to Zm-B73-REFERENCE-NAM-5.0"
+  }
+]

@@ -65,15 +65,21 @@ def generate_synonym_file(server: dict, core_db: str, synonym_file: str, force: 
         if synonym not in names or len(names[synonym]) > len(name): 
             names[synonym] = name
     
-    # if name is longer than 31 character we try to take a synonym
     new_names = {}
     for synonym in names:
         name = names[synonym]
+
+        # add entries for chr prefixed chromsome name from UCSC cases
+        if name.isdigit() or name in ["X", "Y", "MT"]:
+            new_names[f"chr{name}"] = name
+
+        # if name is longer than 31 character we try to take a synonym instead of the name
         if len(name) > 31:
-            # if the current synonym is less than 31 character we do not need to have it in the file
+            # if the current synonym is less than 31 character we can take it 
+            # and it does not need to be in the file
             if len(synonym) <= 31:
                 pass
-            # if the current synonym is longer than 31 character we look for other synonym of the name
+            # if the current synonym is longer than 31 character we look for another synonym of the name
             else:
                 change_name = synonym
                 for alt_synonym in names:

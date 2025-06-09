@@ -135,6 +135,7 @@ def parse_args(args = None):
     parser.add_argument('--fasta_dir', dest="fasta_dir", type=str, required = False, help="Directory containing toplevel FASTA ")
     parser.add_argument('--conservation_data_dir', dest="conservation_data_dir", type=str, required = False, help="Conservation plugin data dir")
     parser.add_argument('--repo_dir', dest="repo_dir", type=str, required = False, help="Ensembl repositories directory")
+    parser.add_argument('--structural_variant', dest="structural_variant", action="store_true", help="Run for structural variants")
     
     return parser.parse_args(args)
 
@@ -372,7 +373,8 @@ def generate_vep_config(
     plugins: dict = None,
     repo_dir: str = REPO_DIR,
     fork: int = 2,
-    force: bool = False) -> None:
+    force: bool = False,
+    structural_variant: bool = False) -> None:
     if os.path.exists(vep_config) and not force:
         print(f"[INFO] {vep_config} file already exists, skipping ...")
         return
@@ -408,6 +410,10 @@ def generate_vep_config(
             
             for plugin in plugins:
                 file.write(f"plugin {plugin}\n")
+
+        if structural_variant:
+            file.write(f"buffer_size 50\n")
+            file.write(f"max_sv_size 1000000000\n")
     
     
 def main(args = None):
@@ -443,21 +449,23 @@ def main(args = None):
         exit(1)
 
     conservation_data_dir = args.conservation_data_dir or CONSERVATION_DATA_DIR
+    structural_variant = args.structural_variant
 
     sift = False
-    if species in SIFT_SPECIES:
+    if species in SIFT_SPECIES and not structural_variant:
         sift = True
         
     polyphen = False
-    if species in POLYPHEN_SPECIES:
+    if species in POLYPHEN_SPECIES and not structural_variant:
         polyphen = True
     
-    frequencies = []
-    if species.startswith("homo_sapiens") or species == "mus_musculus":
-        frequencies = get_frequency_args(species, assembly)
+    (frequencies, plugins) = ([], [])
+    if not structural_variant:
+        if species.startswith("homo_sapiens") or species == "mus_musculus":
+            frequencies = get_frequency_args(assembly)
         
-    plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
-    
+        plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
+
     generate_vep_config(
         vep_config = vep_config,
         species = species,
@@ -469,7 +477,8 @@ def main(args = None):
         polyphen = polyphen,
         frequencies = frequencies,
         plugins = plugins,
-        repo_dir = repo_dir
+        repo_dir = repo_dir,
+        structural_variant = structural_variant
     )
     
 if __name__ == "__main__":

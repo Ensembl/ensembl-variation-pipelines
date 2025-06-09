@@ -14,7 +14,7 @@
  * limitations under the License.
  */
  
-use std::{io::{BufReader,Write}, fs::File, env, collections::HashMap, collections::HashSet};
+use std::{io::{BufReader,Write}, fs::File, env, process::exit, collections::HashMap, collections::HashSet};
 use vcf::{VCFError, VCFReader};
 use flate2::read::MultiGzDecoder;
 
@@ -64,6 +64,41 @@ const VARIANTGROUP : [(&str, u8); 45] = [
     ("upstream_gene_variant", 5),
     ("downstream_gene_variant", 5),
     ("intergenic_variant", 5)
+];
+
+const SV_VARIANTGROUP : [(&str, u8); 32] = [
+    ("Alu_deletion", 11),
+    ("Alu_insertion", 13),
+    ("HERV_deletion", 11),
+    ("HERV_insertion", 13),
+    ("LINE1_deletion", 11),
+    ("LINE1_insertion", 13),
+    ("SVA_deletion", 11),
+    ("SVA_insertion", 13),
+    ("complex_chromosomal_rearrangement", 15),
+    ("complex_structural_alteration", 15),
+    ("complex_substitution", 15),
+    ("copy_number_gain", 13),
+    ("copy_number_loss", 11),
+    ("copy_number_variation", 12),
+    ("duplication", 13),
+    ("chromosome_breakpoint", 15),
+    ("interchromosomal_breakpoint", 15),
+    ("interchromosomal_translocation", 15),
+    ("intrachromosomal_breakpoint", 15),
+    ("intrachromosomal_translocation", 15),
+    ("inversion", 14),
+    ("loss_of_heterozygosity", 11),
+    ("mobile_element_deletion", 11),
+    ("mobile_element_insertion", 13),
+    ("novel_sequence_insertion", 13),
+    ("tandem_repeat", 12),
+    ("short_tandem_repeat_variation", 12),
+    ("tandem_duplication", 13),
+    ("translocation", 12),
+    ("deletion", 11),
+    ("indel", 15),
+    ("insertion", 13)
 ];
 
 struct Line {
@@ -142,6 +177,11 @@ fn main() -> Result<(), VCFError> {
     )?)))?;
     let mut out = File::create(&args[2]).unwrap();
     let json = std::fs::read_to_string(&args[3]).unwrap();
+
+    let mut is_sv = false;
+    if args.len() == 5 && String::from(&args[4]) == "1" {
+        is_sv = true;
+    }
         
     let severity = {
         serde_json::from_str::<HashMap<String, String>>(&json).unwrap()
@@ -149,8 +189,15 @@ fn main() -> Result<(), VCFError> {
     
     // create the severity hash
     let mut variant_groups = HashMap::new();
-    for (csq, value) in &VARIANTGROUP {
-        variant_groups.insert(csq.to_string(), *value);
+    if is_sv {
+        for (csq, value) in &SV_VARIANTGROUP {
+            variant_groups.insert(csq.to_string(), *value);
+        }
+    } 
+    else {
+        for (class, value) in &VARIANTGROUP {
+            variant_groups.insert(class.to_string(), *value);
+        }
     }
     
     let mut record = reader.empty_record();
@@ -186,6 +233,7 @@ fn main() -> Result<(), VCFError> {
             String::from_utf8(a.clone())
         }).collect::<Result<HashSet<_>,_>>().unwrap();
         
+        // TBD: replace hardcoded index value - .nth(1)
         let csq = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
@@ -195,6 +243,7 @@ fn main() -> Result<(), VCFError> {
         // if csq is empty we won't have most severe consequence
         if csq.is_empty(){ continue; }
         
+        // TBD: replace hardcoded index value - .nth(21)
         let class = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
@@ -202,6 +251,19 @@ fn main() -> Result<(), VCFError> {
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         
+        // check for SV
+        let mut symbolic_alts = false;
+        for alt in alts.iter() {
+            if ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
+                symbolic_alts = true;
+            }
+            if !is_sv && symbolic_alts {
+                println!("[ERROR] structural variant detected, but not running in structural variant mode. 
+                    If you are running this script for structural variant please re-run setting the 4th argument field to 1.");
+                exit(1)
+            }
+        }
+
         for id in ids.iter() {
             let mut variant_group = 0;
             let mut most_severe_csq = "";
@@ -225,7 +287,7 @@ fn main() -> Result<(), VCFError> {
             let mut variety = class[0].to_string();
             
             // if sequence_alteration we check if we can convert it to indel (the condition is that all the variant allele is eiter insertion or deletion or indel)
-            if variety.eq(&String::from("sequence_alteration")) {
+            if variety.eq(&String::from("sequence_alteration")) && !is_sv {
                 let mut convert_sequence_alteration = true;
                 for alt in alts.iter() {
                     // note that we are not minimilizing the variant alleles here 
@@ -268,6 +330,48 @@ fn main() -> Result<(), VCFError> {
                 end = start;
             }
             
+            if is_sv {
+                // overwrite variant group to come from variant class instead of consequence
+                variant_group = *variant_groups.get(&variety).unwrap_or(&0);
+                
+                // for insertions and breakpoints the variant is on single point
+                if variety.ends_with(&String::from("insertion")) || 
+                        variety.ends_with(&String::from("breakpoint")) {
+                    start += 1;
+                    end = start;
+                }
+                // for other types check INFO/SVLEN or INFO/END to get the end position
+                else {
+                    let svlens = record.info(b"SVLEN").map(|svlen| {
+                        svlen.iter().map(|svlen| {
+                            let s = String::from_utf8_lossy(svlen);
+                            let i: i64 = s.parse().unwrap_or(0); // SVLEN can be negative in old software
+                            u64::try_from(i.abs()).unwrap_or(0)
+                        }).collect::<Vec<u64>>()
+                    }).unwrap_or(vec![]);
+
+                    let max_svlen = svlens.iter().max();
+                    match max_svlen {
+                        Some(0) | None => {
+                            let info_end: Result<u64, _> = String::from_utf8_lossy(&record.info(b"END")
+                                        .unwrap_or(&vec![vec![]])[0])
+                                        .parse();
+
+                            match info_end {
+                                Ok(number) => { end = number; }
+                                Err(_) => {
+                                    if symbolic_alts {
+                                        println!("[WARNING] Neither SVLEN nor END can be parsed but symbolic alts used");
+                                        continue
+                                    }
+                                }
+                            }
+                        }
+                        Some(number) => { end = start + number; }
+                    }
+                }
+            }
+
             let more = Line {
                 chromosome: String::from_utf8(record.chromosome.to_vec()).unwrap(),
                 start: start,

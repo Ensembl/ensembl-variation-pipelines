@@ -252,8 +252,12 @@ fn main() -> Result<(), VCFError> {
         }).unwrap_or(vec![]);
         
         // check for SV
+        let mut symbolic_alts = false;
         for alt in alts.iter() {
-            if !is_sv && ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
+            if ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
+                symbolic_alts = true;
+            }
+            if !is_sv && symbolic_alts {
                 println!("[ERROR] structural variant detected, but not running in structural variant mode. 
                     If you are running this script for structural variant please re-run setting the 4th argument field to 1.");
                 exit(1)
@@ -356,8 +360,10 @@ fn main() -> Result<(), VCFError> {
                             match info_end {
                                 Ok(number) => { end = number; }
                                 Err(_) => {
-                                    println!("[WARNING] Neither SVLEN nor END can be parsed");
-                                    continue
+                                    if symbolic_alts {
+                                        println!("[WARNING] Neither SVLEN nor END can be parsed but symbolic alts used");
+                                        continue
+                                    }
                                 }
                             }
                         }

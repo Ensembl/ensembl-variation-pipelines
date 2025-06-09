@@ -254,7 +254,10 @@ fn main() -> Result<(), VCFError> {
         // check for SV
         let mut symbolic_alts = false;
         for alt in alts.iter() {
-            if ! alt.chars().all(|c| (c == 'A' || c == 'T' || c == 'C' || c == 'G' || c == 'N')) {
+            if alt.chars().any(|c| (
+                    c != 'A' && c != 'T' && c != 'C' && c != 'G' && c != 'N'
+                    && c != 'a' && c != 't' && c != 'c' && c != 'g' && c != 'n'
+                )) {
                 symbolic_alts = true;
             }
             if !is_sv && symbolic_alts {

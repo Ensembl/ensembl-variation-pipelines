@@ -1,0 +1,403 @@
+{
+   "homo_sapiens": [
+      {
+         "name": "gnomAD_exomes",
+         "version": "4.1",
+         "files": [
+            {
+               "version": "4.1",
+               "short_name": "gnomAD_exomes",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/exomes/gnomad.exomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz",
+               "include_fields": [
+                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
+                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
+                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
+                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
+                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
+                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
+                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
+                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
+                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
+                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+               ]
+            }
+         ]
+      },
+      {
+         "name": "gnomAD_genomes",
+         "version": "4.1",
+         "representative": true,
+         "files": [
+            {
+               "version": "4.1",
+               "short_name": "gnomAD_genomes",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/genomes/gnomad.genomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz",
+               "include_fields": [
+                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
+                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
+                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
+                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
+                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
+                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
+                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
+                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
+                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
+                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
+                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "homo_sapiens_37": [
+      {
+         "name": "gnomAD_exomes",
+         "version": "4.1",
+         "files": [
+            {
+               "version": "4.1",
+               "short_name": "gnomAD_exomes",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/exomes/gnomad.exomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz",
+               "include_fields": [
+                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
+                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
+                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
+                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
+                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
+                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
+                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
+                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
+                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
+                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+               ]
+            }
+         ]
+      },
+      {
+         "name": "gnomAD_genomes",
+         "version": "4.1",
+         "representative": true,
+         "files": [
+            {
+               "version": "4.1",
+               "short_name": "gnomAD_genomes",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/genomes/gnomad.genomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz",
+               "include_fields": [
+                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
+                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
+                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
+                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
+                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
+                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
+                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
+                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
+                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
+                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
+                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "homo_sapiens_gca\\d{9}v\\d{1}": [
+      {
+         "name": "gnomAD_exomes",
+         "version": "4.1",
+         "files": [
+            {
+               "version": "4.1",
+               "short_name": "gnomAD_exomes",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY_ACC##/ensembl/variation/2022_10/vcf/2024_07/gnomad.exomes.v4.1.sites.##ASSEMBLY_ACC##.trimmed_liftover.vcf.gz",
+               "include_fields": [
+                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
+                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
+                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
+                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
+                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
+                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
+                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
+                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
+                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
+                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+               ]
+            }
+         ]
+      },
+      {
+         "name": "gnomAD_genomes",
+         "version": "4.1",
+         "representative": true,
+         "files": [
+            {
+               "version": "4.1",
+               "short_name": "gnomAD_genomes",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY_ACC##/ensembl/variation/2022_10/vcf/2024_07/gnomad.genomes.v4.1.sites.##ASSEMBLY_ACC##.trimmed_liftover.vcf.gz",
+               "include_fields": [
+                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
+                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
+                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
+                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
+                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
+                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
+                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
+                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
+                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
+                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
+                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "mus_musculus": [
+      {
+         "name": "MGP",
+         "representative": true,
+         "files": [
+            {
+               "type": "snp",
+               "short_name": "MGP_snp",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/mus_musculus/GRCm39/variation_genotype/mgp.v3.snps.sorted.rsIDdbSNPv137.GRCm39.vcf.gz",
+               "include_fields": [
+                  {"name": "MGP", "fields": {"an": "AN", "ac": "AC"}}
+               ]
+            },
+            {
+               "type": "indels",
+               "assembly": "GRCm39",
+               "short_name": "MGP_indels",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/mus_musculus/GRCm39/variation_genotype/mgp.v3.indels.sorted.rsIDdbSNPv137.GRCm39.vcf.gz",
+               "include_fields": [
+                  {"name": "MGP", "fields": {"an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "bos_taurus": [
+      {
+         "name": "NextGen",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "NextGen",
+               "representative_af_field": "AF_IRBT",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/bos_taurus/ARS-UCD1.3/variation_genotype/IRBT_ARS-UCD1_3.vcf.gz",
+               "include_fields": [
+                  {"name": "NextGen", "fields": {"af": "AF_IRBT", "an": "AN_IRBT", "ac": "AC_IRBT"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "gallus_gallus": [
+      {
+         "name": "PRJEB44919",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "PRJEB44919",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/gallus_gallus/bGalGal1.mat.broiler.GRCg7b/variation_genotype/cohort188.ALL.1-28.fixed_remap7b.vcf.gz",
+               "include_fields": [
+                  {"name": "PRJEB44919", "fields": {"af": "AF"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "canis_lupus_familiaris": [
+      {
+         "name": "PRJEB24066",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "PRJEB24066",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/canis_lupus_familiaris/ROS_Cfam_1.0/variation_genotype/ROS_Cfam_1.0_remap_PRJEB24066.vcf.gz",
+               "include_fields": [
+                  {"name": "PRJEB24066", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "canis_lupus_familiarisboxer": [
+      {
+         "name": "PRJEB24066",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "PRJEB24066",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/canis_lupus_familiarisboxer/Dog10K_Boxer_Tasha/variation_genotype/Dog10K_Boxer_Tasha_remap_PRJEB24066.vcf.gz",
+               "include_fields": [
+                  {"name": "PRJEB24066", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "ovis_aries": [
+      {
+         "name": "NextGen:IROA",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "NextGen:IROA",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/IROA.population_sites.OARv3_1.20140307.vcf.gz",
+               "include_fields": [
+                  {"name": "NextGen:IROA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      },
+      {
+         "name": "NextGen:MOOA",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "NextGen:MOOA",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/MOOA.population_sites.OARv3_1.20140328.vcf.gz",
+               "include_fields": [
+                  {"name": "NextGen:MOOA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      },
+      {
+         "name": "ISGC",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "ISGC",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/###CHR###.filtered_intersect.vcf.gz",
+               "include_fields": [
+                  {"name": "ISGC", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "ovis_aries_rambouillet": [
+      {
+         "name": "NextGen:IROA",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "NextGen:IROA",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/IROA.population_sites.ARS_UI_Ramb_v2_0.20140307.vcf.g",
+               "include_fields": [
+                  {"name": "NextGen:IROA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      },
+      {
+         "name": "NextGen:MOOA",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "NextGen:MOOA",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/MOOA.population_sites.ARS-UI_Ramb_v2_0.20140328.vcf.gz",
+               "include_fields": [
+                  {"name": "NextGen:MOOA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      },
+      {
+         "name": "ISGC",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "ISGC",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/###CHR###.filtered_ARS-UI_Ramb_v2.0_intersect.vcf.gz",
+               "include_fields": [
+                  {"name": "ISGC", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "capra_hircus": [
+      {
+         "name": "NextGen",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "NextGen",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/Nextgen/capra_hircus/ARS1/NextGenCapraHircusRemappedARS1_comb.vcf.gz",
+               "include_fields": [
+                  {"name": "NextGen:All", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
+                  {"name": "NextGen:MOCH", "fields": {"af": "AF_MOCH", "ac": "AC_MOCH", "an": "AN_MOCH"}},
+                  {"name": "NextGen:FRCH", "fields": {"af": "AF_FRCH", "ac": "AC_FRCH", "an": "AN_FRCH"}},
+                  {"name": "NextGen:AUCH", "fields": {"af": "AF_AUCH", "ac": "AC_AUCH", "an": "AN_AUCH"}},
+                  {"name": "NextGen:ITCH", "fields": {"af": "AF_ITCH", "ac": "AC_ITCH", "an": "AN_ITCH"}},
+                  {"name": "NextGen:IRCH", "fields": {"af": "AF_IRCH", "ac": "AC_IRCH", "an": "AN_IRCH"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "equus_caballus": [
+      {
+         "name": "PRJEB9799",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "PRJEB9799",
+               "representative_af_field": "AF_PRJEB9799",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/equus_caballus/EquCab3.0/variation_genotype/PRJEB9799_EquCab3_0.vcf.gz",
+               "include_fields": [
+                  {"name": "PRJEB9799", "fields": {"af": "AF_PRJEB9799", "ac": "AC_PRJEB9799", "an": "AN_PRJEB9799"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "oreochromis_niloticus": [
+      {
+         "name": "PRJEB38548",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "PRJEB38548",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB38548/oreochromis_niloticus/O_niloticus_UMD_NMBU/tilapia_snp_array.vcf.gz",
+               "include_fields": [
+                  {"name": "PRJEB38548", "fields": {"af": "AF"}}
+               ]
+            }
+         ]
+      }
+   ],
+   "neovison_vison": [
+      {
+         "name": "PRJEB26368",
+         "representative": true,
+         "files": [
+            {
+               "short_name": "PRJEB26368",
+               "representative_af_field": "AF",
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB26368/neovison_vison/NNQGG.v01/GBS_mink_eva.vcf.gz",
+               "include_fields": [
+                  {"name": "PRJEB26368", "fields": {"af": "AF", "ac": "AC", "an": "AN"}}
+               ]
+            }
+         ]
+      }
+   ]
+}

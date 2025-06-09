@@ -20,6 +20,95 @@ import os
 import json
 from deprecated import deprecated
 
+class Placeholders():
+    def __init__(self, source_text: str = "", placeholders: dict = {}, data: dict = {}):
+        self._source_text = source_text
+        self._placeholders = placeholders
+        self._data = data
+
+    @property
+    def source_text(self) -> str:
+        return self._source_text
+
+    @source_text.setter
+    def source_text(self, text: str):
+        self._source_text = text
+
+    @property
+    def data(self) -> dict:
+        return self._data
+
+    @data.setter
+    def data(self, data: dict):
+        self._data = data
+
+    @property
+    def placeholders(self) -> dict:
+        return self._placeholders
+
+    @placeholders.setter
+    def data(self, placeholders: dict):
+        self._placeholders = placeholders
+
+    def get_data(self, name: str) -> str:
+        value = None
+        if name in self._data:
+            value = self._data[name]
+
+        return value
+
+    def add_data(self, name: str, value: str):
+        self._data[name] = value
+
+    def get_placeholder(self, name: str) -> str:
+        value = None
+        if name in self._placeholders:
+            value = self._placeholders[name]
+
+        return value
+
+    def add_placeholder(self, name: str, value: str = None):
+        if value is None:
+            value = self.get_placeholder_value(name)
+        self._placeholders[name] = value
+
+    def get_placeholder_value(self, name: str, data: str = None) -> str:
+        func = getattr(self, f"get_{name.lower()}")
+
+        if data is None:
+            data = self._data
+
+        return func(data)
+
+    def replace(self, placeholders: dict = None):
+        if placeholders is None:
+            placeholders = self._placeholders
+
+        for placeholder in placeholders:
+            if placeholders[placeholder] is None:
+                self.add_placeholder(placeholder)
+            self._source_text = self._source_text.replace(f"##{placeholder}##", placeholders[placeholder])
+
+    def get_assembly_acc(self, data: dict) -> str:
+        placeholder = "ASSEMBLY_ACC"
+        required_data = ["server", "metadata_db", "genome_uuid"]
+        for rdata in required_data:
+            if rdata not in data:
+                print(f"[WARNING] Retrieving placeholder value for { placeholder } failed, missing data - { rdata }")
+                return placeholder
+
+        return get_assembly_accession_from_genome_uuid(server=data["server"], metadata_db=data["metadata_db"], genome_uuid=data["genome_uuid"])
+
+    def get_chr(self, data: dict) -> str:
+        placeholder = "CHR"
+        required_data = ["chromosomes"]
+        for rdata in required_data:
+            if rdata not in data:
+                print(f"[WARNING] Retrieving placeholder value for { placeholder } failed, missing data - { rdata }")
+                return placeholder
+
+        return data["chromosomes"]
+
 def parse_ini(ini_file: str, section: str = "database") -> dict:
     config = configparser.ConfigParser()
     config.read(ini_file)
@@ -44,6 +133,21 @@ def get_db_name(server: dict, version: str, species: str = "homo_sapiens", type:
             "--host", server["host"],
             "--port", server["port"],
             "--user", server["user"],
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    return process.stdout.decode().strip()
+
+def get_assembly_accession_from_genome_uuid(server: dict, metadata_db: str, genome_uuid: str) -> str:
+    query = f"SELECT a.accession FROM assembly AS a, genome AS g WHERE g.assembly_id = a.assembly_id AND g.genome_uuid = '{genome_uuid}';"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "--database", metadata_db,
             "-N",
             "--execute", query
         ],
@@ -102,8 +206,12 @@ def get_sources_meta_info(sources_meta_file: str) -> dict:
 def get_fasta_species_name(species_production_name: str) -> str:
     return species_production_name[0].upper() + species_production_name[1:]
     
-def get_relative_version(version: int, division: str = "EnsemblVertebrates") -> int:
-    return (version - 53) if division != "EnsemblVertebrates" else version
+def get_relative_version(version: int, division: str = "EnsemblVertebrates", site: str = "new") -> int:
+    # obsolete for new site
+    if site == "old":
+        return (version - 53) if division != "EnsemblVertebrates" else version
+
+    return version
     
 def download_file(local_filename: str, url: str) -> int:
     process = subprocess.run(["wget", url, "-O", local_filename],

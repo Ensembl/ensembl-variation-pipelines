@@ -19,6 +19,8 @@ import os
 from cyvcf2 import VCF, Writer
 from Bio import bgzf
 import argparse
+import json
+import re
 
 HEADERS = [
     {'ID': 'RAF', 'Description': 'Allele frequencies from representative population', 'Type':'Float', 'Number': 'A'},
@@ -43,11 +45,6 @@ PER_VARIANT_FIELDS = {
 }
 
 FREQUENCY_FIELD = "RAF"
-# [csq_field, display_name]
-FREQUENCY_META = {
-    "homo_sapiens": ["gnomAD_genomes_AF", "gnomAD genomes v3.1.2"],
-    "homo_sapiens_37": ["gnomAD_exomes_AF", "gnomAD exomes v2.1.1"]
-}
 
 SKIP_CONSEQUENCE = [
     "downstream_gene_variant",
@@ -65,6 +62,7 @@ def parse_args(args = None, description: bool = None):
     parser.add_argument(dest="assembly", type=str, help="assembly default")
     parser.add_argument(dest="input_file", type=str, help="input VCF file")
     parser.add_argument('-O', '--output_file', dest="output_file", type=str)
+    parser.add_argument('--population_data_file', dest="population_data_file", type=str, help="A JSON file containing population information for all species.")
     
     return parser.parse_args(args)
 
@@ -100,18 +98,31 @@ def main(args = None):
     assembly = args.assembly
     input_file = os.path.realpath(args.input_file)
     output_file = args.output_file or os.path.join(os.path.dirname(input_file), "UPDATED_SS_" + os.path.basename(input_file))
+    population_data_file = args.population_data_file or os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "../assets/population_data.json"
+        )
+    
+    # get representative population and respective INFO fields
+    with open(population_data_file, "r") as file:
+        population_data = json.load(file)
+    (population_name, freq_csq_fields, freq_info_display) = ("", [], "")
+    for species_patt in population_data:
+        if re.fullmatch(species_patt, species):
+            for population in population_data[species_patt]:
+                if population.get("representative"):
+                    population_name = population["name"]
+                    freq_info_display = population["name"].replace("_", " ") + population.get("version", "")
 
-    # frequency meta
-    (freq_csq_field, freq_info_display) = (None, "")
-    if species in FREQUENCY_META and len(FREQUENCY_META[species]) == 2:
-        (freq_csq_field, freq_info_display) = FREQUENCY_META[species]
-
-    input_vcf = VCF(input_file)
+                    for file in population["files"]:
+                        freq_csq_fields.append(file["short_name"] + "_" + file["representative_af_field"])
 
     # add to header and write header to output vcf
     if freq_info_display != "":
         HEADERS[0]['Description'] = HEADERS[0]['Description'] + f" ({freq_info_display})"
     
+    input_vcf = VCF(input_file)
+
     use_input_vcf_for_h = True
     for header in HEADERS:
         h_id = header['ID']
@@ -214,11 +225,36 @@ def main(args = None):
                         items_per_variant["citation"].add(citation)
 
             # frequency
-            if freq_csq_field:
-                af_csq_idx = csq_header_idx[freq_csq_field]
-                frequency = csq_values[af_csq_idx]
-                if frequency != "":
-                    items_per_allele[allele]["frequency"] = frequency
+            if freq_csq_fields:
+                af_csq_idc = [csq_header_idx[freq_csq_field] for freq_csq_field in freq_csq_fields if freq_csq_field in csq_header_idx]
+
+                if af_csq_idc:
+                    frequencies = [csq_values[af_csq_idx] for af_csq_idx in af_csq_idc if csq_values[af_csq_idx]]
+                else:
+                    # try finding AC and AN INFO fields and calculate representative AF
+                    ac_csq_idc = [csq_header_idx.get(freq_csq_field.replace("AF", "AC")) for freq_csq_field in freq_csq_fields]
+                    an_csq_idc = [csq_header_idx.get(freq_csq_field.replace("AF", "AN")) for freq_csq_field in freq_csq_fields]
+
+                    if len(ac_csq_idc) !=  len(ac_csq_idc):
+                        print("[ERROR] Attempt to calculate frequency from AC and AN failed.")
+                        print(f"{ac_csq_idc} number of AC field compared to {an_csq_idc} number of AN fields in CSQ. Exiting...")
+                        exit(1)
+
+                    frequencies = []
+                    for idx, _ in enumerate(ac_csq_idc):
+                        ac_csq_idx = ac_csq_idc[idx]
+                        an_csq_idx = an_csq_idc[idx]
+                        
+                        if csq_values[ac_csq_idx] and csq_values[an_csq_idx]:
+                            frequency = str(int(csq_values[ac_csq_idx]) / int(csq_values[an_csq_idx]))
+                            frequencies.append(frequency)
+
+                if len(frequencies) > 1:
+                    print(f"[ERROR] More than 1 representative allele frequencies for {species} population - {population_name}. Exiting ...")
+                    exit(1)
+
+                if len(frequencies) == 1:
+                    items_per_allele[allele]["frequency"] = frequencies[0]
 
         # create summary info for per allele fields
         for field in PER_ALLELE_FIELDS:

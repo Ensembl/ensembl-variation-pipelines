@@ -21,13 +21,48 @@ from Bio import bgzf
 import argparse
 
 HEADERS = [
-    {'ID': 'RAF', 'Description': 'Allele frequencies from representative population', 'Type':'Float', 'Number': 'A'},
-    {'ID': 'NTCSQ', 'Description': 'Number of transcript consequences', 'Type':'Integer', 'Number': 'A'},
-    {'ID': 'NRCSQ', 'Description': 'Number of regulatory consequences', 'Type':'Integer', 'Number': 'A'},
-    {'ID': 'NGENE', 'Description': 'Number of overlapped gene', 'Type':'Integer', 'Number': 'A'},
-    {'ID': 'NVPHN', 'Description': 'Number of associated variant-linked phenotypes', 'Type':'Integer', 'Number': 'A'},
-    {'ID': 'NGPHN', 'Description': 'Number of associated gene-linked phenotypes', 'Type':'Integer', 'Number': 'A'},
-    {'ID': 'NCITE', 'Description': 'Number of citations', 'Type':'Integer', 'Number': '1'}
+    {
+        "ID": "RAF",
+        "Description": "Allele frequencies from representative population",
+        "Type": "Float",
+        "Number": "A",
+    },
+    {
+        "ID": "NTCSQ",
+        "Description": "Number of transcript consequences",
+        "Type": "Integer",
+        "Number": "A",
+    },
+    {
+        "ID": "NRCSQ",
+        "Description": "Number of regulatory consequences",
+        "Type": "Integer",
+        "Number": "A",
+    },
+    {
+        "ID": "NGENE",
+        "Description": "Number of overlapped gene",
+        "Type": "Integer",
+        "Number": "A",
+    },
+    {
+        "ID": "NVPHN",
+        "Description": "Number of associated variant-linked phenotypes",
+        "Type": "Integer",
+        "Number": "A",
+    },
+    {
+        "ID": "NGPHN",
+        "Description": "Number of associated gene-linked phenotypes",
+        "Type": "Integer",
+        "Number": "A",
+    },
+    {
+        "ID": "NCITE",
+        "Description": "Number of citations",
+        "Type": "Integer",
+        "Number": "1",
+    },
 ]
 
 PER_ALLELE_FIELDS = {
@@ -35,18 +70,16 @@ PER_ALLELE_FIELDS = {
     "gene_phenotype": "NGPHN",
     "transcipt_consequence": "NTCSQ",
     "regulatory_consequence": "NRCSQ",
-    "gene": "NGENE"
+    "gene": "NGENE",
 }
 
-PER_VARIANT_FIELDS = {
-    "citation": "NCITE"
-}
+PER_VARIANT_FIELDS = {"citation": "NCITE"}
 
 FREQUENCY_FIELD = "RAF"
 # [csq_field, display_name]
 FREQUENCY_META = {
     "homo_sapiens": ["gnomAD_genomes_AF", "gnomAD genomes v3.1.2"],
-    "homo_sapiens_37": ["gnomAD_exomes_AF", "gnomAD exomes v2.1.1"]
+    "homo_sapiens_37": ["gnomAD_exomes_AF", "gnomAD exomes v2.1.1"],
 }
 
 SKIP_CONSEQUENCE = [
@@ -55,26 +88,31 @@ SKIP_CONSEQUENCE = [
     "intergenic_variant",
     "TF_binding_site_variant",
     "TFBS_ablation",
-    "TFBS_amplification"
+    "TFBS_amplification",
 ]
 
-def parse_args(args = None, description: bool = None):
-    parser = argparse.ArgumentParser(description = description)
-    
+
+def parse_args(args=None, description: bool = None):
+    parser = argparse.ArgumentParser(description=description)
+
     parser.add_argument(dest="species", type=str, help="species production name")
     parser.add_argument(dest="assembly", type=str, help="assembly default")
     parser.add_argument(dest="input_file", type=str, help="input VCF file")
-    parser.add_argument('-O', '--output_file', dest="output_file", type=str)
-    
+    parser.add_argument("-O", "--output_file", dest="output_file", type=str)
+
     return parser.parse_args(args)
+
 
 def header_match(want_header: dict, got_header: dict) -> bool:
     got_header.pop("IDX")
 
-    return want_header['ID'] == got_header['ID'] and \
-        want_header['Type'] == got_header['Type'] and \
-        want_header['Number'] == got_header['Number'] and \
-        f'"{ want_header["Description"] }"' == got_header['Description']
+    return (
+        want_header["ID"] == got_header["ID"]
+        and want_header["Type"] == got_header["Type"]
+        and want_header["Number"] == got_header["Number"]
+        and f'"{want_header["Description"]}"' == got_header["Description"]
+    )
+
 
 def minimise_allele(ref: str, alts: list) -> str:
     alleles = [ref] + alts
@@ -93,13 +131,16 @@ def minimise_allele(ref: str, alts: list) -> str:
 
     return (ref, alts)
 
-def main(args = None):
+
+def main(args=None):
     args = parse_args(args)
 
     species = args.species
     assembly = args.assembly
     input_file = os.path.realpath(args.input_file)
-    output_file = args.output_file or os.path.join(os.path.dirname(input_file), "UPDATED_SS_" + os.path.basename(input_file))
+    output_file = args.output_file or os.path.join(
+        os.path.dirname(input_file), "UPDATED_SS_" + os.path.basename(input_file)
+    )
 
     # frequency meta
     (freq_csq_field, freq_info_display) = (None, "")
@@ -110,12 +151,16 @@ def main(args = None):
 
     # add to header and write header to output vcf
     if freq_info_display != "":
-        HEADERS[0]['Description'] = HEADERS[0]['Description'] + f" ({freq_info_display})"
-    
+        HEADERS[0]["Description"] = (
+            HEADERS[0]["Description"] + f" ({freq_info_display})"
+        )
+
     use_input_vcf_for_h = True
     for header in HEADERS:
-        h_id = header['ID']
-        if input_vcf.contains(h_id) and not header_match(header, input_vcf.get_header_type(key=h_id)):
+        h_id = header["ID"]
+        if input_vcf.contains(h_id) and not header_match(
+            header, input_vcf.get_header_type(key=h_id)
+        ):
             use_input_vcf_for_h = False
 
     if use_input_vcf_for_h:
@@ -126,13 +171,13 @@ def main(args = None):
     else:
         h_vcf_file = "header.vcf"
         raw_h = input_vcf.raw_header
-        header_hash = {info['ID']: info for info in HEADERS}
+        header_hash = {info["ID"]: info for info in HEADERS}
 
         with open(h_vcf_file, "w") as file:
             for line in raw_h.split("\n"):
                 for iid in header_hash:
-                    if f"ID={ iid }" in line:
-                        line = f"##INFO=<ID={ iid },Number={ header_hash[iid]['Number'] },Type={ header_hash[iid]['Type'] },Description=\"{ header_hash[iid]['Description'] }\">"
+                    if f"ID={iid}" in line:
+                        line = f'##INFO=<ID={iid},Number={header_hash[iid]["Number"]},Type={header_hash[iid]["Type"]},Description="{header_hash[iid]["Description"]}">'
                         break
                 file.write(line + "\n")
 
@@ -143,11 +188,13 @@ def main(args = None):
         os.remove(h_vcf_file)
 
     # parse csq header and get index of each field
-    csq_list = input_vcf.get_header_type("CSQ")['Description'].split("Format: ")[1].split("|")
+    csq_list = (
+        input_vcf.get_header_type("CSQ")["Description"].split("Format: ")[1].split("|")
+    )
     csq_header_idx = {}
     for index, value in enumerate(csq_list):
         csq_header_idx[value] = index
-    
+
     # iterate through the file
     for variant in input_vcf:
         # create minimalized allele order
@@ -160,14 +207,14 @@ def main(args = None):
         csqs = variant.INFO["CSQ"]
         for csq in csqs.split(","):
             csq_values = csq.split("|")
-            
+
             allele = csq_values[csq_header_idx["Allele"]]
             if allele not in items_per_allele:
                 items_per_allele[allele] = {item: set() for item in PER_ALLELE_FIELDS}
-                
+
             consequences = csq_values[csq_header_idx["Consequence"]]
             feature_stable_id = csq_values[csq_header_idx["Feature"]]
-            
+
             # if all consequence in the skipped list do not add that feature in the count
             add_regulatory_feature = False
             add_transcript_feature = False
@@ -177,18 +224,22 @@ def main(args = None):
                         add_regulatory_feature = True
                     else:
                         add_transcript_feature = True
-            
+
             if add_transcript_feature:
                 # genes
-                gene = csq_values[csq_header_idx["Gene"]]               
+                gene = csq_values[csq_header_idx["Gene"]]
                 items_per_allele[allele]["gene"].add(gene)
 
                 # transcipt consequences
-                items_per_allele[allele]["transcipt_consequence"].add(f"{feature_stable_id}:{consequences}")
+                items_per_allele[allele]["transcipt_consequence"].add(
+                    f"{feature_stable_id}:{consequences}"
+                )
 
             # regualtory consequences
             if add_regulatory_feature:
-                items_per_allele[allele]["regulatory_consequence"].add(f"{feature_stable_id}:{consequences}")
+                items_per_allele[allele]["regulatory_consequence"].add(
+                    f"{feature_stable_id}:{consequences}"
+                )
 
             # phenotype
             if "PHENOTYPES" in csq_header_idx:
@@ -198,12 +249,16 @@ def main(args = None):
                     pheno_per_allele_fields = phenotype.split("+")
                     if len(pheno_per_allele_fields) != 3:
                         continue
-                    
+
                     (name, source, feature) = pheno_per_allele_fields
                     if feature.startswith("ENS"):
-                        items_per_allele[allele]["gene_phenotype"].add(f"{name}:{source}:{feature}")
+                        items_per_allele[allele]["gene_phenotype"].add(
+                            f"{name}:{source}:{feature}"
+                        )
                     else:
-                        items_per_allele[allele]["variant_phenotype"].add(f"{name}:{source}:{feature}")
+                        items_per_allele[allele]["variant_phenotype"].add(
+                            f"{name}:{source}:{feature}"
+                        )
 
             # citations
             if "PUBMED" in csq_header_idx:
@@ -227,7 +282,7 @@ def main(args = None):
                 if allele in items_per_allele and field in items_per_allele[allele]:
                     field_len = len(items_per_allele[allele][field])
                     if field_len > 0:
-                        field_nums.append(str(field_len)) 
+                        field_nums.append(str(field_len))
 
             if field_nums:
                 variant.INFO[PER_ALLELE_FIELDS[field]] = ",".join(field_nums)
@@ -247,12 +302,13 @@ def main(args = None):
         for field in PER_VARIANT_FIELDS:
             field_len = len(items_per_variant[field])
             if field_len > 0:
-                variant.INFO[PER_VARIANT_FIELDS[field]] = str(field_len) 
+                variant.INFO[PER_VARIANT_FIELDS[field]] = str(field_len)
 
         output_vcf.write_record(variant)
-        
+
     input_vcf.close()
     output_vcf.close()
-    
+
+
 if __name__ == "__main__":
     sys.exit(main())

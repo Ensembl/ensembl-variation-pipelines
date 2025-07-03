@@ -24,12 +24,20 @@ import requests
 from uuid import UUID
 from cyvcf2 import VCF
 
-def parse_args(args = None):
+
+def parse_args(args=None):
     parser = argparse.ArgumentParser()
-    
-    parser.add_argument("--input_config", dest="input_config", type=str, required = True, help="input_config json file used in vcf_prepper")
-    
+
+    parser.add_argument(
+        "--input_config",
+        dest="input_config",
+        type=str,
+        required=True,
+        help="input_config json file used in vcf_prepper",
+    )
+
     return parser.parse_args(args)
+
 
 def is_valid_uuid(uuid: str):
     try:
@@ -37,6 +45,7 @@ def is_valid_uuid(uuid: str):
     except ValueError:
         return False
     return str(uuid_obj) == uuid
+
 
 def parse_input_config(input_config: str) -> dict:
     if not os.path.isfile(input_config):
@@ -57,6 +66,7 @@ def parse_input_config(input_config: str) -> dict:
 
     return species_metadata
 
+
 def get_source_info(source: str) -> str:
     if source == "dbSNP":
         return "dbSNP - build 156"
@@ -65,6 +75,7 @@ def get_source_info(source: str) -> str:
     elif source == "Ensembl":
         return "Ensembl - e110"
 
+
 def get_source_url(source: str) -> str:
     if source == "dbSNP":
         return "https://www.ncbi.nlm.nih.gov/snp"
@@ -72,10 +83,11 @@ def get_source_url(source: str) -> str:
         return "https://www.ebi.ac.uk/eva"
     elif source == "Ensembl":
         return "https://www.ensembl.org/index.html"
-    
-def main(args = None):
+
+
+def main(args=None):
     args = parse_args(args)
-    
+
     input_config = args.input_config
 
     species_metadata = {}
@@ -101,16 +113,23 @@ def main(args = None):
         metadata[genome_uuid]["label"] = f"{source} short variants"
 
         metadata[genome_uuid]["datafiles"] = {}
-        metadata[genome_uuid]["datafiles"]["details"] = f"variant-{source.lower()}-details.bb"
-        metadata[genome_uuid]["datafiles"]["summary"] = f"variant-{source.lower()}-summary.bw"
+        metadata[genome_uuid]["datafiles"]["details"] = (
+            f"variant-{source.lower()}-details.bb"
+        )
+        metadata[genome_uuid]["datafiles"]["summary"] = (
+            f"variant-{source.lower()}-summary.bw"
+        )
 
-        metadata[genome_uuid]["description"] = f"All short variants (SNPs and indel) data from {source_info}"
-        
+        metadata[genome_uuid]["description"] = (
+            f"All short variants (SNPs and indel) data from {source_info}"
+        )
+
         metadata[genome_uuid]["source"] = {}
         metadata[genome_uuid]["source"]["name"] = source
-        metadata[genome_uuid]["source"]["url"] = source_url 
-            
-    print(json.dumps(metadata, indent = 4))
-    
+        metadata[genome_uuid]["source"]["url"] = source_url
+
+    print(json.dumps(metadata, indent=4))
+
+
 if __name__ == "__main__":
     sys.exit(main())

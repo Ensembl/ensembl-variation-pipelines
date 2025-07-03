@@ -21,16 +21,18 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument(dest="input", type=str, help="Population VCF file path")
 parser.add_argument(dest="sample", type=str, help="Sample name")
-parser.add_argument("--output_dir", dest="output_dir", type=str, help="Output directory")
+parser.add_argument(
+    "--output_dir", dest="output_dir", type=str, help="Output directory"
+)
 parser.add_argument("--debug", dest="debug", action="store_true", help="Debug mode")
 args = parser.parse_args()
 
 sample = args.sample
-input_vcf = VCF(
-    args.input,
-    samples = [sample]
+input_vcf = VCF(args.input, samples=[sample])
+out_dir = (
+    args.output_dir
+    or "/nfs/production/flicek/ensembl/variation/new_website/SV/process_hgvs3/outputs/"
 )
-out_dir = args.output_dir or "/nfs/production/flicek/ensembl/variation/new_website/SV/process_hgvs3/outputs/"
 
 if sample == "GRCh38":
     o_vcf = os.path.join(out_dir, "GRCh38_GCA_018504625.1.vcf")
@@ -58,7 +60,6 @@ for variant in input_vcf:
             paternal_vcf_writer.write_record(variant)
         if genotype[1] and var_type != "SNV":
             maternal_vcf_writer.write_record(variant)
-
 
     if args.debug and not counter:
         break

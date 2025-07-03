@@ -689,9 +689,7 @@ def main(args=None):
 
     # Pull Ensembl metadata
     server = parse_ini(args.ini_file, "metadata")
-    ensembl_species = get_ensembl_species(
-        server, meta_db="ensembl_genome_metadata"
-    )
+    ensembl_species = get_ensembl_species(server, meta_db="ensembl_genome_metadata")
     ensembl_vcf_paths = get_ensembl_vcf_filepaths(
         server, meta_db="ensembl_genome_metadata"
     )
@@ -726,7 +724,7 @@ def main(args=None):
         planned_release_id = planned_ids.pop()
     else:
         planned_release_id = None
-    
+
     if prepared_ids:
         prepared_release_id = prepared_ids.pop()
     else:
@@ -835,7 +833,9 @@ def main(args=None):
         with open(prepared_json, "w") as fh:
             json.dump(ensembl_prepared, fh, indent=4)
         if os.path.isfile(prepared_json):
-            print(f"[INFO] 'Prepared' JSON successfully written: {os.path.basename(prepared_json)}")
+            print(
+                f"[INFO] 'Prepared' JSON successfully written: {os.path.basename(prepared_json)}"
+            )
     else:
         print(f"[INFO] No species found for 'Prepared', not writing output JSON.")
 
@@ -846,7 +846,9 @@ def main(args=None):
         with open(planned_json, "w") as fh:
             json.dump(ensembl_planned, fh, indent=4)
         if os.path.isfile(planned_json):
-            print(f"[INFO] 'Planned' JSON successfully written: {os.path.basename(planned_json)}")
+            print(
+                f"[INFO] 'Planned' JSON successfully written: {os.path.basename(planned_json)}"
+            )
     else:
         print(f"[INFO] No species found for 'Planned', not writing output JSON.")
 

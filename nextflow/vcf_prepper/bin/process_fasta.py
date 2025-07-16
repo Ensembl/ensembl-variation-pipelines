@@ -38,46 +38,14 @@ def parse_args(args = None):
     parser.add_argument('--force', dest="force", action="store_true")
     
     return parser.parse_args(args)
-    
-def ungzip_fasta(fasta_dir: str, compressed_fasta: str) -> str:
-    if os.path.dirname(compressed_fasta) != fasta_dir:
-        print(f"[ERROR] Fasta file {fasta_dir} in wrong directory; should be in - {fasta_dir}")
-        exit(1)
-        
-    process = subprocess.run(["gzip", "-df", compressed_fasta],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    
-    if process.returncode != 0:
-        print(f"[ERROR] Could not uncompress fasta file - {compressed_fasta}")
-        exit(1)
-        
-    return compressed_fasta[:-3]
-    
-def bgzip_fasta(fasta_dir: str, unzipped_fasta: str) -> str:
-    if os.path.dirname(unzipped_fasta) != fasta_dir:
-        print(f"[ERROR] Fasta file {fasta_dir} in wrong directory; should be in - {fasta_dir}")
-        exit(1)
-        
-    process = subprocess.run(["bgzip", "-f", unzipped_fasta],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    
-    if process.returncode != 0:
-        print(f"[ERROR] Could not bgzip fasta file - {unzipped_fasta}")
+
+def index_fasta(bgzipped_fasta: str, force: str = False) -> None:
+    if not os.path.isfile(bgzipped_fasta):
+        FileNotFoundError(f"Cannot index fasta. File does not exist - {bgzipped_fasta}.")
         exit(1)
 
-    return unzipped_fasta + ".gz"
-
-def index_fasta(zipped_fasta: str, force: str = False) -> None:
-    if not os.path.isfile(zipped_fasta):
-        print(f"[ERROR] Cannot index fasta - {fasta} - does not exist. Exiting ...")
-        exit(1)
-
-    fai = zipped_fasta + ".fai"
-    gzi = zipped_fasta + ".gzi"
+    fai = bgzipped_fasta + ".fai"
+    gzi = bgzipped_fasta + ".gzi"
 
     if os.path.isfile(fai) and os.path.isfile(gzi) and not force:
         print(f"[INFO] both .fai and .gzi file exist. Skipping ...")
@@ -92,14 +60,14 @@ def index_fasta(zipped_fasta: str, force: str = False) -> None:
         os.remove(gzi)
     
     cmd_index_fasta = "use Bio::DB::HTS::Faidx;"
-    cmd_index_fasta += f"Bio::DB::HTS::Faidx->new('{zipped_fasta}');"
+    cmd_index_fasta += f"Bio::DB::HTS::Faidx->new('{bgzipped_fasta}');"
     
     process = subprocess.run(["perl", "-e", cmd_index_fasta],
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE
     )
     if process.returncode != 0:
-        print(f"[ERROR] Cannot index fasta file - {zipped_fasta}\n{process.stderr.decode()}\nExiting ...")
+        print(f"[ERROR] Cannot index fasta file - {bgzipped_fasta}\n{process.stderr.decode()}\nExiting ...")
         exit(1)
     
 def main(args = None):
@@ -155,8 +123,8 @@ def main(args = None):
                 print(f"[ERROR] Could not download fasta file - {compressed_fasta_url}")
                 exit(1)
     
-        unzipped_fasta = ungzip_fasta(fasta_dir, compressed_fasta)
-        fasta = bgzip_fasta(fasta_dir, unzipped_fasta)
+        unzipped_fasta = ungzip_file(compressed_fasta)
+        fasta = bgzip_file(unzipped_fasta)
     
     if fasta is not None:
         index_fasta(fasta, force=args.force)

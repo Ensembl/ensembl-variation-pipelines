@@ -15,145 +15,111 @@
 # limitations under the License.
 
 import sys
-import configparser
 import argparse
 import subprocess
 import os
-import requests
-import glob
+import re
 
 from helper import *
 
-GFF_DIR = ""
-
+GFF_DIR = "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
 
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
-    
-    parser.add_argument(dest="genome", type=str, help="Genome uuid")
+    parser.add_argument(dest="species", type=str, help="Species production name")
+    parser.add_argument(dest="genome_uuid", type=str, help="Genome uuid")
     parser.add_argument(dest="release_id", type=str, help="Ensembl release id from metadata database")
+    parser.add_argument(dest="version", type=str, help="Ensembl database version")
+    parser.add_argument('--out_dir', dest="out_dir", type=str, help="Out directory where processed GFF file will be created")
     parser.add_argument('-I', '--ini_file', dest="ini_file", type=str, required = False, help="Full path database configuration file, default - DEFAULT.ini in the same directory.")
     parser.add_argument('-gff_dir', dest="gff_dir", type=str, required = False, help="GFF directory")
     parser.add_argument('--force', dest="force", action="store_true")
     
     return parser.parse_args(args)
-    
-def ungzip_fasta(fasta_dir: str, compressed_fasta: str) -> str:
-    if os.path.dirname(compressed_fasta) != fasta_dir:
-        print(f"[ERROR] Fasta file {fasta_dir} in wrong directory; should be in - {fasta_dir}")
-        exit(1)
-        
-    process = subprocess.run(["gzip", "-df", compressed_fasta],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    
-    if process.returncode != 0:
-        print(f"[ERROR] Could not uncompress fasta file - {compressed_fasta}")
-        exit(1)
-        
-    return compressed_fasta[:-3]
-    
-def bgzip_fasta(fasta_dir: str, unzipped_fasta: str) -> str:
-    if os.path.dirname(unzipped_fasta) != fasta_dir:
-        print(f"[ERROR] Fasta file {fasta_dir} in wrong directory; should be in - {fasta_dir}")
-        exit(1)
-        
-    process = subprocess.run(["bgzip", "-f", unzipped_fasta],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    
-    if process.returncode != 0:
-        print(f"[ERROR] Could not bgzip fasta file - {unzipped_fasta}")
-        exit(1)
 
-    return unzipped_fasta + ".gz"
+def index_gff(bgzipped_gff: str, force: str = False) -> None:
+    if not os.path.isfile(bgzipped_gff):
+        raise FileNotFoundError(f"Could not run tabix index. File does not exist - {bgzipped_gff}")
 
-def index_fasta(zipped_fasta: str, force: str = False) -> None:
-    if not os.path.isfile(zipped_fasta):
-        print(f"[ERROR] Cannot index fasta - {fasta} - does not exist. Exiting ...")
-        exit(1)
+    csi = bgzipped_gff + ".csi"
 
-    fai = zipped_fasta + ".fai"
-    gzi = zipped_fasta + ".gzi"
-
-    if os.path.isfile(fai) and os.path.isfile(gzi) and not force:
-        print(f"[INFO] both .fai and .gzi file exist. Skipping ...")
+    if os.path.isfile(csi) and not force:
+        print(f"[INFO] {csi} file exist. Skipping ...")
         return
-
-    if os.path.isfile(fai):
-        print(f"[INFO] {fai} exist. Deleting ...")
-        os.remove(fai)
     
-    if os.path.isfile(gzi):
-        print(f"[INFO] {gzi} exist. Deleting ...")
-        os.remove(gzi)
-    
-    cmd_index_fasta = "use Bio::DB::HTS::Faidx;"
-    cmd_index_fasta += f"Bio::DB::HTS::Faidx->new('{zipped_fasta}');"
-    
-    process = subprocess.run(["perl", "-e", cmd_index_fasta],
+    process = subprocess.run(["tabix", "-f", "-C", bgzipped_gff],
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE
     )
     if process.returncode != 0:
-        print(f"[ERROR] Cannot index fasta file - {zipped_fasta}\n{process.stderr.decode()}\nExiting ...")
+        print(f"[ERROR] Cannot index - {bgzipped_gff}\n{process.stderr.decode()}\nExiting ...")
         exit(1)
+
+def sort_gff(file: str) -> str:
+    if not os.path.isfile(file):
+        raise FileNotFoundError(f"Could not sort. File does not exist - {file}")
+
+    sorted_file = os.path.join(
+        os.path.dirname(file),
+        "sorted_" + os.path.basename(file)
+    )
+    os.system(f"(grep '^#' {file} & grep -v '^#' {file} | sort -k1,1 -k4,4n -k5,5n -t$\'\\t\') > {sorted_file}")
+    process = subprocess.run(["sort", "-f", file],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    
+    if process.returncode != 0:
+        print(f"[ERROR] Could not sort file - {file}")
+        exit(1)
+
+    return sorted_file
     
 def main(args = None):
     args = parse_args(args)
     
+    species = args.species
     genome_uuid = args.genome_uuid
     release_id = args.release_id
+    out_dir = args.out_dir or os.getcwd()
     ini_file = args.ini_file or "DEFAULT.ini"
-    gff_dir = args.gff_dir or "DEFAULT.ini"
+    gff_dir = args.gff_dir or GFF_DIR
     metadb_server = parse_ini(ini_file, "metadata")
-    
-    gff_relative_path = get_gff_relative_path(metadb_server, "ensembl_genome_metadata", genome_uuid, release_id)
-    
-    fasta_dir = args.fasta_dir or FASTA_DIR
-    fasta_glob = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.*.fa.gz")
+    core_server = parse_ini(ini_file, "core")
+    core_db = get_db_name(core_server, args.version, species, type = "core")
 
-    fasta = None
-    if glob.glob(fasta_glob) and not args.force:
-        print(f"[INFO] {fasta_glob} exists. Skipping ...")
-        
-        fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.primary_assembly.fa.gz")
-        if not os.path.isfile(fasta):
-            fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.toplevel.fa.gz")
-        if not os.path.isfile(fasta):
-            print(f"[ERROR] No valid fasta file found, cannot run VEP. Exiting ...")
-            exit(1)
+    # scientific_name = re.match("^([\w ]+)", get_species_display_name(core_server, core_db)).group(1).replace(" ", "_")
+    scientific_name = get_scientific_name(metadb_server, "ensembl_genome_metadata", genome_uuid).replace(" ", "_")
+    assembly_accession = get_assembly_accession(metadb_server, "ensembl_genome_metadata", genome_uuid)
+    annotation_source = get_dataset_attribute_value(
+            metadb_server, 
+            "ensembl_genome_metadata", 
+            genome_uuid, 
+            release_id, 
+            "genebuild.annotation_source"
+        ).lower()
+    last_geneset_update = get_dataset_attribute_value(
+            metadb_server, 
+            "ensembl_genome_metadata", 
+            genome_uuid, 
+            release_id, 
+            "genebuild.last_geneset_update"
+        ).replace("-", "_")
+    
+    source_gff = os.path.join(gff_dir, scientific_name, assembly_accession, annotation_source, "geneset", last_geneset_update, "genes.gff3.gz")
+
+    if not os.path.isfile(source_gff):
+        raise FileNotFoundError(f"Could not find - {source_gff}")
     else:
-        if glob.glob(fasta_glob):
-            print(f"[INFO] {fasta_glob} exists. Will be overwritten ...")
-            for f in glob.glob(fasta_glob):
-                os.remove(f)
-        
-        rl_version = get_relative_version(version, division)
-        src_compressed_fasta = get_ftp_path(species, assembly, division, rl_version, "fasta", "local", fasta_species_name)
-    
-        if src_compressed_fasta is not None:
-            compressed_fasta = os.path.join(fasta_dir, os.path.basename(src_compressed_fasta))
-            returncode = copyto(src_compressed_fasta, compressed_fasta)
-    
-        if src_compressed_fasta is None or returncode != 0:
-            print(f"[INFO] Failed to copy fasta file - {src_compressed_fasta}, will retry using remote FTP")
-        
-            compressed_fasta_url = get_ftp_path(species, assembly, division, rl_version, "fasta", "remote", fasta_species_name)
-        
-            compressed_fasta = os.path.join(fasta_dir, compressed_fasta_url.split('/')[-1])
-            returncode = download_file(compressed_fasta, compressed_fasta_url)
-            if returncode != 0:
-                print(f"[ERROR] Could not download fasta file - {compressed_fasta_url}")
-                exit(1)
-    
-        unzipped_fasta = ungzip_fasta(fasta_dir, compressed_fasta)
-        fasta = bgzip_fasta(fasta_dir, unzipped_fasta)
-    
-    if fasta is not None:
-        index_fasta(fasta, force=args.force)
+        compressed_gff = os.path.join(out_dir, "genes.gff3.gz")
+        returncode = copyto(source_gff, compressed_gff)
+        if returncode != 0:
+            raise Exception(f"Failed to copy.\n\tSource - {source_gff}\n\tTarget - {compressed_gff}")
+
+        unzipped_gff = ungzip_file(compressed_gff)
+        sorted_gff = sort_gff(unzipped_gff)
+        bgzipped_gff = bgzip_file(sorted_gff)
+        index_gff(bgzipped_gff, force=args.force)
         
 if __name__ == "__main__":
     sys.exit(main())

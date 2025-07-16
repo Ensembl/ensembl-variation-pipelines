@@ -29,16 +29,20 @@ process PROCESS_GFF {
   val genome
   
   shell:
+  species = meta.species
   genome_uuid = meta.genome_uuid
   release_id = meta.release_id
+  version = params.version
   ini_file = params.ini_file
   gff_dir = meta.gff_dir
   force_create_config = params.force_create_config ? "--force" : ""
   
   '''
   process_gff.py \
+    !{species} \
     !{genome_uuid} \
     !{release_id} \
+    !{version} \
     --ini_file !{ini_file} \
     --gff_dir !{gff_dir} \
     !{force_create_config}

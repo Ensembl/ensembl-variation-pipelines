@@ -187,6 +187,21 @@ def get_division(server: dict, core_db: str) -> str:
         exit(1)
     return process.stdout.decode().strip()
 
+def get_species_display_name(server: dict, core_db: str) -> str:
+    query = "SELECT meta_value FROM meta WHERE meta_key = 'species.display_name';"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "--database", core_db,
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    return process.stdout.decode().strip()
+
 @deprecated(version='June 2025', reason="Variation database with old schema should not be used anymore")
 def dump_variant_source(server: dict, variation_db: str, dump_file: str) -> str:
     query = "SELECT DISTINCT vf.variation_name, s.name FROM variation_feature AS vf, source AS s WHERE vf.source_id = s.source_id;"
@@ -219,16 +234,74 @@ def get_sources_meta_info(sources_meta_file: str) -> dict:
 def get_fasta_species_name(species_production_name: str) -> str:
     return species_production_name[0].upper() + species_production_name[1:]
 
-def get_gff_relative_path(server: dict, metadata_db: str, genome_uuid: str, release_id: int) -> str:
-    query = f"SELECT da.value FROM genome g" \
+def get_scientific_name(
+            server: dict, 
+            metadata_db: str, 
+            genome_uuid: str
+        ) -> str:
+    query = "SELECT o.scientific_name" \
+        + " FROM genome g" \
+        + " JOIN organism o on o.organism_id = g.organism_id" \
+        + f" WHERE g.genome_uuid = '{genome_uuid}';"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "--database", metadata_db,
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+
+    if process.returncode != 0:
+        return None
+    
+    return process.stdout.decode().strip()
+
+def get_assembly_accession(
+            server: dict, 
+            metadata_db: str, 
+            genome_uuid: str
+        ) -> str:
+    query = "SELECT a.accession" \
+        + " FROM genome g" \
+        + " JOIN assembly a on g.assembly_id = a.assembly_id" \
+        + f" WHERE g.genome_uuid = '{genome_uuid}';"
+    process = subprocess.run(["mysql",
+            "--host", server["host"],
+            "--port", server["port"],
+            "--user", server["user"],
+            "--database", metadata_db,
+            "-N",
+            "--execute", query
+        ],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+
+    if process.returncode != 0:
+        return None
+    
+    return process.stdout.decode().strip()
+
+def get_dataset_attribute_value(
+            server: dict,
+            metadata_db: str, 
+            genome_uuid: str,
+            release_id: int,
+            attrib_name: str
+        ) -> str:
+    query = "SELECT da.value FROM genome g" \
         + " JOIN genome_dataset gd on g.genome_id = gd.genome_id" \
         + " JOIN dataset d on gd.dataset_id = d.dataset_id" \
         + " JOIN dataset_type dt on d.dataset_type_id = dt.dataset_type_id" \
         + " JOIN dataset_attribute da on d.dataset_id = da.dataset_id" \
         + " JOIN attribute a on da.attribute_id = a.attribute_id" \
-        + " WHERE g.genome_uuid = {genome_uuid}" \
-        + " AND gd.release_id = {release_id}" \
-        + " AND a.name = 'vep.gff_location';"
+        + f" WHERE g.genome_uuid = '{genome_uuid}'" \
+        + f" AND gd.release_id = {release_id}" \
+        + f" AND a.name = '{attrib_name}';"
     process = subprocess.run(["mysql",
             "--host", server["host"],
             "--port", server["port"],
@@ -322,3 +395,33 @@ def copyto(src_file: str, dest_file: str) -> int:
     )
         
     return process.returncode
+
+def ungzip_file(file: str) -> str:
+    if not os.path.isfile(file):
+        raise FileNotFoundError(f"Could not un-gzip. File does not exist - {file}")
+        
+    process = subprocess.run(["gzip", "-df", file],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    
+    if process.returncode != 0:
+        print(f"[ERROR] Could not uncompress file - {file}")
+        exit(1)
+        
+    return file[:-3]
+
+def bgzip_file(file: str) -> str:
+    if not os.path.isfile(file):
+        raise FileNotFoundError(f"Could not run bgzip. File does not exist - {file}")
+        
+    process = subprocess.run(["bgzip", "-f", file],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    
+    if process.returncode != 0:
+        print(f"[ERROR] Could not bgzip file - {file}")
+        exit(1)
+
+    return file + ".gz"

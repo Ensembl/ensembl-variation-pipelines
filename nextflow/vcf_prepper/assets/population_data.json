@@ -9,16 +9,86 @@
                "short_name": "gnomAD_exomes",
                "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/exomes/gnomad.exomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz",
                "include_fields": [
-                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADe:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -34,17 +104,94 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/genomes/gnomad.genomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz",
                "include_fields": [
-                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
-                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADg:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:ami",
+                     "fields": {
+                        "af": "AF_ami",
+                        "ac": "AC_ami",
+                        "an": "AN_ami"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -60,16 +207,86 @@
                "short_name": "gnomAD_exomes",
                "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/exomes/gnomad.exomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz",
                "include_fields": [
-                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADe:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -85,17 +302,94 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/genomes/gnomad.genomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz",
                "include_fields": [
-                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
-                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADg:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:ami",
+                     "fields": {
+                        "af": "AF_ami",
+                        "ac": "AC_ami",
+                        "an": "AN_ami"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -111,16 +405,86 @@
                "short_name": "gnomAD_exomes",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY_ACC##/ensembl/variation/2022_10/vcf/2024_07/gnomad.exomes.v4.1.sites.##ASSEMBLY_ACC##.trimmed_liftover.vcf.gz",
                "include_fields": [
-                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADe:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -136,17 +500,94 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY_ACC##/ensembl/variation/2022_10/vcf/2024_07/gnomad.genomes.v4.1.sites.##ASSEMBLY_ACC##.trimmed_liftover.vcf.gz",
                "include_fields": [
-                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
-                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADg:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:ami",
+                     "fields": {
+                        "af": "AF_ami",
+                        "ac": "AC_ami",
+                        "an": "AN_ami"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -163,7 +604,13 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/mus_musculus/GRCm39/variation_genotype/mgp.v3.snps.sorted.rsIDdbSNPv137.GRCm39.vcf.gz",
                "include_fields": [
-                  {"name": "MGP", "fields": {"an": "AN", "ac": "AC"}}
+                  {
+                     "name": "MGP",
+                     "fields": {
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             },
             {
@@ -173,7 +620,13 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/mus_musculus/GRCm39/variation_genotype/mgp.v3.indels.sorted.rsIDdbSNPv137.GRCm39.vcf.gz",
                "include_fields": [
-                  {"name": "MGP", "fields": {"an": "AN", "ac": "AC"}}
+                  {
+                     "name": "MGP",
+                     "fields": {
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -189,7 +642,14 @@
                "representative_af_field": "AF_IRBT",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/bos_taurus/ARS-UCD1.3/variation_genotype/IRBT_ARS-UCD1_3.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen", "fields": {"af": "AF_IRBT", "an": "AN_IRBT", "ac": "AC_IRBT"}}
+                  {
+                     "name": "NextGen",
+                     "fields": {
+                        "af": "AF_IRBT",
+                        "an": "AN_IRBT",
+                        "ac": "AC_IRBT"
+                     }
+                  }
                ]
             }
          ]
@@ -205,7 +665,12 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/gallus_gallus/bGalGal1.mat.broiler.GRCg7b/variation_genotype/cohort188.ALL.1-28.fixed_remap7b.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB44919", "fields": {"af": "AF"}}
+                  {
+                     "name": "PRJEB44919",
+                     "fields": {
+                        "af": "AF"
+                     }
+                  }
                ]
             }
          ]
@@ -221,7 +686,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/canis_lupus_familiaris/ROS_Cfam_1.0/variation_genotype/ROS_Cfam_1.0_remap_PRJEB24066.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB24066", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "PRJEB24066",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -237,7 +709,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/canis_lupus_familiarisboxer/Dog10K_Boxer_Tasha/variation_genotype/Dog10K_Boxer_Tasha_remap_PRJEB24066.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB24066", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "PRJEB24066",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -253,7 +732,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/IROA.population_sites.OARv3_1.20140307.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:IROA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "NextGen:IROA",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -267,7 +753,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/MOOA.population_sites.OARv3_1.20140328.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:MOOA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "NextGen:MOOA",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -281,7 +774,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/###CHR###.filtered_intersect.vcf.gz",
                "include_fields": [
-                  {"name": "ISGC", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "ISGC",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -297,7 +797,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/IROA.population_sites.ARS_UI_Ramb_v2_0.20140307.vcf.g",
                "include_fields": [
-                  {"name": "NextGen:IROA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "NextGen:IROA",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -311,7 +818,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/MOOA.population_sites.ARS-UI_Ramb_v2_0.20140328.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:MOOA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "NextGen:MOOA",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -325,7 +839,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/###CHR###.filtered_ARS-UI_Ramb_v2.0_intersect.vcf.gz",
                "include_fields": [
-                  {"name": "ISGC", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "ISGC",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -341,12 +862,54 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/Nextgen/capra_hircus/ARS1/NextGenCapraHircusRemappedARS1_comb.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:All", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "NextGen:MOCH", "fields": {"af": "AF_MOCH", "ac": "AC_MOCH", "an": "AN_MOCH"}},
-                  {"name": "NextGen:FRCH", "fields": {"af": "AF_FRCH", "ac": "AC_FRCH", "an": "AN_FRCH"}},
-                  {"name": "NextGen:AUCH", "fields": {"af": "AF_AUCH", "ac": "AC_AUCH", "an": "AN_AUCH"}},
-                  {"name": "NextGen:ITCH", "fields": {"af": "AF_ITCH", "ac": "AC_ITCH", "an": "AN_ITCH"}},
-                  {"name": "NextGen:IRCH", "fields": {"af": "AF_IRCH", "ac": "AC_IRCH", "an": "AN_IRCH"}}
+                  {
+                     "name": "NextGen:All",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "NextGen:MOCH",
+                     "fields": {
+                        "af": "AF_MOCH",
+                        "ac": "AC_MOCH",
+                        "an": "AN_MOCH"
+                     }
+                  },
+                  {
+                     "name": "NextGen:FRCH",
+                     "fields": {
+                        "af": "AF_FRCH",
+                        "ac": "AC_FRCH",
+                        "an": "AN_FRCH"
+                     }
+                  },
+                  {
+                     "name": "NextGen:AUCH",
+                     "fields": {
+                        "af": "AF_AUCH",
+                        "ac": "AC_AUCH",
+                        "an": "AN_AUCH"
+                     }
+                  },
+                  {
+                     "name": "NextGen:ITCH",
+                     "fields": {
+                        "af": "AF_ITCH",
+                        "ac": "AC_ITCH",
+                        "an": "AN_ITCH"
+                     }
+                  },
+                  {
+                     "name": "NextGen:IRCH",
+                     "fields": {
+                        "af": "AF_IRCH",
+                        "ac": "AC_IRCH",
+                        "an": "AN_IRCH"
+                     }
+                  }
                ]
             }
          ]
@@ -362,7 +925,14 @@
                "representative_af_field": "AF_PRJEB9799",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/equus_caballus/EquCab3.0/variation_genotype/PRJEB9799_EquCab3_0.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB9799", "fields": {"af": "AF_PRJEB9799", "ac": "AC_PRJEB9799", "an": "AN_PRJEB9799"}}
+                  {
+                     "name": "PRJEB9799",
+                     "fields": {
+                        "af": "AF_PRJEB9799",
+                        "ac": "AC_PRJEB9799",
+                        "an": "AN_PRJEB9799"
+                     }
+                  }
                ]
             }
          ]
@@ -378,7 +948,12 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB38548/oreochromis_niloticus/O_niloticus_UMD_NMBU/tilapia_snp_array.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB38548", "fields": {"af": "AF"}}
+                  {
+                     "name": "PRJEB38548",
+                     "fields": {
+                        "af": "AF"
+                     }
+                  }
                ]
             }
          ]
@@ -394,7 +969,262 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB26368/neovison_vison/NNQGG.v01/GBS_mink_eva.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB26368", "fields": {"af": "AF", "ac": "AC", "an": "AN"}}
+                  {
+                     "name": "PRJEB26368",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "triticum_aestivum": [
+      {
+         "name": "Axiom",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/820k_fixed_freq.vcf.gz",
+               "short_name": "Axiom_820k",
+               "include_fields": [
+                  {
+                     "name": "Axiom",
+                     "fields": {
+                        "af": "Axiom_AF",
+                        "ac": "Axiom_AC",
+                        "an": "Axiom_AN"
+                     }
+                  }
+               ]
+            },
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/35k_fixed_freq.vcf.gz",
+               "short_name": "Axiom_35k",
+               "include_fields": [
+                  {
+                     "name": "Axiom",
+                     "fields": {
+                        "af": "Axiom_AF",
+                        "ac": "Axiom_AC",
+                        "an": "Axiom_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Watkins_collection:All",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/combined_watkins_nochr.INFO_freq.vcf.gz",
+               "short_name": "Watkins_collection:All",
+               "include_fields": [
+                  {
+                     "name": "Watkins_collection:AG3",
+                     "fields": {
+                        "af": "Watkins_collection:AG3_AF",
+                        "ac": "Watkins_collection:AG3_AC",
+                        "an": "Watkins_collection:AG3_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG4",
+                     "fields": {
+                        "af": "Watkins_collection:AG4_AF",
+                        "ac": "Watkins_collection:AG4_AC",
+                        "an": "Watkins_collection:AG4_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG6",
+                     "fields": {
+                        "af": "Watkins_collection:AG6_AF",
+                        "ac": "Watkins_collection:AG6_AC",
+                        "an": "Watkins_collection:AG6_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG1",
+                     "fields": {
+                        "af": "Watkins_collection:AG1_AF",
+                        "ac": "Watkins_collection:AG1_AC",
+                        "an": "Watkins_collection:AG1_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:Modern",
+                     "fields": {
+                        "af": "Watkins_collection:Modern_AF",
+                        "ac": "Watkins_collection:Modern_AC",
+                        "an": "Watkins_collection:Modern_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG5",
+                     "fields": {
+                        "af": "Watkins_collection:AG5_AF",
+                        "ac": "Watkins_collection:AG5_AC",
+                        "an": "Watkins_collection:AG5_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG7",
+                     "fields": {
+                        "af": "Watkins_collection:AG7_AF",
+                        "ac": "Watkins_collection:AG7_AC",
+                        "an": "Watkins_collection:AG7_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:All",
+                     "fields": {
+                        "af": "Watkins_collection:All_AF",
+                        "ac": "Watkins_collection:All_AC",
+                        "an": "Watkins_collection:All_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG2",
+                     "fields": {
+                        "af": "Watkins_collection:AG2_AF",
+                        "ac": "Watkins_collection:AG2_AC",
+                        "an": "Watkins_collection:AG2_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "oryza_sativa": [
+      {
+         "name": "Collection from BGI 2004",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/bgi_snps_2004_freq.vcf.gz",
+               "short_name": "Collection from BGI 2004",
+               "include_fields": [
+                  {
+                     "name": "Collection from BGI 2004",
+                     "fields": {
+                        "af": "Collection from BGI 2004_AF",
+                        "ac": "Collection from BGI 2004_AC",
+                        "an": "Collection from BGI 2004_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from Duitama et al. 2015",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/duitama_et_al_2015_freq.vcf.gz",
+               "short_name": "Collection from Duitama et al. 2015",
+               "include_fields": [
+                  {
+                     "name": "Collection from Duitama et al. 2015",
+                     "fields": {
+                        "af": "Collection from Duitama et al. 2015_AF",
+                        "ac": "Collection from Duitama et al. 2015_AC",
+                        "an": "Collection from Duitama et al. 2015_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from McNally et al. 2009",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/mcnally_et_al_2009_freq.vcf.gz",
+               "short_name": "Collection from McNally et al. 2009",
+               "include_fields": [
+                  {
+                     "name": "Collection from McNally et al. 2009",
+                     "fields": {
+                        "af": "Collection from McNally et al. 2009_AF",
+                        "ac": "Collection from McNally et al. 2009_AC",
+                        "an": "Collection from McNally et al. 2009_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from OMAP 2007",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/omap_snps_2007_div_freq.vcf.gz",
+               "short_name": "Collection from OMAP 2007_div",
+               "include_fields": [
+                  {
+                     "name": "Collection from OMAP 2007",
+                     "fields": {
+                        "af": "Collection from OMAP 2007_AF",
+                        "ac": "Collection from OMAP 2007_AC",
+                        "an": "Collection from OMAP 2007_AN"
+                     }
+                  }
+               ]
+            },
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/omap_snps_2007_snv_freq.vcf.gz",
+               "short_name": "Collection from OMAP 2007",
+               "include_fields": [
+                  {
+                     "name": "Collection from OMAP 2007_snv",
+                     "fields": {
+                        "af": "Collection from OMAP 2007_AF",
+                        "ac": "Collection from OMAP 2007_AC",
+                        "an": "Collection from OMAP 2007_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from Rice 3k",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/rice_3k_freq.vcf.gz",
+               "short_name": "Collection from Rice 3k",
+               "include_fields": [
+                  {
+                     "name": "Collection from Rice 3k",
+                     "fields": {
+                        "af": "Collection from Rice 3k_AF",
+                        "ac": "Collection from Rice 3k_AC",
+                        "an": "Collection from Rice 3k_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from Zhao et al. 2010",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/zhao_et_al_2010_fixed_freq.vcf.gz",
+               "short_name": "Collection from Zhao et al. 2010",
+               "include_fields": [
+                  {
+                     "name": "Collection from Zhao et al. 2010",
+                     "fields": {
+                        "af": "Collection from Zhao et al. 2010_AF",
+                        "ac": "Collection from Zhao et al. 2010_AC",
+                        "an": "Collection from Zhao et al. 2010_AN"
+                     }
+                  }
                ]
             }
          ]

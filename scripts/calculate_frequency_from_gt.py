@@ -200,7 +200,7 @@ def get_input_file(config: dict) -> str:
             print(f"[ERROR] cannot create tmp dir to download remote files - {tmp_dir}, skipping...")
             return None
 
-        process = subprocecs(["wget", "-P", tmp_dir, filename_template], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.run(["wget", "-P", tmp_dir, filename_template], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if process.returncode != 0:
             print(f"[ERROR] cannot download file - {filename_template}, skipping...")
             return None

@@ -7,7 +7,7 @@
             {
                "version": "4.1",
                "short_name": "gnomAD_exomes",
-               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/exomes/gnomad.exomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/exomes/gnomad.exomes.v4.1.sites.chr###CHR###_trimmed.vcf.bgz",
                "include_fields": [
                   {
                      "name": "gnomADe:ALL",
@@ -102,7 +102,7 @@
                "version": "4.1",
                "short_name": "gnomAD_genomes",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/genomes/gnomad.genomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/genomes/gnomad.genomes.v4.1.sites.chr###CHR###_trimmed.vcf.bgz",
                "include_fields": [
                   {
                      "name": "gnomADg:ALL",
@@ -205,7 +205,7 @@
             {
                "version": "4.1",
                "short_name": "gnomAD_exomes",
-               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/exomes/gnomad.exomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/exomes/gnomad.exomes.v4.1.sites.grch37.chr###CHR###_trimmed_liftover.vcf.gz",
                "include_fields": [
                   {
                      "name": "gnomADe:ALL",
@@ -300,7 +300,7 @@
                "version": "4.1",
                "short_name": "gnomAD_genomes",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/genomes/gnomad.genomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/genomes/gnomad.genomes.v4.1.sites.grch37.chr###CHR###_trimmed_liftover.vcf.gz",
                "include_fields": [
                   {
                      "name": "gnomADg:ALL",
@@ -772,7 +772,7 @@
             {
                "short_name": "ISGC",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/###CHR###.filtered_intersect.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/####CHR####.filtered_intersect.vcf.gz",
                "include_fields": [
                   {
                      "name": "ISGC",
@@ -837,7 +837,7 @@
             {
                "short_name": "ISGC",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/###CHR###.filtered_ARS-UI_Ramb_v2.0_intersect.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/####CHR####.filtered_ARS-UI_Ramb_v2.0_intersect.vcf.gz",
                "include_fields": [
                   {
                      "name": "ISGC",
@@ -975,6 +975,96 @@
                         "af": "AF",
                         "ac": "AC",
                         "an": "AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "salmo_salar": [
+      {
+         "name": "ALL:PRJEB34225",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB34225/salmo_salar/Ssal_v3.1/Salmon_SNP_80_samples_freebayes_EBI_noINFO_remap_freq.vcf.gz",
+               "short_name": "ALL:PRJEB34225",
+               "include_fields": [
+                  {
+                     "name": "ALL:PRJEB34225",
+                     "fields": {
+                        "af": "ALL:PRJEB34225_AF",
+                        "ac": "ALL:PRJEB34225_AC",
+                        "an": "ALL:PRJEB34225_AN"
+                     }
+                  },
+                  {
+                     "name": "Gaspe of New Brunswick",
+                     "fields": {
+                        "af": "Gaspe of New Brunswick_AF",
+                        "ac": "Gaspe of New Brunswick_AC",
+                        "an": "Gaspe of New Brunswick_AN"
+                     }
+                  },
+                  {
+                     "name": "Penobscot River",
+                     "fields": {
+                        "af": "Penobscot River_AF",
+                        "ac": "Penobscot River_AC",
+                        "an": "Penobscot River_AN"
+                     }
+                  },
+                  {
+                     "name": "St. John River",
+                     "fields": {
+                        "af": "St. John River_AF",
+                        "ac": "St. John River_AC",
+                        "an": "St. John River_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "oryctolagus_cuniculus": [
+      {
+         "name": "ALL:PRJEB27278",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB27278/oryctolagus_cuniculus/OryCun2.0/Craniosnyostotic_Rabbit_Colony_eva08062018_freq.vcf.gz",
+               "short_name": "ALL:PRJEB27278",
+               "include_fields": [
+                  {
+                     "name": "ICN",
+                     "fields": {
+                        "af": "ICN_AF",
+                        "ac": "ICN_AC",
+                        "an": "ICN_AN"
+                     }
+                  },
+                  {
+                     "name": "ALL:PRJEB27278",
+                     "fields": {
+                        "af": "ALL:PRJEB27278_AF",
+                        "ac": "ALL:PRJEB27278_AC",
+                        "an": "ALL:PRJEB27278_AN"
+                     }
+                  },
+                  {
+                     "name": "EOS",
+                     "fields": {
+                        "af": "EOS_AF",
+                        "ac": "EOS_AC",
+                        "an": "EOS_AN"
+                     }
+                  },
+                  {
+                     "name": "DOS",
+                     "fields": {
+                        "af": "DOS_AF",
+                        "ac": "DOS_AC",
+                        "an": "DOS_AN"
                      }
                   }
                ]
@@ -1195,7 +1285,7 @@
          "name": "Collection from Rice 3k",
          "files": [
             {
-               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/rice_3k_freq.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/rice_3k_###CHR###_freq.vcf.gz",
                "short_name": "Collection from Rice 3k",
                "include_fields": [
                   {

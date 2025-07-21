@@ -111,7 +111,8 @@ struct Line {
     alts: HashSet<String>,
     group: u8,
     severity: String,
-    severity_rank: u8
+    severity_rank: u8,
+    extent: u64
 }
 
 impl Line {
@@ -155,11 +156,18 @@ impl Line {
         // print out the current line
         if self.alts.len() > 0 {
             let alts = Vec::from_iter(self.alts.clone());
-            write!(out, "{} {} {} {} {} {} {} {} {}\n",
+            write!(out, "{} {} {} {} {} {} {} {} {}",
                 self.chromosome, self.start, self.end,
                 self.id, self.variety, self.reference,
                 alts.join(","), self.group, self.severity
             ).unwrap();
+            
+            if self.extent != 0 {
+                write!(out, " {}\n", self.extent).unwrap();
+            }
+            else {
+                write!(out, "\n").unwrap();
+            }
         }
         
         // make the new Line as the current one
@@ -213,7 +221,8 @@ fn main() -> Result<(), VCFError> {
         alts: HashSet::new(),
         group: 0,
         severity: "".to_string(),
-        severity_rank: 255
+        severity_rank: 255,
+        extent: 0
     };
     while reader.next_record(&mut record)? {
         let reference = String::from_utf8(record.reference.clone()).unwrap();
@@ -332,46 +341,52 @@ fn main() -> Result<(), VCFError> {
                 start += 1;
                 end = start;
             }
+
+            // for short variants we do not use extent
+            let mut extent = 0;
             
             if is_sv {
                 // overwrite variant group to come from variant class instead of consequence
                 variant_group = *variant_groups.get(&variety).unwrap_or(&0);
                 
+                // check INFO/SVLEN or INFO/END to get the end position
+                let svlens = record.info(b"SVLEN").map(|svlen| {
+                    svlen.iter().map(|svlen| {
+                        let s = String::from_utf8_lossy(svlen);
+                        let i: i64 = s.parse().unwrap_or(0); // INFO/SVLEN can be negative in old software
+                        u64::try_from(i.abs()).unwrap_or(0)
+                    }).collect::<Vec<u64>>()
+                }).unwrap_or(vec![]);
+
+                let max_svlen = svlens.iter().max();
+                match max_svlen {
+                    // in case of INFO/SVLEN=0 or no INFO/SVLEN use INFO/END
+                    Some(0) | None => {
+                        let info_end: Result<u64, _> = String::from_utf8_lossy(&record.info(b"END")
+                                    .unwrap_or(&vec![vec![]])[0])
+                                    .parse();
+
+                        match info_end {
+                            Ok(number) => { end = number; }
+                            Err(_) => {
+                                if symbolic_alts {
+                                    println!("[WARNING] Neither SVLEN nor END can be parsed but symbolic alts used");
+                                    continue
+                                }
+                            }
+                        }
+                    }
+                    Some(number) => { end = start + number; }
+                }
+                
+                // extend is particulary useful for symbolic alts
+                extent = end - start;
+
                 // for insertions and breakpoints the variant is on single point
                 if variety.ends_with(&String::from("insertion")) || 
                         variety.ends_with(&String::from("breakpoint")) {
                     start += 1;
                     end = start;
-                }
-                // for other types check INFO/SVLEN or INFO/END to get the end position
-                else {
-                    let svlens = record.info(b"SVLEN").map(|svlen| {
-                        svlen.iter().map(|svlen| {
-                            let s = String::from_utf8_lossy(svlen);
-                            let i: i64 = s.parse().unwrap_or(0); // SVLEN can be negative in old software
-                            u64::try_from(i.abs()).unwrap_or(0)
-                        }).collect::<Vec<u64>>()
-                    }).unwrap_or(vec![]);
-
-                    let max_svlen = svlens.iter().max();
-                    match max_svlen {
-                        Some(0) | None => {
-                            let info_end: Result<u64, _> = String::from_utf8_lossy(&record.info(b"END")
-                                        .unwrap_or(&vec![vec![]])[0])
-                                        .parse();
-
-                            match info_end {
-                                Ok(number) => { end = number; }
-                                Err(_) => {
-                                    if symbolic_alts {
-                                        println!("[WARNING] Neither SVLEN nor END can be parsed but symbolic alts used");
-                                        continue
-                                    }
-                                }
-                            }
-                        }
-                        Some(number) => { end = start + number; }
-                    }
                 }
             }
 
@@ -385,7 +400,8 @@ fn main() -> Result<(), VCFError> {
                 alts: alts.clone(),
                 group: variant_group,
                 severity: most_severe_csq.to_string(),
-                severity_rank: most_severe_csq_rank
+                severity_rank: most_severe_csq_rank,
+                extent: extent
             };
             
             lines.merge(Some(more), &mut out);

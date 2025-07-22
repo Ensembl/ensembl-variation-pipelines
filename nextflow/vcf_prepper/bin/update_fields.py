@@ -156,7 +156,7 @@ def main(args = None):
                         if key in sources:
                             variant_source = key
                         break
-            info_fields += f"SOURCE={variant_source}"
+            info_fields = f"SOURCE={variant_source}"
 
             if variant.INFO.get("SVLEN"):
                 info_fields += f";SVLEN={variant.INFO['SVLEN']}"

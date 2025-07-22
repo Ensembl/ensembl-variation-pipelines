@@ -38,9 +38,18 @@ process GENERATE_VEP_CONFIG {
   fasta_dir = meta.fasta_dir
   conservation_data_dir = meta.conservation_data_dir
   repo_dir = params.repo_dir
-  population_data_file = params.population_data_file
   structural_variant = params.structural_variant ? "--structural_variant" : ""
-  
+
+  if (params.population_data_file) {
+    population_data_file = "--population_data_file " + params.population_data_file
+  }
+  else if (!params.structural_variant && file("${projectDir}/assets/population_data.json").exists()){
+    population_data_file = "--population_data_file " + "${projectDir}/assets/population_data.json"
+  }
+  else {
+    population_data_file = ""
+  }
+
   '''
   if [[ ! -e !{vep_config} || !{force_create_config} == 1 ]]; then
     generate_vep_config.py \
@@ -54,7 +63,7 @@ process GENERATE_VEP_CONFIG {
       --fasta_dir !{fasta_dir} \
       --conservation_data_dir !{conservation_data_dir} \
       --repo_dir !{repo_dir} \
-      --population_data_file !{population_data_file} \
+      !{population_data_file} \
       !{structural_variant}
   fi
   '''

@@ -29,6 +29,7 @@ process PROCESS_FASTA {
   shell:
   genome = meta.genome
   species = meta.species
+  genome_uuid = meta.genome_uuid
   assembly = meta.assembly
   version = params.version
   ini_file = params.ini_file

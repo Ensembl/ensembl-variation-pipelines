@@ -85,11 +85,11 @@ def main(args = None):
     ini_file = args.ini_file or "DEFAULT.ini"
     gff_dir = args.gff_dir or GFF_DIR
     metadb_server = parse_ini(ini_file, "metadata")
-    core_server = parse_ini(ini_file, "core")
-    core_db = get_db_name(core_server, args.version, species, type = "core")
 
-    # scientific_name = re.match("^([\w ]+)", get_species_display_name(core_server, core_db)).group(1).replace(" ", "_")
     scientific_name = get_scientific_name(metadb_server, "ensembl_genome_metadata", genome_uuid).replace(" ", "_")
+    scientific_name = re.sub("[^a-zA-Z0-9]+", "", scientific_name)
+    scientific_name = re.sub(" +", "_", scientific_name)
+    scientific_name = re.sub("^_+|_+$", "", scientific_name)
     assembly_accession = get_assembly_accession(metadb_server, "ensembl_genome_metadata", genome_uuid)
     annotation_source = get_dataset_attribute_value(
             metadb_server, 
@@ -105,7 +105,8 @@ def main(args = None):
             release_id, 
             "genebuild.last_geneset_update"
         ).replace("-", "_")
-    
+    last_geneset_update = re.sub("[\-\s]", "_", last_geneset_update)
+
     source_gff = os.path.join(gff_dir, scientific_name, assembly_accession, annotation_source, "geneset", last_geneset_update, "genes.gff3.gz")
 
     if not os.path.isfile(source_gff):

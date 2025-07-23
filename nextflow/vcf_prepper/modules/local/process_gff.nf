@@ -29,6 +29,7 @@ process PROCESS_GFF {
   val genome
   
   shell:
+  genome = meta.genome
   species = meta.species
   genome_uuid = meta.genome_uuid
   release_id = meta.release_id

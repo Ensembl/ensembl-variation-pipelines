@@ -34,8 +34,9 @@ process GENERATE_VEP_CONFIG {
   genome_uuid = meta.genome_uuid
   ini_file = params.ini_file
   vep_config = meta.vep_config
-  cache_dir = meta.cache_dir
   fasta_dir = meta.fasta_dir
+  cache_dir = params.cache_dir ? "--cache_dir ${meta.cache_dir}" : ""
+  cache_dir = params.gff_dir ? "--gff_dir ${meta.gff_dir}" : ""
   conservation_data_dir = meta.conservation_data_dir
   repo_dir = params.repo_dir
   structural_variant = params.structural_variant ? "--structural_variant" : ""
@@ -59,8 +60,9 @@ process GENERATE_VEP_CONFIG {
       --genome_uuid !{genome_uuid} \
       --ini_file !{ini_file} \
       --vep_config !{vep_config} \
-      --cache_dir !{cache_dir} \
       --fasta_dir !{fasta_dir} \
+      !{cache_dir} \
+      !{gff_dir} \
       --conservation_data_dir !{conservation_data_dir} \
       --repo_dir !{repo_dir} \
       !{population_data_file} \

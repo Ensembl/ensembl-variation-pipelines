@@ -70,6 +70,15 @@ PLUGINS = [
     "Downstream",
     "ClinPred"
 ]
+DEFAULT_PARAMS = [
+    "force_overwrite",
+    "fork 2",
+    "species",
+    "assembly",
+    "vcf 1",
+    "spdi 1",
+    "transcript_version 1"
+]
 
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
@@ -137,8 +146,7 @@ def check_plugin_files(plugin: str, files: list, exit_rule: str = "exit") -> boo
                 print(f"[INFO] Cannot get {plugin} data file - {file}. Skipping ...")
                 return False
 
-            print(f"[INFO] Cannot get {plugin} data file - {file}. Exiting ...")
-            exit(1)
+            raise FileNotFoundError(f"[ERROR] Cannot get {plugin} data file - {file}. Exiting ...")
 
     return True
     
@@ -309,8 +317,9 @@ def generate_vep_config(
     species: str,
     assembly: str,
     version: str,
-    cache_dir: str,
     fasta: str,
+    cache_dir: str = None,
+    gff: str = None,
     sift: bool = False,
     polyphen: bool = False,
     frequencies: list = None,
@@ -328,10 +337,7 @@ def generate_vep_config(
         file.write(f"fork {fork}\n")
         file.write(f"species {species}\n")
         file.write(f"assembly {assembly}\n")
-        file.write(f"cache_version {version}\n")
-        file.write(f"cache {cache_dir}\n")
         file.write(f"fasta {fasta}\n")
-        file.write("offline 1\n")
         file.write("vcf 1\n")
         file.write("spdi 1\n")
         file.write("regulatory 1\n")
@@ -340,7 +346,14 @@ def generate_vep_config(
         file.write("variant_class 1\n")
         file.write("protein 1\n")
         file.write("transcript_version 1\n")
-        
+    
+        if cache_dir:
+            file.write(f"cache_version {version}\n")
+            file.write(f"cache {cache_dir}\n")
+            file.write("offline 1\n")
+        elif gff:
+            file.write(f"gff {gff}\n")
+
         if sift:
             file.write(f"sift b\n")
         if polyphen:
@@ -379,21 +392,33 @@ def main(args = None):
     # TMP - until we use fasta from new website infra
     species = "homo_sapiens" if species == "homo_sapiens_37" else species
     
-    cache_dir = args.cache_dir or CACHE_DIR
-    cache_version = get_relative_version(version, division)
-    genome_cache_dir = os.path.join(cache_dir, species, f"{cache_version}_{assembly}")         
-    if not os.path.exists(genome_cache_dir):
-        print(f"[ERROR] {genome_cache_dir} directory does not exists, cannot run VEP. Exiting ...")
-        exit(1)
+    if args.cache_dir and args.gff_dir:
+        raise Exception("[ERROR] Cannot use both cache and gff at the same time, but both given.")
+
+    if args.cache_dir:
+        cache_dir = args.cache_dir
+        cache_version = get_relative_version(version, division)
+        genome_cache_dir = os.path.join(cache_dir, species, f"{cache_version}_{assembly}")         
+        if not os.path.exists(genome_cache_dir):
+            raise FileNotFoundError(f"[ERROR] {genome_cache_dir} directory does not exists, cannot run VEP. Exiting ...")
+    elif args.gff_dir:
+        gff = os.path.join(fasta_dir, "genes.gff3.gz")
+        if not os.path.isfile(gff):
+            raise FileNotFoundError(f"[ERROR] No valid GFF file found, cannot run VEP. Exiting ...")
+    
 
     fasta_species_name = get_fasta_species_name(species)
     fasta_dir = args.fasta_dir or FASTA_DIR
-    fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.primary_assembly.fa.gz")
-    if not os.path.isfile(fasta):
-        fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.toplevel.fa.gz")
-    if not os.path.isfile(fasta):
-        print(f"[ERROR] No valid fasta file found, cannot run VEP. Exiting ...")
-        exit(1)
+    if args.use_old_infra:
+        fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.primary_assembly.fa.gz")
+        if not os.path.isfile(fasta):
+            fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.toplevel.fa.gz")
+        if not os.path.isfile(fasta):
+            raise FileNotFoundError(f"[ERROR] No valid FASTA file found, cannot run VEP. Exiting ...")
+    else:
+        fasta = os.path.join(fasta_dir, "unmasked.fa.gz")
+        if not os.path.isfile(fasta):
+            raise FileNotFoundError(f"[ERROR] No valid FASTA file found, cannot run VEP. Exiting ...")
 
     conservation_data_dir = args.conservation_data_dir or CONSERVATION_DATA_DIR
     structural_variant = args.structural_variant

@@ -67,6 +67,8 @@ def parse_config (config) {
         meta.sources = meta.sources.join(",")
         meta.sources = meta.sources.replace(" ", "%20") // we cannot use whitespace in cmd argument
       }
+
+      meta.release_id = source_data.release_id ?: params.release_id
       
       input_set.add([meta, vcf])
     }  

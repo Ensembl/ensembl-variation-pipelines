@@ -24,14 +24,17 @@ import re
 from helper import *
 
 FASTA_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/fasta"
+FASTA_FTP_BASE_DIR = "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
+FASTA_FILE_NAME = "unmasked.fa.gz"
 
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
     
-    parser.add_argument(dest="species", type=str, help="species production name")
-    parser.add_argument(dest="genome_uuid", type=str, help="Genome uuid")
-    parser.add_argument(dest="assembly", type=str, help="assembly default")
-    parser.add_argument(dest="version", type=int, help="Ensembl release version")
+    parser.add_argument('--species', dest="species", type=str, help="species production name")
+    parser.add_argument('--genome_uuid', dest="genome_uuid", type=str, help="Genome uuid")
+    parser.add_argument('--assembly', dest="assembly", type=str, help="assembly default")
+    parser.add_argument('--version',  dest="version", type=int, help="Ensembl release version")
+    parser.add_argument('--out_dir', dest="out_dir", type=str, help="Out directory where processed GFF file will be created")
     parser.add_argument('--division', dest="division", type=str, required = False, help="Ensembl division the species belongs to")
     parser.add_argument('-I', '--ini_file', dest="ini_file", type=str, required = False, help="full path database configuration file, default - DEFAULT.ini in the same directory.")
     parser.add_argument('--fasta_dir', dest="fasta_dir", type=str, required = False, help="FASTA directory")
@@ -74,13 +77,18 @@ def index_fasta(bgzipped_fasta: str, force: str = False) -> None:
 def main(args = None):
     args = parse_args(args)
     
-    species = args.species
-    assembly = args.assembly
-    version = args.version
+    out_dir = args.out_dir or os.getcwd()
     ini_file = args.ini_file or "DEFAULT.ini"
     fasta_dir = args.fasta_dir or FASTA_DIR
 
     if args.use_old_infra:
+        species = args.species
+        assembly = args.assembly
+        version = args.version
+
+        if species is None or assembly is None or version is None:
+            raise Exception("[ERROR] Cannot run in old infra mode, make sure you have provided --species, --assembly and --version")
+        
         core_server = parse_ini(ini_file, "core")
         core_db = get_db_name(core_server, args.version, species, type = "core")
         division = args.division or get_division(core_server, core_db)
@@ -136,19 +144,32 @@ def main(args = None):
         metadb_server = parse_ini(ini_file, "metadata")
         genome_uuid = args.genome_uuid
 
-        scientific_name = get_scientific_name(metadb_server, "ensembl_genome_metadata", genome_uuid).replace(" ", "_")
-        scientific_name = re.sub("[^a-zA-Z0-9]+", "", scientific_name)
-        scientific_name = re.sub(" +", "_", scientific_name)
-        scientific_name = re.sub("^_+|_+$", "", scientific_name)
-        assembly_accession = get_assembly_accession(metadb_server, "ensembl_genome_metadata", genome_uuid)
+        if genome_uuid is None:
+            raise Exception("[ERROR] Cannot run in new infra mode, make sure you have provided --genome_uuid")
 
-
-        source_fasta = os.path.join(fasta_dir, scientific_name, assembly_accession, "genome", "unmasked.fa.gz")
+        source_fasta = os.path.join(fasta_dir, FASTA_FILE_NAME)
+    
+        if not os.path.isfile(source_fasta) \
+                or not os.path.isfile(source_fasta + ".fai") \
+                or not os.path.isfile(source_fasta + ".gzi") \
+                or args.force:
+        
+            scientific_name = get_scientific_name(metadb_server, "ensembl_genome_metadata", genome_uuid).replace(" ", "_")
+            if scientific_name == "" or scientific_name is None:
+                raise Exception(f"[ERROR] Could not retrieve scientific name for genome uuid - {genome_uuid}")
+            scientific_name = re.sub("[^a-zA-Z0-9]+", " ", scientific_name)
+            scientific_name = re.sub(" +", "_", scientific_name)
+            scientific_name = re.sub("^_+|_+$", "", scientific_name)
+            assembly_accession = get_assembly_accession(metadb_server, "ensembl_genome_metadata", genome_uuid)
+            if assembly_accession == "" or assembly_accession is None:
+                raise Exception(f"[ERROR] Could not retrieve assembly accession for genome uuid - {genome_uuid}")
+        
+            source_fasta = os.path.join(FASTA_FTP_BASE_DIR, scientific_name, assembly_accession, "genome", FASTA_FILE_NAME)
 
         if not os.path.isfile(source_fasta):
             raise FileNotFoundError(f"Could not find - {source_fasta}")
         else:
-            compressed_fasta = os.path.join(out_dir, "unmasked.fa.gz")
+            compressed_fasta = os.path.join(out_dir, FASTA_FILE_NAME)
             returncode = copyto(source_fasta, compressed_fasta)
             if returncode != 0:
                 raise Exception(f"Failed to copy.\n\tSource - {source_fasta}\n\tTarget - {compressed_fasta}")

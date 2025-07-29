@@ -17,56 +17,115 @@
 from cyvcf2 import VCF, Writer
 import os
 import argparse
+import subprocess
+from enum import Enum
 
 parser = argparse.ArgumentParser()
 parser.add_argument(dest="input", type=str, help="Population VCF file path")
 parser.add_argument(dest="sample", type=str, help="Sample name")
 parser.add_argument("--output_dir", dest="output_dir", type=str, help="Output directory")
+parser.add_argument("--split_sv", dest="split_sv", action="store_true", help="Split the output file into short and structural variant")
 parser.add_argument("--debug", dest="debug", action="store_true", help="Debug mode")
 args = parser.parse_args()
 
+def get_sample_genotype_prefix(sample):
+    if sample == "GRCh38":
+        return {0: 'GCA_000001405.29'}
+    else:
+        return {0: 'paternal', 1: 'maternal'}
+    
+def generate_filenames(sample, split_sv):
+    genotype_prefix = get_sample_genotype_prefix(sample)
+    output_files = {
+        gt_idx: f"{sample}_{prefix}.vcf"
+        for gt_idx, prefix in genotype_prefix.items()
+    }
+
+    filenames = {}
+    if split_sv:
+        filenames["short_variant"] = {
+                gt_idx: o_filename.replace(".vcf", "_short_variants.vcf") 
+                for gt_idx, o_filename in output_files.items()
+            }
+        filenames["structural_variant"] = {
+                gt_idx: o_filename.replace(".vcf", "_structural_variants.vcf") 
+                for gt_idx, o_filename in output_files.items()
+            }
+    else:
+        filenames["short_variant"] = output_files
+        filenames["structural_variant"] = output_files
+
+    return filenames 
+
+def bgzip_file(file: str) -> bool:
+    if not os.path.isfile(file):
+        raise FileNotFoundError(f"File not found - {file}")
+    
+    process = subprocess.run(["bgzip", file])
+    if process.returncode != 0:
+        raise Exception("Failed to bgzip - {file}")
+    
+def index_file(file: str) -> bool:
+    if not os.path.isfile(file):
+        raise FileNotFoundError(f"File not found - {file}")
+    
+    process = subprocess.run(["tabix", "-C", "-p", "vcf", file])
+    if process.returncode != 0:
+        raise Exception("Failed to create tabix index for - {file}")
+
+
+STRUCTURAL_VARIANT_LEN = 50
 sample = args.sample
 input_vcf = VCF(
     args.input,
     samples = [sample]
 )
 out_dir = args.output_dir or "/nfs/production/flicek/ensembl/variation/new_website/SV/process_hgvs3/outputs/"
-
-if sample == "GRCh38":
-    o_vcf = os.path.join(out_dir, "GRCh38_GCA_018504625.1.vcf")
-
-    o_vcf_writer = Writer(o_vcf, input_vcf)
-else:
-    paternal_vcf = os.path.join(out_dir, "NA20129_GCA_018504625.1.vcf")
-    maternal_vcf = os.path.join(out_dir, "NA20129_GCA_018504635.2.vcf")
-
-    paternal_vcf_writer = Writer(paternal_vcf, input_vcf)
-    maternal_vcf_writer = Writer(maternal_vcf, input_vcf)
+filenames = generate_filenames(sample, args.split_sv)
+writers = {}
+writers['short_variant'] = {
+    gt_idx: Writer(os.path.join(out_dir, filename), input_vcf) 
+    for gt_idx, filename in filenames['short_variant'].items()
+}
+writers['structural_variant'] = {
+    gt_idx: Writer(os.path.join(out_dir, filename), input_vcf) 
+    for gt_idx, filename in filenames['structural_variant'].items()
+}
 
 sample_idx = input_vcf.samples.index(sample)
 counter = 100
 for variant in input_vcf:
+    # id_tag = variant.INFO.get("ID")
+    # var_type = id_tag.split("-")[2]
+    
+    max_allele_len = max([len(allele)for allele in variant.ALT + [variant.REF]])
+    type = 'short_variant'
+    if max_allele_len > STRUCTURAL_VARIANT_LEN:
+        type = 'structural_variant'
+
     genotype = variant.genotypes[sample_idx]
-    id_tag = variant.INFO.get("ID")
-    var_type = id_tag.split("-")[2]
-
-    if sample == "GRCh38":
-        if genotype[0]:
-            o_vcf_writer.write_record(variant)
-    else:
-        if genotype[0] and var_type != "SNV":
-            paternal_vcf_writer.write_record(variant)
-        if genotype[1] and var_type != "SNV":
-            maternal_vcf_writer.write_record(variant)
-
+    for gt_idx, gt in enumerate(genotype[:-1]):
+        if gt:
+            writer = writers[type][gt_idx]
+            writer.write_record(variant)
 
     if args.debug and not counter:
         break
     counter -= 1
 
 input_vcf.close()
-if sample == "GRCh38":
-    o_vcf_writer.close()
-else:
-    paternal_vcf_writer.close()
-    maternal_vcf_writer.close()
+all_writers = set(
+    list(writers['short_variant'].values()) + 
+    list(writers['structural_variant'].values())
+)
+for writer in all_writers:
+    writer.close()
+
+all_files = set(
+    list(filenames['short_variant'].values()) +
+    list(filenames['structural_variant'].values())
+)
+for file in all_files:
+    file = os.path.join(out_dir, file)
+    bgzip_file(file)
+    index_file(file + ".gz")

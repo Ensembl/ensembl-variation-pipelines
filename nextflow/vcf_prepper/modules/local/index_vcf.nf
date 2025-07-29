@@ -28,7 +28,7 @@ process INDEX_VCF {
   shell:
   index_type = meta.index_type
   flag_index = (index_type == "tbi" ? "-t" : "-c")
-  new_vcf = "${meta.genome}-${meta.source}".replaceAll("\\.", "_") + ".vcf.gz"
+  new_vcf = "${meta.genome}-${meta.source}.vcf.gz"
   vcf_index = new_vcf + ".${index_type}"
   
   '''

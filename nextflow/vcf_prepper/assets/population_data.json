@@ -725,11 +725,9 @@
    "ovis_aries": [
       {
          "name": "NextGen:IROA",
-         "representative": true,
          "files": [
             {
                "short_name": "NextGen:IROA",
-               "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/IROA.population_sites.OARv3_1.20140307.vcf.gz",
                "include_fields": [
                   {
@@ -746,11 +744,9 @@
       },
       {
          "name": "NextGen:MOOA",
-         "representative": true,
          "files": [
             {
                "short_name": "NextGen:MOOA",
-               "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/MOOA.population_sites.OARv3_1.20140328.vcf.gz",
                "include_fields": [
                   {
@@ -772,7 +768,7 @@
             {
                "short_name": "ISGC",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/####CHR####.filtered_intersect.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/###CHR###.filtered_intersect.vcf.gz",
                "include_fields": [
                   {
                      "name": "ISGC",
@@ -787,10 +783,9 @@
          ]
       }
    ],
-   "ovis_aries_rambouillet": [
+   "ovis_aries_gca016772045v1": [
       {
          "name": "NextGen:IROA",
-         "representative": true,
          "files": [
             {
                "short_name": "NextGen:IROA",
@@ -811,7 +806,6 @@
       },
       {
          "name": "NextGen:MOOA",
-         "representative": true,
          "files": [
             {
                "short_name": "NextGen:MOOA",
@@ -837,7 +831,7 @@
             {
                "short_name": "ISGC",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/####CHR####.filtered_ARS-UI_Ramb_v2.0_intersect.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/###CHR###.filtered_ARS-UI_Ramb_v2.0_intersect.vcf.gz",
                "include_fields": [
                   {
                      "name": "ISGC",
@@ -985,10 +979,12 @@
    "salmo_salar": [
       {
          "name": "ALL:PRJEB34225",
+         "representative": true,
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB34225/salmo_salar/Ssal_v3.1/Salmon_SNP_80_samples_freebayes_EBI_noINFO_remap_freq.vcf.gz",
                "short_name": "ALL:PRJEB34225",
+               "representative_af_field": "ALL:PRJEB34225_AF",
                "include_fields": [
                   {
                      "name": "ALL:PRJEB34225",
@@ -1030,10 +1026,12 @@
    "oryctolagus_cuniculus": [
       {
          "name": "ALL:PRJEB27278",
+         "representative": true,
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB27278/oryctolagus_cuniculus/OryCun2.0/Craniosnyostotic_Rabbit_Colony_eva08062018_freq.vcf.gz",
                "short_name": "ALL:PRJEB27278",
+               "representative_af_field": "ALL:PRJEB27278_AF",
                "include_fields": [
                   {
                      "name": "ICN",
@@ -1108,10 +1106,12 @@
       },
       {
          "name": "Watkins_collection:All",
+         "representative": true,
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/combined_watkins_nochr.INFO_freq.vcf.gz",
                "short_name": "Watkins_collection:All",
+               "representative_af_field": "Watkins_collection:All_AF",
                "include_fields": [
                   {
                      "name": "Watkins_collection:AG3",
@@ -1190,7 +1190,7 @@
          ]
       }
    ],
-   "oryza_sativa": [
+   "oryza_sativa_gca001433935v1cm": [
       {
          "name": "Collection from BGI 2004",
          "files": [
@@ -1283,10 +1283,12 @@
       },
       {
          "name": "Collection from Rice 3k",
+         "representative": true,
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/rice_3k_###CHR###_freq.vcf.gz",
                "short_name": "Collection from Rice 3k",
+               "representative_af_field": "Collection from Rice 3k_AF",
                "include_fields": [
                   {
                      "name": "Collection from Rice 3k",
@@ -1323,6 +1325,7 @@
    "aedes_aegypti_lvpagwg": [
       {
          "name": "UNSPECIFIED",
+         "representative": true,
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000125_Aedes_Faucon_2015_IR_2_AaegL5_freq.vcf.gz",
@@ -1337,75 +1340,75 @@
                      }
                   },
                   {
-                     "name": "Bora Bora strain%2C deltamethrin susceptible",
+                     "name": "Bora Bora strain$2C deltamethrin susceptible",
                      "fields": {
-                        "af": "Bora Bora strain%2C deltamethrin susceptible_AF",
-                        "ac": "Bora Bora strain%2C deltamethrin susceptible_AC",
-                        "an": "Bora Bora strain%2C deltamethrin susceptible_AN"
+                        "af": "Bora Bora strain$2C deltamethrin susceptible_AF",
+                        "ac": "Bora Bora strain$2C deltamethrin susceptible_AC",
+                        "an": "Bora Bora strain$2C deltamethrin susceptible_AN"
                      }
                   },
                   {
-                     "name": "Saint-Georges strain (French Guiana)%2C deltamethrin resistant (2014)",
+                     "name": "Saint-Georges strain (French Guiana)$2C deltamethrin resistant (2014)",
                      "fields": {
-                        "af": "Saint-Georges strain (French Guiana)%2C deltamethrin resistant (2014)_AF",
-                        "ac": "Saint-Georges strain (French Guiana)%2C deltamethrin resistant (2014)_AC",
-                        "an": "Saint-Georges strain (French Guiana)%2C deltamethrin resistant (2014)_AN"
+                        "af": "Saint-Georges strain (French Guiana)$2C deltamethrin resistant (2014)_AF",
+                        "ac": "Saint-Georges strain (French Guiana)$2C deltamethrin resistant (2014)_AC",
+                        "an": "Saint-Georges strain (French Guiana)$2C deltamethrin resistant (2014)_AN"
                      }
                   },
                   {
-                     "name": "Saint-Georges strain (French Guiana)%2C deltamethrin susceptible (2014)",
+                     "name": "Saint-Georges strain (French Guiana)$2C deltamethrin susceptible (2014)",
                      "fields": {
-                        "af": "Saint-Georges strain (French Guiana)%2C deltamethrin susceptible (2014)_AF",
-                        "ac": "Saint-Georges strain (French Guiana)%2C deltamethrin susceptible (2014)_AC",
-                        "an": "Saint-Georges strain (French Guiana)%2C deltamethrin susceptible (2014)_AN"
+                        "af": "Saint-Georges strain (French Guiana)$2C deltamethrin susceptible (2014)_AF",
+                        "ac": "Saint-Georges strain (French Guiana)$2C deltamethrin susceptible (2014)_AC",
+                        "an": "Saint-Georges strain (French Guiana)$2C deltamethrin susceptible (2014)_AN"
                      }
                   },
                   {
-                     "name": "Nakhonsawan strain (Thailand)%2C deltamethrin resistant (2014)",
+                     "name": "Nakhonsawan strain (Thailand)$2C deltamethrin resistant (2014)",
                      "fields": {
-                        "af": "Nakhonsawan strain (Thailand)%2C deltamethrin resistant (2014)_AF",
-                        "ac": "Nakhonsawan strain (Thailand)%2C deltamethrin resistant (2014)_AC",
-                        "an": "Nakhonsawan strain (Thailand)%2C deltamethrin resistant (2014)_AN"
+                        "af": "Nakhonsawan strain (Thailand)$2C deltamethrin resistant (2014)_AF",
+                        "ac": "Nakhonsawan strain (Thailand)$2C deltamethrin resistant (2014)_AC",
+                        "an": "Nakhonsawan strain (Thailand)$2C deltamethrin resistant (2014)_AN"
                      }
                   },
                   {
-                     "name": "Phetchaburi strain (Thailand)%2C deltamethrin susceptible (2014)",
+                     "name": "Phetchaburi strain (Thailand)$2C deltamethrin susceptible (2014)",
                      "fields": {
-                        "af": "Phetchaburi strain (Thailand)%2C deltamethrin susceptible (2014)_AF",
-                        "ac": "Phetchaburi strain (Thailand)%2C deltamethrin susceptible (2014)_AC",
-                        "an": "Phetchaburi strain (Thailand)%2C deltamethrin susceptible (2014)_AN"
+                        "af": "Phetchaburi strain (Thailand)$2C deltamethrin susceptible (2014)_AF",
+                        "ac": "Phetchaburi strain (Thailand)$2C deltamethrin susceptible (2014)_AC",
+                        "an": "Phetchaburi strain (Thailand)$2C deltamethrin susceptible (2014)_AN"
                      }
                   },
                   {
-                     "name": "Phetchaburi strain (Thailand)%2C deltamethrin resistant (2014)",
+                     "name": "Phetchaburi strain (Thailand)$2C deltamethrin resistant (2014)",
                      "fields": {
-                        "af": "Phetchaburi strain (Thailand)%2C deltamethrin resistant (2014)_AF",
-                        "ac": "Phetchaburi strain (Thailand)%2C deltamethrin resistant (2014)_AC",
-                        "an": "Phetchaburi strain (Thailand)%2C deltamethrin resistant (2014)_AN"
+                        "af": "Phetchaburi strain (Thailand)$2C deltamethrin resistant (2014)_AF",
+                        "ac": "Phetchaburi strain (Thailand)$2C deltamethrin resistant (2014)_AC",
+                        "an": "Phetchaburi strain (Thailand)$2C deltamethrin resistant (2014)_AN"
                      }
                   },
                   {
-                     "name": "Pattalung strain (Thailand)%2C deltamethrin susceptible",
+                     "name": "Pattalung strain (Thailand)$2C deltamethrin susceptible",
                      "fields": {
-                        "af": "Pattalung strain (Thailand)%2C deltamethrin susceptible_AF",
-                        "ac": "Pattalung strain (Thailand)%2C deltamethrin susceptible_AC",
-                        "an": "Pattalung strain (Thailand)%2C deltamethrin susceptible_AN"
+                        "af": "Pattalung strain (Thailand)$2C deltamethrin susceptible_AF",
+                        "ac": "Pattalung strain (Thailand)$2C deltamethrin susceptible_AC",
+                        "an": "Pattalung strain (Thailand)$2C deltamethrin susceptible_AN"
                      }
                   },
                   {
-                     "name": "New Orleans strain (USA)%2C deltamethrin susceptible",
+                     "name": "New Orleans strain (USA)$2C deltamethrin susceptible",
                      "fields": {
-                        "af": "New Orleans strain (USA)%2C deltamethrin susceptible_AF",
-                        "ac": "New Orleans strain (USA)%2C deltamethrin susceptible_AC",
-                        "an": "New Orleans strain (USA)%2C deltamethrin susceptible_AN"
+                        "af": "New Orleans strain (USA)$2C deltamethrin susceptible_AF",
+                        "ac": "New Orleans strain (USA)$2C deltamethrin susceptible_AC",
+                        "an": "New Orleans strain (USA)$2C deltamethrin susceptible_AN"
                      }
                   },
                   {
-                     "name": "Nakhonsawan strain (Thailand)%2C deltamethrin susceptible (2014)",
+                     "name": "Nakhonsawan strain (Thailand)$2C deltamethrin susceptible (2014)",
                      "fields": {
-                        "af": "Nakhonsawan strain (Thailand)%2C deltamethrin susceptible (2014)_AF",
-                        "ac": "Nakhonsawan strain (Thailand)%2C deltamethrin susceptible (2014)_AC",
-                        "an": "Nakhonsawan strain (Thailand)%2C deltamethrin susceptible (2014)_AN"
+                        "af": "Nakhonsawan strain (Thailand)$2C deltamethrin susceptible (2014)_AF",
+                        "ac": "Nakhonsawan strain (Thailand)$2C deltamethrin susceptible (2014)_AC",
+                        "an": "Nakhonsawan strain (Thailand)$2C deltamethrin susceptible (2014)_AN"
                      }
                   },
                   {
@@ -1417,19 +1420,19 @@
                      }
                   },
                   {
-                     "name": "Cayenne strain (French Guiana)%2C deltamethrin susceptible (2014)",
+                     "name": "Cayenne strain (French Guiana)$2C deltamethrin susceptible (2014)",
                      "fields": {
-                        "af": "Cayenne strain (French Guiana)%2C deltamethrin susceptible (2014)_AF",
-                        "ac": "Cayenne strain (French Guiana)%2C deltamethrin susceptible (2014)_AC",
-                        "an": "Cayenne strain (French Guiana)%2C deltamethrin susceptible (2014)_AN"
+                        "af": "Cayenne strain (French Guiana)$2C deltamethrin susceptible (2014)_AF",
+                        "ac": "Cayenne strain (French Guiana)$2C deltamethrin susceptible (2014)_AC",
+                        "an": "Cayenne strain (French Guiana)$2C deltamethrin susceptible (2014)_AN"
                      }
                   },
                   {
-                     "name": "Cayenne strain (French Guiana)%2C deltamethrin resistant (2014)",
+                     "name": "Cayenne strain (French Guiana)$2C deltamethrin resistant (2014)",
                      "fields": {
-                        "af": "Cayenne strain (French Guiana)%2C deltamethrin resistant (2014)_AF",
-                        "ac": "Cayenne strain (French Guiana)%2C deltamethrin resistant (2014)_AC",
-                        "an": "Cayenne strain (French Guiana)%2C deltamethrin resistant (2014)_AN"
+                        "af": "Cayenne strain (French Guiana)$2C deltamethrin resistant (2014)_AF",
+                        "ac": "Cayenne strain (French Guiana)$2C deltamethrin resistant (2014)_AC",
+                        "an": "Cayenne strain (French Guiana)$2C deltamethrin resistant (2014)_AN"
                      }
                   }
                ]
@@ -1444,275 +1447,275 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "Tijuana%2C Mexico (2013)",
+                     "name": "Tijuana$2C Mexico (2013)",
                      "fields": {
-                        "af": "Tijuana%2C Mexico (2013)_AF",
-                        "ac": "Tijuana%2C Mexico (2013)_AC",
-                        "an": "Tijuana%2C Mexico (2013)_AN"
+                        "af": "Tijuana$2C Mexico (2013)_AF",
+                        "ac": "Tijuana$2C Mexico (2013)_AC",
+                        "an": "Tijuana$2C Mexico (2013)_AN"
                      }
                   },
                   {
-                     "name": "New Orleans%2C LA%2C USA (2012)",
+                     "name": "New Orleans$2C LA$2C USA (2012)",
                      "fields": {
-                        "af": "New Orleans%2C LA%2C USA (2012)_AF",
-                        "ac": "New Orleans%2C LA%2C USA (2012)_AC",
-                        "an": "New Orleans%2C LA%2C USA (2012)_AN"
+                        "af": "New Orleans$2C LA$2C USA (2012)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2012)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2012)_AN"
                      }
                   },
                   {
-                     "name": "Clovis%2C CA (2013)",
+                     "name": "Clovis$2C CA (2013)",
                      "fields": {
-                        "af": "Clovis%2C CA (2013)_AF",
-                        "ac": "Clovis%2C CA (2013)_AC",
-                        "an": "Clovis%2C CA (2013)_AN"
+                        "af": "Clovis$2C CA (2013)_AF",
+                        "ac": "Clovis$2C CA (2013)_AC",
+                        "an": "Clovis$2C CA (2013)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Australia field isolate%2C Queensland Cairns 2011%2C individual insect (2011)",
+                     "name": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti Australia field isolate%2C Queensland Cairns 2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti Australia field isolate%2C Queensland Cairns 2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti Australia field isolate%2C Queensland Cairns 2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "Muscogee County%2C Georgia%2C USA (2012)",
+                     "name": "Muscogee County$2C Georgia$2C USA (2012)",
                      "fields": {
-                        "af": "Muscogee County%2C Georgia%2C USA (2012)_AF",
-                        "ac": "Muscogee County%2C Georgia%2C USA (2012)_AC",
-                        "an": "Muscogee County%2C Georgia%2C USA (2012)_AN"
+                        "af": "Muscogee County$2C Georgia$2C USA (2012)_AF",
+                        "ac": "Muscogee County$2C Georgia$2C USA (2012)_AC",
+                        "an": "Muscogee County$2C Georgia$2C USA (2012)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)",
+                     "name": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)",
                      "fields": {
-                        "af": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AF",
-                        "ac": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AC",
-                        "an": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AN"
+                        "af": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AN"
                      }
                   },
                   {
-                     "name": "North Key West%2C FL%2C USA (2013)",
+                     "name": "North Key West$2C FL$2C USA (2013)",
                      "fields": {
-                        "af": "North Key West%2C FL%2C USA (2013)_AF",
-                        "ac": "North Key West%2C FL%2C USA (2013)_AC",
-                        "an": "North Key West%2C FL%2C USA (2013)_AN"
+                        "af": "North Key West$2C FL$2C USA (2013)_AF",
+                        "ac": "North Key West$2C FL$2C USA (2013)_AC",
+                        "an": "North Key West$2C FL$2C USA (2013)_AN"
                      }
                   },
                   {
-                     "name": "Attock%2C Pakistan (2014)",
+                     "name": "Attock$2C Pakistan (2014)",
                      "fields": {
-                        "af": "Attock%2C Pakistan (2014)_AF",
-                        "ac": "Attock%2C Pakistan (2014)_AC",
-                        "an": "Attock%2C Pakistan (2014)_AN"
+                        "af": "Attock$2C Pakistan (2014)_AF",
+                        "ac": "Attock$2C Pakistan (2014)_AC",
+                        "an": "Attock$2C Pakistan (2014)_AN"
                      }
                   },
                   {
-                     "name": "Cali%2C Colombia (2013)",
+                     "name": "Cali$2C Colombia (2013)",
                      "fields": {
-                        "af": "Cali%2C Colombia (2013)_AF",
-                        "ac": "Cali%2C Colombia (2013)_AC",
-                        "an": "Cali%2C Colombia (2013)_AN"
+                        "af": "Cali$2C Colombia (2013)_AF",
+                        "ac": "Cali$2C Colombia (2013)_AC",
+                        "an": "Cali$2C Colombia (2013)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti French Polynesia field isolate%2C Tahiti  2013%2C individual insect (2013)",
+                     "name": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)",
                      "fields": {
-                        "af": "A.aegypti French Polynesia field isolate%2C Tahiti  2013%2C individual insect (2013)_AF",
-                        "ac": "A.aegypti French Polynesia field isolate%2C Tahiti  2013%2C individual insect (2013)_AC",
-                        "an": "A.aegypti French Polynesia field isolate%2C Tahiti  2013%2C individual insect (2013)_AN"
+                        "af": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AN"
                      }
                   },
                   {
-                     "name": "Hanoi%2C Vietnam (2013)",
+                     "name": "Hanoi$2C Vietnam (2013)",
                      "fields": {
-                        "af": "Hanoi%2C Vietnam (2013)_AF",
-                        "ac": "Hanoi%2C Vietnam (2013)_AC",
-                        "an": "Hanoi%2C Vietnam (2013)_AN"
+                        "af": "Hanoi$2C Vietnam (2013)_AF",
+                        "ac": "Hanoi$2C Vietnam (2013)_AC",
+                        "an": "Hanoi$2C Vietnam (2013)_AN"
                      }
                   },
                   {
-                     "name": "Madera%2C CA (2015)",
+                     "name": "Madera$2C CA (2015)",
                      "fields": {
-                        "af": "Madera%2C CA (2015)_AF",
-                        "ac": "Madera%2C CA (2015)_AC",
-                        "an": "Madera%2C CA (2015)_AN"
+                        "af": "Madera$2C CA (2015)_AF",
+                        "ac": "Madera$2C CA (2015)_AC",
+                        "an": "Madera$2C CA (2015)_AN"
                      }
                   },
                   {
-                     "name": "Hopa%2C Turkey (2015)",
+                     "name": "Hopa$2C Turkey (2015)",
                      "fields": {
-                        "af": "Hopa%2C Turkey (2015)_AF",
-                        "ac": "Hopa%2C Turkey (2015)_AC",
-                        "an": "Hopa%2C Turkey (2015)_AN"
+                        "af": "Hopa$2C Turkey (2015)_AF",
+                        "ac": "Hopa$2C Turkey (2015)_AC",
+                        "an": "Hopa$2C Turkey (2015)_AN"
                      }
                   },
                   {
-                     "name": "Trinidad%2C Republic of Trinidad and Tobaco (2014)",
+                     "name": "Trinidad$2C Republic of Trinidad and Tobaco (2014)",
                      "fields": {
-                        "af": "Trinidad%2C Republic of Trinidad and Tobaco (2014)_AF",
-                        "ac": "Trinidad%2C Republic of Trinidad and Tobaco (2014)_AC",
-                        "an": "Trinidad%2C Republic of Trinidad and Tobaco (2014)_AN"
+                        "af": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AF",
+                        "ac": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AC",
+                        "an": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)",
+                     "name": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "Tapachula Norte%2C CHP%2C Mexico (2012)",
+                     "name": "Tapachula Norte$2C CHP$2C Mexico (2012)",
                      "fields": {
-                        "af": "Tapachula Norte%2C CHP%2C Mexico (2012)_AF",
-                        "ac": "Tapachula Norte%2C CHP%2C Mexico (2012)_AC",
-                        "an": "Tapachula Norte%2C CHP%2C Mexico (2012)_AN"
+                        "af": "Tapachula Norte$2C CHP$2C Mexico (2012)_AF",
+                        "ac": "Tapachula Norte$2C CHP$2C Mexico (2012)_AC",
+                        "an": "Tapachula Norte$2C CHP$2C Mexico (2012)_AN"
                      }
                   },
                   {
-                     "name": "Tbilisi-Tsereteli%2C Georgia (2015)",
+                     "name": "Tbilisi-Tsereteli$2C Georgia (2015)",
                      "fields": {
-                        "af": "Tbilisi-Tsereteli%2C Georgia (2015)_AF",
-                        "ac": "Tbilisi-Tsereteli%2C Georgia (2015)_AC",
-                        "an": "Tbilisi-Tsereteli%2C Georgia (2015)_AN"
+                        "af": "Tbilisi-Tsereteli$2C Georgia (2015)_AF",
+                        "ac": "Tbilisi-Tsereteli$2C Georgia (2015)_AC",
+                        "an": "Tbilisi-Tsereteli$2C Georgia (2015)_AN"
                      }
                   },
                   {
-                     "name": "Johannesburg%2C South Africa (2015)",
+                     "name": "Johannesburg$2C South Africa (2015)",
                      "fields": {
-                        "af": "Johannesburg%2C South Africa (2015)_AF",
-                        "ac": "Johannesburg%2C South Africa (2015)_AC",
-                        "an": "Johannesburg%2C South Africa (2015)_AN"
+                        "af": "Johannesburg$2C South Africa (2015)_AF",
+                        "ac": "Johannesburg$2C South Africa (2015)_AC",
+                        "an": "Johannesburg$2C South Africa (2015)_AN"
                      }
                   },
                   {
-                     "name": "Amacuzac%2C MOR%2C Mexico (2014)",
+                     "name": "Amacuzac$2C MOR$2C Mexico (2014)",
                      "fields": {
-                        "af": "Amacuzac%2C MOR%2C Mexico (2014)_AF",
-                        "ac": "Amacuzac%2C MOR%2C Mexico (2014)_AC",
-                        "an": "Amacuzac%2C MOR%2C Mexico (2014)_AN"
+                        "af": "Amacuzac$2C MOR$2C Mexico (2014)_AF",
+                        "ac": "Amacuzac$2C MOR$2C Mexico (2014)_AC",
+                        "an": "Amacuzac$2C MOR$2C Mexico (2014)_AN"
                      }
                   },
                   {
-                     "name": "Nogales%2C SON%2C Mexico (2013)",
+                     "name": "Nogales$2C SON$2C Mexico (2013)",
                      "fields": {
-                        "af": "Nogales%2C SON%2C Mexico (2013)_AF",
-                        "ac": "Nogales%2C SON%2C Mexico (2013)_AC",
-                        "an": "Nogales%2C SON%2C Mexico (2013)_AN"
+                        "af": "Nogales$2C SON$2C Mexico (2013)_AF",
+                        "ac": "Nogales$2C SON$2C Mexico (2013)_AC",
+                        "an": "Nogales$2C SON$2C Mexico (2013)_AN"
                      }
                   },
                   {
-                     "name": "New Orleans%2C LA%2C USA (2011)",
+                     "name": "New Orleans$2C LA$2C USA (2011)",
                      "fields": {
-                        "af": "New Orleans%2C LA%2C USA (2011)_AF",
-                        "ac": "New Orleans%2C LA%2C USA (2011)_AC",
-                        "an": "New Orleans%2C LA%2C USA (2011)_AN"
+                        "af": "New Orleans$2C LA$2C USA (2011)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2011)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2011)_AN"
                      }
                   },
                   {
-                     "name": "Goudiry%2C Senegal (2012)",
+                     "name": "Goudiry$2C Senegal (2012)",
                      "fields": {
-                        "af": "Goudiry%2C Senegal (2012)_AF",
-                        "ac": "Goudiry%2C Senegal (2012)_AC",
-                        "an": "Goudiry%2C Senegal (2012)_AN"
+                        "af": "Goudiry$2C Senegal (2012)_AF",
+                        "ac": "Goudiry$2C Senegal (2012)_AC",
+                        "an": "Goudiry$2C Senegal (2012)_AN"
                      }
                   },
                   {
-                     "name": "Cebu City%2C Philippines (2013)",
+                     "name": "Cebu City$2C Philippines (2013)",
                      "fields": {
-                        "af": "Cebu City%2C Philippines (2013)_AF",
-                        "ac": "Cebu City%2C Philippines (2013)_AC",
-                        "an": "Cebu City%2C Philippines (2013)_AN"
+                        "af": "Cebu City$2C Philippines (2013)_AF",
+                        "ac": "Cebu City$2C Philippines (2013)_AC",
+                        "an": "Cebu City$2C Philippines (2013)_AN"
                      }
                   },
                   {
-                     "name": "Aedes mascarensis%2C Mauritius (2014)",
+                     "name": "Aedes mascarensis$2C Mauritius (2014)",
                      "fields": {
-                        "af": "Aedes mascarensis%2C Mauritius (2014)_AF",
-                        "ac": "Aedes mascarensis%2C Mauritius (2014)_AC",
-                        "an": "Aedes mascarensis%2C Mauritius (2014)_AN"
+                        "af": "Aedes mascarensis$2C Mauritius (2014)_AF",
+                        "ac": "Aedes mascarensis$2C Mauritius (2014)_AC",
+                        "an": "Aedes mascarensis$2C Mauritius (2014)_AN"
                      }
                   },
                   {
-                     "name": "Rio de Janeiro%2C Brazil (2014)",
+                     "name": "Rio de Janeiro$2C Brazil (2014)",
                      "fields": {
-                        "af": "Rio de Janeiro%2C Brazil (2014)_AF",
-                        "ac": "Rio de Janeiro%2C Brazil (2014)_AC",
-                        "an": "Rio de Janeiro%2C Brazil (2014)_AN"
+                        "af": "Rio de Janeiro$2C Brazil (2014)_AF",
+                        "ac": "Rio de Janeiro$2C Brazil (2014)_AC",
+                        "an": "Rio de Janeiro$2C Brazil (2014)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti USA field isolate%2C Puerto Rico Patillas 2013%2C individual insect (2013)",
+                     "name": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)",
                      "fields": {
-                        "af": "A.aegypti USA field isolate%2C Puerto Rico Patillas 2013%2C individual insect (2013)_AF",
-                        "ac": "A.aegypti USA field isolate%2C Puerto Rico Patillas 2013%2C individual insect (2013)_AC",
-                        "an": "A.aegypti USA field isolate%2C Puerto Rico Patillas 2013%2C individual insect (2013)_AN"
+                        "af": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AN"
                      }
                   },
                   {
-                     "name": "Siquirres%2C Costa Rica (2014)",
+                     "name": "Siquirres$2C Costa Rica (2014)",
                      "fields": {
-                        "af": "Siquirres%2C Costa Rica (2014)_AF",
-                        "ac": "Siquirres%2C Costa Rica (2014)_AC",
-                        "an": "Siquirres%2C Costa Rica (2014)_AN"
+                        "af": "Siquirres$2C Costa Rica (2014)_AF",
+                        "ac": "Siquirres$2C Costa Rica (2014)_AC",
+                        "an": "Siquirres$2C Costa Rica (2014)_AN"
                      }
                   },
                   {
-                     "name": "Punjab%2C Pakistan (2010)",
+                     "name": "Punjab$2C Pakistan (2010)",
                      "fields": {
-                        "af": "Punjab%2C Pakistan (2010)_AF",
-                        "ac": "Punjab%2C Pakistan (2010)_AC",
-                        "an": "Punjab%2C Pakistan (2010)_AN"
+                        "af": "Punjab$2C Pakistan (2010)_AF",
+                        "ac": "Punjab$2C Pakistan (2010)_AC",
+                        "an": "Punjab$2C Pakistan (2010)_AN"
                      }
                   },
                   {
-                     "name": "Sedhiou%2C Senegal (2012)",
+                     "name": "Sedhiou$2C Senegal (2012)",
                      "fields": {
-                        "af": "Sedhiou%2C Senegal (2012)_AF",
-                        "ac": "Sedhiou%2C Senegal (2012)_AC",
-                        "an": "Sedhiou%2C Senegal (2012)_AN"
+                        "af": "Sedhiou$2C Senegal (2012)_AF",
+                        "ac": "Sedhiou$2C Senegal (2012)_AC",
+                        "an": "Sedhiou$2C Senegal (2012)_AN"
                      }
                   },
                   {
-                     "name": "Riyadh%2C Saudi Arabia (2012)",
+                     "name": "Riyadh$2C Saudi Arabia (2012)",
                      "fields": {
-                        "af": "Riyadh%2C Saudi Arabia (2012)_AF",
-                        "ac": "Riyadh%2C Saudi Arabia (2012)_AC",
-                        "an": "Riyadh%2C Saudi Arabia (2012)_AN"
+                        "af": "Riyadh$2C Saudi Arabia (2012)_AF",
+                        "ac": "Riyadh$2C Saudi Arabia (2012)_AC",
+                        "an": "Riyadh$2C Saudi Arabia (2012)_AN"
                      }
                   },
                   {
-                     "name": "Maraba%2C Brazil (2010)",
+                     "name": "Maraba$2C Brazil (2010)",
                      "fields": {
-                        "af": "Maraba%2C Brazil (2010)_AF",
-                        "ac": "Maraba%2C Brazil (2010)_AC",
-                        "an": "Maraba%2C Brazil (2010)_AN"
+                        "af": "Maraba$2C Brazil (2010)_AF",
+                        "ac": "Maraba$2C Brazil (2010)_AC",
+                        "an": "Maraba$2C Brazil (2010)_AN"
                      }
                   },
                   {
-                     "name": "Nairobi%2C Kenya (2012)",
+                     "name": "Nairobi$2C Kenya (2012)",
                      "fields": {
-                        "af": "Nairobi%2C Kenya (2012)_AF",
-                        "ac": "Nairobi%2C Kenya (2012)_AC",
-                        "an": "Nairobi%2C Kenya (2012)_AN"
+                        "af": "Nairobi$2C Kenya (2012)_AF",
+                        "ac": "Nairobi$2C Kenya (2012)_AC",
+                        "an": "Nairobi$2C Kenya (2012)_AN"
                      }
                   },
                   {
-                     "name": "Ho Chih Minh%2C Vietnam (2013)",
+                     "name": "Ho Chih Minh$2C Vietnam (2013)",
                      "fields": {
-                        "af": "Ho Chih Minh%2C Vietnam (2013)_AF",
-                        "ac": "Ho Chih Minh%2C Vietnam (2013)_AC",
-                        "an": "Ho Chih Minh%2C Vietnam (2013)_AN"
+                        "af": "Ho Chih Minh$2C Vietnam (2013)_AF",
+                        "ac": "Ho Chih Minh$2C Vietnam (2013)_AC",
+                        "an": "Ho Chih Minh$2C Vietnam (2013)_AN"
                      }
                   },
                   {
-                     "name": "Rio de Janeiro%2C Brazil (2015)",
+                     "name": "Rio de Janeiro$2C Brazil (2015)",
                      "fields": {
-                        "af": "Rio de Janeiro%2C Brazil (2015)_AF",
-                        "ac": "Rio de Janeiro%2C Brazil (2015)_AC",
-                        "an": "Rio de Janeiro%2C Brazil (2015)_AN"
+                        "af": "Rio de Janeiro$2C Brazil (2015)_AF",
+                        "ac": "Rio de Janeiro$2C Brazil (2015)_AC",
+                        "an": "Rio de Janeiro$2C Brazil (2015)_AN"
                      }
                   }
                ]
@@ -1727,83 +1730,83 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "Garden Grove%2C CA (2015)",
+                     "name": "Garden Grove$2C CA (2015)",
                      "fields": {
-                        "af": "Garden Grove%2C CA (2015)_AF",
-                        "ac": "Garden Grove%2C CA (2015)_AC",
-                        "an": "Garden Grove%2C CA (2015)_AN"
+                        "af": "Garden Grove$2C CA (2015)_AF",
+                        "ac": "Garden Grove$2C CA (2015)_AC",
+                        "an": "Garden Grove$2C CA (2015)_AN"
                      }
                   },
                   {
-                     "name": "San Mateo%2C CA (2013)",
+                     "name": "San Mateo$2C CA (2013)",
                      "fields": {
-                        "af": "San Mateo%2C CA (2013)_AF",
-                        "ac": "San Mateo%2C CA (2013)_AC",
-                        "an": "San Mateo%2C CA (2013)_AN"
+                        "af": "San Mateo$2C CA (2013)_AF",
+                        "ac": "San Mateo$2C CA (2013)_AC",
+                        "an": "San Mateo$2C CA (2013)_AN"
                      }
                   },
                   {
-                     "name": "San Diego%2C CA (2015)",
+                     "name": "San Diego$2C CA (2015)",
                      "fields": {
-                        "af": "San Diego%2C CA (2015)_AF",
-                        "ac": "San Diego%2C CA (2015)_AC",
-                        "an": "San Diego%2C CA (2015)_AN"
+                        "af": "San Diego$2C CA (2015)_AF",
+                        "ac": "San Diego$2C CA (2015)_AC",
+                        "an": "San Diego$2C CA (2015)_AN"
                      }
                   },
                   {
-                     "name": "Madera%2C CA (2013)",
+                     "name": "Madera$2C CA (2013)",
                      "fields": {
-                        "af": "Madera%2C CA (2013)_AF",
-                        "ac": "Madera%2C CA (2013)_AC",
-                        "an": "Madera%2C CA (2013)_AN"
+                        "af": "Madera$2C CA (2013)_AF",
+                        "ac": "Madera$2C CA (2013)_AC",
+                        "an": "Madera$2C CA (2013)_AN"
                      }
                   },
                   {
-                     "name": "Clovis%2C CA (2013)",
+                     "name": "Clovis$2C CA (2013)",
                      "fields": {
-                        "af": "Clovis%2C CA (2013)_AF",
-                        "ac": "Clovis%2C CA (2013)_AC",
-                        "an": "Clovis%2C CA (2013)_AN"
+                        "af": "Clovis$2C CA (2013)_AF",
+                        "ac": "Clovis$2C CA (2013)_AC",
+                        "an": "Clovis$2C CA (2013)_AN"
                      }
                   },
                   {
-                     "name": "Los Angeles%2C CA (2014)",
+                     "name": "Los Angeles$2C CA (2014)",
                      "fields": {
-                        "af": "Los Angeles%2C CA (2014)_AF",
-                        "ac": "Los Angeles%2C CA (2014)_AC",
-                        "an": "Los Angeles%2C CA (2014)_AN"
+                        "af": "Los Angeles$2C CA (2014)_AF",
+                        "ac": "Los Angeles$2C CA (2014)_AC",
+                        "an": "Los Angeles$2C CA (2014)_AN"
                      }
                   },
                   {
-                     "name": "Madera%2C CA (2015)",
+                     "name": "Madera$2C CA (2015)",
                      "fields": {
-                        "af": "Madera%2C CA (2015)_AF",
-                        "ac": "Madera%2C CA (2015)_AC",
-                        "an": "Madera%2C CA (2015)_AN"
+                        "af": "Madera$2C CA (2015)_AF",
+                        "ac": "Madera$2C CA (2015)_AC",
+                        "an": "Madera$2C CA (2015)_AN"
                      }
                   },
                   {
-                     "name": "Fresno%2C CA (2015)",
+                     "name": "Fresno$2C CA (2015)",
                      "fields": {
-                        "af": "Fresno%2C CA (2015)_AF",
-                        "ac": "Fresno%2C CA (2015)_AC",
-                        "an": "Fresno%2C CA (2015)_AN"
+                        "af": "Fresno$2C CA (2015)_AF",
+                        "ac": "Fresno$2C CA (2015)_AC",
+                        "an": "Fresno$2C CA (2015)_AN"
                      }
                   },
                   {
-                     "name": "Mission Viejo%2C CA (2015)",
+                     "name": "Mission Viejo$2C CA (2015)",
                      "fields": {
-                        "af": "Mission Viejo%2C CA (2015)_AF",
-                        "ac": "Mission Viejo%2C CA (2015)_AC",
-                        "an": "Mission Viejo%2C CA (2015)_AN"
+                        "af": "Mission Viejo$2C CA (2015)_AF",
+                        "ac": "Mission Viejo$2C CA (2015)_AC",
+                        "an": "Mission Viejo$2C CA (2015)_AN"
                      }
                   },
                   {
-                     "name": "Exeter%2C CA (2014)",
+                     "name": "Exeter$2C CA (2014)",
                      "fields": {
-                        "af": "Exeter%2C CA (2014)_AF",
-                        "ac": "Exeter%2C CA (2014)_AC",
-                        "an": "Exeter%2C CA (2014)_AN"
+                        "af": "Exeter$2C CA (2014)_AF",
+                        "ac": "Exeter$2C CA (2014)_AC",
+                        "an": "Exeter$2C CA (2014)_AN"
                      }
                   }
                ]
@@ -1818,43 +1821,43 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "Tijuana%2C Mexico (2013)",
+                     "name": "Tijuana$2C Mexico (2013)",
                      "fields": {
-                        "af": "Tijuana%2C Mexico (2013)_AF",
-                        "ac": "Tijuana%2C Mexico (2013)_AC",
-                        "an": "Tijuana%2C Mexico (2013)_AN"
+                        "af": "Tijuana$2C Mexico (2013)_AF",
+                        "ac": "Tijuana$2C Mexico (2013)_AC",
+                        "an": "Tijuana$2C Mexico (2013)_AN"
                      }
                   },
                   {
-                     "name": "Jacobina%2C Brazil (2013)",
+                     "name": "Jacobina$2C Brazil (2013)",
                      "fields": {
-                        "af": "Jacobina%2C Brazil (2013)_AF",
-                        "ac": "Jacobina%2C Brazil (2013)_AC",
-                        "an": "Jacobina%2C Brazil (2013)_AN"
+                        "af": "Jacobina$2C Brazil (2013)_AF",
+                        "ac": "Jacobina$2C Brazil (2013)_AC",
+                        "an": "Jacobina$2C Brazil (2013)_AN"
                      }
                   },
                   {
-                     "name": "Clovis%2C CA (2013)",
+                     "name": "Clovis$2C CA (2013)",
                      "fields": {
-                        "af": "Clovis%2C CA (2013)_AF",
-                        "ac": "Clovis%2C CA (2013)_AC",
-                        "an": "Clovis%2C CA (2013)_AN"
+                        "af": "Clovis$2C CA (2013)_AF",
+                        "ac": "Clovis$2C CA (2013)_AC",
+                        "an": "Clovis$2C CA (2013)_AN"
                      }
                   },
                   {
-                     "name": "Fresno%2C CA (2015)",
+                     "name": "Fresno$2C CA (2015)",
                      "fields": {
-                        "af": "Fresno%2C CA (2015)_AF",
-                        "ac": "Fresno%2C CA (2015)_AC",
-                        "an": "Fresno%2C CA (2015)_AN"
+                        "af": "Fresno$2C CA (2015)_AF",
+                        "ac": "Fresno$2C CA (2015)_AC",
+                        "an": "Fresno$2C CA (2015)_AN"
                      }
                   },
                   {
-                     "name": "Muscogee County%2C Georgia%2C USA (2012)",
+                     "name": "Muscogee County$2C Georgia$2C USA (2012)",
                      "fields": {
-                        "af": "Muscogee County%2C Georgia%2C USA (2012)_AF",
-                        "ac": "Muscogee County%2C Georgia%2C USA (2012)_AC",
-                        "an": "Muscogee County%2C Georgia%2C USA (2012)_AN"
+                        "af": "Muscogee County$2C Georgia$2C USA (2012)_AF",
+                        "ac": "Muscogee County$2C Georgia$2C USA (2012)_AC",
+                        "an": "Muscogee County$2C Georgia$2C USA (2012)_AN"
                      }
                   },
                   {
@@ -1874,91 +1877,91 @@
                      }
                   },
                   {
-                     "name": "Sri Lanka%2C SL (2014)",
+                     "name": "Sri Lanka$2C SL (2014)",
                      "fields": {
-                        "af": "Sri Lanka%2C SL (2014)_AF",
-                        "ac": "Sri Lanka%2C SL (2014)_AC",
-                        "an": "Sri Lanka%2C SL (2014)_AN"
+                        "af": "Sri Lanka$2C SL (2014)_AF",
+                        "ac": "Sri Lanka$2C SL (2014)_AC",
+                        "an": "Sri Lanka$2C SL (2014)_AN"
                      }
                   },
                   {
-                     "name": "Attock%2C Pakistan (2014)",
+                     "name": "Attock$2C Pakistan (2014)",
                      "fields": {
-                        "af": "Attock%2C Pakistan (2014)_AF",
-                        "ac": "Attock%2C Pakistan (2014)_AC",
-                        "an": "Attock%2C Pakistan (2014)_AN"
+                        "af": "Attock$2C Pakistan (2014)_AF",
+                        "ac": "Attock$2C Pakistan (2014)_AC",
+                        "an": "Attock$2C Pakistan (2014)_AN"
                      }
                   },
                   {
-                     "name": "Karachi%2C Pakistan (2010)",
+                     "name": "Karachi$2C Pakistan (2010)",
                      "fields": {
-                        "af": "Karachi%2C Pakistan (2010)_AF",
-                        "ac": "Karachi%2C Pakistan (2010)_AC",
-                        "an": "Karachi%2C Pakistan (2010)_AN"
+                        "af": "Karachi$2C Pakistan (2010)_AF",
+                        "ac": "Karachi$2C Pakistan (2010)_AC",
+                        "an": "Karachi$2C Pakistan (2010)_AN"
                      }
                   },
                   {
-                     "name": "Cali%2C Colombia (2013)",
+                     "name": "Cali$2C Colombia (2013)",
                      "fields": {
-                        "af": "Cali%2C Colombia (2013)_AF",
-                        "ac": "Cali%2C Colombia (2013)_AC",
-                        "an": "Cali%2C Colombia (2013)_AN"
+                        "af": "Cali$2C Colombia (2013)_AF",
+                        "ac": "Cali$2C Colombia (2013)_AC",
+                        "an": "Cali$2C Colombia (2013)_AN"
                      }
                   },
                   {
-                     "name": "Madera%2C California%2C USA (2013)",
+                     "name": "Madera$2C California$2C USA (2013)",
                      "fields": {
-                        "af": "Madera%2C California%2C USA (2013)_AF",
-                        "ac": "Madera%2C California%2C USA (2013)_AC",
-                        "an": "Madera%2C California%2C USA (2013)_AN"
+                        "af": "Madera$2C California$2C USA (2013)_AF",
+                        "ac": "Madera$2C California$2C USA (2013)_AC",
+                        "an": "Madera$2C California$2C USA (2013)_AN"
                      }
                   },
                   {
-                     "name": "Hanoi%2C Vietnam (2013)",
+                     "name": "Hanoi$2C Vietnam (2013)",
                      "fields": {
-                        "af": "Hanoi%2C Vietnam (2013)_AF",
-                        "ac": "Hanoi%2C Vietnam (2013)_AC",
-                        "an": "Hanoi%2C Vietnam (2013)_AN"
+                        "af": "Hanoi$2C Vietnam (2013)_AF",
+                        "ac": "Hanoi$2C Vietnam (2013)_AC",
+                        "an": "Hanoi$2C Vietnam (2013)_AN"
                      }
                   },
                   {
-                     "name": "Madera%2C CA (2015)",
+                     "name": "Madera$2C CA (2015)",
                      "fields": {
-                        "af": "Madera%2C CA (2015)_AF",
-                        "ac": "Madera%2C CA (2015)_AC",
-                        "an": "Madera%2C CA (2015)_AN"
+                        "af": "Madera$2C CA (2015)_AF",
+                        "ac": "Madera$2C CA (2015)_AC",
+                        "an": "Madera$2C CA (2015)_AN"
                      }
                   },
                   {
-                     "name": "Trinidad%2C Republic of Trinidad and Tobaco (2014)",
+                     "name": "Trinidad$2C Republic of Trinidad and Tobaco (2014)",
                      "fields": {
-                        "af": "Trinidad%2C Republic of Trinidad and Tobaco (2014)_AF",
-                        "ac": "Trinidad%2C Republic of Trinidad and Tobaco (2014)_AC",
-                        "an": "Trinidad%2C Republic of Trinidad and Tobaco (2014)_AN"
+                        "af": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AF",
+                        "ac": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AC",
+                        "an": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)",
+                     "name": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "Amacuzac%2C MOR%2C Mexico (2014)",
+                     "name": "Amacuzac$2C MOR$2C Mexico (2014)",
                      "fields": {
-                        "af": "Amacuzac%2C MOR%2C Mexico (2014)_AF",
-                        "ac": "Amacuzac%2C MOR%2C Mexico (2014)_AC",
-                        "an": "Amacuzac%2C MOR%2C Mexico (2014)_AN"
+                        "af": "Amacuzac$2C MOR$2C Mexico (2014)_AF",
+                        "ac": "Amacuzac$2C MOR$2C Mexico (2014)_AC",
+                        "an": "Amacuzac$2C MOR$2C Mexico (2014)_AN"
                      }
                   },
                   {
-                     "name": "Nogales%2C SON%2C Mexico (2013)",
+                     "name": "Nogales$2C SON$2C Mexico (2013)",
                      "fields": {
-                        "af": "Nogales%2C SON%2C Mexico (2013)_AF",
-                        "ac": "Nogales%2C SON%2C Mexico (2013)_AC",
-                        "an": "Nogales%2C SON%2C Mexico (2013)_AN"
+                        "af": "Nogales$2C SON$2C Mexico (2013)_AF",
+                        "ac": "Nogales$2C SON$2C Mexico (2013)_AC",
+                        "an": "Nogales$2C SON$2C Mexico (2013)_AN"
                      }
                   },
                   {
@@ -1970,115 +1973,115 @@
                      }
                   },
                   {
-                     "name": "Cebu City%2C Philippines (2013)",
+                     "name": "Cebu City$2C Philippines (2013)",
                      "fields": {
-                        "af": "Cebu City%2C Philippines (2013)_AF",
-                        "ac": "Cebu City%2C Philippines (2013)_AC",
-                        "an": "Cebu City%2C Philippines (2013)_AN"
+                        "af": "Cebu City$2C Philippines (2013)_AF",
+                        "ac": "Cebu City$2C Philippines (2013)_AC",
+                        "an": "Cebu City$2C Philippines (2013)_AN"
                      }
                   },
                   {
-                     "name": "Washington%2C DC%2C USA (2014)",
+                     "name": "Washington$2C DC$2C USA (2014)",
                      "fields": {
-                        "af": "Washington%2C DC%2C USA (2014)_AF",
-                        "ac": "Washington%2C DC%2C USA (2014)_AC",
-                        "an": "Washington%2C DC%2C USA (2014)_AN"
+                        "af": "Washington$2C DC$2C USA (2014)_AF",
+                        "ac": "Washington$2C DC$2C USA (2014)_AC",
+                        "an": "Washington$2C DC$2C USA (2014)_AN"
                      }
                   },
                   {
-                     "name": "Rio de Janeiro%2C Brazil (2014)",
+                     "name": "Rio de Janeiro$2C Brazil (2014)",
                      "fields": {
-                        "af": "Rio de Janeiro%2C Brazil (2014)_AF",
-                        "ac": "Rio de Janeiro%2C Brazil (2014)_AC",
-                        "an": "Rio de Janeiro%2C Brazil (2014)_AN"
+                        "af": "Rio de Janeiro$2C Brazil (2014)_AF",
+                        "ac": "Rio de Janeiro$2C Brazil (2014)_AC",
+                        "an": "Rio de Janeiro$2C Brazil (2014)_AN"
                      }
                   },
                   {
-                     "name": "El Paso%2C TX%2C USA (2015)",
+                     "name": "El Paso$2C TX$2C USA (2015)",
                      "fields": {
-                        "af": "El Paso%2C TX%2C USA (2015)_AF",
-                        "ac": "El Paso%2C TX%2C USA (2015)_AC",
-                        "an": "El Paso%2C TX%2C USA (2015)_AN"
+                        "af": "El Paso$2C TX$2C USA (2015)_AF",
+                        "ac": "El Paso$2C TX$2C USA (2015)_AC",
+                        "an": "El Paso$2C TX$2C USA (2015)_AN"
                      }
                   },
                   {
-                     "name": "Tucson%2C AZ%2C USA (2012)",
+                     "name": "Tucson$2C AZ$2C USA (2012)",
                      "fields": {
-                        "af": "Tucson%2C AZ%2C USA (2012)_AF",
-                        "ac": "Tucson%2C AZ%2C USA (2012)_AC",
-                        "an": "Tucson%2C AZ%2C USA (2012)_AN"
+                        "af": "Tucson$2C AZ$2C USA (2012)_AF",
+                        "ac": "Tucson$2C AZ$2C USA (2012)_AC",
+                        "an": "Tucson$2C AZ$2C USA (2012)_AN"
                      }
                   },
                   {
-                     "name": "Siquirres%2C Costa Rica (2014)",
+                     "name": "Siquirres$2C Costa Rica (2014)",
                      "fields": {
-                        "af": "Siquirres%2C Costa Rica (2014)_AF",
-                        "ac": "Siquirres%2C Costa Rica (2014)_AC",
-                        "an": "Siquirres%2C Costa Rica (2014)_AN"
+                        "af": "Siquirres$2C Costa Rica (2014)_AF",
+                        "ac": "Siquirres$2C Costa Rica (2014)_AC",
+                        "an": "Siquirres$2C Costa Rica (2014)_AN"
                      }
                   },
                   {
-                     "name": "Punjab%2C Pakistan (2010)",
+                     "name": "Punjab$2C Pakistan (2010)",
                      "fields": {
-                        "af": "Punjab%2C Pakistan (2010)_AF",
-                        "ac": "Punjab%2C Pakistan (2010)_AC",
-                        "an": "Punjab%2C Pakistan (2010)_AN"
+                        "af": "Punjab$2C Pakistan (2010)_AF",
+                        "ac": "Punjab$2C Pakistan (2010)_AC",
+                        "an": "Punjab$2C Pakistan (2010)_AN"
                      }
                   },
                   {
-                     "name": "Dominica%2C rural (2016)",
+                     "name": "Dominica$2C rural (2016)",
                      "fields": {
-                        "af": "Dominica%2C rural (2016)_AF",
-                        "ac": "Dominica%2C rural (2016)_AC",
-                        "an": "Dominica%2C rural (2016)_AN"
+                        "af": "Dominica$2C rural (2016)_AF",
+                        "ac": "Dominica$2C rural (2016)_AC",
+                        "an": "Dominica$2C rural (2016)_AN"
                      }
                   },
                   {
-                     "name": "Hawaii%2C USA (2016)",
+                     "name": "Hawaii$2C USA (2016)",
                      "fields": {
-                        "af": "Hawaii%2C USA (2016)_AF",
-                        "ac": "Hawaii%2C USA (2016)_AC",
-                        "an": "Hawaii%2C USA (2016)_AN"
+                        "af": "Hawaii$2C USA (2016)_AF",
+                        "ac": "Hawaii$2C USA (2016)_AC",
+                        "an": "Hawaii$2C USA (2016)_AN"
                      }
                   },
                   {
-                     "name": "Madera%2C CA (2013)",
+                     "name": "Madera$2C CA (2013)",
                      "fields": {
-                        "af": "Madera%2C CA (2013)_AF",
-                        "ac": "Madera%2C CA (2013)_AC",
-                        "an": "Madera%2C CA (2013)_AN"
+                        "af": "Madera$2C CA (2013)_AF",
+                        "ac": "Madera$2C CA (2013)_AC",
+                        "an": "Madera$2C CA (2013)_AN"
                      }
                   },
                   {
-                     "name": "Riyadh%2C Saudi Arabia (2012)",
+                     "name": "Riyadh$2C Saudi Arabia (2012)",
                      "fields": {
-                        "af": "Riyadh%2C Saudi Arabia (2012)_AF",
-                        "ac": "Riyadh%2C Saudi Arabia (2012)_AC",
-                        "an": "Riyadh%2C Saudi Arabia (2012)_AN"
+                        "af": "Riyadh$2C Saudi Arabia (2012)_AF",
+                        "ac": "Riyadh$2C Saudi Arabia (2012)_AC",
+                        "an": "Riyadh$2C Saudi Arabia (2012)_AN"
                      }
                   },
                   {
-                     "name": "Maraba%2C Brazil (2010)",
+                     "name": "Maraba$2C Brazil (2010)",
                      "fields": {
-                        "af": "Maraba%2C Brazil (2010)_AF",
-                        "ac": "Maraba%2C Brazil (2010)_AC",
-                        "an": "Maraba%2C Brazil (2010)_AN"
+                        "af": "Maraba$2C Brazil (2010)_AF",
+                        "ac": "Maraba$2C Brazil (2010)_AC",
+                        "an": "Maraba$2C Brazil (2010)_AN"
                      }
                   },
                   {
-                     "name": "Dominica%2C urban (2016)",
+                     "name": "Dominica$2C urban (2016)",
                      "fields": {
-                        "af": "Dominica%2C urban (2016)_AF",
-                        "ac": "Dominica%2C urban (2016)_AC",
-                        "an": "Dominica%2C urban (2016)_AN"
+                        "af": "Dominica$2C urban (2016)_AF",
+                        "ac": "Dominica$2C urban (2016)_AC",
+                        "an": "Dominica$2C urban (2016)_AN"
                      }
                   },
                   {
-                     "name": "Ho Chih Minh%2C Vietnam (2013)",
+                     "name": "Ho Chih Minh$2C Vietnam (2013)",
                      "fields": {
-                        "af": "Ho Chih Minh%2C Vietnam (2013)_AF",
-                        "ac": "Ho Chih Minh%2C Vietnam (2013)_AC",
-                        "an": "Ho Chih Minh%2C Vietnam (2013)_AN"
+                        "af": "Ho Chih Minh$2C Vietnam (2013)_AF",
+                        "ac": "Ho Chih Minh$2C Vietnam (2013)_AC",
+                        "an": "Ho Chih Minh$2C Vietnam (2013)_AN"
                      }
                   },
                   {
@@ -2090,11 +2093,11 @@
                      }
                   },
                   {
-                     "name": "Rio de Janeiro%2C Brazil (2015)",
+                     "name": "Rio de Janeiro$2C Brazil (2015)",
                      "fields": {
-                        "af": "Rio de Janeiro%2C Brazil (2015)_AF",
-                        "ac": "Rio de Janeiro%2C Brazil (2015)_AC",
-                        "an": "Rio de Janeiro%2C Brazil (2015)_AN"
+                        "af": "Rio de Janeiro$2C Brazil (2015)_AF",
+                        "ac": "Rio de Janeiro$2C Brazil (2015)_AC",
+                        "an": "Rio de Janeiro$2C Brazil (2015)_AN"
                      }
                   }
                ]
@@ -2109,99 +2112,99 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)",
+                     "name": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)",
                      "fields": {
-                        "af": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AF",
-                        "ac": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AC",
-                        "an": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AN"
+                        "af": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)",
+                     "name": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti Thailand field isolate%2C Rayong  2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Senegal field isolate%2C Sedhiou Sedhiou 2011%2C individual insect (2011)",
+                     "name": "A.aegypti Senegal field isolate$2C Sedhiou Sedhiou 2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti Senegal field isolate%2C Sedhiou Sedhiou 2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti Senegal field isolate%2C Sedhiou Sedhiou 2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti Senegal field isolate%2C Sedhiou Sedhiou 2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti Senegal field isolate$2C Sedhiou Sedhiou 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Senegal field isolate$2C Sedhiou Sedhiou 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Senegal field isolate$2C Sedhiou Sedhiou 2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti USA field isolate%2C Texas Houston 2011%2C individual insect (2011)",
+                     "name": "A.aegypti USA field isolate$2C Texas Houston 2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti USA field isolate%2C Texas Houston 2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti USA field isolate%2C Texas Houston 2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti USA field isolate%2C Texas Houston 2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti USA field isolate$2C Texas Houston 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Texas Houston 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti USA field isolate$2C Texas Houston 2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti USA field isolate%2C Florida Key West 2011%2C individual insect (2011)",
+                     "name": "A.aegypti USA field isolate$2C Florida Key West 2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti USA field isolate%2C Florida Key West 2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti USA field isolate%2C Florida Key West 2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti USA field isolate%2C Florida Key West 2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti USA field isolate$2C Florida Key West 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Florida Key West 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti USA field isolate$2C Florida Key West 2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti French Polynesia field isolate%2C Tahiti  2013%2C individual insect (2013)",
+                     "name": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)",
                      "fields": {
-                        "af": "A.aegypti French Polynesia field isolate%2C Tahiti  2013%2C individual insect (2013)_AF",
-                        "ac": "A.aegypti French Polynesia field isolate%2C Tahiti  2013%2C individual insect (2013)_AC",
-                        "an": "A.aegypti French Polynesia field isolate%2C Tahiti  2013%2C individual insect (2013)_AN"
+                        "af": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Australia field isolate%2C Queensland Cairns 2011%2C individual insect (2011)",
+                     "name": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti Australia field isolate%2C Queensland Cairns 2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti Australia field isolate%2C Queensland Cairns 2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti Australia field isolate%2C Queensland Cairns 2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Mexico field isolate%2C Chiapas Tapachula 2013%2C individual insect (2013)",
+                     "name": "A.aegypti Mexico field isolate$2C Chiapas Tapachula 2013$2C individual insect (2013)",
                      "fields": {
-                        "af": "A.aegypti Mexico field isolate%2C Chiapas Tapachula 2013%2C individual insect (2013)_AF",
-                        "ac": "A.aegypti Mexico field isolate%2C Chiapas Tapachula 2013%2C individual insect (2013)_AC",
-                        "an": "A.aegypti Mexico field isolate%2C Chiapas Tapachula 2013%2C individual insect (2013)_AN"
+                        "af": "A.aegypti Mexico field isolate$2C Chiapas Tapachula 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti Mexico field isolate$2C Chiapas Tapachula 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti Mexico field isolate$2C Chiapas Tapachula 2013$2C individual insect (2013)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Senegal field isolate%2C Tambacounda Goudiry 2011%2C individual insect (2011)",
+                     "name": "A.aegypti Senegal field isolate$2C Tambacounda Goudiry 2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti Senegal field isolate%2C Tambacounda Goudiry 2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti Senegal field isolate%2C Tambacounda Goudiry 2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti Senegal field isolate%2C Tambacounda Goudiry 2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti Senegal field isolate$2C Tambacounda Goudiry 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Senegal field isolate$2C Tambacounda Goudiry 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Senegal field isolate$2C Tambacounda Goudiry 2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Uganda field isolate%2C Entebbe Lunyo 2011%2C individual insect (2011)",
+                     "name": "A.aegypti Uganda field isolate$2C Entebbe Lunyo 2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti Uganda field isolate%2C Entebbe Lunyo 2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti Uganda field isolate%2C Entebbe Lunyo 2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti Uganda field isolate%2C Entebbe Lunyo 2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti Uganda field isolate$2C Entebbe Lunyo 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Uganda field isolate$2C Entebbe Lunyo 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Uganda field isolate$2C Entebbe Lunyo 2011$2C individual insect (2011)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti USA field isolate%2C Puerto Rico Patillas 2013%2C individual insect (2013)",
+                     "name": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)",
                      "fields": {
-                        "af": "A.aegypti USA field isolate%2C Puerto Rico Patillas 2013%2C individual insect (2013)_AF",
-                        "ac": "A.aegypti USA field isolate%2C Puerto Rico Patillas 2013%2C individual insect (2013)_AC",
-                        "an": "A.aegypti USA field isolate%2C Puerto Rico Patillas 2013%2C individual insect (2013)_AN"
+                        "af": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti USA field isolate%2C Hawaii  2011%2C individual insect (2011)",
+                     "name": "A.aegypti USA field isolate$2C Hawaii  2011$2C individual insect (2011)",
                      "fields": {
-                        "af": "A.aegypti USA field isolate%2C Hawaii  2011%2C individual insect (2011)_AF",
-                        "ac": "A.aegypti USA field isolate%2C Hawaii  2011%2C individual insect (2011)_AC",
-                        "an": "A.aegypti USA field isolate%2C Hawaii  2011%2C individual insect (2011)_AN"
+                        "af": "A.aegypti USA field isolate$2C Hawaii  2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Hawaii  2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti USA field isolate$2C Hawaii  2011$2C individual insect (2011)_AN"
                      }
                   }
                ]
@@ -2216,59 +2219,59 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "Yaounde%2C Cameroon (2015)",
+                     "name": "Yaounde$2C Cameroon (2015)",
                      "fields": {
-                        "af": "Yaounde%2C Cameroon (2015)_AF",
-                        "ac": "Yaounde%2C Cameroon (2015)_AC",
-                        "an": "Yaounde%2C Cameroon (2015)_AN"
+                        "af": "Yaounde$2C Cameroon (2015)_AF",
+                        "ac": "Yaounde$2C Cameroon (2015)_AC",
+                        "an": "Yaounde$2C Cameroon (2015)_AN"
                      }
                   },
                   {
-                     "name": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)",
+                     "name": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)",
                      "fields": {
-                        "af": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AF",
-                        "ac": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AC",
-                        "an": "A.aegypti Brazil field isolate%2C Bahia Jacobina 2013%2C individual insect (2013)_AN"
+                        "af": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AN"
                      }
                   },
                   {
-                     "name": "New Orleans%2C LA%2C USA (2015)",
+                     "name": "New Orleans$2C LA$2C USA (2015)",
                      "fields": {
-                        "af": "New Orleans%2C LA%2C USA (2015)_AF",
-                        "ac": "New Orleans%2C LA%2C USA (2015)_AC",
-                        "an": "New Orleans%2C LA%2C USA (2015)_AN"
+                        "af": "New Orleans$2C LA$2C USA (2015)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2015)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2015)_AN"
                      }
                   },
                   {
-                     "name": "New Orleans%2C LA%2C USA (2012)",
+                     "name": "New Orleans$2C LA$2C USA (2012)",
                      "fields": {
-                        "af": "New Orleans%2C LA%2C USA (2012)_AF",
-                        "ac": "New Orleans%2C LA%2C USA (2012)_AC",
-                        "an": "New Orleans%2C LA%2C USA (2012)_AN"
+                        "af": "New Orleans$2C LA$2C USA (2012)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2012)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2012)_AN"
                      }
                   },
                   {
-                     "name": "Jacobina%2C Brazil (2015)",
+                     "name": "Jacobina$2C Brazil (2015)",
                      "fields": {
-                        "af": "Jacobina%2C Brazil (2015)_AF",
-                        "ac": "Jacobina%2C Brazil (2015)_AC",
-                        "an": "Jacobina%2C Brazil (2015)_AN"
+                        "af": "Jacobina$2C Brazil (2015)_AF",
+                        "ac": "Jacobina$2C Brazil (2015)_AC",
+                        "an": "Jacobina$2C Brazil (2015)_AN"
                      }
                   },
                   {
-                     "name": "New Orleans%2C LA%2C USA (2011)",
+                     "name": "New Orleans$2C LA$2C USA (2011)",
                      "fields": {
-                        "af": "New Orleans%2C LA%2C USA (2011)_AF",
-                        "ac": "New Orleans%2C LA%2C USA (2011)_AC",
-                        "an": "New Orleans%2C LA%2C USA (2011)_AN"
+                        "af": "New Orleans$2C LA$2C USA (2011)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2011)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2011)_AN"
                      }
                   },
                   {
-                     "name": "Yaounde%2C Cameroon (2013)",
+                     "name": "Yaounde$2C Cameroon (2013)",
                      "fields": {
-                        "af": "Yaounde%2C Cameroon (2013)_AF",
-                        "ac": "Yaounde%2C Cameroon (2013)_AC",
-                        "an": "Yaounde%2C Cameroon (2013)_AN"
+                        "af": "Yaounde$2C Cameroon (2013)_AF",
+                        "ac": "Yaounde$2C Cameroon (2013)_AC",
+                        "an": "Yaounde$2C Cameroon (2013)_AN"
                      }
                   }
                ]
@@ -2299,11 +2302,11 @@
                      }
                   },
                   {
-                     "name": "Bora Bora strain%2C generally susceptible to insecticides",
+                     "name": "Bora Bora strain$2C generally susceptible to insecticides",
                      "fields": {
-                        "af": "Bora Bora strain%2C generally susceptible to insecticides_AF",
-                        "ac": "Bora Bora strain%2C generally susceptible to insecticides_AC",
-                        "an": "Bora Bora strain%2C generally susceptible to insecticides_AN"
+                        "af": "Bora Bora strain$2C generally susceptible to insecticides_AF",
+                        "ac": "Bora Bora strain$2C generally susceptible to insecticides_AC",
+                        "an": "Bora Bora strain$2C generally susceptible to insecticides_AN"
                      }
                   },
                   {
@@ -2326,75 +2329,75 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "Burkina Faso%2C Burkina Faso (2015)",
+                     "name": "Burkina Faso$2C Burkina Faso (2015)",
                      "fields": {
-                        "af": "Burkina Faso%2C Burkina Faso (2015)_AF",
-                        "ac": "Burkina Faso%2C Burkina Faso (2015)_AC",
-                        "an": "Burkina Faso%2C Burkina Faso (2015)_AN"
+                        "af": "Burkina Faso$2C Burkina Faso (2015)_AF",
+                        "ac": "Burkina Faso$2C Burkina Faso (2015)_AC",
+                        "an": "Burkina Faso$2C Burkina Faso (2015)_AN"
                      }
                   },
                   {
-                     "name": "Cameroon%2C Buffalo camp (2014)",
+                     "name": "Cameroon$2C Buffalo camp (2014)",
                      "fields": {
-                        "af": "Cameroon%2C Buffalo camp (2014)_AF",
-                        "ac": "Cameroon%2C Buffalo camp (2014)_AC",
-                        "an": "Cameroon%2C Buffalo camp (2014)_AN"
+                        "af": "Cameroon$2C Buffalo camp (2014)_AF",
+                        "ac": "Cameroon$2C Buffalo camp (2014)_AC",
+                        "an": "Cameroon$2C Buffalo camp (2014)_AN"
                      }
                   },
                   {
-                     "name": "Philippines%2C Philippines (2013)",
+                     "name": "Philippines$2C Philippines (2013)",
                      "fields": {
-                        "af": "Philippines%2C Philippines (2013)_AF",
-                        "ac": "Philippines%2C Philippines (2013)_AC",
-                        "an": "Philippines%2C Philippines (2013)_AN"
+                        "af": "Philippines$2C Philippines (2013)_AF",
+                        "ac": "Philippines$2C Philippines (2013)_AC",
+                        "an": "Philippines$2C Philippines (2013)_AN"
                      }
                   },
                   {
-                     "name": "Brazil%2C Macapa (2012)",
+                     "name": "Brazil$2C Macapa (2012)",
                      "fields": {
-                        "af": "Brazil%2C Macapa (2012)_AF",
-                        "ac": "Brazil%2C Macapa (2012)_AC",
-                        "an": "Brazil%2C Macapa (2012)_AN"
+                        "af": "Brazil$2C Macapa (2012)_AF",
+                        "ac": "Brazil$2C Macapa (2012)_AC",
+                        "an": "Brazil$2C Macapa (2012)_AN"
                      }
                   },
                   {
-                     "name": "Yaounde%2C Cameroon (2013)",
+                     "name": "Yaounde$2C Cameroon (2013)",
                      "fields": {
-                        "af": "Yaounde%2C Cameroon (2013)_AF",
-                        "ac": "Yaounde%2C Cameroon (2013)_AC",
-                        "an": "Yaounde%2C Cameroon (2013)_AN"
+                        "af": "Yaounde$2C Cameroon (2013)_AF",
+                        "ac": "Yaounde$2C Cameroon (2013)_AC",
+                        "an": "Yaounde$2C Cameroon (2013)_AN"
                      }
                   },
                   {
-                     "name": "Cameroon%2C Yaounde Mvog_Ada (2015)",
+                     "name": "Cameroon$2C Yaounde Mvog_Ada (2015)",
                      "fields": {
-                        "af": "Cameroon%2C Yaounde Mvog_Ada (2015)_AF",
-                        "ac": "Cameroon%2C Yaounde Mvog_Ada (2015)_AC",
-                        "an": "Cameroon%2C Yaounde Mvog_Ada (2015)_AN"
+                        "af": "Cameroon$2C Yaounde Mvog_Ada (2015)_AF",
+                        "ac": "Cameroon$2C Yaounde Mvog_Ada (2015)_AC",
+                        "an": "Cameroon$2C Yaounde Mvog_Ada (2015)_AN"
                      }
                   },
                   {
-                     "name": "Kenya%2C Kaya Forest (2012)",
+                     "name": "Kenya$2C Kaya Forest (2012)",
                      "fields": {
-                        "af": "Kenya%2C Kaya Forest (2012)_AF",
-                        "ac": "Kenya%2C Kaya Forest (2012)_AC",
-                        "an": "Kenya%2C Kaya Forest (2012)_AN"
+                        "af": "Kenya$2C Kaya Forest (2012)_AF",
+                        "ac": "Kenya$2C Kaya Forest (2012)_AC",
+                        "an": "Kenya$2C Kaya Forest (2012)_AN"
                      }
                   },
                   {
-                     "name": "Cali%2C Colombia (2013)",
+                     "name": "Cali$2C Colombia (2013)",
                      "fields": {
-                        "af": "Cali%2C Colombia (2013)_AF",
-                        "ac": "Cali%2C Colombia (2013)_AC",
-                        "an": "Cali%2C Colombia (2013)_AN"
+                        "af": "Cali$2C Colombia (2013)_AF",
+                        "ac": "Cali$2C Colombia (2013)_AC",
+                        "an": "Cali$2C Colombia (2013)_AN"
                      }
                   },
                   {
-                     "name": "Cameroon%2C Yaounde Forest (2015)",
+                     "name": "Cameroon$2C Yaounde Forest (2015)",
                      "fields": {
-                        "af": "Cameroon%2C Yaounde Forest (2015)_AF",
-                        "ac": "Cameroon%2C Yaounde Forest (2015)_AC",
-                        "an": "Cameroon%2C Yaounde Forest (2015)_AN"
+                        "af": "Cameroon$2C Yaounde Forest (2015)_AF",
+                        "ac": "Cameroon$2C Yaounde Forest (2015)_AC",
+                        "an": "Cameroon$2C Yaounde Forest (2015)_AN"
                      }
                   },
                   {
@@ -2406,35 +2409,35 @@
                      }
                   },
                   {
-                     "name": "Georgia%2C Georgia (2015)",
+                     "name": "Georgia$2C Georgia (2015)",
                      "fields": {
-                        "af": "Georgia%2C Georgia (2015)_AF",
-                        "ac": "Georgia%2C Georgia (2015)_AC",
-                        "an": "Georgia%2C Georgia (2015)_AN"
+                        "af": "Georgia$2C Georgia (2015)_AF",
+                        "ac": "Georgia$2C Georgia (2015)_AC",
+                        "an": "Georgia$2C Georgia (2015)_AN"
                      }
                   },
                   {
-                     "name": "Australia%2C Cairns (2013)",
+                     "name": "Australia$2C Cairns (2013)",
                      "fields": {
-                        "af": "Australia%2C Cairns (2013)_AF",
-                        "ac": "Australia%2C Cairns (2013)_AC",
-                        "an": "Australia%2C Cairns (2013)_AN"
+                        "af": "Australia$2C Cairns (2013)_AF",
+                        "ac": "Australia$2C Cairns (2013)_AC",
+                        "an": "Australia$2C Cairns (2013)_AN"
                      }
                   },
                   {
-                     "name": "Gabon%2C Franceville (2014)",
+                     "name": "Gabon$2C Franceville (2014)",
                      "fields": {
-                        "af": "Gabon%2C Franceville (2014)_AF",
-                        "ac": "Gabon%2C Franceville (2014)_AC",
-                        "an": "Gabon%2C Franceville (2014)_AN"
+                        "af": "Gabon$2C Franceville (2014)_AF",
+                        "ac": "Gabon$2C Franceville (2014)_AC",
+                        "an": "Gabon$2C Franceville (2014)_AN"
                      }
                   },
                   {
-                     "name": "Caribbean%2C Dominica (2016)",
+                     "name": "Caribbean$2C Dominica (2016)",
                      "fields": {
-                        "af": "Caribbean%2C Dominica (2016)_AF",
-                        "ac": "Caribbean%2C Dominica (2016)_AC",
-                        "an": "Caribbean%2C Dominica (2016)_AN"
+                        "af": "Caribbean$2C Dominica (2016)_AF",
+                        "ac": "Caribbean$2C Dominica (2016)_AC",
+                        "an": "Caribbean$2C Dominica (2016)_AN"
                      }
                   },
                   {
@@ -2446,115 +2449,115 @@
                      }
                   },
                   {
-                     "name": "Mauritius island%2C Aedes mascarensis (2014)",
+                     "name": "Mauritius island$2C Aedes mascarensis (2014)",
                      "fields": {
-                        "af": "Mauritius island%2C Aedes mascarensis (2014)_AF",
-                        "ac": "Mauritius island%2C Aedes mascarensis (2014)_AC",
-                        "an": "Mauritius island%2C Aedes mascarensis (2014)_AN"
+                        "af": "Mauritius island$2C Aedes mascarensis (2014)_AF",
+                        "ac": "Mauritius island$2C Aedes mascarensis (2014)_AC",
+                        "an": "Mauritius island$2C Aedes mascarensis (2014)_AN"
                      }
                   },
                   {
-                     "name": "Tbilisi-Tsereteli%2C Georgia (2015)",
+                     "name": "Tbilisi-Tsereteli$2C Georgia (2015)",
                      "fields": {
-                        "af": "Tbilisi-Tsereteli%2C Georgia (2015)_AF",
-                        "ac": "Tbilisi-Tsereteli%2C Georgia (2015)_AC",
-                        "an": "Tbilisi-Tsereteli%2C Georgia (2015)_AN"
+                        "af": "Tbilisi-Tsereteli$2C Georgia (2015)_AF",
+                        "ac": "Tbilisi-Tsereteli$2C Georgia (2015)_AC",
+                        "an": "Tbilisi-Tsereteli$2C Georgia (2015)_AN"
                      }
                   },
                   {
-                     "name": "Johannesburg%2C South Africa (2015)",
+                     "name": "Johannesburg$2C South Africa (2015)",
                      "fields": {
-                        "af": "Johannesburg%2C South Africa (2015)_AF",
-                        "ac": "Johannesburg%2C South Africa (2015)_AC",
-                        "an": "Johannesburg%2C South Africa (2015)_AN"
+                        "af": "Johannesburg$2C South Africa (2015)_AF",
+                        "ac": "Johannesburg$2C South Africa (2015)_AC",
+                        "an": "Johannesburg$2C South Africa (2015)_AN"
                      }
                   },
                   {
-                     "name": "Gabon%2C Lope Forest (2014)",
+                     "name": "Gabon$2C Lope Forest (2014)",
                      "fields": {
-                        "af": "Gabon%2C Lope Forest (2014)_AF",
-                        "ac": "Gabon%2C Lope Forest (2014)_AC",
-                        "an": "Gabon%2C Lope Forest (2014)_AN"
+                        "af": "Gabon$2C Lope Forest (2014)_AF",
+                        "ac": "Gabon$2C Lope Forest (2014)_AC",
+                        "an": "Gabon$2C Lope Forest (2014)_AN"
                      }
                   },
                   {
-                     "name": "Cameroon%2C Yaounde Mokolo (2015)",
+                     "name": "Cameroon$2C Yaounde Mokolo (2015)",
                      "fields": {
-                        "af": "Cameroon%2C Yaounde Mokolo (2015)_AF",
-                        "ac": "Cameroon%2C Yaounde Mokolo (2015)_AC",
-                        "an": "Cameroon%2C Yaounde Mokolo (2015)_AN"
+                        "af": "Cameroon$2C Yaounde Mokolo (2015)_AF",
+                        "ac": "Cameroon$2C Yaounde Mokolo (2015)_AC",
+                        "an": "Cameroon$2C Yaounde Mokolo (2015)_AN"
                      }
                   },
                   {
-                     "name": "Cebu City%2C Philippines (2013)",
+                     "name": "Cebu City$2C Philippines (2013)",
                      "fields": {
-                        "af": "Cebu City%2C Philippines (2013)_AF",
-                        "ac": "Cebu City%2C Philippines (2013)_AC",
-                        "an": "Cebu City%2C Philippines (2013)_AN"
+                        "af": "Cebu City$2C Philippines (2013)_AF",
+                        "ac": "Cebu City$2C Philippines (2013)_AC",
+                        "an": "Cebu City$2C Philippines (2013)_AN"
                      }
                   },
                   {
-                     "name": "Goudiry%2C Senegal (2012)",
+                     "name": "Goudiry$2C Senegal (2012)",
                      "fields": {
-                        "af": "Goudiry%2C Senegal (2012)_AF",
-                        "ac": "Goudiry%2C Senegal (2012)_AC",
-                        "an": "Goudiry%2C Senegal (2012)_AN"
+                        "af": "Goudiry$2C Senegal (2012)_AF",
+                        "ac": "Goudiry$2C Senegal (2012)_AC",
+                        "an": "Goudiry$2C Senegal (2012)_AN"
                      }
                   },
                   {
-                     "name": "Aedes mascarensis%2C Mauritius (2014)",
+                     "name": "Aedes mascarensis$2C Mauritius (2014)",
                      "fields": {
-                        "af": "Aedes mascarensis%2C Mauritius (2014)_AF",
-                        "ac": "Aedes mascarensis%2C Mauritius (2014)_AC",
-                        "an": "Aedes mascarensis%2C Mauritius (2014)_AN"
+                        "af": "Aedes mascarensis$2C Mauritius (2014)_AF",
+                        "ac": "Aedes mascarensis$2C Mauritius (2014)_AC",
+                        "an": "Aedes mascarensis$2C Mauritius (2014)_AN"
                      }
                   },
                   {
-                     "name": "Reunion island%2C Reunion Island (2016)",
+                     "name": "Reunion island$2C Reunion Island (2016)",
                      "fields": {
-                        "af": "Reunion island%2C Reunion Island (2016)_AF",
-                        "ac": "Reunion island%2C Reunion Island (2016)_AC",
-                        "an": "Reunion island%2C Reunion Island (2016)_AN"
+                        "af": "Reunion island$2C Reunion Island (2016)_AF",
+                        "ac": "Reunion island$2C Reunion Island (2016)_AC",
+                        "an": "Reunion island$2C Reunion Island (2016)_AN"
                      }
                   },
                   {
-                     "name": "Gabon%2C Lope Village (2014)",
+                     "name": "Gabon$2C Lope Village (2014)",
                      "fields": {
-                        "af": "Gabon%2C Lope Village (2014)_AF",
-                        "ac": "Gabon%2C Lope Village (2014)_AC",
-                        "an": "Gabon%2C Lope Village (2014)_AN"
+                        "af": "Gabon$2C Lope Village (2014)_AF",
+                        "ac": "Gabon$2C Lope Village (2014)_AC",
+                        "an": "Gabon$2C Lope Village (2014)_AN"
                      }
                   },
                   {
-                     "name": "Cameroon%2C Yaounde Village (2015)",
+                     "name": "Cameroon$2C Yaounde Village (2015)",
                      "fields": {
-                        "af": "Cameroon%2C Yaounde Village (2015)_AF",
-                        "ac": "Cameroon%2C Yaounde Village (2015)_AC",
-                        "an": "Cameroon%2C Yaounde Village (2015)_AN"
+                        "af": "Cameroon$2C Yaounde Village (2015)_AF",
+                        "ac": "Cameroon$2C Yaounde Village (2015)_AC",
+                        "an": "Cameroon$2C Yaounde Village (2015)_AN"
                      }
                   },
                   {
-                     "name": "Siquirres%2C Costa Rica (2014)",
+                     "name": "Siquirres$2C Costa Rica (2014)",
                      "fields": {
-                        "af": "Siquirres%2C Costa Rica (2014)_AF",
-                        "ac": "Siquirres%2C Costa Rica (2014)_AC",
-                        "an": "Siquirres%2C Costa Rica (2014)_AN"
+                        "af": "Siquirres$2C Costa Rica (2014)_AF",
+                        "ac": "Siquirres$2C Costa Rica (2014)_AC",
+                        "an": "Siquirres$2C Costa Rica (2014)_AN"
                      }
                   },
                   {
-                     "name": "Uganda%2C Zika village (2016)",
+                     "name": "Uganda$2C Zika village (2016)",
                      "fields": {
-                        "af": "Uganda%2C Zika village (2016)_AF",
-                        "ac": "Uganda%2C Zika village (2016)_AC",
-                        "an": "Uganda%2C Zika village (2016)_AN"
+                        "af": "Uganda$2C Zika village (2016)_AF",
+                        "ac": "Uganda$2C Zika village (2016)_AC",
+                        "an": "Uganda$2C Zika village (2016)_AN"
                      }
                   },
                   {
-                     "name": "Sedhiou%2C Senegal (2012)",
+                     "name": "Sedhiou$2C Senegal (2012)",
                      "fields": {
-                        "af": "Sedhiou%2C Senegal (2012)_AF",
-                        "ac": "Sedhiou%2C Senegal (2012)_AC",
-                        "an": "Sedhiou%2C Senegal (2012)_AN"
+                        "af": "Sedhiou$2C Senegal (2012)_AF",
+                        "ac": "Sedhiou$2C Senegal (2012)_AC",
+                        "an": "Sedhiou$2C Senegal (2012)_AN"
                      }
                   },
                   {
@@ -2566,51 +2569,51 @@
                      }
                   },
                   {
-                     "name": "Angola%2C Luanda (2016)",
+                     "name": "Angola$2C Luanda (2016)",
                      "fields": {
-                        "af": "Angola%2C Luanda (2016)_AF",
-                        "ac": "Angola%2C Luanda (2016)_AC",
-                        "an": "Angola%2C Luanda (2016)_AN"
+                        "af": "Angola$2C Luanda (2016)_AF",
+                        "ac": "Angola$2C Luanda (2016)_AC",
+                        "an": "Angola$2C Luanda (2016)_AN"
                      }
                   },
                   {
-                     "name": "Mexico%2C Chetumal lab strain (2013)",
+                     "name": "Mexico$2C Chetumal lab strain (2013)",
                      "fields": {
-                        "af": "Mexico%2C Chetumal lab strain (2013)_AF",
-                        "ac": "Mexico%2C Chetumal lab strain (2013)_AC",
-                        "an": "Mexico%2C Chetumal lab strain (2013)_AN"
+                        "af": "Mexico$2C Chetumal lab strain (2013)_AF",
+                        "ac": "Mexico$2C Chetumal lab strain (2013)_AC",
+                        "an": "Mexico$2C Chetumal lab strain (2013)_AN"
                      }
                   },
                   {
-                     "name": "Tahiti%2C Tahiti (2010)",
+                     "name": "Tahiti$2C Tahiti (2010)",
                      "fields": {
-                        "af": "Tahiti%2C Tahiti (2010)_AF",
-                        "ac": "Tahiti%2C Tahiti (2010)_AC",
-                        "an": "Tahiti%2C Tahiti (2010)_AN"
+                        "af": "Tahiti$2C Tahiti (2010)_AF",
+                        "ac": "Tahiti$2C Tahiti (2010)_AC",
+                        "an": "Tahiti$2C Tahiti (2010)_AN"
                      }
                   },
                   {
-                     "name": "Kenya%2C Nairobi (2012)",
+                     "name": "Kenya$2C Nairobi (2012)",
                      "fields": {
-                        "af": "Kenya%2C Nairobi (2012)_AF",
-                        "ac": "Kenya%2C Nairobi (2012)_AC",
-                        "an": "Kenya%2C Nairobi (2012)_AN"
+                        "af": "Kenya$2C Nairobi (2012)_AF",
+                        "ac": "Kenya$2C Nairobi (2012)_AC",
+                        "an": "Kenya$2C Nairobi (2012)_AN"
                      }
                   },
                   {
-                     "name": "Ho Chih Minh%2C Vietnam (2013)",
+                     "name": "Ho Chih Minh$2C Vietnam (2013)",
                      "fields": {
-                        "af": "Ho Chih Minh%2C Vietnam (2013)_AF",
-                        "ac": "Ho Chih Minh%2C Vietnam (2013)_AC",
-                        "an": "Ho Chih Minh%2C Vietnam (2013)_AN"
+                        "af": "Ho Chih Minh$2C Vietnam (2013)_AF",
+                        "ac": "Ho Chih Minh$2C Vietnam (2013)_AC",
+                        "an": "Ho Chih Minh$2C Vietnam (2013)_AN"
                      }
                   },
                   {
-                     "name": "Uganda%2C Lunyo (2013)",
+                     "name": "Uganda$2C Lunyo (2013)",
                      "fields": {
-                        "af": "Uganda%2C Lunyo (2013)_AF",
-                        "ac": "Uganda%2C Lunyo (2013)_AC",
-                        "an": "Uganda%2C Lunyo (2013)_AN"
+                        "af": "Uganda$2C Lunyo (2013)_AF",
+                        "ac": "Uganda$2C Lunyo (2013)_AC",
+                        "an": "Uganda$2C Lunyo (2013)_AN"
                      }
                   }
                ]
@@ -2662,19 +2665,19 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "G3 colony%2C male (2017)",
+                     "name": "G3 colony$2C male (2017)",
                      "fields": {
-                        "af": "G3 colony%2C male (2017)_AF",
-                        "ac": "G3 colony%2C male (2017)_AC",
-                        "an": "G3 colony%2C male (2017)_AN"
+                        "af": "G3 colony$2C male (2017)_AF",
+                        "ac": "G3 colony$2C male (2017)_AC",
+                        "an": "G3 colony$2C male (2017)_AN"
                      }
                   },
                   {
-                     "name": "G3 colony%2C female (2017)",
+                     "name": "G3 colony$2C female (2017)",
                      "fields": {
-                        "af": "G3 colony%2C female (2017)_AF",
-                        "ac": "G3 colony%2C female (2017)_AC",
-                        "an": "G3 colony%2C female (2017)_AN"
+                        "af": "G3 colony$2C female (2017)_AF",
+                        "ac": "G3 colony$2C female (2017)_AC",
+                        "an": "G3 colony$2C female (2017)_AN"
                      }
                   }
                ]
@@ -2744,18 +2747,18 @@
          ]
       },
       {
-         "name": "A. arabiensis field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)",
+         "name": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000124_Goundry_2016_arabiensis_freq.vcf.gz",
-               "short_name": "A. arabiensis field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)",
+               "short_name": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
                "include_fields": [
                   {
-                     "name": "A. arabiensis field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)",
+                     "name": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
                      "fields": {
-                        "af": "A. arabiensis field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AF",
-                        "ac": "A. arabiensis field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AC",
-                        "an": "A. arabiensis field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AN"
+                        "af": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AF",
+                        "ac": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AC",
+                        "an": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AN"
                      }
                   }
                ]
@@ -2789,27 +2792,27 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)",
+                     "name": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)",
                      "fields": {
-                        "af": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AF",
-                        "ac": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AC",
-                        "an": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AN"
+                        "af": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AF",
+                        "ac": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AC",
+                        "an": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AN"
                      }
                   },
                   {
-                     "name": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)",
+                     "name": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
                      "fields": {
-                        "af": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AF",
-                        "ac": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AC",
-                        "an": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AN"
+                        "af": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AF",
+                        "ac": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AC",
+                        "an": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AN"
                      }
                   },
                   {
-                     "name": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2010)",
+                     "name": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)",
                      "fields": {
-                        "af": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2010)_AF",
-                        "ac": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2010)_AC",
-                        "an": "A. coluzzii field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2010)_AN"
+                        "af": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AF",
+                        "ac": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AC",
+                        "an": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AN"
                      }
                   }
                ]
@@ -2824,27 +2827,27 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2010)",
+                     "name": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)",
                      "fields": {
-                        "af": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2010)_AF",
-                        "ac": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2010)_AC",
-                        "an": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2010)_AN"
+                        "af": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AF",
+                        "ac": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AC",
+                        "an": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AN"
                      }
                   },
                   {
-                     "name": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)",
+                     "name": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)",
                      "fields": {
-                        "af": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AF",
-                        "ac": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AC",
-                        "an": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AN"
+                        "af": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AF",
+                        "ac": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AC",
+                        "an": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AN"
                      }
                   },
                   {
-                     "name": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)",
+                     "name": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
                      "fields": {
-                        "af": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AF",
-                        "ac": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AC",
-                        "an": "A. gambiae field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AN"
+                        "af": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AF",
+                        "ac": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AC",
+                        "an": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AN"
                      }
                   }
                ]
@@ -3067,27 +3070,27 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2009)",
+                     "name": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2009)",
                      "fields": {
-                        "af": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2009)_AF",
-                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2009)_AC",
-                        "an": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2009)_AN"
+                        "af": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2009)_AF",
+                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2009)_AC",
+                        "an": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2009)_AN"
                      }
                   },
                   {
-                     "name": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)",
+                     "name": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)",
                      "fields": {
-                        "af": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AF",
-                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AC",
-                        "an": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2008)_AN"
+                        "af": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AF",
+                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AC",
+                        "an": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AN"
                      }
                   },
                   {
-                     "name": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)",
+                     "name": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
                      "fields": {
-                        "af": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AF",
-                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AC",
-                        "an": "A. coluzzii/gambiae (Goundry form) field isolate%2C Goundry%2C Burkina Faso%2C individual insect (2007)_AN"
+                        "af": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AF",
+                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AC",
+                        "an": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AN"
                      }
                   }
                ]
@@ -3096,6 +3099,7 @@
       },
       {
          "name": "1000_genomes_project",
+         "representative": true,
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000163_ag1000g.phase1.ar3.pass.2L_freq.vcf.gz",
@@ -3497,51 +3501,51 @@
                "short_name": "UNSPECIFIED",
                "include_fields": [
                   {
-                     "name": "Kansambwe%2C Nsadzi%2C Uganda (2012)",
+                     "name": "Kansambwe$2C Nsadzi$2C Uganda (2012)",
                      "fields": {
-                        "af": "Kansambwe%2C Nsadzi%2C Uganda (2012)_AF",
-                        "ac": "Kansambwe%2C Nsadzi%2C Uganda (2012)_AC",
-                        "an": "Kansambwe%2C Nsadzi%2C Uganda (2012)_AN"
+                        "af": "Kansambwe$2C Nsadzi$2C Uganda (2012)_AF",
+                        "ac": "Kansambwe$2C Nsadzi$2C Uganda (2012)_AC",
+                        "an": "Kansambwe$2C Nsadzi$2C Uganda (2012)_AN"
                      }
                   },
                   {
-                     "name": "Naama%2C Wamala%2C Uganda (2012)",
+                     "name": "Naama$2C Wamala$2C Uganda (2012)",
                      "fields": {
-                        "af": "Naama%2C Wamala%2C Uganda (2012)_AF",
-                        "ac": "Naama%2C Wamala%2C Uganda (2012)_AC",
-                        "an": "Naama%2C Wamala%2C Uganda (2012)_AN"
+                        "af": "Naama$2C Wamala$2C Uganda (2012)_AF",
+                        "ac": "Naama$2C Wamala$2C Uganda (2012)_AC",
+                        "an": "Naama$2C Wamala$2C Uganda (2012)_AN"
                      }
                   },
                   {
-                     "name": "Lunnyo%2C Entebbe%2C Uganda (2012)",
+                     "name": "Lunnyo$2C Entebbe$2C Uganda (2012)",
                      "fields": {
-                        "af": "Lunnyo%2C Entebbe%2C Uganda (2012)_AF",
-                        "ac": "Lunnyo%2C Entebbe%2C Uganda (2012)_AC",
-                        "an": "Lunnyo%2C Entebbe%2C Uganda (2012)_AN"
+                        "af": "Lunnyo$2C Entebbe$2C Uganda (2012)_AF",
+                        "ac": "Lunnyo$2C Entebbe$2C Uganda (2012)_AC",
+                        "an": "Lunnyo$2C Entebbe$2C Uganda (2012)_AN"
                      }
                   },
                   {
-                     "name": "Sserinya%2C Uganda (2012)",
+                     "name": "Sserinya$2C Uganda (2012)",
                      "fields": {
-                        "af": "Sserinya%2C Uganda (2012)_AF",
-                        "ac": "Sserinya%2C Uganda (2012)_AC",
-                        "an": "Sserinya%2C Uganda (2012)_AN"
+                        "af": "Sserinya$2C Uganda (2012)_AF",
+                        "ac": "Sserinya$2C Uganda (2012)_AC",
+                        "an": "Sserinya$2C Uganda (2012)_AN"
                      }
                   },
                   {
-                     "name": "Lutoboka%2C Bugala%2C Uganda (2012)",
+                     "name": "Lutoboka$2C Bugala$2C Uganda (2012)",
                      "fields": {
-                        "af": "Lutoboka%2C Bugala%2C Uganda (2012)_AF",
-                        "ac": "Lutoboka%2C Bugala%2C Uganda (2012)_AC",
-                        "an": "Lutoboka%2C Bugala%2C Uganda (2012)_AN"
+                        "af": "Lutoboka$2C Bugala$2C Uganda (2012)_AF",
+                        "ac": "Lutoboka$2C Bugala$2C Uganda (2012)_AC",
+                        "an": "Lutoboka$2C Bugala$2C Uganda (2012)_AN"
                      }
                   },
                   {
-                     "name": "Nakibanga%2C Bukasa%2C Uganda (2012)",
+                     "name": "Nakibanga$2C Bukasa$2C Uganda (2012)",
                      "fields": {
-                        "af": "Nakibanga%2C Bukasa%2C Uganda (2012)_AF",
-                        "ac": "Nakibanga%2C Bukasa%2C Uganda (2012)_AC",
-                        "an": "Nakibanga%2C Bukasa%2C Uganda (2012)_AN"
+                        "af": "Nakibanga$2C Bukasa$2C Uganda (2012)_AF",
+                        "ac": "Nakibanga$2C Bukasa$2C Uganda (2012)_AC",
+                        "an": "Nakibanga$2C Bukasa$2C Uganda (2012)_AN"
                      }
                   }
                ]

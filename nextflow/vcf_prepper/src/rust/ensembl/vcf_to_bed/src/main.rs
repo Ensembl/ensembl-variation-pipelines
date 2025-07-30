@@ -236,7 +236,13 @@ fn main() -> Result<(), VCFError> {
         for id in ids.iter() {
             if id.contains(";") { multiple_ids = true; }
         }
-        if multiple_ids { continue; }
+        if multiple_ids { 
+            println!("[WARNING] Multiple IDs currently not supported - {0}:{1}, skipping",
+                String::from_utf8(record.chromosome.to_vec()).unwrap(), 
+                record.position
+            );
+            continue; 
+        }
         
         let alts = record.alternative.iter().map(|a| {
             String::from_utf8(a.clone())
@@ -250,7 +256,13 @@ fn main() -> Result<(), VCFError> {
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         // if csq is empty we won't have most severe consequence
-        if csq.is_empty(){ continue; }
+        if csq.is_empty(){  
+            println!("[WARNING] INFO/CSQ empty - {0}:{1}, skipping",
+                String::from_utf8(record.chromosome.to_vec()).unwrap(), 
+                record.position
+            );
+            continue; 
+        }
         
         // TBD: replace hardcoded index value - .nth(21)
         let class = record.info(b"CSQ").map(|csqs| {
@@ -370,7 +382,11 @@ fn main() -> Result<(), VCFError> {
                             Ok(number) => { end = number; }
                             Err(_) => {
                                 if symbolic_alts {
-                                    println!("[WARNING] Neither SVLEN nor END can be parsed but symbolic alts used");
+                                    println!("[WARNING] Neither SVLEN nor END can be parsed but symbolic alts used - {0}:{1}:{2}, skipping...",
+                                        String::from_utf8(record.chromosome.to_vec()).unwrap(), 
+                                        record.position,
+                                        id
+                                    );
                                     continue
                                 }
                             }
@@ -381,6 +397,18 @@ fn main() -> Result<(), VCFError> {
                 
                 // extend is particulary useful for symbolic alts
                 extent = end - start;
+                if !symbolic_alts && variety.eq(&String::from("insertion")) {
+                    let max_alt = alts.iter().map(|alt| {alt.len()}).max().unwrap();
+                    extent = u64::try_from(max_alt).unwrap() - 1;
+                }
+                if extent == 0 {
+                    println!("[WARNING] Could not calculate extent for structural variant - {0}:{1}:{2}, skipping...",
+                            String::from_utf8(record.chromosome.to_vec()).unwrap(), 
+                            record.position,
+                            id 
+                    );
+                    continue
+                }
 
                 // for insertions and breakpoints the variant is on single point
                 if variety.ends_with(&String::from("insertion")) || 

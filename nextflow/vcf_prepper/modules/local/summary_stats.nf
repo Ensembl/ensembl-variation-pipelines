@@ -32,13 +32,24 @@ process SUMMARY_STATS {
   index_type = meta.index_type
   flag_index = (index_type == "tbi" ? "-t" : "-c")
   vcf_index = output_file + ".${index_type}"
+  
+  if (params.population_data_file) {
+    population_data_file = "--population_data_file " + params.population_data_file
+  }
+  else if (!params.structural_variant && file("${projectDir}/assets/population_data.json").exists()){
+    population_data_file = "--population_data_file " + "${projectDir}/assets/population_data.json"
+  }
+  else {
+    population_data_file = ""
+  }
 
   '''
   summary_stats.py \
     !{species} \
     !{assembly} \
     !{vcf} \
-    -O !{output_file}
+    -O !{output_file} \
+    !{population_data_file}
   
   bcftools index !{flag_index} !{output_file}
   '''

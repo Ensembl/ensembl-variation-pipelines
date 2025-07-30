@@ -98,28 +98,27 @@ def main(args = None):
     assembly = args.assembly
     input_file = os.path.realpath(args.input_file)
     output_file = args.output_file or os.path.join(os.path.dirname(input_file), "UPDATED_SS_" + os.path.basename(input_file))
-    population_data_file = args.population_data_file or os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            "../assets/population_data.json"
-        )
+    population_data_file = args.population_data_file or ""
     
     # get representative population and respective INFO fields
-    with open(population_data_file, "r") as file:
-        population_data = json.load(file)
     (population_name, freq_csq_fields, freq_info_display) = ("", [], "")
-    for species_patt in population_data:
-        if re.fullmatch(species_patt, species):
-            for population in population_data[species_patt]:
-                if population.get("representative"):
-                    population_name = population["name"]
-                    freq_info_display = population["name"].replace("_", " ") + population.get("version", "")
+    if os.path.isfile(population_data_file):
+        with open(population_data_file, "r") as file:
+            population_data = json.load(file)
+            
+        for species_patt in population_data:
+            if re.fullmatch(species_patt, species):
+                for population in population_data[species_patt]:
+                    if population.get("representative"):
+                        population_name = population["name"]
+                        freq_info_display = population["name"].replace("_", " ") + population.get("version", "")
 
-                    for file in population["files"]:
-                        freq_csq_fields.append(file["short_name"] + "_" + file["representative_af_field"])
+                        for file in population["files"]:
+                            freq_csq_fields.append(file["short_name"] + "_" + file["representative_af_field"])
 
-    # add to header and write header to output vcf
-    if freq_info_display != "":
-        HEADERS[0]['Description'] = HEADERS[0]['Description'] + f" ({freq_info_display})"
+        # add to header and write header to output vcf
+        if freq_info_display != "":
+            HEADERS[0]['Description'] = HEADERS[0]['Description'] + f" ({freq_info_display})"
     
     input_vcf = VCF(input_file)
 

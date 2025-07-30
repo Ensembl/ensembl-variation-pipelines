@@ -232,7 +232,7 @@ def get_input_file(config: dict) -> str:
     return input_file
 
 def format_population_name(pop_name: str) -> str:
-    return pop_name.replace(",", "%2C")
+    return pop_name.replace(",", "$2C")
 
 # parse ini file
 variation_server = parse_ini(ini_file, "variation")

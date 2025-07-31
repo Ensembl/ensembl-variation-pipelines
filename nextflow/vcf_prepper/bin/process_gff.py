@@ -106,19 +106,20 @@ def main(args = None):
                 genome_uuid, 
                 release_id, 
                 "genebuild.annotation_source"
-            ).lower()
+            )
         if annotation_source == "" or annotation_source is None:
             raise Exception(f"[ERROR] Could not retrieve genebuild annotation source for genome uuid - {genome_uuid} and release id - {release_id}")
+        annotation_source = annotation_source.lower()
         last_geneset_update = get_dataset_attribute_value(
                 metadb_server, 
                 "ensembl_genome_metadata", 
                 genome_uuid, 
                 release_id, 
                 "genebuild.last_geneset_update"
-            ).replace("-", "_")
+            )
         if last_geneset_update == "" or last_geneset_update is None:
             raise Exception(f"[ERROR] Could not retrieve last genebuild udpate date for genome uuid - {genome_uuid} and release id - {release_id}")
-        
+        last_geneset_update = last_geneset_update.replace("-", "_")
         last_geneset_update = re.sub("[\-\s]", "_", last_geneset_update)
 
         source_gff = os.path.join(GFF_FASTA_BASE_DIR, scientific_name, assembly_accession, annotation_source, "geneset", last_geneset_update, "genes.gff3.gz")

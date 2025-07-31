@@ -790,7 +790,7 @@
             {
                "short_name": "NextGen:IROA",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/IROA.population_sites.ARS_UI_Ramb_v2_0.20140307.vcf.g",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/Oar_rambouillet_v1.0/variation_genotype/IROA.population_sites.Oar_rambouillet_v1_0.20140307.vcf.gz",
                "include_fields": [
                   {
                      "name": "NextGen:IROA",
@@ -810,7 +810,7 @@
             {
                "short_name": "NextGen:MOOA",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/MOOA.population_sites.ARS-UI_Ramb_v2_0.20140328.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/Oar_rambouillet_v1.0/variation_genotype/MOOA.population_sites.Oar_rambouillet_v1_0.20140328.vcf.gz",
                "include_fields": [
                   {
                      "name": "NextGen:MOOA",
@@ -831,7 +831,7 @@
             {
                "short_name": "ISGC",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/###CHR###.filtered_ARS-UI_Ramb_v2.0_intersect.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/Oar_rambouillet_v1.0/variation_genotype/###CHR###.filtered_intersect.vcf.gz",
                "include_fields": [
                   {
                      "name": "ISGC",

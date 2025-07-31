@@ -70,15 +70,7 @@ PLUGINS = [
     "Downstream",
     "ClinPred"
 ]
-DEFAULT_PARAMS = [
-    "force_overwrite",
-    "fork 2",
-    "species",
-    "assembly",
-    "vcf 1",
-    "spdi 1",
-    "transcript_version 1"
-]
+
 
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
@@ -91,7 +83,8 @@ def parse_args(args = None):
     parser.add_argument('-I', '--ini_file', dest="ini_file", type=str, required = False, help="full path database configuration file, default - DEFAULT.ini in the same directory.")
     parser.add_argument('--vep_config', dest="vep_config", type=str, required = False, help="VEP configuration file, default - <species>_<assembly>.ini in the same directory.")
     parser.add_argument('--cache_dir', dest="cache_dir", type=str, required = False, help="VEP cache directory, must be indexed")
-    parser.add_argument('--fasta_dir', dest="fasta_dir", type=str, required = False, help="Directory containing toplevel FASTA ")
+    parser.add_argument('--fasta_dir', dest="fasta_dir", type=str, required = False, help="Directory containing toplevel FASTA")
+    parser.add_argument('--gff_dir', dest="gff_dir", type=str, required = False, help="Directory containing GFF file")
     parser.add_argument('--conservation_data_dir', dest="conservation_data_dir", type=str, required = False, help="Conservation plugin data dir")
     parser.add_argument('--repo_dir', dest="repo_dir", type=str, required = False, help="Ensembl repositories directory")
     parser.add_argument('--population_data_file', dest="population_data_file", type=str, required = False, help="A JSON file containing population information for all species.")
@@ -402,7 +395,8 @@ def main(args = None):
         if not os.path.exists(genome_cache_dir):
             raise FileNotFoundError(f"[ERROR] {genome_cache_dir} directory does not exists, cannot run VEP. Exiting ...")
     elif args.gff_dir:
-        gff = os.path.join(fasta_dir, "genes.gff3.gz")
+        gff_dir = args.gff_dir
+        gff = os.path.join(gff_dir, "sorted_genes.gff3.gz")
         if not os.path.isfile(gff):
             raise FileNotFoundError(f"[ERROR] No valid GFF file found, cannot run VEP. Exiting ...")
     

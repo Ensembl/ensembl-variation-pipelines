@@ -87,8 +87,7 @@ def main(args = None):
     source_gff = os.path.join(gff_dir, GFF_FILE_NAME)
     
     if not os.path.isfile(source_gff) \
-            or not os.path.isfile(source_gff + ".fai") \
-            or not os.path.isfile(source_gff + ".gzi") \
+            or not os.path.isfile(source_gff + ".csi") \
             or args.force:
 
         scientific_name = get_scientific_name(metadb_server, "ensembl_genome_metadata", genome_uuid).replace(" ", "_")

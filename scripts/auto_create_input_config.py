@@ -53,17 +53,13 @@ EVA_REST_ENDPOINT = "https://www.ebi.ac.uk/eva/webservices/release"
 
 
 def parse_args(args=None):
-    """
-    Parse all command-line arguments for the script.
+    """Parse all command-line arguments for the auto-create input config script.
 
-    Raises:
-        SystemExit: Raised internally by *argparse* if `-h/--help`
-            is requested or if invalid arguments are supplied.
+    Args:
+        args (list, optional): Command-line arguments. Defaults to None.
 
     Returns:
-        argparse.Namespace:  Namespace whose attributes are
-            `ini_file`, `output_dir`, and `tmp_dir`, already
-            populated with defaults or user-supplied values.
+        argparse.Namespace: Parsed arguments with ini_file, output_dir and tmp_dir.
     """
 
     parser = argparse.ArgumentParser(
@@ -101,16 +97,14 @@ def parse_args(args=None):
 
 
 def parse_ini(ini_file: str, section: str = "database") -> dict:
-    """
-    Load connection parameters from an INI file.
+    """Load connection parameters from an INI file.
 
-    Raises:
-        SystemExit: If the requested *section* is absent from
-            the file (an error message is printed before exit).
+    Args:
+        ini_file (str): Path to the INI file.
+        section (str, optional): Configuration section to read. Defaults to "database".
 
     Returns:
-        dict:  Keys `host`, `port`, `user` – suitable for passing
-            straight to the MySQL command-line client.
+        dict: Dictionary containing host, port and user.
     """
 
     config = configparser.ConfigParser()
@@ -128,14 +122,14 @@ def parse_ini(ini_file: str, section: str = "database") -> dict:
 
 
 def get_ensembl_species(server: dict, meta_db: str) -> dict:
-    """
-    Query metadata db for every available genome.
+    """Query the metadata database for every available genome.
 
-    Raises:
-        SystemExit: If the underlying `mysql` subprocess fails.
+    Args:
+        server (dict): Connection parameters for the metadata database.
+        meta_db (str): Name of the metadata database.
 
     Returns:
-        dict:  `{genome_uuid: {species, assembly_id, assembly_name}}`.
+        dict: Dictionary mapping genome_uuid to species metadata.
     """
 
     query = f"""
@@ -186,15 +180,14 @@ def get_ensembl_species(server: dict, meta_db: str) -> dict:
 
 
 def get_ensembl_vcf_filepaths(server: dict, meta_db: str) -> dict:
-    """
-    Retrieve the location of VCFs already produced by the
-    VCF-prepper pipeline.
+    """Retrieve the location of VCFs already produced by the VCF-prepper pipeline.
 
-    Raises:
-        SystemExit: On failure of the SQL query / subprocess.
+    Args:
+        server (dict): Connection parameters.
+        meta_db (str): Name of the metadata database.
 
     Returns:
-        dict:  `{genome_uuid: {species, assembly_id, file_path}}`.
+        dict: Dictionary mapping genome_uuid to details including species, assembly_id and file_path.
     """
 
     query = f"""
@@ -258,16 +251,14 @@ def get_ensembl_vcf_filepaths(server: dict, meta_db: str) -> dict:
 
 
 def get_ensembl_variant_counts(server: dict, meta_db: str) -> dict:
-    """
-    Pull the pre-computed “short-variant” counts from the
-    metadata db.
+    """Pull pre-computed short-variant counts from the metadata database.
 
-    Raises:
-        SystemExit: When the MySQL subprocess exits non-zero.
+    Args:
+        server (dict): Connection parameters.
+        meta_db (str): Name of the metadata database.
 
     Returns:
-        dict:  `{genome_uuid: {"assembly": accession,
-                            "variant_count": int}}`.
+        dict: Dictionary mapping genome_uuid to variant count details.
     """
 
     query = f"""
@@ -324,19 +315,13 @@ def get_ensembl_variant_counts(server: dict, meta_db: str) -> dict:
 
 
 def get_eva_version_from_ensembl_vcf(vcf_path: str):
-    """
-    Scan the header of the Ensembl VCF and extract
-    the EVA release version recorded in the `##source=` line.
+    """Extract the EVA release version from the header of an Ensembl VCF file.
 
-    Raises:
-        FileNotFoundError: If vcf_path does not exist.
-        ValueError:        If the `version="…"` token is present
-            but cannot be coerced to an `int`.
+    Args:
+        vcf_path (str): Path to the VCF file.
 
     Returns:
-        int | None:  The EVA release number, or None when the
-            header lacks an EVA `##source` line or version
-            isn't an `int`.
+        int or None: EVA version if found, otherwise None.
     """
 
     path = Path(vcf_path)
@@ -364,15 +349,10 @@ def get_eva_version_from_ensembl_vcf(vcf_path: str):
 
 
 def get_latest_eva_version() -> int:
-    """
-    Query the EVA REST API for the most recent public release version.
-
-    Raises:
-        SystemExit: If the HTTP request fails or an unexpected
-            JSON payload is returned.
+    """Query the EVA REST API for the most recent public release version.
 
     Returns:
-        int:  The latest EVA release version.
+        int: The latest EVA release version.
     """
 
     url = EVA_REST_ENDPOINT + "/v1/info/latest"
@@ -397,16 +377,13 @@ def get_latest_eva_version() -> int:
 
 
 def get_eva_species(release_version: int) -> dict:
-    """
-    Fetch per-species statistics for the requested EVA release
-    and retain only assemblies with ≥ 5000 RS IDs.
+    """Fetch per-species EVA statistics for a given release version.
 
-    Raises:
-        SystemExit: On HTTP / JSON errors.
+    Args:
+        release_version (int): The EVA release version.
 
     Returns:
-        dict:  `{assembly_accession: {species, accession,
-                release_folder, taxonomy_id, variant_count}}`.
+        dict: Dictionary of EVA species meeting the filter criteria.
     """
 
     eva_species = {}
@@ -446,15 +423,14 @@ def get_eva_species(release_version: int) -> dict:
 
 
 def _tabix_list(path: str, workdir: Path = Path.cwd()) -> Optional[List[str]]:
-    """
-    Run `tabix -l` and collect the sequence names.
+    """Run 'tabix -l' and collect sequence names from the VCF index.
 
-    Raises:
-        Any `tabix` error simply yields None.
+    Args:
+        path (str): Path to the VCF file.
+        workdir (Path, optional): Working directory. Defaults to Path.cwd().
 
     Returns:
-        list[str] | None:  Sequence names on success; None if
-            `tabix` exits non-zero.
+        list[str] or None: List of contig names or None on failure.
     """
 
     proc = subprocess.run(
@@ -468,16 +444,13 @@ def _tabix_list(path: str, workdir: Path = Path.cwd()) -> Optional[List[str]]:
 
 
 def _header_contigs(path: str) -> List[str]:
-    """
-    Parse `##contig=<ID=…>` header lines from a VCF
-    (compressed or plain).
+    """Parse contig IDs from the VCF header.
 
-    Raises:
-        IOError:  If the file cannot be read.
+    Args:
+        path (str): Path to the VCF file.
 
     Returns:
-        list[str]:  All contig IDs found - in the order they
-            appear in the header.
+        list[str]: List of contig IDs.
     """
 
     opener = gzip.open if path.endswith(".gz") else open
@@ -490,21 +463,15 @@ def _header_contigs(path: str) -> List[str]:
 
 
 def seq_region_matches(eva_file: str, ensembl_file: str, tmp_dir: Path) -> bool:
-    """
-    Determine whether a remote EVA VCF and a local Ensembl VCF
-    reference at least one common sequence region.
+    """Determine whether EVA and Ensembl VCF files share at least one common contig.
 
-    The function attempts `tabix -l` on both files, builds a
-    temporary index for the local VCF when necessary, and finally
-    falls back to a header parse if indexing fails.
-
-    Raises:
-        ValueError:  When *tmp_dir* does not exist.
-        Subprocess errors that are thrown while
-            copying or indexing files.
+    Args:
+        eva_file (str): Path to the remote EVA VCF.
+        ensembl_file (str): Path to the local Ensembl VCF.
+        tmp_dir (Path): Temporary directory for indexing.
 
     Returns:
-        bool:  *True* if a shared contig is found, *False* otherwise.
+        bool: True if a shared contig is found, False otherwise.
     """
 
     # Set up temp_dir/work to hold tmp files
@@ -586,16 +553,14 @@ def seq_region_matches(eva_file: str, ensembl_file: str, tmp_dir: Path) -> bool:
 
 
 def get_ensembl_release_status(server: dict, meta_db: str) -> str:
-    """
-    Collect “planned” or “prepared” release statuses recorded in
-    metadata for every genome.
+    """Collect release statuses (planned/prepared) for every genome in the metadata database.
 
-    Raises:
-        SystemExit: If the MySQL query fails.
+    Args:
+        server (dict): Connection parameters.
+        meta_db (str): Name of the metadata database.
 
     Returns:
-        dict:  `{genome_uuid: {species, release_status,
-                            release_id, assembly_id}}`
+        str: Dictionary mapping genome_uuid to release status details.
     """
 
     query = f"""
@@ -655,18 +620,10 @@ def get_ensembl_release_status(server: dict, meta_db: str) -> str:
 
 
 def main(args=None):
-    """
-    Run the auto-discovery workflow:
+    """Run the auto-discovery workflow to generate JSON configuration files.
 
-    1.  Load CLI arguments and check paths.
-    2.  Fetch EVA and Ensembl metadata (species, VCFs, counts, statuses).
-    3.  Decide which genomes need to be processed.
-    4.  Emit three JSON configuration files.
-
-    Raises:
-        SystemExit:  For argument/ environment problems.
-        ValueError:  From helpers (e.g. `seq_region_matches`)
-            when conditions are not met.
+    Args:
+        args (list, optional): Command-line arguments. Defaults to None.
 
     Returns:
         None

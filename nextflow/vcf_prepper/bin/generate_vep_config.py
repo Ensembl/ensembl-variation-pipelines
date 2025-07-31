@@ -73,6 +73,14 @@ PLUGINS = [
 
 
 def parse_args(args = None):
+    """Parse command-line arguments for generating the VEP configuration.
+
+    Args:
+        args (Optional[Iterable[str]]): Command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument(dest="version", type=int, help="Ensembl release version")
@@ -95,6 +103,20 @@ def parse_args(args = None):
 
 def format_custom_args(file: str, short_name: str, format: str = "vcf", type: str = "exact", coords: int = 0, fields: list = []) -> str:
     check_file_path = file.replace("###CHR###", "*")
+    """Format custom annotation arguments for VEP.
+
+    Args:
+        file (str): File path with placeholders.
+        short_name (str): Short name for the annotation.
+        format (str): File format.
+        type (str): Type of annotation.
+        coords (int): Coordinate field.
+        fields (list): List of fields to be included.
+
+    Returns:
+        str: Formatted custom annotation argument string.
+    """
+    check_file_path = file.replace("##CHR##", "*")
     if len(glob.glob(check_file_path)) == 0:
         print(f"[ERROR] Custom annotation file does not exist - {file}. Exiting ...")
         exit(1)
@@ -106,6 +128,16 @@ def format_custom_args(file: str, short_name: str, format: str = "vcf", type: st
     return custom_line
     
 def get_frequency_args(population_data_file: str, species: str, placeholders: dict) -> list:
+    """Generate frequency arguments for VEP from population data.
+
+    Args:
+        population_data_file (str): JSON file with population data.
+        species (str): Species production name.
+        placeholders (dict): Placeholders object for file location replacement.
+
+    Returns:
+        list: List of frequency argument strings.
+    """
     with open(population_data_file, "r") as file:
         population_data = json.load(file)
 
@@ -134,6 +166,16 @@ def get_frequency_args(population_data_file: str, species: str, placeholders: di
     return frequencies
     
 def check_plugin_files(plugin: str, files: list, exit_rule: str = "exit") -> bool:
+    """Verify that the required plugin files exist.
+
+    Args:
+        plugin (str): Plugin name.
+        files (list): List of file paths required.
+        exit_rule (str): Action if file not found; either "exit" or "skip".
+
+    Returns:
+        bool: True if all files exist; otherwise False.
+    """
     for file in files:
         if not os.path.isfile(file):
             if exit_rule == "skip":
@@ -151,7 +193,18 @@ def get_plugin_args(
         assembly: str, 
         conservation_data_dir: str = CONSERVATION_DATA_DIR
     ) -> str:
+    """Generate the argument string for a given VEP plugin.
 
+    Args:
+        plugin (str): Plugin name.
+        version (int): Ensembl release version.
+        species (str): Species production name.
+        assembly (str): Assembly version.
+        conservation_data_dir (str): Directory for conservation data.
+
+    Returns:
+        str: Plugin argument string, or None if data file is not available.
+    """
     plugin_data_dir = PLUGIN_DATA_DIR.replace("VERSION", "e" + str(version))
     if assembly == "GRCh37":
         plugin_data_dir = plugin_data_dir.replace("grch38", "grch37")
@@ -259,6 +312,15 @@ def get_plugin_args(
     return plugin
     
 def get_plugin_species(plugin: str, repo_dir: str) -> list:
+    """Retrieve the list of species supported by a given VEP plugin.
+
+    Args:
+        plugin (str): Plugin name.
+        repo_dir (str): Ensembl repositories directory.
+
+    Returns:
+        list: List of species that the plugin supports.
+    """
     plugin_config_file = f"{repo_dir}/VEP_plugins/plugin_config.txt"
     
     if not os.path.isfile(plugin_config_file):
@@ -294,7 +356,18 @@ def get_plugins(
         repo_dir: str = REPO_DIR,
         conservation_data_dir: str = CONSERVATION_DATA_DIR,
     ) -> list:
+    """Obtain the list of plugin arguments for a species given the release version and assembly.
 
+    Args:
+        species (str): Species production name.
+        version (int): Ensembl release version.
+        assembly (str): Assembly version.
+        repo_dir (str): Ensembl repositories directory.
+        conservation_data_dir (str): Directory for conservation plugin data.
+
+    Returns:
+        list: List of plugin argument strings.
+    """
     plugins = []
     
     for plugin in PLUGINS:
@@ -305,8 +378,91 @@ def get_plugins(
                 plugins.append(plugin_args)
             
     return plugins   
+    return plugins
+        
+def generate_vep_config(
+    vep_config: str,
+    species: str,
+    assembly: str,
+    version: str,
+    cache_dir: str,
+    fasta: str,
+    sift: bool = False,
+    polyphen: bool = False,
+    frequencies: list = None,
+    plugins: dict = None,
+    repo_dir: str = REPO_DIR,
+    fork: int = 2,
+    force: bool = False) -> None:
+    """Generate the VEP configuration file.
+
+    Creates an INI file with the configuration needed for VEP and writes it to disk if it does not already exist,
+    unless forced.
+
+    Args:
+        vep_config (str): Path to the VEP configuration file.
+        species (str): Species production name.
+        assembly (str): Assembly version.
+        version (str): Cache version.
+        cache_dir (str): VEP cache directory.
+        fasta (str): Path to the FASTA file.
+        sift (bool): Whether to enable SIFT.
+        polyphen (bool): Whether to enable PolyPhen.
+        frequencies (list): List of frequency arguments.
+        plugins (dict): Dictionary of plugin arguments.
+        repo_dir (str): Repository directory for VEP plugins.
+        fork (int): Number of forked processes.
+        force (bool): If True, overwrite existing config file.
+    """
+    if os.path.exists(vep_config) and not force:
+        print(f"[INFO] {vep_config} file already exists, skipping ...")
+        return
+    
+    with open(vep_config, "w") as file:
+        file.write("force_overwrite 1\n")
+        file.write(f"fork {fork}\n")
+        file.write(f"species {species}\n")
+        file.write(f"assembly {assembly}\n")
+        file.write(f"cache_version {version}\n")
+        file.write(f"cache {cache_dir}\n")
+        file.write(f"fasta {fasta}\n")
+        file.write("offline 1\n")
+        file.write("vcf 1\n")
+        file.write("spdi 1\n")
+        file.write("regulatory 1\n")
+        file.write("pubmed 1\n")
+        file.write("var_synonyms 1\n")
+        file.write("variant_class 1\n")
+        file.write("protein 1\n")
+        file.write("transcript_version 1\n")
+        
+        if sift:
+            file.write(f"sift b\n")
+        if polyphen:
+            file.write(f"polyphen b\n")
+        if frequencies:
+            for frequency in frequencies:
+                file.write(f"{frequency}\n")
+            
+        if plugins:
+            file.write(f"dir_plugins {repo_dir}/VEP_plugins\n")
+            
+            for plugin in plugins:
+                file.write(f"plugin {plugin}\n")
+    
     
 def main(args = None):
+    """Main entry point for generating the VEP configuration file.
+
+    Parses command-line arguments, determines required directories, obtains plugin and frequency arguments,
+    and writes the configuration file for VEP.
+
+    Args:
+        args (Optional[Iterable[str]]): Command-line arguments.
+
+    Returns:
+        int: Exit code.
+    """
     args = parse_args(args)
     
     version = args.version

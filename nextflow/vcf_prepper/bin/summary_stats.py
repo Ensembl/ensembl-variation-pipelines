@@ -58,6 +58,15 @@ SKIP_CONSEQUENCE = [
 ]
 
 def parse_args(args = None, description: bool = None):
+    """Parse command-line arguments for generating summary statistics from a VCF.
+
+    Args:
+        args (Optional[Iterable[str]]): Command-line arguments.
+        description (Optional[bool]): Description for the argument parser.
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(description = description)
     
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -69,6 +78,15 @@ def parse_args(args = None, description: bool = None):
     return parser.parse_args(args)
 
 def header_match(want_header: dict, got_header: dict) -> bool:
+    """Check whether a given header from the VCF matches the expected header.
+
+    Args:
+        want_header (dict): The expected header field properties.
+        got_header (dict): The header field extracted from the VCF.
+
+    Returns:
+        bool: True if the header matches; otherwise False.
+    """
     got_header.pop("IDX")
 
     return want_header['ID'] == got_header['ID'] and \
@@ -77,6 +95,15 @@ def header_match(want_header: dict, got_header: dict) -> bool:
         f'"{ want_header["Description"] }"' == got_header['Description']
 
 def minimise_allele(ref: str, alts: list) -> str:
+    """Minimise the allele representation by removing redundant bases.
+
+    Args:
+        ref (str): The reference allele.
+        alts (list): List of alternative alleles.
+
+    Returns:
+        tuple: The minimised reference allele and updated alternative alleles.
+    """
     alleles = [ref] + alts
     first_bases = {allele[0] for allele in alleles}
 
@@ -94,6 +121,18 @@ def minimise_allele(ref: str, alts: list) -> str:
     return (ref, alts)
 
 def main(args = None):
+    """Main entry point for generating summary statistics for a VCF file.
+
+    This function processes the input VCF file, adds necessary header and INFO fields,
+    calculates various statistics per allele and per variant, and writes the summary to
+    an output VCF.
+
+    Args:
+        args (Optional[Iterable[str]]): Command-line arguments.
+
+    Returns:
+        int: Exit code.
+    """
     args = parse_args(args)
 
     species = args.species

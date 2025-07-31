@@ -23,6 +23,15 @@ from typing import Callable
 import os
 
 def parse_args(args = None, description: bool = None):
+    """Parse command-line arguments for removing variants from a VCF.
+
+    Args:
+        args (Optional[Iterable[str]]): Command-line arguments.
+        description (Optional[str]): Detailed description for the parser.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser(description = description, formatter_class=RawTextHelpFormatter)
     
     parser.add_argument(dest="input_file", type=str, help="input VCF file")
@@ -34,19 +43,41 @@ def parse_args(args = None, description: bool = None):
     return parser.parse_args(args)
  
 def get_id(variant: Variant) -> str:
-    'Get variant id'
-    
+    """Obtain the variant identifier.
+
+    Args:
+        variant (Variant): A cyvcf2 Variant object.
+
+    Returns:
+        str: The variant ID.
+    """
     return variant.ID
 
 def get_positioned_id(variant: Variant) -> str:
-    'Get variant positioned id'
+    """Generate a positioned identifier for the variant, combining chromosome, position and ID.
 
+    Args:
+        variant (Variant): A cyvcf2 Variant object.
+
+    Returns:
+        str: The positioned identifier.
+    """
     id = variant.ID or "unknown"
     return variant.CHROM + ":" + str(variant.POS) + ":" + id
 
 def generate_removal_status(vcf_file: str, get_identifier: Callable, remove_patch_regions: bool = True) -> dict:
-    'Generate hash against variant about its removal status'
-    
+    """Generate a mapping of variant identifiers to a boolean flag indicating removal status.
+
+    Evaluates uniqueness and, if enabled, whether the variant falls into a patch region.
+
+    Args:
+        vcf_file (str): Path to the input VCF file.
+        get_identifier (Callable): Function to obtain a unique identifier from a variant.
+        remove_patch_regions (bool): Whether to flag variants in patch regions for removal.
+
+    Returns:
+        dict: Mapping from variant identifier to removal status.
+    """
     removal_status = {}
     input_vcf = VCF(vcf_file)
     for variant in input_vcf:
@@ -61,8 +92,14 @@ def generate_removal_status(vcf_file: str, get_identifier: Callable, remove_patc
     return removal_status
 
 def parse_chrom_sizes(chrom_sizes: str) -> list:
-    'Parse chrom_sizes file to get list of valid chromosomes'
+    """Parse a chromosome sizes file into a list of valid chromosome names.
 
+    Args:
+        chrom_sizes (str): Path to the chromosome sizes file.
+
+    Returns:
+        list: List of valid chromosome names.
+    """
     valid_chroms = []
     with open(chrom_sizes, "r") as file:
         for line in file:
@@ -72,6 +109,17 @@ def parse_chrom_sizes(chrom_sizes: str) -> list:
     return valid_chroms
 
 def main(args = None):
+    """Main entry point for removing unwanted variants from a VCF file.
+
+    Determines removal criteria based on uniqueness and region, then writes a new VCF
+    without the flagged variants.
+
+    Args:
+        args (Optional[Iterable[str]]): Command-line arguments.
+
+    Returns:
+        int: Exit code.
+    """
     description = '''
     Removes variant based on uniqueness and sequence region. 
         1) By default, variant is discarded if the positioned identifier (chrom:position:id) is same for multiple variant record. The assumption is that the variants will be multi-allelic if needed be instead of bi-allelic in the source VCF file.

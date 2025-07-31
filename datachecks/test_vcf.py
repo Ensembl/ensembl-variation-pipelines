@@ -119,20 +119,53 @@ CSQ_FIELDS = {
 class TestFile:
 
     def test_exist(self, vcf):
+        """Assert that the VCF file exists.
+
+        Args:
+            vcf (str): Path to the VCF file.
+
+        Returns:
+            None
+        """
         assert os.path.isfile(vcf)
+
 
 class TestHeader:
 
     def test_file_format(self, vcf_reader):
+        """Verify that the VCF header contains a file format declaration.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+
+        Returns:
+            None
+        """
         assert vcf_reader.get_header_type("fileformat")
 
     def test_header_line(self, vcf_reader):
+        """Check that the header line starts with standard VCF columns.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+
+        Returns:
+            None
+        """
         header_line = vcf_reader.raw_header.split("\n")[-2]
         assert header_line.startswith("#CHROM\tPOS\tID\tREF\tALT")
 
     def test_info_csq(self, vcf_reader, species):
-        assert vcf_reader.get_header_type("CSQ")
+        """Ensure that the CSQ information header exists and contains expected fields.
 
+        Args:
+            vcf_reader: Instance of VCF reader.
+            species (str): Species identifier.
+
+        Returns:
+            None
+        """
+        assert vcf_reader.get_header_type("CSQ")
         csq_info_description = vcf_reader.get_header_type("CSQ")["Description"].strip("\"")
         prefix = "Consequence annotations from Ensembl VEP. Format: "
         csq_list = [csq.strip() for csq in csq_info_description[len(prefix):].split("|")]
@@ -149,24 +182,45 @@ class TestHeader:
                 assert csq_field in csq_list
             else:
                 logger.info(f"{csq_field} exist - {csq_field in csq_list}")
-            
+
 
 class TestDuplicate:
 
     def get_positioned_id(self, variant: Variant) -> str:
-        'Get variant positioned id'
+        """Return a unique identifier for a variant based on its chromosome, position and ID.
 
+        Args:
+            variant (Variant): A VCF variant instance.
+
+        Returns:
+            str: A string combining CHROM, POS and the variant's ID.
+        """
         id = variant.ID or "unknown"
         return variant.CHROM + ":" + str(variant.POS) + ":" + id
 
     def get_id(self, variant: Variant) -> str:
-        'Get variant id'
-        
+        """Return the variant's ID.
+
+        Args:
+            variant (Variant): A VCF variant instance.
+
+        Returns:
+            str: The variant's ID.
+        """
         return variant.ID
 
     def no_duplicated_identifier(self, vcf_reader: VCF, get_identifier: Callable) -> bool:
-        'Generate hash against variant about its removal status'
-        
+        """Check that there are no duplicate identifiers in the VCF file.
+
+        Generates identifiers using the provided function and verifies uniqueness.
+
+        Args:
+            vcf_reader (VCF): A VCF reader instance.
+            get_identifier (Callable): Function to extract an identifier from a variant.
+
+        Returns:
+            bool: True if all identifiers are unique, False otherwise.
+        """
         removal_status = {}
         for variant in vcf_reader:
             variant_identifier = get_identifier(variant)
@@ -177,14 +231,41 @@ class TestDuplicate:
         return True
 
     def test_duplicate_positioned_id(self, vcf_reader):
+        """Assert that no duplicated positioned identifiers exist in the VCF.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+
+        Returns:
+            None
+        """
         assert self.no_duplicated_identifier(vcf_reader, self.get_positioned_id)
 
     def test_duplicate_id(self, vcf_reader):
+        """Assert that no duplicated variant IDs exist in the VCF.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+
+        Returns:
+            None
+        """
         assert self.no_duplicated_identifier(vcf_reader, self.get_id)
+
 
 class TestSrcCount:
 
     def get_total_variant_count_from_vcf(self, vcf: str) -> int:
+        """Retrieve the total number of variants in a VCF file using bcftools.
+
+        Falls back to a naive iteration method if bcftools fails.
+
+        Args:
+            vcf (str): Path to the VCF file.
+
+        Returns:
+            int: Total variant count, or -1 if unsuccessful.
+        """
         if vcf is None:
             logger.warning(f"Could not get variant count - no file provided")
             return -1
@@ -213,6 +294,16 @@ class TestSrcCount:
 
 
     def get_variant_count_from_vcf_by_chr(self, vcf: str) -> dict:
+        """Retrieve the variant counts per chromosome from a VCF file.
+
+        Falls back to a naive iteration method if bcftools fails.
+
+        Args:
+            vcf (str): Path to the VCF file.
+
+        Returns:
+            dict: A mapping of chromosome names to variant counts, or -1 if unsuccessful.
+        """
         if vcf is None:
             logger.warning(f"Could not get variant count - no file provided")
             return -1
@@ -250,6 +341,15 @@ class TestSrcCount:
         return chrom_variant_counts
 
     def test_compare_count_with_source(self, vcf, source_vcf):
+        """Compare total variant counts between two VCF files.
+
+        Args:
+            vcf (str): Path to the primary VCF file.
+            source_vcf (str): Path to the source VCF file.
+
+        Returns:
+            None
+        """
         variant_count = self.get_total_variant_count_from_vcf(vcf)
         source_variant_count = self.get_total_variant_count_from_vcf(source_vcf)
 
@@ -258,6 +358,16 @@ class TestSrcCount:
         assert variant_count > source_variant_count * 0.90
 
     def test_compare_count_with_source_by_chr(self, vcf_reader, vcf, source_vcf):
+        """Compare the variant counts per chromosome between two VCF files.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+            vcf (str): Path to the primary VCF file.
+            source_vcf (str): Path to the source VCF file.
+
+        Returns:
+            None
+        """
         chrs = vcf_reader.seqnames
         variant_counts = self.get_variant_count_from_vcf_by_chr(vcf)
         source_variant_counts = self.get_variant_count_from_vcf_by_chr(source_vcf)
@@ -271,9 +381,18 @@ class TestSrcCount:
             if chr in variant_counts and chr in source_variant_counts:
                 assert variant_counts[chr] > source_variant_counts[chr] * 0.95
 
+
 class TestContent:
 
     def test_csq_content(self, vcf_reader):
+        """Test that the CSQ field in variant INFO contains expected non-empty values.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+
+        Returns:
+            None
+        """
         NO_VARIANTS = 100
         NO_ITER = 100000
         
@@ -320,6 +439,7 @@ class TestContent:
             else:
                 logger.info(f"{csq_field} count: {csq_field_cnt[csq_field]} expected: {NO_VARIANTS * 0.5}")
 
+
 class TestSummaryStatistics:
     
     PER_ALLELE_FIELDS = {    
@@ -340,6 +460,14 @@ class TestSummaryStatistics:
     ]
 
     def test_summary_statistics_per_variant(self, vcf_reader):
+        """Test that summary statistics per variant match the expected citation counts.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+
+        Returns:
+            None
+        """
         NO_VARIANTS = 100
         NO_ITER = 100000
         
@@ -378,6 +506,15 @@ class TestSummaryStatistics:
             iter += 1
 
     def test_summary_statistics_per_allele(self, vcf_reader, species):
+        """Test summary statistics per allele for consequences and phenotypes.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+            species (str): Species identifier.
+
+        Returns:
+            None
+        """
         NO_VARIANTS = 100
         NO_ITER = 100000
         
@@ -479,6 +616,15 @@ class TestSummaryStatistics:
             iter += 1
 
     def test_summary_statistics_frequency(self, vcf_reader, species):
+        """Test that frequency statistics in the VCF (RAF field) are close to the expected frequency based on CSQ.
+
+        Args:
+            vcf_reader: Instance of VCF reader.
+            species (str): Species identifier.
+
+        Returns:
+            None
+        """
         if species not in ["homo_sapiens", "homo_sapiens_37"]:
              pytest.skip("Unsupported species, skipping ...")
 

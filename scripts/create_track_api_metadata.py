@@ -26,6 +26,14 @@ from cyvcf2 import VCF
 import re
 
 def parse_args(args = None):
+    """Parse command-line arguments.
+
+    Args:
+        args (list, optional): List of command-line arguments. Defaults to None.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--tracks_outdir", dest="tracks_outdir", type=str, required = True, help="path to a vcf prepper tracks output directory")
@@ -34,6 +42,14 @@ def parse_args(args = None):
     return parser.parse_args(args)
 
 def is_valid_uuid(uuid: str):
+    """Check if a UUID string is valid.
+
+    Args:
+        uuid (str): UUID string to validate.
+
+    Returns:
+        bool: True if valid, False otherwise.
+    """
     try:
         uuid_obj = UUID(uuid)
     except ValueError:
@@ -41,6 +57,14 @@ def is_valid_uuid(uuid: str):
     return str(uuid_obj) == uuid
 
 def parse_input_config(input_config: str) -> dict:
+    """Parse the input config JSON file and extract species metadata.
+
+    Args:
+        input_config (str): Path to the input config JSON file.
+
+    Returns:
+        dict: A dictionary with genome_uuid as keys and metadata as values.
+    """
     if not os.path.isfile(input_config):
         return []
 
@@ -77,6 +101,31 @@ def get_source_header(api_file: str) -> dict:
     return source_info
 
 def get_source_desc_prefix(source: str, source_version: str) -> str:
+def get_source_info(source: str) -> str:
+    """Return a descriptive string for the given source.
+
+    Args:
+        source (str): Source identifier.
+
+    Returns:
+        str: Human-readable description of the source.
+    """
+    if source == "dbSNP":
+        return "dbSNP - build 156"
+    elif source == "EVA":
+        return "European Variation Archive (EVA) - release 5"
+    elif source == "Ensembl":
+        return "Ensembl - e110"
+
+def get_source_url(source: str) -> str:
+    """Return the URL associated with the given source.
+
+    Args:
+        source (str): Source identifier.
+
+    Returns:
+        str: URL for the source.
+    """
     if source == "dbSNP":
         return f" from dbSNP - build {source_version}"
     elif source == "EVA":
@@ -92,6 +141,14 @@ def get_source_desc_prefix(source: str, source_version: str) -> str:
         return desc_prefix
     
 def main(args = None):
+    """Main entry point for creating track API metadata.
+
+    Args:
+        args (list, optional): List of command-line arguments. Defaults to None.
+
+    Returns:
+        int: Exit status.
+    """
     args = parse_args(args)
     
     input_config = args.input_config

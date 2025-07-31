@@ -23,6 +23,14 @@ import os
 from helper import parse_ini, get_db_name
 
 def parse_args(args = None):
+    """Parse command-line arguments for generating the chromosome sizes file.
+
+    Args:
+        args (Optional[Iterable[str]]): List of command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -35,6 +43,19 @@ def parse_args(args = None):
     return parser.parse_args(args)
 
 def generate_chrom_sizes(server: dict, core_db: str, chrom_sizes: str, assembly: str = "grch38", force: bool = False) -> None:
+    """Generate a chromosome sizes file using core database information.
+
+    This function queries the database for coordinate system IDs and sequence regions,
+    appends synonyms, removes duplicates and writes the chromosome sizes to file,
+    incrementing each length by 1.
+
+    Args:
+        server (dict): Database server configuration.
+        core_db (str): Core database name.
+        chrom_sizes (str): Output file path to write chromosome sizes.
+        assembly (str, optional): Assembly version string. Defaults to "grch38".
+        force (bool, optional): Whether to force file creation if it exists. Defaults to False.
+    """
     if os.path.exists(chrom_sizes) and not force:
         print(f"[INFO] {chrom_sizes} file already exists, skipping ...")
         return
@@ -104,6 +125,17 @@ def generate_chrom_sizes(server: dict, core_db: str, chrom_sizes: str, assembly:
             file.write(f"{name}\t{str(length)}\n")
 
 def main(args = None):
+    """Main entry point for generating the chromosome sizes file.
+
+    Parses the arguments, retrieves the core database configuration and
+    generates the chromosome sizes file.
+
+    Args:
+        args (Optional[Iterable[str]]): List of command-line arguments.
+
+    Returns:
+        int: Exit status.
+    """
     args = parse_args(args)
     
     species = args.species

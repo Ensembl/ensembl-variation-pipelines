@@ -22,6 +22,13 @@ from deprecated import deprecated
 
 class Placeholders():
     def __init__(self, source_text: str = "", placeholders: dict = {}, data: dict = {}):
+        """Initialise a Placeholders instance.
+
+        Args:
+            source_text (str): The source text containing placeholder tags.
+            placeholders (dict): Dictionary of placeholder mappings.
+            data (dict): Additional data for placeholder replacement.
+        """
         self._source_text = source_text
         self._placeholders = placeholders
         self._data = data
@@ -51,6 +58,14 @@ class Placeholders():
         self._placeholders = placeholders
 
     def get_data(self, name: str) -> str:
+        """Retrieve a value from the internal data by key.
+
+        Args:
+            name (str): The key name.
+
+        Returns:
+            str: The associated value, or None if key is not found.
+        """
         value = None
         if name in self._data:
             value = self._data[name]
@@ -58,9 +73,23 @@ class Placeholders():
         return value
 
     def add_data(self, name: str, value: str):
+        """Add a key–value pair to the internal data.
+
+        Args:
+            name (str): The key name.
+            value (str): The value to add.
+        """
         self._data[name] = value
 
     def get_placeholder(self, name: str) -> str:
+        """Retrieve the current value of a placeholder.
+
+        Args:
+            name (str): The placeholder name.
+
+        Returns:
+            str: The value for the placeholder, or None if not set.
+        """
         value = None
         if name in self._placeholders:
             value = self._placeholders[name]
@@ -68,11 +97,26 @@ class Placeholders():
         return value
 
     def add_placeholder(self, name: str, value: str = None):
+        """Add a new placeholder with an optional value.
+
+        Args:
+            name (str): The placeholder name.
+            value (Optional[str]): The placeholder value; if None, computed using get_placeholder_value.
+        """
         if value is None:
             value = self.get_placeholder_value(name)
         self._placeholders[name] = value
 
     def get_placeholder_value(self, name: str, data: str = None) -> str:
+        """Compute the value for a given placeholder using a dedicated getter method.
+
+        Args:
+            name (str): The placeholder name.
+            data (Optional[str]): Data to use in computing the placeholder value; defaults to internal data.
+
+        Returns:
+            str: The computed placeholder value.
+        """
         func = getattr(self, f"get_{name.lower()}")
 
         if data is None:
@@ -81,6 +125,11 @@ class Placeholders():
         return func(data)
 
     def replace(self, placeholders: dict = None):
+        """Perform placeholder replacement in the source text.
+
+        Args:
+            placeholders (Optional[dict]): Dictionary of placeholders to replace.
+        """
         if placeholders is None:
             placeholders = self._placeholders
 
@@ -90,6 +139,14 @@ class Placeholders():
             self._source_text = self._source_text.replace(f"##{placeholder}##", placeholders[placeholder])
 
     def get_assembly_acc(self, data: dict) -> str:
+        """Retrieve the assembly accession using provided database information.
+
+        Args:
+            data (dict): Data containing keys 'server', 'metadata_db', and 'genome_uuid'.
+
+        Returns:
+            str: The assembly accession identifier.
+        """
         placeholder = "ASSEMBLY_ACC"
         required_data = ["server", "metadata_db", "genome_uuid"]
         for rdata in required_data:
@@ -100,6 +157,14 @@ class Placeholders():
         return get_assembly_accession_from_genome_uuid(server=data["server"], metadata_db=data["metadata_db"], genome_uuid=data["genome_uuid"])
 
     def get_chr(self, data: dict) -> str:
+        """Retrieve the chromosome information from the provided data.
+
+        Args:
+            data (dict): Data that should include the key 'chromosomes'.
+
+        Returns:
+            str: The chromosome information, or the placeholder name if not found.
+        """
         placeholder = "CHR"
         required_data = ["chromosomes"]
         for rdata in required_data:
@@ -110,6 +175,18 @@ class Placeholders():
         return data["chromosomes"]
 
 def parse_ini(ini_file: str, section: str = "database") -> dict:
+    """Parse an INI file and return configuration for a specified section.
+
+    Args:
+        ini_file (str): Path to the INI file.
+        section (str): The section to parse.
+
+    Returns:
+        dict: A dictionary with the configuration parameters.
+
+    Raises:
+        SystemExit: If the section is not found.
+    """
     config = configparser.ConfigParser()
     config.read(ini_file)
     
@@ -128,6 +205,17 @@ def parse_ini(ini_file: str, section: str = "database") -> dict:
     }
 
 def get_db_name(server: dict, version: str, species: str = "homo_sapiens", type: str = "core") -> str:
+    """Retrieve the database name for the specified species, type and version.
+
+    Args:
+        server (dict): Database server configuration.
+        version (str): Ensembl version.
+        species (str): Species production name.
+        type (str): Database type.
+
+    Returns:
+        str: The name of the database.
+    """
     query = f"SHOW DATABASES LIKE '{species}_{type}%{version}%';"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -147,6 +235,16 @@ def get_db_name(server: dict, version: str, species: str = "homo_sapiens", type:
     return results[0]
 
 def get_assembly_accession_from_genome_uuid(server: dict, metadata_db: str, genome_uuid: str) -> str:
+    """Obtain the assembly accession based on a genome UUID.
+
+    Args:
+        server (dict): Database server configuration.
+        metadata_db (str): Name of the metadata database.
+        genome_uuid (str): Genome UUID.
+
+    Returns:
+        str: The assembly accession.
+    """
     query = f"SELECT a.accession FROM assembly AS a, genome AS g WHERE g.assembly_id = a.assembly_id AND g.genome_uuid = '{genome_uuid}';"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -162,6 +260,15 @@ def get_assembly_accession_from_genome_uuid(server: dict, metadata_db: str, geno
     return process.stdout.decode().strip()
 
 def get_division(server: dict, core_db: str) -> str:
+    """Retrieve the division for the species from the core database.
+
+    Args:
+        server (dict): Database server configuration.
+        core_db (str): The core database name.
+
+    Returns:
+        str: The division (e.g. 'EnsemblVertebrates').
+    """
     # TMP: this is only temp as ensemblgenome FTP had problem in 110
     if core_db.startswith("drosophila_melanogaster"):
         return "EnsemblVertebrates"
@@ -204,6 +311,16 @@ def get_species_display_name(server: dict, core_db: str) -> str:
 
 @deprecated(version='June 2025', reason="Variation database with old schema should not be used anymore")
 def dump_variant_source(server: dict, variation_db: str, dump_file: str) -> str:
+    """Dump variant source data from the variation database to a file.
+
+    Args:
+        server (dict): Database server configuration.
+        variation_db (str): Variation database name.
+        dump_file (str): File path to save the dump.
+
+    Returns:
+        str: The exit code from the dump process.
+    """
     query = "SELECT DISTINCT vf.variation_name, s.name FROM variation_feature AS vf, source AS s WHERE vf.source_id = s.source_id;"
 
     with open(dump_file, "w") as file:
@@ -222,6 +339,14 @@ def dump_variant_source(server: dict, variation_db: str, dump_file: str) -> str:
     return process.returncode
 
 def get_sources_meta_info(sources_meta_file: str) -> dict:
+    """Retrieve JSON metadata information about variant sources from a file.
+
+    Args:
+        sources_meta_file (str): Path to the JSON file containing metadata.
+
+    Returns:
+        dict: The metadata dictionary, or an empty dict if file is not found.
+    """
     if not os.path.isfile(sources_meta_file):
         print(f"[WARNING] no such file - {sources_meta_file}, cannot get variant sources metadata.")
         return {}
@@ -232,6 +357,14 @@ def get_sources_meta_info(sources_meta_file: str) -> dict:
     return sources_meta
 
 def get_fasta_species_name(species_production_name: str) -> str:
+    """Generate a FASTA species name with an initial capital letter.
+
+    Args:
+        species_production_name (str): The species production name.
+
+    Returns:
+        str: The formatted species name.
+    """
     return species_production_name[0].upper() + species_production_name[1:]
 
 def get_scientific_name(
@@ -325,6 +458,18 @@ def get_dataset_attribute_value(
     return process.stdout.decode().strip()
     
 def get_relative_version(version: int, division: str = "EnsemblVertebrates", site: str = "old") -> int:
+    
+def get_relative_version(version: int, division: str = "EnsemblVertebrates", site: str = "new") -> int:
+    """Calculate the relative version of the database release.
+
+    Args:
+        version (int): The absolute Ensembl release version.
+        division (str): The Ensembl division.
+        site (str): The site type; 'new' or 'old'.
+
+    Returns:
+        int: The relative version number.
+    """
     # obsolete for new site
     if site == "old":
         return (version - 53) if division != "EnsemblVertebrates" else version
@@ -332,6 +477,15 @@ def get_relative_version(version: int, division: str = "EnsemblVertebrates", sit
     return version
     
 def download_file(local_filename: str, url: str) -> int:
+    """Download a file using wget.
+
+    Args:
+        local_filename (str): Path where the file should be saved.
+        url (str): The URL from which to download the file.
+
+    Returns:
+        int: The return code of the download process.
+    """
     process = subprocess.run(["wget", url, "-O", local_filename],
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE
@@ -351,6 +505,20 @@ def get_ftp_path(
         mode: str = "local",
         species_url_name: str = None
     ) -> str:
+    """Construct the full FTP path for a given species, assembly, and data type.
+
+    Args:
+        species (str): Species name.
+        assembly (str): Assembly version.
+        division (str): Ensembl division.
+        version (int): Ensembl release version.
+        type (str): Data type ('cache', 'fasta', etc.).
+        mode (str): Either 'local' or 'remote'.
+        species_url_name (Optional[str]): Alternative species name for the URL.
+
+    Returns:
+        str: The full FTP path if it exists; otherwise None.
+    """
     
     version = str(version)
     if species == "homo_sapiens_37":
@@ -395,6 +563,15 @@ def get_ftp_path(
     return None
     
 def copyto(src_file: str, dest_file: str) -> int:
+    """Copy a file using rsync.
+
+    Args:
+        src_file (str): Source file path.
+        dest_file (str): Destination file path.
+
+    Returns:
+        int: The return code of the rsync command.
+    """
     process = subprocess.run(["rsync", src_file, dest_file], 
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE

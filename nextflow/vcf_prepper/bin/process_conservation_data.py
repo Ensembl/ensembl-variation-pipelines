@@ -28,6 +28,14 @@ from helper import *
 CONSERVATION_DATA_DIR = "/nfs/production/flicek/ensembl/variation/data/Conservation"
 
 def parse_args(args = None):
+    """Parse command-line arguments for processing conservation data.
+
+    Args:
+        args (Optional[Iterable[str]]): List of command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -41,6 +49,17 @@ def parse_args(args = None):
     return parser.parse_args(args)
         
 def main(args = None):
+    """Main entry point for processing conservation data.
+
+    This function obtains the necessary parameters, checks for an existing conservation
+    bigwig file and if not present (or forced), retrieves it via FTP.
+
+    Args:
+        args (Optional[Iterable[str]]): List of command-line arguments.
+
+    Returns:
+        int: Exit status.
+    """
     args = parse_args(args)
     
     species = args.species

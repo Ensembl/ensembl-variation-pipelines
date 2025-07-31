@@ -25,6 +25,14 @@ from uuid import UUID
 from cyvcf2 import VCF
 
 def parse_args(args = None):
+    """Parse command-line arguments for the metadata payload.
+
+    Args:
+        args (list, optional): List of command-line arguments. Defaults to None.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--api_outdir", dest="api_outdir", type=str, help="path to a vcf prepper api output directory")
@@ -36,6 +44,14 @@ def parse_args(args = None):
     return parser.parse_args(args)
 
 def is_valid_uuid(uuid: str):
+    """Determine whether the provided UUID string is valid.
+
+    Args:
+        uuid (str): UUID string to check.
+
+    Returns:
+        bool: True if valid, False otherwise.
+    """
     try:
         uuid_obj = UUID(uuid)
     except ValueError:
@@ -43,6 +59,14 @@ def is_valid_uuid(uuid: str):
     return str(uuid_obj) == uuid
 
 def get_variant_count(file: str) -> str:
+    """Obtain the total variant count from a VCF file via bcftools.
+
+    Args:
+        file (str): Path to the VCF file.
+
+    Returns:
+        int or None: Number of records or None on failure.
+    """
     process = subprocess.run(["bcftools", "index", "--nrecords", file],
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE
@@ -56,6 +80,15 @@ def get_variant_count(file: str) -> str:
         return None
 
 def get_csq_field_index(csq: str, field: str ="Consequence") -> int:
+    """Get the index of the specified field in the CSQ annotation.
+
+    Args:
+        csq (str): CSQ header description.
+        field (str, optional): Field to search for. Defaults to "Consequence".
+
+    Returns:
+        int or None: The index of the field or None if not found.
+    """
     prefix = "Consequence annotations from Ensembl VEP. Format: "
     csq_list = csq[len(prefix):].split("|")
 
@@ -66,6 +99,15 @@ def get_csq_field_index(csq: str, field: str ="Consequence") -> int:
     return None
 
 def get_variant_example(file: str, species: str) -> str:
+    """Find an example variant from the VCF file.
+
+    Args:
+        file (str): Path to the VCF file.
+        species (str): Species identifier.
+
+    Returns:
+        str: A string representing a variant example in 'chrom:pos:id' format.
+    """
     vcf = VCF(file)
     
     csq_info_description = vcf.get_header_type("CSQ")["Description"].strip("\"")
@@ -100,6 +142,15 @@ def get_variant_example(file: str, species: str) -> str:
         return f"{chrom}:{pos}:{id}"
 
 def get_evidence_count(file: str, csq_field: str) -> int:
+    """Count evidence occurrences for a given field in the VCF file.
+
+    Args:
+        file (str): Path to the VCF file.
+        csq_field (str): CSQ field to search for.
+
+    Returns:
+        int or None: Count value or None if no positive count.
+    """
     vcf = VCF(file)
     
     csq_info_description = vcf.get_header_type("CSQ")["Description"].strip("\"")
@@ -124,6 +175,14 @@ def get_evidence_count(file: str, csq_field: str) -> int:
     return count
 
 def parse_input_config(input_config: str) -> dict:
+    """Parse the input config JSON file and extract species metadata.
+
+    Args:
+        input_config (str): Path to the input config JSON file.
+
+    Returns:
+        dict: Dictionary of species metadata keyed by genome_uuid.
+    """
     if not os.path.isfile(input_config):
         return []
 
@@ -143,9 +202,26 @@ def parse_input_config(input_config: str) -> dict:
     return species_metadata
 
 def submit_payload(endpoint: str, payload: str) -> str:
+    """Submit the JSON payload to the provided endpoint.
+
+    Args:
+        endpoint (str): Metadata API URL.
+        payload (str): JSON payload to submit.
+
+    Returns:
+        str: API response (if any).
+    """
     requests.put(endpoint, payload)
     
 def main(args = None):
+    """Main entry point to create and submit the metadata payload.
+
+    Args:
+        args (list, optional): List of command-line arguments. Defaults to None.
+
+    Returns:
+        int: Exit status.
+    """
     args = parse_args(args)
     
     api_outdir = args.api_outdir or os.getcwd()

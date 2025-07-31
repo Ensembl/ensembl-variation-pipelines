@@ -21,6 +21,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 def pytest_addoption(parser):
+    """Add command-line options for test configuration.
+
+    Args:
+        parser (pytest.Parser): The parser used to add command-line options.
+    """
     parser.addoption("--vcf", type=str, default=None)
     parser.addoption("--bigbed", type=str, default=None)
     parser.addoption("--bigwig", type=str, default=None)
@@ -28,6 +33,11 @@ def pytest_addoption(parser):
     parser.addoption("--species", type=str, default=None)
 
 def pytest_generate_tests(metafunc):
+    """Parametrise tests with command-line options.
+
+    Args:
+        metafunc (pytest.Metafunc): The object used to generate tests.
+    """
     if "vcf" in metafunc.fixturenames:
         metafunc.parametrize("vcf", [metafunc.config.getoption("vcf")])
     if "bigbed" in metafunc.fixturenames:
@@ -41,15 +51,39 @@ def pytest_generate_tests(metafunc):
 
 @pytest.fixture()
 def vcf_reader(vcf):
+    """Create a VCF reader fixture.
+
+    Args:
+        vcf (str): Path to the VCF file.
+
+    Returns:
+        cyvcf2.VCF: An instance of a VCF reader.
+    """
     vcf_reader = VCF(vcf)
     return vcf_reader
 
 @pytest.fixture()
 def bb_reader(bigbed):
+    """Create a BigBed reader fixture.
+
+    Args:
+        bigbed (str): Path to the BigBed file.
+
+    Returns:
+        pyBigWig: An instance of a BigBed reader.
+    """
     bb_reader = pyBigWig.open(bigbed)
     return bb_reader
 
 @pytest.fixture()
 def bw_reader(bigwig):
+    """Create a BigWig reader fixture.
+
+    Args:
+        bigwig (str): Path to the BigWig file.
+
+    Returns:
+        pyBigWig: An instance of a BigWig reader.
+    """
     bw_reader = pyBigWig.open(bigwig)
     return bw_reader

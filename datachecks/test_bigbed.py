@@ -20,14 +20,39 @@ import random
 class TestFile:
 
     def test_exist(self, bigbed):
+        """Check that the BigBed file exists.
+
+        Args:
+            bigbed (str): Path to the BigBed file.
+
+        Returns:
+            None
+        """
         assert os.path.isfile(bigbed)
 
     def test_validity(self, bb_reader):
+        """Check that the BigBed reader is valid.
+
+        Args:
+            bb_reader: An instance of a BigBed reader.
+
+        Returns:
+            None
+        """
         assert bb_reader.isBigBed()
+
 
 class TestSrcCount:
 
     def get_total_variant_count_from_vcf(self, vcf: str) -> int:
+        """Retrieve the total variant count from the VCF file using bcftools.
+
+        Args:
+            vcf (str): Path to the VCF file.
+
+        Returns:
+            int: The number of variants in the VCF file, or -1 if the file is not provided or the command fails.
+        """
         if vcf is None:
             logger.warning(f"Could not get variant count - no file provided")
             return -1
@@ -43,22 +68,53 @@ class TestSrcCount:
 
         return int(process.stdout.decode().strip())
 
-
     def get_total_variant_count_from_bb(self, bb_reader) -> int:
+        """Calculate the total variant count from a BigBed reader.
+
+        Args:
+            bb_reader: An instance of a BigBed reader.
+
+        Returns:
+            int: The sum of variant counts across all chromosomes.
+        """
         variant_counts = 0
         for chr in bb_reader.chroms():
             variant_counts += len(bb_reader.entries(chr, 0, bb_reader.chroms(chr)))
         return variant_counts
 
     def test_compare_count_with_source(self, vcf, bb_reader):
+        """Compare variant counts between VCF and BigBed sources.
+
+        Asserts that the variant count from BigBed is at least 95% of that from the VCF file.
+
+        Args:
+            vcf (str): Path to the VCF file.
+            bb_reader: An instance of a BigBed reader.
+
+        Returns:
+            None
+        """
         variant_count_vcf = self.get_total_variant_count_from_vcf(vcf)
         variant_count_bb = self.get_total_variant_count_from_bb(bb_reader)
 
         assert variant_count_bb > variant_count_vcf * 0.95
 
+
 class TestSrcExistence:
 
     def test_variant_exist_from_source(self, bb_reader, vcf_reader):
+        """Verify that variants extracted from the VCF file exist in the BigBed data.
+
+        The test randomly selects a number of variants from the VCF and checks if the corresponding entries
+        exist in the BigBed data.
+
+        Args:
+            bb_reader: An instance of a BigBed reader.
+            vcf_reader: An instance of a VCF reader.
+
+        Returns:
+            None
+        """
         NO_VARIANTS = 100
         NO_ITER = 100000
         

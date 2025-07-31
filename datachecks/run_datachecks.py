@@ -30,6 +30,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 def parse_args(args = None):
+    """Parse command-line arguments.
+
+    Args:
+        args (list, optional): List of command-line arguments. Defaults to None.
+
+    Returns:
+        argparse.Namespace: The parsed command-line options.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--dir", dest="dir", type=str, default = os.getcwd())
@@ -44,6 +52,14 @@ def parse_args(args = None):
     return parser.parse_args(args)
 
 def get_species_metadata(input_config: str = None) -> dict:
+    """Retrieve species metadata from a configuration JSON file.
+
+    Args:
+        input_config (str, optional): Path to the input configuration file. Defaults to None.
+
+    Returns:
+        dict: A dictionary mapping genome UUIDs to species metadata. Returns an empty dict if the file is not found.
+    """
     if input_config is None or not os.path.isfile(input_config):
         return []
 
@@ -64,6 +80,14 @@ def get_species_metadata(input_config: str = None) -> dict:
     return species_metadata
 
 def is_valid_uuid(uuid: str):
+    """Check whether a string is a valid UUID.
+
+    Args:
+        uuid (str): The string to validate.
+
+    Returns:
+        bool: True if the string is a valid UUID, False otherwise.
+    """
     try:
         uuid_obj = UUID(uuid)
     except ValueError:
@@ -71,6 +95,17 @@ def is_valid_uuid(uuid: str):
     return str(uuid_obj) == uuid
 
 def main(args = None):
+    """Execute data checks and submit job scripts.
+
+    This function parses command-line arguments, reads species metadata from the input configuration,
+    and creates and submits job scripts for each genome.
+
+    Args:
+        args (list, optional): List of command-line arguments. Defaults to None.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     input_config = args.input_config or None

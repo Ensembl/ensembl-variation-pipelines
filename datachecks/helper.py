@@ -15,6 +15,17 @@
 import logging
 
 def logAssert(test, msg):
+    """Log the result of a test assertion.
+
+    If the test condition is False, an error message is logged; otherwise, an informational message indicating a pass is logged.
+
+    Args:
+        test (bool): The condition to evaluate, where False indicates failure.
+        msg (str): The message to log.
+
+    Returns:
+        None
+    """
     if not test:
         logging.error("FAILED:", msg)
     else:

@@ -23,6 +23,14 @@ import os
 from helper import parse_ini, get_db_name
 
 def parse_args(args = None):
+    """Parse command-line arguments for generating a chromosome synonym file.
+
+    Args:
+        args (Optional[Iterable[str]]): Command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -35,6 +43,17 @@ def parse_args(args = None):
     return parser.parse_args(args)
 
 def generate_synonym_file(server: dict, core_db: str, synonym_file: str, force: bool = False) -> None:
+    """Generate a chromosome synonym file from the core database.
+
+    Retrieves synonyms and corresponding seq region names and writes them to a file,
+    ensuring names do not exceed 31 characters.
+
+    Args:
+        server (dict): Database server configuration.
+        core_db (str): Core database name.
+        synonym_file (str): Output file path for synonyms.
+        force (bool): If True, force regeneration even if the file exists.
+    """
     if os.path.exists(synonym_file) and not force:
         print(f"[INFO] {synonym_file} file already exists, skipping ...")
         return
@@ -99,6 +118,16 @@ def generate_synonym_file(server: dict, core_db: str, synonym_file: str, force: 
             file.write(f"{synonym}\t{new_names[synonym]}\n")
     
 def main(args = None):
+    """Main entry point for generating a sequence region synonym file.
+
+    Parses command-line arguments, connects to the core database, and writes the synoynm file.
+
+    Args:
+        args (Optional[Iterable[str]]): Command-line arguments.
+
+    Returns:
+        int: Exit code.
+    """
     args = parse_args(args)
     
     species = args.species

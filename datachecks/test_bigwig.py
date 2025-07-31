@@ -20,14 +20,40 @@ import random
 class TestFile:
 
     def test_exist(self, bigwig):
+        """Check that the BigWig file exists.
+
+        Args:
+            bigwig (str): Path to the BigWig file.
+
+        Returns:
+            None
+        """
         assert os.path.isfile(bigwig)
 
     def test_validity(self, bw_reader):
+        """Verify that the BigWig reader is valid.
+
+        Args:
+            bw_reader: An instance of a BigWig reader.
+
+        Returns:
+            None
+        """
         assert bw_reader.isBigWig()
+
 
 class TestSrcExistence:
 
     def test_variant_exist_from_source(self, bw_reader, vcf_reader):
+        """Validate that variants from the VCF source exist in the BigWig data.
+
+        Args:
+            bw_reader: An instance of a BigWig reader.
+            vcf_reader: An instance of a VCF reader.
+
+        Returns:
+            None
+        """
         NO_VARIANTS = 100
         NO_ITER = 100000
         
@@ -53,9 +79,18 @@ class TestSrcExistence:
             bw_state = bw_reader.stats(chr, start, end)[0]
             assert bw_state > 0.0
 
+
 class TestSrcCount:
 
     def get_total_variant_count_from_vcf(self, vcf: str) -> int:
+        """Retrieve the total number of variants from the VCF file using bcftools.
+
+        Args:
+            vcf (str): Path to the VCF file.
+
+        Returns:
+            int: The number of variants, or -1 if the VCF file is not provided or the command fails.
+        """
         if vcf is None:
             logger.warning(f"Could not get variant count - no file provided")
             return -1
@@ -71,8 +106,15 @@ class TestSrcCount:
 
         return int(process.stdout.decode().strip())
 
-
     def get_total_variant_count_from_bw(self, bw_reader) -> int:
+        """Calculate the total variant count from the BigWig reader.
+
+        Args:
+            bw_reader: An instance of a BigWig reader.
+
+        Returns:
+            int: The sum of counts from non-zero BigWig values across all chromosomes.
+        """
         variant_counts = 0
         for chr in bw_reader.chroms():
             non_zero_vals = [val for val in bw_reader.values(chr, 0, bw_reader.chroms(chr)) if val > 0.0]
@@ -80,6 +122,17 @@ class TestSrcCount:
         return variant_counts
 
     def test_compare_count_with_source(self, vcf, bw_reader):
+        """Compare variant counts between the VCF and BigWig data sources.
+
+        Asserts that the variant count from BigWig is at least 95% of that from the VCF file.
+
+        Args:
+            vcf (str): Path to the VCF file.
+            bw_reader: An instance of a BigWig reader.
+
+        Returns:
+            None
+        """
         variant_count_vcf = self.get_total_variant_count_from_vcf(vcf)
         variant_count_bw = self.get_total_variant_count_from_bw(bw_reader)
 

@@ -28,6 +28,14 @@ FASTA_FTP_BASE_DIR = "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_
 FASTA_FILE_NAME = "unmasked.fa.gz"
 
 def parse_args(args = None):
+    """Parse command-line arguments for processing FASTA files.
+
+    Args:
+        args (Optional[Iterable[str]]): List of command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--species', dest="species", type=str, help="species production name")
@@ -46,10 +54,82 @@ def parse_args(args = None):
 def index_fasta(bgzipped_fasta: str, force: str = False) -> None:
     if not os.path.isfile(bgzipped_fasta):
         FileNotFoundError(f"Cannot index fasta. File does not exist - {bgzipped_fasta}.")
+    
+def ungzip_fasta(fasta_dir: str, compressed_fasta: str) -> str:
+    """Uncompress a gzipped FASTA file.
+
+    Args:
+        fasta_dir (str): Expected directory of the FASTA file.
+        compressed_fasta (str): Path to the compressed FASTA file.
+
+    Returns:
+        str: Path to the uncompressed FASTA file.
+
+    Raises:
+        SystemExit: If the FASTA file is not in the correct directory or fails to uncompress.
+    """
+    if os.path.dirname(compressed_fasta) != fasta_dir:
+        print(f"[ERROR] Fasta file {fasta_dir} in wrong directory; should be in - {fasta_dir}")
         exit(1)
 
     fai = bgzipped_fasta + ".fai"
     gzi = bgzipped_fasta + ".gzi"
+        
+    process = subprocess.run(["gzip", "-df", compressed_fasta],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    
+    if process.returncode != 0:
+        print(f"[ERROR] Could not uncompress fasta file - {compressed_fasta}")
+        exit(1)
+        
+    return compressed_fasta[:-3]
+    
+def bgzip_fasta(fasta_dir: str, unzipped_fasta: str) -> str:
+    """Compress an unzipped FASTA file using bgzip.
+
+    Args:
+        fasta_dir (str): Expected directory of the FASTA file.
+        unzipped_fasta (str): Path to the uncompressed FASTA file.
+
+    Returns:
+        str: Path to the bgzipped FASTA file.
+
+    Raises:
+        SystemExit: If the file is not in the expected directory or compression fails.
+    """
+    if os.path.dirname(unzipped_fasta) != fasta_dir:
+        print(f"[ERROR] Fasta file {fasta_dir} in wrong directory; should be in - {fasta_dir}")
+        exit(1)
+        
+    process = subprocess.run(["bgzip", "-f", unzipped_fasta],
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE
+    )
+    
+    if process.returncode != 0:
+        print(f"[ERROR] Could not bgzip fasta file - {unzipped_fasta}")
+        exit(1)
+
+    return unzipped_fasta + ".gz"
+
+def index_fasta(zipped_fasta: str, force: str = False) -> None:
+    """Index a bgzipped FASTA file using Faidx.
+
+    Args:
+        zipped_fasta (str): Path to the bgzipped FASTA file.
+        force (str, optional): If True, re-index even if index files exist. Defaults to False.
+
+    Raises:
+        SystemExit: If the FASTA file does not exist or indexing fails.
+    """
+    if not os.path.isfile(zipped_fasta):
+        print(f"[ERROR] Cannot index fasta - {fasta} - does not exist. Exiting ...")
+        exit(1)
+
+    fai = zipped_fasta + ".fai"
+    gzi = zipped_fasta + ".gzi"
 
     if os.path.isfile(fai) and os.path.isfile(gzi) and not force:
         print(f"[INFO] both .fai and .gzi file exist. Skipping ...")
@@ -75,6 +155,17 @@ def index_fasta(bgzipped_fasta: str, force: str = False) -> None:
         exit(1)
     
 def main(args = None):
+    """Main entry point for processing FASTA files.
+
+    Downloads (or copies) and processes a FASTA file:
+    uncompress, bgzip and index it for VEP usage.
+
+    Args:
+        args (Optional[Iterable[str]]): List of command-line arguments.
+
+    Returns:
+        int: Exit status.
+    """
     args = parse_args(args)
     
     out_dir = args.out_dir or os.getcwd()

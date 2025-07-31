@@ -44,6 +44,15 @@ base_outdir = args.base_outdir or "/nfs/production/flicek/ensembl/variation/new_
 write_output = args.write_output
 
 def parse_ini(ini_file: str, section: str = "database") -> dict:
+    """Parse the INI file and return database connection parameters.
+
+    Args:
+        ini_file (str): Path to the INI file.
+        section (str, optional): Configuration section to use. Defaults to "database".
+
+    Returns:
+        dict: Dictionary with host, port and user.
+    """
     config = configparser.ConfigParser()
     config.read(ini_file)
     
@@ -62,6 +71,17 @@ def parse_ini(ini_file: str, section: str = "database") -> dict:
     }
 
 def get_db_name(server: dict, version: str, species: str, type: str) -> str:
+    """Retrieve the name of the database for a given species and type.
+
+    Args:
+        server (dict): Server connection details.
+        version (str): Ensembl version.
+        species (str): Species name.
+        type (str): Type of database (e.g. 'variation').
+
+    Returns:
+        str: Database name.
+    """
     query = f"SHOW DATABASES LIKE '{species}_{type}%{version}%';"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -81,6 +101,15 @@ def get_db_name(server: dict, version: str, species: str, type: str) -> str:
     return results[0]
 
 def get_population_against_id(server: dict, variation_db: str) -> str:
+    """Map population IDs to their names from the population table.
+
+    Args:
+        server (dict): Server connection parameters.
+        variation_db (str): Variation database name.
+
+    Returns:
+        str: Dictionary mapping population IDs to names.
+    """
     query = f"SELECT population_id, name from population;"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -105,6 +134,15 @@ def get_population_against_id(server: dict, variation_db: str) -> str:
     return populations
 
 def get_population_structure(server: dict, variation_db: str) -> str:
+    """Retrieve the population structure mapping from the database.
+
+    Args:
+        server (dict): Server connection parameters.
+        variation_db (str): Variation database name.
+
+    Returns:
+        str: Mapping of sub_population_id to super_population_id.
+    """
     query = f"SELECT super_population_id, sub_population_id from population_structure;"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -129,6 +167,15 @@ def get_population_structure(server: dict, variation_db: str) -> str:
     return super_population
 
 def get_sample_against_id(server: dict, variation_db: str) -> str:
+    """Map sample IDs to sample names from the sample table.
+
+    Args:
+        server (dict): Server connection parameters.
+        variation_db (str): Variation database name.
+
+    Returns:
+        str: Dictionary mapping sample IDs to names.
+    """
     query = f"SELECT sample_id, name from sample;"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -153,6 +200,15 @@ def get_sample_against_id(server: dict, variation_db: str) -> str:
     return samples
 
 def get_sample_populations(server: dict, variation_db: str) -> str:
+    """Retrieve sample to population mappings from the sample_population table.
+
+    Args:
+        server (dict): Server connection parameters.
+        variation_db (str): Variation database name.
+
+    Returns:
+        str: Dictionary mapping sample IDs to list of population IDs.
+    """
     query = f"SELECT sample_id, population_id from sample_population;"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -179,6 +235,15 @@ def get_sample_populations(server: dict, variation_db: str) -> str:
     return sample_populations
 
 def generate_sample_population(server: dict, variation_db: str) -> dict:
+    """Generate a mapping of sample names to their populations with names.
+
+    Args:
+        server (dict): Server connection parameters.
+        variation_db (str): Variation database name.
+
+    Returns:
+        dict: Mapping of sample names to a list of population names.
+    """
     populations = get_population_against_id(server, variation_db)
     samples = get_sample_against_id(server, variation_db)
     sample_populations = get_sample_populations(server, variation_db)

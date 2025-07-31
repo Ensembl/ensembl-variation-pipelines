@@ -27,6 +27,14 @@ from helper import *
 CACHE_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/tabixconverted"
 
 def parse_args(args = None):
+    """Parse command-line arguments for processing the VEP cache.
+
+    Args:
+        args (Optional[Iterable[str]]): List of command-line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -40,6 +48,15 @@ def parse_args(args = None):
     return parser.parse_args(args)
     
 def uncompress_cache(cache_dir: str, compressed_cache: str) -> None:
+    """Uncompress a tar.gz cache file into the specified cache directory.
+
+    Args:
+        cache_dir (str): Directory where the cache should be uncompressed.
+        compressed_cache (str): Path to the compressed cache file.
+
+    Raises:
+        SystemExit: If uncompression fails.
+    """
     process = subprocess.run(["tar", "-xvzf", compressed_cache, "-C", cache_dir],
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE
@@ -50,6 +67,17 @@ def uncompress_cache(cache_dir: str, compressed_cache: str) -> None:
         exit(1)
     
 def main(args = None):
+    """Main entry point for processing the VEP cache.
+
+    Checks if the genome cache directory exists and, if forced or absent, retrieves and uncompresses
+    the cache using FTP.
+
+    Args:
+        args (Optional[Iterable[str]]): List of command-line arguments.
+
+    Returns:
+        int: Exit status.
+    """
     args = parse_args(args)
     
     species = args.species

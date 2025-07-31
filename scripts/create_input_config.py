@@ -27,6 +27,14 @@ import requests
 EVA_REST_ENDPOINT = "https://www.ebi.ac.uk/eva/webservices/release/v1"
 
 def parse_args(args = None):
+    """Parse command-line arguments for creating the input config.
+
+    Args:
+        args (list, optional): Command-line arguments. Defaults to None.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
     
     parser.add_argument(dest="release_candidates_file", type=str, help="path to a release_canidates.json file")
@@ -37,6 +45,15 @@ def parse_args(args = None):
     return parser.parse_args(args)
     
 def parse_ini(ini_file: str, section: str = "database") -> dict:
+    """Parse the INI file and extract configuration for a given section.
+
+    Args:
+        ini_file (str): Path to the INI file.
+        section (str, optional): Section to read. Defaults to "database".
+
+    Returns:
+        dict: Configuration parameters.
+    """
     config = configparser.ConfigParser()
     config.read(ini_file)
     
@@ -55,6 +72,17 @@ def parse_ini(ini_file: str, section: str = "database") -> dict:
     }
 
 def get_db_name(server: dict, version: str, species: str = "homo_sapiens", type: str = "core") -> str:
+    """Get the database name matching the given species and version.
+
+    Args:
+        server (dict): Server connection parameters.
+        version (str): Ensembl version.
+        species (str, optional): Species name. Defaults to "homo_sapiens".
+        type (str, optional): Database type. Defaults to "core".
+
+    Returns:
+        str: Database name.
+    """
     query = f"SHOW DATABASES LIKE '{species}_{type}%{version}%';"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -69,6 +97,15 @@ def get_db_name(server: dict, version: str, species: str = "homo_sapiens", type:
     return process.stdout.decode().strip()
     
 def get_assembly_name(server: dict, core_db: str) -> str:
+    """Retrieve the default assembly name from the core database.
+
+    Args:
+        server (dict): Server connection parameters.
+        core_db (str): Database name.
+
+    Returns:
+        str: Assembly name.
+    """
     query = f"SELECT meta_value FROM meta where meta_key = 'assembly.default';"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -85,9 +122,25 @@ def get_assembly_name(server: dict, core_db: str) -> str:
 
 # TBD: currently this scripts only support EVA
 def get_source() -> str:
+    """Obtain the source identifier, currently fixed to EVA.
+
+    Returns:
+        str: Source identifier.
+    """
     return "EVA"
 
 def get_genome_uuid(server: dict, meta_db: str, species, assembly) -> str:
+    """Retrieve the genome UUID based on species and assembly.
+
+    Args:
+        server (dict): Server connection parameters.
+        meta_db (str): Metadata database.
+        species (str): Species name.
+        assembly (str): Assembly identifier.
+
+    Returns:
+        str: Genome UUID.
+    """
     query = f"SELECT genome_uuid FROM genome AS g, organism AS o, assembly AS a WHERE g.assembly_id = a.assembly_id and g.organism_id = o.organism_id and a.accession = '{assembly}' and o.ensembl_name = '{species}';"
     process = subprocess.run(["mysql",
             "--host", server["host"],
@@ -104,6 +157,11 @@ def get_genome_uuid(server: dict, meta_db: str, species, assembly) -> str:
     return process.stdout.decode().strip()
     
 def get_latest_eva_version() -> int:
+    """Obtain the latest EVA release version from the REST API.
+
+    Returns:
+        int: Latest EVA version.
+    """
     url = EVA_REST_ENDPOINT + "/info/latest"
     headers = {"Accept": "application/json"}
 
@@ -122,6 +180,14 @@ def get_latest_eva_version() -> int:
     return release_version
     
 def main(args = None):
+    """Main entry point for creating input config JSON.
+
+    Args:
+        args (list, optional): Command-line arguments. Defaults to None.
+
+    Returns:
+        int: Exit status.
+    """
     args = parse_args(args)
     
     release_candidates_file = args.release_candidates_file

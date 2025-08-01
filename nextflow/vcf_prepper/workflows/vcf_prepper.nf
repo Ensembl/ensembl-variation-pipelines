@@ -81,6 +81,10 @@ workflow VCF_PREPPER {
   if (params.skip_vep && params.skip_tracks && params.skip_stats) {
     exit 0, "Skipping VEP and track file generation, nothing to do ..."
   }
+
+  if (params.use_old_infra && !params.use_vep_cache) {
+    exit 0, "Cannot use old infrastructure without VEP cache, please re-run with --use_vep_cache 1."
+  }
   
   input_set = parse_config(params.config)
   ch_input = Channel.fromList( input_set )

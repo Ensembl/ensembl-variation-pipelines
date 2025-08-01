@@ -23,7 +23,7 @@ import re
 from helper import *
 
 GFF_FASTA_BASE_DIR = "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
-GFF_FILE_NAME = "genes.gff3.gz"
+GFF_FILE_NAME = "sorted_genes.gff3.gz"
 
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
@@ -54,11 +54,11 @@ def index_gff(bgzipped_gff: str, force: str = False) -> None:
         print(f"[ERROR] Cannot index - {bgzipped_gff}\n{process.stderr.decode()}\nExiting ...")
         exit(1)
 
-def sort_gff(file: str) -> str:
+def sort_gff(file: str, sorted_file: str = None) -> str:
     if not os.path.isfile(file):
         raise FileNotFoundError(f"Could not sort. File does not exist - {file}")
 
-    sorted_file = os.path.join(
+    sorted_file = sorted_file or os.path.join(
         os.path.dirname(file),
         "sorted_" + os.path.basename(file)
     )

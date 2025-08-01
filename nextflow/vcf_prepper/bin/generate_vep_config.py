@@ -89,6 +89,7 @@ def parse_args(args = None):
     parser.add_argument('--repo_dir', dest="repo_dir", type=str, required = False, help="Ensembl repositories directory")
     parser.add_argument('--population_data_file', dest="population_data_file", type=str, required = False, help="A JSON file containing population information for all species.")
     parser.add_argument('--structural_variant', dest="structural_variant", action="store_true", help="Run for structural variants")
+    parser.add_argument('--use_old_infra', dest="use_old_infra", action="store_true", help="Use old infrastructure to get FASTA file")
     
     return parser.parse_args(args)
 
@@ -303,68 +304,7 @@ def get_plugins(
             if plugin_args is not None:
                 plugins.append(plugin_args)
             
-    return plugins
-        
-def generate_vep_config(
-    vep_config: str,
-    species: str,
-    assembly: str,
-    version: str,
-    fasta: str,
-    cache_dir: str = None,
-    gff: str = None,
-    sift: bool = False,
-    polyphen: bool = False,
-    frequencies: list = None,
-    plugins: dict = None,
-    repo_dir: str = REPO_DIR,
-    fork: int = 2,
-    force: bool = False,
-    structural_variant: bool = False) -> None:
-    if os.path.exists(vep_config) and not force:
-        print(f"[INFO] {vep_config} file already exists, skipping ...")
-        return
-    
-    with open(vep_config, "w") as file:
-        file.write("force_overwrite 1\n")
-        file.write(f"fork {fork}\n")
-        file.write(f"species {species}\n")
-        file.write(f"assembly {assembly}\n")
-        file.write(f"fasta {fasta}\n")
-        file.write("vcf 1\n")
-        file.write("spdi 1\n")
-        file.write("regulatory 1\n")
-        file.write("pubmed 1\n")
-        file.write("var_synonyms 1\n")
-        file.write("variant_class 1\n")
-        file.write("protein 1\n")
-        file.write("transcript_version 1\n")
-    
-        if cache_dir:
-            file.write(f"cache_version {version}\n")
-            file.write(f"cache {cache_dir}\n")
-            file.write("offline 1\n")
-        elif gff:
-            file.write(f"gff {gff}\n")
-
-        if sift:
-            file.write(f"sift b\n")
-        if polyphen:
-            file.write(f"polyphen b\n")
-        if frequencies:
-            for frequency in frequencies:
-                file.write(f"{frequency}\n")
-            
-        if plugins:
-            file.write(f"dir_plugins {repo_dir}/VEP_plugins\n")
-            
-            for plugin in plugins:
-                file.write(f"plugin {plugin}\n")
-
-        if structural_variant:
-            file.write(f"buffer_size 50\n")
-            file.write(f"max_sv_size 1000000000\n")
-    
+    return plugins   
     
 def main(args = None):
     args = parse_args(args)
@@ -441,20 +381,43 @@ def main(args = None):
     
     plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
     
-    generate_vep_config(
-        vep_config = vep_config,
-        species = species,
-        assembly = assembly,
-        version = cache_version,
-        cache_dir = cache_dir,
-        fasta = fasta,
-        sift = sift,
-        polyphen = polyphen,
-        frequencies = frequencies,
-        plugins = plugins,
-        repo_dir = repo_dir,
-        structural_variant = structural_variant
-    )
+    # write the VEP config file
+    with open(vep_config, "w") as file:
+        file.write("force_overwrite 1\n")
+        file.write(f"fork 2\n")
+        file.write(f"species {species}\n")
+        file.write(f"assembly {assembly}\n")
+        file.write(f"fasta {fasta}\n")
+        file.write("vcf 1\n")
+        file.write("spdi 1\n")
+        file.write("regulatory 1\n")
+        file.write("pubmed 1\n")
+        file.write("var_synonyms 1\n")
+        file.write("variant_class 1\n")
+        file.write("protein 1\n")
+        file.write("transcript_version 1\n")
+    
+        if args.cache_dir:
+            file.write(f"cache_version {version}\n")
+            file.write(f"cache {args.cache_dir}\n")
+            file.write("offline 1\n")
+        elif args.gff_dir:
+            file.write(f"gff {gff}\n")
+
+        if sift:
+            file.write(f"sift b\n")
+        if polyphen:
+            file.write(f"polyphen b\n")
+        if frequencies:
+            for frequency in frequencies:
+                file.write(f"{frequency}\n")
+            
+        if plugins:
+            file.write(f"dir_plugins {repo_dir}/VEP_plugins\n")
+            
+            for plugin in plugins:
+                file.write(f"plugin {plugin}\n")
+    
     
 if __name__ == "__main__":
     sys.exit(main())

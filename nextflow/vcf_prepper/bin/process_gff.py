@@ -123,18 +123,18 @@ def main(args = None):
 
         source_gff = os.path.join(GFF_FASTA_BASE_DIR, scientific_name, assembly_accession, annotation_source, "geneset", last_geneset_update, "genes.gff3.gz")
 
-    if not os.path.isfile(source_gff):
-        raise FileNotFoundError(f"Could not find - {source_gff}")
-    else:
-        compressed_gff = os.path.join(out_dir, "genes.gff3.gz")
-        returncode = copyto(source_gff, compressed_gff)
-        if returncode != 0:
-            raise Exception(f"Failed to copy.\n\tSource - {source_gff}\n\tTarget - {compressed_gff}")
+        if not os.path.isfile(source_gff):
+            raise FileNotFoundError(f"Could not find - {source_gff}")
+        else:
+            compressed_gff = os.path.join(out_dir, "genes.gff3.gz")
+            returncode = copyto(source_gff, compressed_gff)
+            if returncode != 0:
+                raise Exception(f"Failed to copy.\n\tSource - {source_gff}\n\tTarget - {compressed_gff}")
 
-        unzipped_gff = ungzip_file(compressed_gff)
-        sorted_gff = sort_gff(unzipped_gff)
-        bgzipped_gff = bgzip_file(sorted_gff)
-        index_gff(bgzipped_gff, force=args.force)
+            unzipped_gff = ungzip_file(compressed_gff)
+            sorted_gff = sort_gff(unzipped_gff)
+            bgzipped_gff = bgzip_file(sorted_gff)
+            index_gff(bgzipped_gff, force=args.force)
         
 if __name__ == "__main__":
     sys.exit(main())

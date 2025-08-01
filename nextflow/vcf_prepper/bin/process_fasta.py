@@ -148,7 +148,7 @@ def main(args = None):
             raise Exception("[ERROR] Cannot run in new infra mode, make sure you have provided --genome_uuid")
 
         source_fasta = os.path.join(fasta_dir, FASTA_FILE_NAME)
-    
+
         if not os.path.isfile(source_fasta) \
                 or not os.path.isfile(source_fasta + ".fai") \
                 or not os.path.isfile(source_fasta + ".gzi") \
@@ -166,17 +166,17 @@ def main(args = None):
         
             source_fasta = os.path.join(FASTA_FTP_BASE_DIR, scientific_name, assembly_accession, "genome", FASTA_FILE_NAME)
 
-        if not os.path.isfile(source_fasta):
-            raise FileNotFoundError(f"Could not find - {source_fasta}")
-        else:
-            compressed_fasta = os.path.join(out_dir, FASTA_FILE_NAME)
-            returncode = copyto(source_fasta, compressed_fasta)
-            if returncode != 0:
-                raise Exception(f"Failed to copy.\n\tSource - {source_fasta}\n\tTarget - {compressed_fasta}")
+            if not os.path.isfile(source_fasta):
+                raise FileNotFoundError(f"Could not find - {source_fasta}")
+            else:
+                compressed_fasta = os.path.join(out_dir, FASTA_FILE_NAME)
+                returncode = copyto(source_fasta, compressed_fasta)
+                if returncode != 0:
+                    raise Exception(f"Failed to copy.\n\tSource - {source_fasta}\n\tTarget - {compressed_fasta}")
 
-            unzipped_fasta = ungzip_file(compressed_fasta)
-            bgzipped_fasta = bgzip_file(unzipped_fasta)
-            index_fasta(bgzipped_fasta, force=args.force)
+                unzipped_fasta = ungzip_file(compressed_fasta)
+                bgzipped_fasta = bgzip_file(unzipped_fasta)
+                index_fasta(bgzipped_fasta, force=args.force)
         
 if __name__ == "__main__":
     sys.exit(main())

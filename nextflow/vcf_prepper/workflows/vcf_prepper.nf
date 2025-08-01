@@ -64,8 +64,8 @@ def parse_config (config) {
 
       // if source is MULTIPLE there are multiple sources; they must be listed  in sources field in the input config
       if (meta.source == "MULTIPLE"){
-        meta.sources = meta.sources.join(",")
-        meta.sources = meta.sources.replace(" ", "%20") // we cannot use whitespace in cmd argument
+        meta.sources = source_data.sources.join(",")
+        meta.sources = meta.sources.replaceAll(" ", "%20") // we cannot use whitespace in cmd argument
       }
 
       meta.release_id = source_data.release_id ?: params.release_id

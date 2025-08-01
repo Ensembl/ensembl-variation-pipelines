@@ -30,7 +30,7 @@ process UPDATE_FIELDS {
   source = meta.source
   synonym_file = meta.synonym_file
   rename_clinvar_ids = params.rename_clinvar_ids ? "--rename_clinvar_ids" : ""
-  sources = params.sources
+  sources = meta.sources
   sources_meta_file = params.sources_meta_file
 
   '''

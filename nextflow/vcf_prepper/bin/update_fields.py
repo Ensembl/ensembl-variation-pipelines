@@ -79,7 +79,7 @@ def main(args = None):
     synonym_file = args.synonym_file
     chromosomes = args.chromosomes or None
     output_file = args.output_file or os.path.join(os.path.dirname(input_file), "UPDATED_S_" + os.path.basename(input_file))
-    sources = args.sources or []
+    sources = args.sources if args.sources != "null" else source
     sources_meta_file = args.sources_meta_file or os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
             "../assets/source_meta.json"

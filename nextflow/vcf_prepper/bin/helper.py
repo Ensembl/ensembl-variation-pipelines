@@ -139,7 +139,12 @@ def get_db_name(server: dict, version: str, species: str = "homo_sapiens", type:
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE
     )
-    return process.stdout.decode().strip()
+
+    results = process.stdout.decode().strip().split("\n")
+    if len(results) > 1:
+        print(f"[WARNING] Multiple {type} database found - returning the first match only")
+
+    return results[0]
 
 def get_assembly_accession_from_genome_uuid(server: dict, metadata_db: str, genome_uuid: str) -> str:
     query = f"SELECT a.accession FROM assembly AS a, genome AS g WHERE g.assembly_id = a.assembly_id AND g.genome_uuid = '{genome_uuid}';"

@@ -30,13 +30,18 @@ process BED_TO_BIGBED {
   source = meta.source.toLowerCase()
   output_bb = "${meta.genome_tracks_outdir}/variant-${source}-details.bb"
   chrom_sizes = meta.chrom_sizes
+  // structural variant has extent as 10th column
+  type = params.structural_variant ? "-type=bed3+7" : "-type=bed3+6"
   
   '''
-  bedToBigBed -type=bed3+6 !{bed} !{chrom_sizes} !{output_bb}
+  bedToBigBed !{type} !{bed} !{chrom_sizes} !{output_bb}
   ln -sf !{output_bb} "variant-!{source}-details.bb"
   
-  # temp: for one source we create symlink for focus
-  cd !{meta.genome_tracks_outdir}
-  ln -sf variant-!{source}-details.bb variant-details.bb
+  # temp: for one source we create symlink for focus if only one source present
+  if [[ ! !{meta.multiple_source} ]]
+  then
+    cd !{meta.genome_tracks_outdir}
+    ln -sf variant-!{source}-details.bb variant-details.bb
+  fi
   '''
 }

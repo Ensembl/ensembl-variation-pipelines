@@ -256,6 +256,8 @@ def get_scientific_name(
     )
 
     if process.returncode != 0:
+        print(f"[WARNING] Failed to retrieve species scientific name for genome - {genome_uuid}")
+        print(f"\tError - {process.stderr.decode().strip()}")
         return None
     
     return process.stdout.decode().strip()
@@ -282,6 +284,8 @@ def get_assembly_accession(
     )
 
     if process.returncode != 0:
+        print(f"[WARNING] Failed to retrieve assembly accession for genome - {genome_uuid}")
+        print(f"\tError - {process.stderr.decode().strip()}")
         return None
     
     return process.stdout.decode().strip()
@@ -314,6 +318,8 @@ def get_dataset_attribute_value(
         stderr = subprocess.PIPE
     )
     if process.returncode != 0:
+        print(f"[WARNING] Failed to retrieve {attrib_name} dataset attribute for genome - {genome_uuid} and release - {release_id}")
+        print(f"\tError - {process.stderr.decode().strip()}")
         return None
     
     return process.stdout.decode().strip()

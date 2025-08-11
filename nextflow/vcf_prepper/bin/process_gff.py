@@ -62,15 +62,8 @@ def sort_gff(file: str, sorted_file: str = None) -> str:
         os.path.dirname(file),
         "sorted_" + os.path.basename(file)
     )
+
     os.system(f"(grep '^#' {file} & grep -v '^#' {file} | sort -k1,1 -k4,4n -k5,5n -t$\'\\t\') > {sorted_file}")
-    process = subprocess.run(["sort", "-f", file],
-        stdout = subprocess.PIPE,
-        stderr = subprocess.PIPE
-    )
-    
-    if process.returncode != 0:
-        print(f"[ERROR] Could not sort file - {file}")
-        exit(1)
 
     return sorted_file
     

@@ -262,12 +262,10 @@ def main(args = None):
                     for idx, _ in enumerate(ac_csq_idc):
                         (ac_csq_idx, an_csq_idx) = (ac_csq_idc[idx], an_csq_idc[idx])
                         if ac_csq_idx is None or an_csq_idx is None:
-                            print(f"[ERROR] Unable to retrieve CSQ field index for RAF.",
-                                  f"\tGiven RAF fields: {', '.join(freq_csq_fields)}.",
-                                  f"\tCSQ fields: {', '.join(csq_list)}.",
-                                  "Exiting ...",
-                                  sep="\n"
-                                )
+                            print(f"[ERROR] Unable to retrieve CSQ field index for RAF.")
+                            print(f"\tGiven RAF fields: {', '.join(freq_csq_fields)}.")
+                            print(f"\tCSQ fields: {', '.join(csq_list)}.")
+                            print("Exiting ...")
                             exit(1)
 
                         if csq_values[ac_csq_idx] and csq_values[an_csq_idx]:

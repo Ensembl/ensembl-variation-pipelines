@@ -28,7 +28,7 @@ import re
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--tracks_outdir", dest="tracks_outdir", type=str, help="path to a vcf prepper tracks output directory")
+    parser.add_argument("--tracks_outdir", dest="tracks_outdir", type=str, required = True, help="path to a vcf prepper tracks output directory")
     parser.add_argument("--input_config", dest="input_config", type=str, required = True, help="input_config json file used in vcf_prepper")
     
     return parser.parse_args(args)
@@ -110,8 +110,8 @@ def main(args = None):
         source = species_metadata[genome_uuid]["source_name"]
         species = species_metadata[genome_uuid]["species"]
 
-        source.replace("%20", " ")
-        source.replace("%2F", "/")
+        source = source.replace("%20", " ")
+        source = source.replace("%2F", "/")
 
         api_file = os.path.join(os.path.dirname(tracks_outdir), "api", genome_uuid, "variation.vcf.gz")
         if not os.path.isfile(api_file):

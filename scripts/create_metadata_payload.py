@@ -211,7 +211,7 @@ def main(args = None):
                 variant_count = get_variant_count(api_vcf)
                 if variant_count is not None:
                     attribute = {}
-                    attribute["name"] = "variation.short_variants"
+                    attribute["name"] = "variation.stats.short_variants"
                     attribute["value"] = str(variant_count)
                     dataset_attribute.append(attribute)
 
@@ -225,20 +225,20 @@ def main(args = None):
                 phenotype_count = get_evidence_count(api_vcf, "PHENOTYPES")
                 if phenotype_count is not None:
                     attribute = {}
-                    attribute["name"] = "variation.short_variants_with_phenotype_assertions"
+                    attribute["name"] = "variation.stats.short_variants_with_phenotype_assertions"
                     attribute["value"] = phenotype_count
                     dataset_attribute.append(attribute)
 
                 publication_count = get_evidence_count(api_vcf, "PUBMED")
                 if publication_count is not None:
                     attribute = {}
-                    attribute["name"] = "variation.short_variants_with_publications"
+                    attribute["name"] = "variation.stats.short_variants_with_publications"
                     attribute["value"] = publication_count
                     dataset_attribute.append(attribute)
 
                 if species == "homo_sapiens" or species == "homo_sapiens_37":
                     attribute = {}
-                    attribute["name"] = "variation.short_variants_frequency_studies"
+                    attribute["name"] = "variation.stats.short_variants_frequency_studies"
                     attribute["value"] = 1
                     dataset_attribute.append(attribute)
 

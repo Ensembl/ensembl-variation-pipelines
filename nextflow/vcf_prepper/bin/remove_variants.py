@@ -111,6 +111,10 @@ def main(args = None):
 
         if check_chrom and variant.CHROM not in valid_chroms:
             continue
+
+        if variant.ID is None or variant.ID == ".":
+            print(f"[WARNING] Variant at {variant.CHROM}:{variant.POS} has no ID. Skipping...")
+            continue
                 
         output_vcf_writer.write_record(variant)
     output_vcf_writer.close()

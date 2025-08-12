@@ -177,6 +177,14 @@ def get_division(server: dict, core_db: str) -> str:
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE
     )
+
+    ensembl_divisions = ["EnsemblVertebrates", "EnsemblFungi", "EnsemblMetazoa", "EnsemblPlants", "EnsemblProtists"]
+    if process.returncode != 0 or process.stdout.decode().strip() not in ensembl_divisions:
+        print(f"[ERROR] Could not get division from core database - {core_db}")
+        print(f"\tDatabase server - mysql://{server['user']}:@{server['host']}:{server['port']}")
+        print(f"\tError - {process.stderr.decode().strip()}")
+
+        exit(1)
     return process.stdout.decode().strip()
 
 @deprecated(version='June 2025', reason="Variation database with old schema should not be used anymore")

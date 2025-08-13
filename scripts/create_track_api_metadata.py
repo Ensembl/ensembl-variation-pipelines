@@ -149,7 +149,7 @@ def main(args = None):
         metadata[genome_uuid]["datafiles"]["focus_details"] = focus_bb_file
         metadata[genome_uuid]["datafiles"]["focus_summary"] = focus_bw_file
 
-        metadata[genome_uuid]["description"] = "All short variants (SNPs and indel) data" + source_desc_prefix
+        metadata[genome_uuid]["description"] = "All short variants (SNPs and indels) data" + source_desc_prefix
         
         metadata[genome_uuid]["source"] = {}
         if source == "MULTIPLE":

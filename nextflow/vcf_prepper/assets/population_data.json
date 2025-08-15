@@ -7,18 +7,88 @@
             {
                "version": "4.1",
                "short_name": "gnomAD_exomes",
-               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/exomes/gnomad.exomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/exomes/gnomad.exomes.v4.1.sites.chr###CHR###_trimmed.vcf.bgz",
                "include_fields": [
-                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADe:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -32,19 +102,96 @@
                "version": "4.1",
                "short_name": "gnomAD_genomes",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/genomes/gnomad.genomes.v4.1.sites.chr##CHR##_trimmed.vcf.bgz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch38/genomes/gnomad.genomes.v4.1.sites.chr###CHR###_trimmed.vcf.bgz",
                "include_fields": [
-                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
-                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADg:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:ami",
+                     "fields": {
+                        "af": "AF_ami",
+                        "ac": "AC_ami",
+                        "an": "AN_ami"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -58,18 +205,88 @@
             {
                "version": "4.1",
                "short_name": "gnomAD_exomes",
-               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/exomes/gnomad.exomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/exomes/gnomad.exomes.v4.1.sites.grch37.chr###CHR###_trimmed_liftover.vcf.gz",
                "include_fields": [
-                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADe:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -83,19 +300,96 @@
                "version": "4.1",
                "short_name": "gnomAD_genomes",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/genomes/gnomad.genomes.v4.1.sites.grch37.chr##CHR##_trimmed_liftover.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/variation/data/gnomAD/v4.1/grch37/genomes/gnomad.genomes.v4.1.sites.grch37.chr###CHR###_trimmed_liftover.vcf.gz",
                "include_fields": [
-                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
-                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADg:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:ami",
+                     "fields": {
+                        "af": "AF_ami",
+                        "ac": "AC_ami",
+                        "an": "AN_ami"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -111,16 +405,86 @@
                "short_name": "gnomAD_exomes",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY_ACC##/ensembl/variation/2022_10/vcf/2024_07/gnomad.exomes.v4.1.sites.##ASSEMBLY_ACC##.trimmed_liftover.vcf.gz",
                "include_fields": [
-                  {"name": "gnomADe:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADe:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADe:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADe:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADe:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADe:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADe:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADe:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADe:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADe:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADe:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADe:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -136,17 +500,94 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/rapid-release/species/Homo_sapiens/##ASSEMBLY_ACC##/ensembl/variation/2022_10/vcf/2024_07/gnomad.genomes.v4.1.sites.##ASSEMBLY_ACC##.trimmed_liftover.vcf.gz",
                "include_fields": [
-                  {"name": "gnomADg:ALL", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "gnomADg:afr", "fields": {"af": "AF_afr", "ac": "AC_afr", "an": "AN_afr"}},
-                  {"name": "gnomADg:ami", "fields": {"af": "AF_ami", "ac": "AC_ami", "an": "AN_ami"}},
-                  {"name": "gnomADg:amr", "fields": {"af": "AF_amr", "ac": "AC_amr", "an": "AN_amr"}},
-                  {"name": "gnomADg:asj", "fields": {"af": "AF_asj", "ac": "AC_asj", "an": "AN_asj"}},
-                  {"name": "gnomADg:eas", "fields": {"af": "AF_eas", "ac": "AC_eas", "an": "AN_eas"}},
-                  {"name": "gnomADg:fin", "fields": {"af": "AF_fin", "ac": "AC_fin", "an": "AN_fin"}},
-                  {"name": "gnomADg:mid", "fields": {"af": "AF_mid", "ac": "AC_mid", "an": "AN_mid"}},
-                  {"name": "gnomADg:nfe", "fields": {"af": "AF_nfe", "ac": "AC_nfe", "an": "AN_nfe"}},
-                  {"name": "gnomADg:remaining", "fields": {"af": "AF_remaining", "ac": "AC_remaining", "an": "AN_remaining"}},
-                  {"name": "gnomADg:sas", "fields": {"af": "AF_sas", "ac": "AC_sas", "an": "AN_sas"}}
+                  {
+                     "name": "gnomADg:ALL",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:afr",
+                     "fields": {
+                        "af": "AF_afr",
+                        "ac": "AC_afr",
+                        "an": "AN_afr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:ami",
+                     "fields": {
+                        "af": "AF_ami",
+                        "ac": "AC_ami",
+                        "an": "AN_ami"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:amr",
+                     "fields": {
+                        "af": "AF_amr",
+                        "ac": "AC_amr",
+                        "an": "AN_amr"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:asj",
+                     "fields": {
+                        "af": "AF_asj",
+                        "ac": "AC_asj",
+                        "an": "AN_asj"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:eas",
+                     "fields": {
+                        "af": "AF_eas",
+                        "ac": "AC_eas",
+                        "an": "AN_eas"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:fin",
+                     "fields": {
+                        "af": "AF_fin",
+                        "ac": "AC_fin",
+                        "an": "AN_fin"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:mid",
+                     "fields": {
+                        "af": "AF_mid",
+                        "ac": "AC_mid",
+                        "an": "AN_mid"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:nfe",
+                     "fields": {
+                        "af": "AF_nfe",
+                        "ac": "AC_nfe",
+                        "an": "AN_nfe"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:remaining",
+                     "fields": {
+                        "af": "AF_remaining",
+                        "ac": "AC_remaining",
+                        "an": "AN_remaining"
+                     }
+                  },
+                  {
+                     "name": "gnomADg:sas",
+                     "fields": {
+                        "af": "AF_sas",
+                        "ac": "AC_sas",
+                        "an": "AN_sas"
+                     }
+                  }
                ]
             }
          ]
@@ -163,7 +604,13 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/mus_musculus/GRCm39/variation_genotype/mgp.v3.snps.sorted.rsIDdbSNPv137.GRCm39.vcf.gz",
                "include_fields": [
-                  {"name": "MGP", "fields": {"an": "AN", "ac": "AC"}}
+                  {
+                     "name": "MGP",
+                     "fields": {
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             },
             {
@@ -173,7 +620,13 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/mus_musculus/GRCm39/variation_genotype/mgp.v3.indels.sorted.rsIDdbSNPv137.GRCm39.vcf.gz",
                "include_fields": [
-                  {"name": "MGP", "fields": {"an": "AN", "ac": "AC"}}
+                  {
+                     "name": "MGP",
+                     "fields": {
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -189,7 +642,14 @@
                "representative_af_field": "AF_IRBT",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/bos_taurus/ARS-UCD1.3/variation_genotype/IRBT_ARS-UCD1_3.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen", "fields": {"af": "AF_IRBT", "an": "AN_IRBT", "ac": "AC_IRBT"}}
+                  {
+                     "name": "NextGen",
+                     "fields": {
+                        "af": "AF_IRBT",
+                        "an": "AN_IRBT",
+                        "ac": "AC_IRBT"
+                     }
+                  }
                ]
             }
          ]
@@ -205,7 +665,12 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/gallus_gallus/bGalGal1.mat.broiler.GRCg7b/variation_genotype/cohort188.ALL.1-28.fixed_remap7b.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB44919", "fields": {"af": "AF"}}
+                  {
+                     "name": "PRJEB44919",
+                     "fields": {
+                        "af": "AF"
+                     }
+                  }
                ]
             }
          ]
@@ -221,7 +686,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/canis_lupus_familiaris/ROS_Cfam_1.0/variation_genotype/ROS_Cfam_1.0_remap_PRJEB24066.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB24066", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "PRJEB24066",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -237,7 +709,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/canis_lupus_familiarisboxer/Dog10K_Boxer_Tasha/variation_genotype/Dog10K_Boxer_Tasha_remap_PRJEB24066.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB24066", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "PRJEB24066",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -246,28 +725,38 @@
    "ovis_aries": [
       {
          "name": "NextGen:IROA",
-         "representative": true,
          "files": [
             {
                "short_name": "NextGen:IROA",
-               "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/IROA.population_sites.OARv3_1.20140307.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:IROA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "NextGen:IROA",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
       },
       {
          "name": "NextGen:MOOA",
-         "representative": true,
          "files": [
             {
                "short_name": "NextGen:MOOA",
-               "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/MOOA.population_sites.OARv3_1.20140328.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:MOOA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "NextGen:MOOA",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -281,7 +770,14 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries/Oar_v3.1/variation_genotype/###CHR###.filtered_intersect.vcf.gz",
                "include_fields": [
-                  {"name": "ISGC", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "ISGC",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -290,28 +786,40 @@
    "ovis_aries_rambouillet": [
       {
          "name": "NextGen:IROA",
-         "representative": true,
          "files": [
             {
                "short_name": "NextGen:IROA",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/IROA.population_sites.ARS_UI_Ramb_v2_0.20140307.vcf.g",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/Oar_rambouillet_v1.0/variation_genotype/IROA.population_sites.Oar_rambouillet_v1_0.20140307.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:IROA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "NextGen:IROA",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
       },
       {
          "name": "NextGen:MOOA",
-         "representative": true,
          "files": [
             {
                "short_name": "NextGen:MOOA",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/MOOA.population_sites.ARS-UI_Ramb_v2_0.20140328.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/Oar_rambouillet_v1.0/variation_genotype/MOOA.population_sites.Oar_rambouillet_v1_0.20140328.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:MOOA", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "NextGen:MOOA",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -323,9 +831,16 @@
             {
                "short_name": "ISGC",
                "representative_af_field": "AF",
-               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/ARS-UI_Ramb_v2.0/variation_genotype/###CHR###.filtered_ARS-UI_Ramb_v2.0_intersect.vcf.gz",
+               "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/ovis_aries_rambouillet/Oar_rambouillet_v1.0/variation_genotype/###CHR###.filtered_intersect.vcf.gz",
                "include_fields": [
-                  {"name": "ISGC", "fields": {"af": "AF", "an": "AN", "ac": "AC"}}
+                  {
+                     "name": "ISGC",
+                     "fields": {
+                        "af": "AF",
+                        "an": "AN",
+                        "ac": "AC"
+                     }
+                  }
                ]
             }
          ]
@@ -341,12 +856,54 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/Nextgen/capra_hircus/ARS1/NextGenCapraHircusRemappedARS1_comb.vcf.gz",
                "include_fields": [
-                  {"name": "NextGen:All", "fields": {"af": "AF", "ac": "AC", "an": "AN"}},
-                  {"name": "NextGen:MOCH", "fields": {"af": "AF_MOCH", "ac": "AC_MOCH", "an": "AN_MOCH"}},
-                  {"name": "NextGen:FRCH", "fields": {"af": "AF_FRCH", "ac": "AC_FRCH", "an": "AN_FRCH"}},
-                  {"name": "NextGen:AUCH", "fields": {"af": "AF_AUCH", "ac": "AC_AUCH", "an": "AN_AUCH"}},
-                  {"name": "NextGen:ITCH", "fields": {"af": "AF_ITCH", "ac": "AC_ITCH", "an": "AN_ITCH"}},
-                  {"name": "NextGen:IRCH", "fields": {"af": "AF_IRCH", "ac": "AC_IRCH", "an": "AN_IRCH"}}
+                  {
+                     "name": "NextGen:All",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  },
+                  {
+                     "name": "NextGen:MOCH",
+                     "fields": {
+                        "af": "AF_MOCH",
+                        "ac": "AC_MOCH",
+                        "an": "AN_MOCH"
+                     }
+                  },
+                  {
+                     "name": "NextGen:FRCH",
+                     "fields": {
+                        "af": "AF_FRCH",
+                        "ac": "AC_FRCH",
+                        "an": "AN_FRCH"
+                     }
+                  },
+                  {
+                     "name": "NextGen:AUCH",
+                     "fields": {
+                        "af": "AF_AUCH",
+                        "ac": "AC_AUCH",
+                        "an": "AN_AUCH"
+                     }
+                  },
+                  {
+                     "name": "NextGen:ITCH",
+                     "fields": {
+                        "af": "AF_ITCH",
+                        "ac": "AC_ITCH",
+                        "an": "AN_ITCH"
+                     }
+                  },
+                  {
+                     "name": "NextGen:IRCH",
+                     "fields": {
+                        "af": "AF_IRCH",
+                        "ac": "AC_IRCH",
+                        "an": "AN_IRCH"
+                     }
+                  }
                ]
             }
          ]
@@ -362,7 +919,14 @@
                "representative_af_field": "AF_PRJEB9799",
                "file_location": "/nfs/production/flicek/ensembl/production/ensemblftp/data_files/vertebrates/equus_caballus/EquCab3.0/variation_genotype/PRJEB9799_EquCab3_0.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB9799", "fields": {"af": "AF_PRJEB9799", "ac": "AC_PRJEB9799", "an": "AN_PRJEB9799"}}
+                  {
+                     "name": "PRJEB9799",
+                     "fields": {
+                        "af": "AF_PRJEB9799",
+                        "ac": "AC_PRJEB9799",
+                        "an": "AN_PRJEB9799"
+                     }
+                  }
                ]
             }
          ]
@@ -378,7 +942,12 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB38548/oreochromis_niloticus/O_niloticus_UMD_NMBU/tilapia_snp_array.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB38548", "fields": {"af": "AF"}}
+                  {
+                     "name": "PRJEB38548",
+                     "fields": {
+                        "af": "AF"
+                     }
+                  }
                ]
             }
          ]
@@ -394,7 +963,2591 @@
                "representative_af_field": "AF",
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB26368/neovison_vison/NNQGG.v01/GBS_mink_eva.vcf.gz",
                "include_fields": [
-                  {"name": "PRJEB26368", "fields": {"af": "AF", "ac": "AC", "an": "AN"}}
+                  {
+                     "name": "PRJEB26368",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "salmo_salar": [
+      {
+         "name": "ALL:PRJEB34225",
+         "representative": true,
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB34225/salmo_salar/Ssal_v3.1/Salmon_SNP_80_samples_freebayes_EBI_noINFO_remap_freq.vcf.gz",
+               "short_name": "ALL:PRJEB34225",
+               "representative_af_field": "ALL:PRJEB34225_AF",
+               "include_fields": [
+                  {
+                     "name": "ALL:PRJEB34225",
+                     "fields": {
+                        "af": "ALL:PRJEB34225_AF",
+                        "ac": "ALL:PRJEB34225_AC",
+                        "an": "ALL:PRJEB34225_AN"
+                     }
+                  },
+                  {
+                     "name": "Gaspe of New Brunswick",
+                     "fields": {
+                        "af": "Gaspe of New Brunswick_AF",
+                        "ac": "Gaspe of New Brunswick_AC",
+                        "an": "Gaspe of New Brunswick_AN"
+                     }
+                  },
+                  {
+                     "name": "Penobscot River",
+                     "fields": {
+                        "af": "Penobscot River_AF",
+                        "ac": "Penobscot River_AC",
+                        "an": "Penobscot River_AN"
+                     }
+                  },
+                  {
+                     "name": "St. John River",
+                     "fields": {
+                        "af": "St. John River_AF",
+                        "ac": "St. John River_AC",
+                        "an": "St. John River_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "oryctolagus_cuniculus": [
+      {
+         "name": "ALL:PRJEB27278",
+         "representative": true,
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/PRJEB27278/oryctolagus_cuniculus/OryCun2.0/Craniosnyostotic_Rabbit_Colony_eva08062018_freq.vcf.gz",
+               "short_name": "ALL:PRJEB27278",
+               "representative_af_field": "ALL:PRJEB27278_AF",
+               "include_fields": [
+                  {
+                     "name": "ICN",
+                     "fields": {
+                        "af": "ICN_AF",
+                        "ac": "ICN_AC",
+                        "an": "ICN_AN"
+                     }
+                  },
+                  {
+                     "name": "ALL:PRJEB27278",
+                     "fields": {
+                        "af": "ALL:PRJEB27278_AF",
+                        "ac": "ALL:PRJEB27278_AC",
+                        "an": "ALL:PRJEB27278_AN"
+                     }
+                  },
+                  {
+                     "name": "EOS",
+                     "fields": {
+                        "af": "EOS_AF",
+                        "ac": "EOS_AC",
+                        "an": "EOS_AN"
+                     }
+                  },
+                  {
+                     "name": "DOS",
+                     "fields": {
+                        "af": "DOS_AF",
+                        "ac": "DOS_AC",
+                        "an": "DOS_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "triticum_aestivum": [
+      {
+         "name": "Axiom",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/820k_fixed_freq.vcf.gz",
+               "short_name": "Axiom_820k",
+               "include_fields": [
+                  {
+                     "name": "Axiom",
+                     "fields": {
+                        "af": "Axiom_AF",
+                        "ac": "Axiom_AC",
+                        "an": "Axiom_AN"
+                     }
+                  }
+               ]
+            },
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/35k_fixed_freq.vcf.gz",
+               "short_name": "Axiom_35k",
+               "include_fields": [
+                  {
+                     "name": "Axiom",
+                     "fields": {
+                        "af": "Axiom_AF",
+                        "ac": "Axiom_AC",
+                        "an": "Axiom_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Watkins_collection:All",
+         "representative": true,
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/combined_watkins_nochr.INFO_freq.vcf.gz",
+               "short_name": "Watkins_collection:All",
+               "representative_af_field": "Watkins_collection:All_AF",
+               "include_fields": [
+                  {
+                     "name": "Watkins_collection:AG3",
+                     "fields": {
+                        "af": "Watkins_collection:AG3_AF",
+                        "ac": "Watkins_collection:AG3_AC",
+                        "an": "Watkins_collection:AG3_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG4",
+                     "fields": {
+                        "af": "Watkins_collection:AG4_AF",
+                        "ac": "Watkins_collection:AG4_AC",
+                        "an": "Watkins_collection:AG4_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG6",
+                     "fields": {
+                        "af": "Watkins_collection:AG6_AF",
+                        "ac": "Watkins_collection:AG6_AC",
+                        "an": "Watkins_collection:AG6_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG1",
+                     "fields": {
+                        "af": "Watkins_collection:AG1_AF",
+                        "ac": "Watkins_collection:AG1_AC",
+                        "an": "Watkins_collection:AG1_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:Modern",
+                     "fields": {
+                        "af": "Watkins_collection:Modern_AF",
+                        "ac": "Watkins_collection:Modern_AC",
+                        "an": "Watkins_collection:Modern_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG5",
+                     "fields": {
+                        "af": "Watkins_collection:AG5_AF",
+                        "ac": "Watkins_collection:AG5_AC",
+                        "an": "Watkins_collection:AG5_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG7",
+                     "fields": {
+                        "af": "Watkins_collection:AG7_AF",
+                        "ac": "Watkins_collection:AG7_AC",
+                        "an": "Watkins_collection:AG7_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:All",
+                     "fields": {
+                        "af": "Watkins_collection:All_AF",
+                        "ac": "Watkins_collection:All_AC",
+                        "an": "Watkins_collection:All_AN"
+                     }
+                  },
+                  {
+                     "name": "Watkins_collection:AG2",
+                     "fields": {
+                        "af": "Watkins_collection:AG2_AF",
+                        "ac": "Watkins_collection:AG2_AC",
+                        "an": "Watkins_collection:AG2_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "oryza_sativa_gca001433935v1cm": [
+      {
+         "name": "Collection from BGI 2004",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/bgi_snps_2004_freq.vcf.gz",
+               "short_name": "Collection from BGI 2004",
+               "include_fields": [
+                  {
+                     "name": "Collection from BGI 2004",
+                     "fields": {
+                        "af": "Collection from BGI 2004_AF",
+                        "ac": "Collection from BGI 2004_AC",
+                        "an": "Collection from BGI 2004_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from Duitama et al. 2015",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/duitama_et_al_2015_freq.vcf.gz",
+               "short_name": "Collection from Duitama et al. 2015",
+               "include_fields": [
+                  {
+                     "name": "Collection from Duitama et al. 2015",
+                     "fields": {
+                        "af": "Collection from Duitama et al. 2015_AF",
+                        "ac": "Collection from Duitama et al. 2015_AC",
+                        "an": "Collection from Duitama et al. 2015_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from McNally et al. 2009",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/mcnally_et_al_2009_freq.vcf.gz",
+               "short_name": "Collection from McNally et al. 2009",
+               "include_fields": [
+                  {
+                     "name": "Collection from McNally et al. 2009",
+                     "fields": {
+                        "af": "Collection from McNally et al. 2009_AF",
+                        "ac": "Collection from McNally et al. 2009_AC",
+                        "an": "Collection from McNally et al. 2009_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from OMAP 2007",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/omap_snps_2007_div_freq.vcf.gz",
+               "short_name": "Collection from OMAP 2007_div",
+               "include_fields": [
+                  {
+                     "name": "Collection from OMAP 2007",
+                     "fields": {
+                        "af": "Collection from OMAP 2007_AF",
+                        "ac": "Collection from OMAP 2007_AC",
+                        "an": "Collection from OMAP 2007_AN"
+                     }
+                  }
+               ]
+            },
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/omap_snps_2007_snv_freq.vcf.gz",
+               "short_name": "Collection from OMAP 2007",
+               "include_fields": [
+                  {
+                     "name": "Collection from OMAP 2007_snv",
+                     "fields": {
+                        "af": "Collection from OMAP 2007_AF",
+                        "ac": "Collection from OMAP 2007_AC",
+                        "an": "Collection from OMAP 2007_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from Rice 3k",
+         "representative": true,
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/rice_3k_###CHR###_freq.vcf.gz",
+               "short_name": "Collection from Rice 3k",
+               "representative_af_field": "Collection from Rice 3k_AF",
+               "include_fields": [
+                  {
+                     "name": "Collection from Rice 3k",
+                     "fields": {
+                        "af": "Collection from Rice 3k_AF",
+                        "ac": "Collection from Rice 3k_AC",
+                        "an": "Collection from Rice 3k_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Collection from Zhao et al. 2010",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/oryza_sativa/IRGSP-1.0/zhao_et_al_2010_fixed_freq.vcf.gz",
+               "short_name": "Collection from Zhao et al. 2010",
+               "include_fields": [
+                  {
+                     "name": "Collection from Zhao et al. 2010",
+                     "fields": {
+                        "af": "Collection from Zhao et al. 2010_AF",
+                        "ac": "Collection from Zhao et al. 2010_AC",
+                        "an": "Collection from Zhao et al. 2010_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "aedes_aegypti_lvpagwg": [
+      {
+         "name": "UNSPECIFIED",
+         "representative": true,
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000125_Aedes_Faucon_2015_IR_2_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Deltamethrin susceptible strain",
+                     "fields": {
+                        "af": "Deltamethrin susceptible strain_AF",
+                        "ac": "Deltamethrin susceptible strain_AC",
+                        "an": "Deltamethrin susceptible strain_AN"
+                     }
+                  },
+                  {
+                     "name": "Bora Bora strain$2C deltamethrin susceptible",
+                     "fields": {
+                        "af": "Bora Bora strain$2C deltamethrin susceptible_AF",
+                        "ac": "Bora Bora strain$2C deltamethrin susceptible_AC",
+                        "an": "Bora Bora strain$2C deltamethrin susceptible_AN"
+                     }
+                  },
+                  {
+                     "name": "Saint-Georges strain (French Guiana)$2C deltamethrin resistant (2014)",
+                     "fields": {
+                        "af": "Saint-Georges strain (French Guiana)$2C deltamethrin resistant (2014)_AF",
+                        "ac": "Saint-Georges strain (French Guiana)$2C deltamethrin resistant (2014)_AC",
+                        "an": "Saint-Georges strain (French Guiana)$2C deltamethrin resistant (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Saint-Georges strain (French Guiana)$2C deltamethrin susceptible (2014)",
+                     "fields": {
+                        "af": "Saint-Georges strain (French Guiana)$2C deltamethrin susceptible (2014)_AF",
+                        "ac": "Saint-Georges strain (French Guiana)$2C deltamethrin susceptible (2014)_AC",
+                        "an": "Saint-Georges strain (French Guiana)$2C deltamethrin susceptible (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Nakhonsawan strain (Thailand)$2C deltamethrin resistant (2014)",
+                     "fields": {
+                        "af": "Nakhonsawan strain (Thailand)$2C deltamethrin resistant (2014)_AF",
+                        "ac": "Nakhonsawan strain (Thailand)$2C deltamethrin resistant (2014)_AC",
+                        "an": "Nakhonsawan strain (Thailand)$2C deltamethrin resistant (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Phetchaburi strain (Thailand)$2C deltamethrin susceptible (2014)",
+                     "fields": {
+                        "af": "Phetchaburi strain (Thailand)$2C deltamethrin susceptible (2014)_AF",
+                        "ac": "Phetchaburi strain (Thailand)$2C deltamethrin susceptible (2014)_AC",
+                        "an": "Phetchaburi strain (Thailand)$2C deltamethrin susceptible (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Phetchaburi strain (Thailand)$2C deltamethrin resistant (2014)",
+                     "fields": {
+                        "af": "Phetchaburi strain (Thailand)$2C deltamethrin resistant (2014)_AF",
+                        "ac": "Phetchaburi strain (Thailand)$2C deltamethrin resistant (2014)_AC",
+                        "an": "Phetchaburi strain (Thailand)$2C deltamethrin resistant (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Pattalung strain (Thailand)$2C deltamethrin susceptible",
+                     "fields": {
+                        "af": "Pattalung strain (Thailand)$2C deltamethrin susceptible_AF",
+                        "ac": "Pattalung strain (Thailand)$2C deltamethrin susceptible_AC",
+                        "an": "Pattalung strain (Thailand)$2C deltamethrin susceptible_AN"
+                     }
+                  },
+                  {
+                     "name": "New Orleans strain (USA)$2C deltamethrin susceptible",
+                     "fields": {
+                        "af": "New Orleans strain (USA)$2C deltamethrin susceptible_AF",
+                        "ac": "New Orleans strain (USA)$2C deltamethrin susceptible_AC",
+                        "an": "New Orleans strain (USA)$2C deltamethrin susceptible_AN"
+                     }
+                  },
+                  {
+                     "name": "Nakhonsawan strain (Thailand)$2C deltamethrin susceptible (2014)",
+                     "fields": {
+                        "af": "Nakhonsawan strain (Thailand)$2C deltamethrin susceptible (2014)_AF",
+                        "ac": "Nakhonsawan strain (Thailand)$2C deltamethrin susceptible (2014)_AC",
+                        "an": "Nakhonsawan strain (Thailand)$2C deltamethrin susceptible (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Deltamethrin resistant strain",
+                     "fields": {
+                        "af": "Deltamethrin resistant strain_AF",
+                        "ac": "Deltamethrin resistant strain_AC",
+                        "an": "Deltamethrin resistant strain_AN"
+                     }
+                  },
+                  {
+                     "name": "Cayenne strain (French Guiana)$2C deltamethrin susceptible (2014)",
+                     "fields": {
+                        "af": "Cayenne strain (French Guiana)$2C deltamethrin susceptible (2014)_AF",
+                        "ac": "Cayenne strain (French Guiana)$2C deltamethrin susceptible (2014)_AC",
+                        "an": "Cayenne strain (French Guiana)$2C deltamethrin susceptible (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cayenne strain (French Guiana)$2C deltamethrin resistant (2014)",
+                     "fields": {
+                        "af": "Cayenne strain (French Guiana)$2C deltamethrin resistant (2014)_AF",
+                        "ac": "Cayenne strain (French Guiana)$2C deltamethrin resistant (2014)_AC",
+                        "an": "Cayenne strain (French Guiana)$2C deltamethrin resistant (2014)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000269_Kotsakiozi_2018_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Tijuana$2C Mexico (2013)",
+                     "fields": {
+                        "af": "Tijuana$2C Mexico (2013)_AF",
+                        "ac": "Tijuana$2C Mexico (2013)_AC",
+                        "an": "Tijuana$2C Mexico (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "New Orleans$2C LA$2C USA (2012)",
+                     "fields": {
+                        "af": "New Orleans$2C LA$2C USA (2012)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2012)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Clovis$2C CA (2013)",
+                     "fields": {
+                        "af": "Clovis$2C CA (2013)_AF",
+                        "ac": "Clovis$2C CA (2013)_AC",
+                        "an": "Clovis$2C CA (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "Muscogee County$2C Georgia$2C USA (2012)",
+                     "fields": {
+                        "af": "Muscogee County$2C Georgia$2C USA (2012)_AF",
+                        "ac": "Muscogee County$2C Georgia$2C USA (2012)_AC",
+                        "an": "Muscogee County$2C Georgia$2C USA (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)",
+                     "fields": {
+                        "af": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "North Key West$2C FL$2C USA (2013)",
+                     "fields": {
+                        "af": "North Key West$2C FL$2C USA (2013)_AF",
+                        "ac": "North Key West$2C FL$2C USA (2013)_AC",
+                        "an": "North Key West$2C FL$2C USA (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Attock$2C Pakistan (2014)",
+                     "fields": {
+                        "af": "Attock$2C Pakistan (2014)_AF",
+                        "ac": "Attock$2C Pakistan (2014)_AC",
+                        "an": "Attock$2C Pakistan (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cali$2C Colombia (2013)",
+                     "fields": {
+                        "af": "Cali$2C Colombia (2013)_AF",
+                        "ac": "Cali$2C Colombia (2013)_AC",
+                        "an": "Cali$2C Colombia (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)",
+                     "fields": {
+                        "af": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Hanoi$2C Vietnam (2013)",
+                     "fields": {
+                        "af": "Hanoi$2C Vietnam (2013)_AF",
+                        "ac": "Hanoi$2C Vietnam (2013)_AC",
+                        "an": "Hanoi$2C Vietnam (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Madera$2C CA (2015)",
+                     "fields": {
+                        "af": "Madera$2C CA (2015)_AF",
+                        "ac": "Madera$2C CA (2015)_AC",
+                        "an": "Madera$2C CA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Hopa$2C Turkey (2015)",
+                     "fields": {
+                        "af": "Hopa$2C Turkey (2015)_AF",
+                        "ac": "Hopa$2C Turkey (2015)_AC",
+                        "an": "Hopa$2C Turkey (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Trinidad$2C Republic of Trinidad and Tobaco (2014)",
+                     "fields": {
+                        "af": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AF",
+                        "ac": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AC",
+                        "an": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "Tapachula Norte$2C CHP$2C Mexico (2012)",
+                     "fields": {
+                        "af": "Tapachula Norte$2C CHP$2C Mexico (2012)_AF",
+                        "ac": "Tapachula Norte$2C CHP$2C Mexico (2012)_AC",
+                        "an": "Tapachula Norte$2C CHP$2C Mexico (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Tbilisi-Tsereteli$2C Georgia (2015)",
+                     "fields": {
+                        "af": "Tbilisi-Tsereteli$2C Georgia (2015)_AF",
+                        "ac": "Tbilisi-Tsereteli$2C Georgia (2015)_AC",
+                        "an": "Tbilisi-Tsereteli$2C Georgia (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Johannesburg$2C South Africa (2015)",
+                     "fields": {
+                        "af": "Johannesburg$2C South Africa (2015)_AF",
+                        "ac": "Johannesburg$2C South Africa (2015)_AC",
+                        "an": "Johannesburg$2C South Africa (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Amacuzac$2C MOR$2C Mexico (2014)",
+                     "fields": {
+                        "af": "Amacuzac$2C MOR$2C Mexico (2014)_AF",
+                        "ac": "Amacuzac$2C MOR$2C Mexico (2014)_AC",
+                        "an": "Amacuzac$2C MOR$2C Mexico (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Nogales$2C SON$2C Mexico (2013)",
+                     "fields": {
+                        "af": "Nogales$2C SON$2C Mexico (2013)_AF",
+                        "ac": "Nogales$2C SON$2C Mexico (2013)_AC",
+                        "an": "Nogales$2C SON$2C Mexico (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "New Orleans$2C LA$2C USA (2011)",
+                     "fields": {
+                        "af": "New Orleans$2C LA$2C USA (2011)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2011)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "Goudiry$2C Senegal (2012)",
+                     "fields": {
+                        "af": "Goudiry$2C Senegal (2012)_AF",
+                        "ac": "Goudiry$2C Senegal (2012)_AC",
+                        "an": "Goudiry$2C Senegal (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cebu City$2C Philippines (2013)",
+                     "fields": {
+                        "af": "Cebu City$2C Philippines (2013)_AF",
+                        "ac": "Cebu City$2C Philippines (2013)_AC",
+                        "an": "Cebu City$2C Philippines (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Aedes mascarensis$2C Mauritius (2014)",
+                     "fields": {
+                        "af": "Aedes mascarensis$2C Mauritius (2014)_AF",
+                        "ac": "Aedes mascarensis$2C Mauritius (2014)_AC",
+                        "an": "Aedes mascarensis$2C Mauritius (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Rio de Janeiro$2C Brazil (2014)",
+                     "fields": {
+                        "af": "Rio de Janeiro$2C Brazil (2014)_AF",
+                        "ac": "Rio de Janeiro$2C Brazil (2014)_AC",
+                        "an": "Rio de Janeiro$2C Brazil (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)",
+                     "fields": {
+                        "af": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Siquirres$2C Costa Rica (2014)",
+                     "fields": {
+                        "af": "Siquirres$2C Costa Rica (2014)_AF",
+                        "ac": "Siquirres$2C Costa Rica (2014)_AC",
+                        "an": "Siquirres$2C Costa Rica (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Punjab$2C Pakistan (2010)",
+                     "fields": {
+                        "af": "Punjab$2C Pakistan (2010)_AF",
+                        "ac": "Punjab$2C Pakistan (2010)_AC",
+                        "an": "Punjab$2C Pakistan (2010)_AN"
+                     }
+                  },
+                  {
+                     "name": "Sedhiou$2C Senegal (2012)",
+                     "fields": {
+                        "af": "Sedhiou$2C Senegal (2012)_AF",
+                        "ac": "Sedhiou$2C Senegal (2012)_AC",
+                        "an": "Sedhiou$2C Senegal (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Riyadh$2C Saudi Arabia (2012)",
+                     "fields": {
+                        "af": "Riyadh$2C Saudi Arabia (2012)_AF",
+                        "ac": "Riyadh$2C Saudi Arabia (2012)_AC",
+                        "an": "Riyadh$2C Saudi Arabia (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Maraba$2C Brazil (2010)",
+                     "fields": {
+                        "af": "Maraba$2C Brazil (2010)_AF",
+                        "ac": "Maraba$2C Brazil (2010)_AC",
+                        "an": "Maraba$2C Brazil (2010)_AN"
+                     }
+                  },
+                  {
+                     "name": "Nairobi$2C Kenya (2012)",
+                     "fields": {
+                        "af": "Nairobi$2C Kenya (2012)_AF",
+                        "ac": "Nairobi$2C Kenya (2012)_AC",
+                        "an": "Nairobi$2C Kenya (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Ho Chih Minh$2C Vietnam (2013)",
+                     "fields": {
+                        "af": "Ho Chih Minh$2C Vietnam (2013)_AF",
+                        "ac": "Ho Chih Minh$2C Vietnam (2013)_AC",
+                        "an": "Ho Chih Minh$2C Vietnam (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Rio de Janeiro$2C Brazil (2015)",
+                     "fields": {
+                        "af": "Rio de Janeiro$2C Brazil (2015)_AF",
+                        "ac": "Rio de Janeiro$2C Brazil (2015)_AC",
+                        "an": "Rio de Janeiro$2C Brazil (2015)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000177_Pless_S1_File_2_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Garden Grove$2C CA (2015)",
+                     "fields": {
+                        "af": "Garden Grove$2C CA (2015)_AF",
+                        "ac": "Garden Grove$2C CA (2015)_AC",
+                        "an": "Garden Grove$2C CA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "San Mateo$2C CA (2013)",
+                     "fields": {
+                        "af": "San Mateo$2C CA (2013)_AF",
+                        "ac": "San Mateo$2C CA (2013)_AC",
+                        "an": "San Mateo$2C CA (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "San Diego$2C CA (2015)",
+                     "fields": {
+                        "af": "San Diego$2C CA (2015)_AF",
+                        "ac": "San Diego$2C CA (2015)_AC",
+                        "an": "San Diego$2C CA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Madera$2C CA (2013)",
+                     "fields": {
+                        "af": "Madera$2C CA (2013)_AF",
+                        "ac": "Madera$2C CA (2013)_AC",
+                        "an": "Madera$2C CA (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Clovis$2C CA (2013)",
+                     "fields": {
+                        "af": "Clovis$2C CA (2013)_AF",
+                        "ac": "Clovis$2C CA (2013)_AC",
+                        "an": "Clovis$2C CA (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Los Angeles$2C CA (2014)",
+                     "fields": {
+                        "af": "Los Angeles$2C CA (2014)_AF",
+                        "ac": "Los Angeles$2C CA (2014)_AC",
+                        "an": "Los Angeles$2C CA (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Madera$2C CA (2015)",
+                     "fields": {
+                        "af": "Madera$2C CA (2015)_AF",
+                        "ac": "Madera$2C CA (2015)_AC",
+                        "an": "Madera$2C CA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Fresno$2C CA (2015)",
+                     "fields": {
+                        "af": "Fresno$2C CA (2015)_AF",
+                        "ac": "Fresno$2C CA (2015)_AC",
+                        "an": "Fresno$2C CA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Mission Viejo$2C CA (2015)",
+                     "fields": {
+                        "af": "Mission Viejo$2C CA (2015)_AF",
+                        "ac": "Mission Viejo$2C CA (2015)_AC",
+                        "an": "Mission Viejo$2C CA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Exeter$2C CA (2014)",
+                     "fields": {
+                        "af": "Exeter$2C CA (2014)_AF",
+                        "ac": "Exeter$2C CA (2014)_AC",
+                        "an": "Exeter$2C CA (2014)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000201_Gloria-Soria_2017_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Tijuana$2C Mexico (2013)",
+                     "fields": {
+                        "af": "Tijuana$2C Mexico (2013)_AF",
+                        "ac": "Tijuana$2C Mexico (2013)_AC",
+                        "an": "Tijuana$2C Mexico (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Jacobina$2C Brazil (2013)",
+                     "fields": {
+                        "af": "Jacobina$2C Brazil (2013)_AF",
+                        "ac": "Jacobina$2C Brazil (2013)_AC",
+                        "an": "Jacobina$2C Brazil (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Clovis$2C CA (2013)",
+                     "fields": {
+                        "af": "Clovis$2C CA (2013)_AF",
+                        "ac": "Clovis$2C CA (2013)_AC",
+                        "an": "Clovis$2C CA (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Fresno$2C CA (2015)",
+                     "fields": {
+                        "af": "Fresno$2C CA (2015)_AF",
+                        "ac": "Fresno$2C CA (2015)_AC",
+                        "an": "Fresno$2C CA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Muscogee County$2C Georgia$2C USA (2012)",
+                     "fields": {
+                        "af": "Muscogee County$2C Georgia$2C USA (2012)_AF",
+                        "ac": "Muscogee County$2C Georgia$2C USA (2012)_AC",
+                        "an": "Muscogee County$2C Georgia$2C USA (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Pakistan - PK (2010)",
+                     "fields": {
+                        "af": "Pakistan - PK (2010)_AF",
+                        "ac": "Pakistan - PK (2010)_AC",
+                        "an": "Pakistan - PK (2010)_AN"
+                     }
+                  },
+                  {
+                     "name": "Tobago - TT (2015)",
+                     "fields": {
+                        "af": "Tobago - TT (2015)_AF",
+                        "ac": "Tobago - TT (2015)_AC",
+                        "an": "Tobago - TT (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Sri Lanka$2C SL (2014)",
+                     "fields": {
+                        "af": "Sri Lanka$2C SL (2014)_AF",
+                        "ac": "Sri Lanka$2C SL (2014)_AC",
+                        "an": "Sri Lanka$2C SL (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Attock$2C Pakistan (2014)",
+                     "fields": {
+                        "af": "Attock$2C Pakistan (2014)_AF",
+                        "ac": "Attock$2C Pakistan (2014)_AC",
+                        "an": "Attock$2C Pakistan (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Karachi$2C Pakistan (2010)",
+                     "fields": {
+                        "af": "Karachi$2C Pakistan (2010)_AF",
+                        "ac": "Karachi$2C Pakistan (2010)_AC",
+                        "an": "Karachi$2C Pakistan (2010)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cali$2C Colombia (2013)",
+                     "fields": {
+                        "af": "Cali$2C Colombia (2013)_AF",
+                        "ac": "Cali$2C Colombia (2013)_AC",
+                        "an": "Cali$2C Colombia (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Madera$2C California$2C USA (2013)",
+                     "fields": {
+                        "af": "Madera$2C California$2C USA (2013)_AF",
+                        "ac": "Madera$2C California$2C USA (2013)_AC",
+                        "an": "Madera$2C California$2C USA (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Hanoi$2C Vietnam (2013)",
+                     "fields": {
+                        "af": "Hanoi$2C Vietnam (2013)_AF",
+                        "ac": "Hanoi$2C Vietnam (2013)_AC",
+                        "an": "Hanoi$2C Vietnam (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Madera$2C CA (2015)",
+                     "fields": {
+                        "af": "Madera$2C CA (2015)_AF",
+                        "ac": "Madera$2C CA (2015)_AC",
+                        "an": "Madera$2C CA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Trinidad$2C Republic of Trinidad and Tobaco (2014)",
+                     "fields": {
+                        "af": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AF",
+                        "ac": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AC",
+                        "an": "Trinidad$2C Republic of Trinidad and Tobaco (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "Amacuzac$2C MOR$2C Mexico (2014)",
+                     "fields": {
+                        "af": "Amacuzac$2C MOR$2C Mexico (2014)_AF",
+                        "ac": "Amacuzac$2C MOR$2C Mexico (2014)_AC",
+                        "an": "Amacuzac$2C MOR$2C Mexico (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Nogales$2C SON$2C Mexico (2013)",
+                     "fields": {
+                        "af": "Nogales$2C SON$2C Mexico (2013)_AF",
+                        "ac": "Nogales$2C SON$2C Mexico (2013)_AC",
+                        "an": "Nogales$2C SON$2C Mexico (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Madeira (2012)",
+                     "fields": {
+                        "af": "Madeira (2012)_AF",
+                        "ac": "Madeira (2012)_AC",
+                        "an": "Madeira (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cebu City$2C Philippines (2013)",
+                     "fields": {
+                        "af": "Cebu City$2C Philippines (2013)_AF",
+                        "ac": "Cebu City$2C Philippines (2013)_AC",
+                        "an": "Cebu City$2C Philippines (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Washington$2C DC$2C USA (2014)",
+                     "fields": {
+                        "af": "Washington$2C DC$2C USA (2014)_AF",
+                        "ac": "Washington$2C DC$2C USA (2014)_AC",
+                        "an": "Washington$2C DC$2C USA (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Rio de Janeiro$2C Brazil (2014)",
+                     "fields": {
+                        "af": "Rio de Janeiro$2C Brazil (2014)_AF",
+                        "ac": "Rio de Janeiro$2C Brazil (2014)_AC",
+                        "an": "Rio de Janeiro$2C Brazil (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "El Paso$2C TX$2C USA (2015)",
+                     "fields": {
+                        "af": "El Paso$2C TX$2C USA (2015)_AF",
+                        "ac": "El Paso$2C TX$2C USA (2015)_AC",
+                        "an": "El Paso$2C TX$2C USA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Tucson$2C AZ$2C USA (2012)",
+                     "fields": {
+                        "af": "Tucson$2C AZ$2C USA (2012)_AF",
+                        "ac": "Tucson$2C AZ$2C USA (2012)_AC",
+                        "an": "Tucson$2C AZ$2C USA (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Siquirres$2C Costa Rica (2014)",
+                     "fields": {
+                        "af": "Siquirres$2C Costa Rica (2014)_AF",
+                        "ac": "Siquirres$2C Costa Rica (2014)_AC",
+                        "an": "Siquirres$2C Costa Rica (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Punjab$2C Pakistan (2010)",
+                     "fields": {
+                        "af": "Punjab$2C Pakistan (2010)_AF",
+                        "ac": "Punjab$2C Pakistan (2010)_AC",
+                        "an": "Punjab$2C Pakistan (2010)_AN"
+                     }
+                  },
+                  {
+                     "name": "Dominica$2C rural (2016)",
+                     "fields": {
+                        "af": "Dominica$2C rural (2016)_AF",
+                        "ac": "Dominica$2C rural (2016)_AC",
+                        "an": "Dominica$2C rural (2016)_AN"
+                     }
+                  },
+                  {
+                     "name": "Hawaii$2C USA (2016)",
+                     "fields": {
+                        "af": "Hawaii$2C USA (2016)_AF",
+                        "ac": "Hawaii$2C USA (2016)_AC",
+                        "an": "Hawaii$2C USA (2016)_AN"
+                     }
+                  },
+                  {
+                     "name": "Madera$2C CA (2013)",
+                     "fields": {
+                        "af": "Madera$2C CA (2013)_AF",
+                        "ac": "Madera$2C CA (2013)_AC",
+                        "an": "Madera$2C CA (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Riyadh$2C Saudi Arabia (2012)",
+                     "fields": {
+                        "af": "Riyadh$2C Saudi Arabia (2012)_AF",
+                        "ac": "Riyadh$2C Saudi Arabia (2012)_AC",
+                        "an": "Riyadh$2C Saudi Arabia (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Maraba$2C Brazil (2010)",
+                     "fields": {
+                        "af": "Maraba$2C Brazil (2010)_AF",
+                        "ac": "Maraba$2C Brazil (2010)_AC",
+                        "an": "Maraba$2C Brazil (2010)_AN"
+                     }
+                  },
+                  {
+                     "name": "Dominica$2C urban (2016)",
+                     "fields": {
+                        "af": "Dominica$2C urban (2016)_AF",
+                        "ac": "Dominica$2C urban (2016)_AC",
+                        "an": "Dominica$2C urban (2016)_AN"
+                     }
+                  },
+                  {
+                     "name": "Ho Chih Minh$2C Vietnam (2013)",
+                     "fields": {
+                        "af": "Ho Chih Minh$2C Vietnam (2013)_AF",
+                        "ac": "Ho Chih Minh$2C Vietnam (2013)_AC",
+                        "an": "Ho Chih Minh$2C Vietnam (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Saint Vincent - VC (2015)",
+                     "fields": {
+                        "af": "Saint Vincent - VC (2015)_AF",
+                        "ac": "Saint Vincent - VC (2015)_AC",
+                        "an": "Saint Vincent - VC (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Rio de Janeiro$2C Brazil (2015)",
+                     "fields": {
+                        "af": "Rio de Janeiro$2C Brazil (2015)_AF",
+                        "ac": "Rio de Janeiro$2C Brazil (2015)_AC",
+                        "an": "Rio de Janeiro$2C Brazil (2015)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000122_Aedes_Evans_2015_AxiomGT1_calls_2_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)",
+                     "fields": {
+                        "af": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Thailand field isolate$2C Rayong  2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Senegal field isolate$2C Sedhiou Sedhiou 2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti Senegal field isolate$2C Sedhiou Sedhiou 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Senegal field isolate$2C Sedhiou Sedhiou 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Senegal field isolate$2C Sedhiou Sedhiou 2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti USA field isolate$2C Texas Houston 2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti USA field isolate$2C Texas Houston 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Texas Houston 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti USA field isolate$2C Texas Houston 2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti USA field isolate$2C Florida Key West 2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti USA field isolate$2C Florida Key West 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Florida Key West 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti USA field isolate$2C Florida Key West 2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)",
+                     "fields": {
+                        "af": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti French Polynesia field isolate$2C Tahiti  2013$2C individual insect (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Australia field isolate$2C Queensland Cairns 2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Mexico field isolate$2C Chiapas Tapachula 2013$2C individual insect (2013)",
+                     "fields": {
+                        "af": "A.aegypti Mexico field isolate$2C Chiapas Tapachula 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti Mexico field isolate$2C Chiapas Tapachula 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti Mexico field isolate$2C Chiapas Tapachula 2013$2C individual insect (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Senegal field isolate$2C Tambacounda Goudiry 2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti Senegal field isolate$2C Tambacounda Goudiry 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Senegal field isolate$2C Tambacounda Goudiry 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Senegal field isolate$2C Tambacounda Goudiry 2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Uganda field isolate$2C Entebbe Lunyo 2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti Uganda field isolate$2C Entebbe Lunyo 2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti Uganda field isolate$2C Entebbe Lunyo 2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti Uganda field isolate$2C Entebbe Lunyo 2011$2C individual insect (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)",
+                     "fields": {
+                        "af": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti USA field isolate$2C Puerto Rico Patillas 2013$2C individual insect (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti USA field isolate$2C Hawaii  2011$2C individual insect (2011)",
+                     "fields": {
+                        "af": "A.aegypti USA field isolate$2C Hawaii  2011$2C individual insect (2011)_AF",
+                        "ac": "A.aegypti USA field isolate$2C Hawaii  2011$2C individual insect (2011)_AC",
+                        "an": "A.aegypti USA field isolate$2C Hawaii  2011$2C individual insect (2011)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000193_Saarman-EvoApps-2017-SNPs_2_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Yaounde$2C Cameroon (2015)",
+                     "fields": {
+                        "af": "Yaounde$2C Cameroon (2015)_AF",
+                        "ac": "Yaounde$2C Cameroon (2015)_AC",
+                        "an": "Yaounde$2C Cameroon (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)",
+                     "fields": {
+                        "af": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AF",
+                        "ac": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AC",
+                        "an": "A.aegypti Brazil field isolate$2C Bahia Jacobina 2013$2C individual insect (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "New Orleans$2C LA$2C USA (2015)",
+                     "fields": {
+                        "af": "New Orleans$2C LA$2C USA (2015)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2015)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "New Orleans$2C LA$2C USA (2012)",
+                     "fields": {
+                        "af": "New Orleans$2C LA$2C USA (2012)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2012)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Jacobina$2C Brazil (2015)",
+                     "fields": {
+                        "af": "Jacobina$2C Brazil (2015)_AF",
+                        "ac": "Jacobina$2C Brazil (2015)_AC",
+                        "an": "Jacobina$2C Brazil (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "New Orleans$2C LA$2C USA (2011)",
+                     "fields": {
+                        "af": "New Orleans$2C LA$2C USA (2011)_AF",
+                        "ac": "New Orleans$2C LA$2C USA (2011)_AC",
+                        "an": "New Orleans$2C LA$2C USA (2011)_AN"
+                     }
+                  },
+                  {
+                     "name": "Yaounde$2C Cameroon (2013)",
+                     "fields": {
+                        "af": "Yaounde$2C Cameroon (2013)_AF",
+                        "ac": "Yaounde$2C Cameroon (2013)_AC",
+                        "an": "Yaounde$2C Cameroon (2013)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000121_Aedes_JP-David_2014_IR_2_fix1_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Permethrin (pyrethroid) insecticide resistant colony derived from Bora Bora strain",
+                     "fields": {
+                        "af": "Permethrin (pyrethroid) insecticide resistant colony derived from Bora Bora strain_AF",
+                        "ac": "Permethrin (pyrethroid) insecticide resistant colony derived from Bora Bora strain_AC",
+                        "an": "Permethrin (pyrethroid) insecticide resistant colony derived from Bora Bora strain_AN"
+                     }
+                  },
+                  {
+                     "name": "Propoxur (carbamate) insecticide resistant colony derived from Bora Bora strain",
+                     "fields": {
+                        "af": "Propoxur (carbamate) insecticide resistant colony derived from Bora Bora strain_AF",
+                        "ac": "Propoxur (carbamate) insecticide resistant colony derived from Bora Bora strain_AC",
+                        "an": "Propoxur (carbamate) insecticide resistant colony derived from Bora Bora strain_AN"
+                     }
+                  },
+                  {
+                     "name": "Bora Bora strain$2C generally susceptible to insecticides",
+                     "fields": {
+                        "af": "Bora Bora strain$2C generally susceptible to insecticides_AF",
+                        "ac": "Bora Bora strain$2C generally susceptible to insecticides_AC",
+                        "an": "Bora Bora strain$2C generally susceptible to insecticides_AN"
+                     }
+                  },
+                  {
+                     "name": "Imidacloprid (neonicotinoid) insecticide resistant colony derived from Bora Bora strain",
+                     "fields": {
+                        "af": "Imidacloprid (neonicotinoid) insecticide resistant colony derived from Bora Bora strain_AF",
+                        "ac": "Imidacloprid (neonicotinoid) insecticide resistant colony derived from Bora Bora strain_AC",
+                        "an": "Imidacloprid (neonicotinoid) insecticide resistant colony derived from Bora Bora strain_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000295_Kotsakiozi_2018_Africa_fix1_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Burkina Faso$2C Burkina Faso (2015)",
+                     "fields": {
+                        "af": "Burkina Faso$2C Burkina Faso (2015)_AF",
+                        "ac": "Burkina Faso$2C Burkina Faso (2015)_AC",
+                        "an": "Burkina Faso$2C Burkina Faso (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cameroon$2C Buffalo camp (2014)",
+                     "fields": {
+                        "af": "Cameroon$2C Buffalo camp (2014)_AF",
+                        "ac": "Cameroon$2C Buffalo camp (2014)_AC",
+                        "an": "Cameroon$2C Buffalo camp (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Philippines$2C Philippines (2013)",
+                     "fields": {
+                        "af": "Philippines$2C Philippines (2013)_AF",
+                        "ac": "Philippines$2C Philippines (2013)_AC",
+                        "an": "Philippines$2C Philippines (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Brazil$2C Macapa (2012)",
+                     "fields": {
+                        "af": "Brazil$2C Macapa (2012)_AF",
+                        "ac": "Brazil$2C Macapa (2012)_AC",
+                        "an": "Brazil$2C Macapa (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Yaounde$2C Cameroon (2013)",
+                     "fields": {
+                        "af": "Yaounde$2C Cameroon (2013)_AF",
+                        "ac": "Yaounde$2C Cameroon (2013)_AC",
+                        "an": "Yaounde$2C Cameroon (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cameroon$2C Yaounde Mvog_Ada (2015)",
+                     "fields": {
+                        "af": "Cameroon$2C Yaounde Mvog_Ada (2015)_AF",
+                        "ac": "Cameroon$2C Yaounde Mvog_Ada (2015)_AC",
+                        "an": "Cameroon$2C Yaounde Mvog_Ada (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Kenya$2C Kaya Forest (2012)",
+                     "fields": {
+                        "af": "Kenya$2C Kaya Forest (2012)_AF",
+                        "ac": "Kenya$2C Kaya Forest (2012)_AC",
+                        "an": "Kenya$2C Kaya Forest (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cali$2C Colombia (2013)",
+                     "fields": {
+                        "af": "Cali$2C Colombia (2013)_AF",
+                        "ac": "Cali$2C Colombia (2013)_AC",
+                        "an": "Cali$2C Colombia (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cameroon$2C Yaounde Forest (2015)",
+                     "fields": {
+                        "af": "Cameroon$2C Yaounde Forest (2015)_AF",
+                        "ac": "Cameroon$2C Yaounde Forest (2015)_AC",
+                        "an": "Cameroon$2C Yaounde Forest (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Jacobina2016_Jac16_POPULATION",
+                     "fields": {
+                        "af": "Jacobina2016_Jac16_POPULATION_AF",
+                        "ac": "Jacobina2016_Jac16_POPULATION_AC",
+                        "an": "Jacobina2016_Jac16_POPULATION_AN"
+                     }
+                  },
+                  {
+                     "name": "Georgia$2C Georgia (2015)",
+                     "fields": {
+                        "af": "Georgia$2C Georgia (2015)_AF",
+                        "ac": "Georgia$2C Georgia (2015)_AC",
+                        "an": "Georgia$2C Georgia (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Australia$2C Cairns (2013)",
+                     "fields": {
+                        "af": "Australia$2C Cairns (2013)_AF",
+                        "ac": "Australia$2C Cairns (2013)_AC",
+                        "an": "Australia$2C Cairns (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Gabon$2C Franceville (2014)",
+                     "fields": {
+                        "af": "Gabon$2C Franceville (2014)_AF",
+                        "ac": "Gabon$2C Franceville (2014)_AC",
+                        "an": "Gabon$2C Franceville (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Caribbean$2C Dominica (2016)",
+                     "fields": {
+                        "af": "Caribbean$2C Dominica (2016)_AF",
+                        "ac": "Caribbean$2C Dominica (2016)_AC",
+                        "an": "Caribbean$2C Dominica (2016)_AN"
+                     }
+                  },
+                  {
+                     "name": "Kahawa_Sukari_KS_A_POPULATION",
+                     "fields": {
+                        "af": "Kahawa_Sukari_KS_A_POPULATION_AF",
+                        "ac": "Kahawa_Sukari_KS_A_POPULATION_AC",
+                        "an": "Kahawa_Sukari_KS_A_POPULATION_AN"
+                     }
+                  },
+                  {
+                     "name": "Mauritius island$2C Aedes mascarensis (2014)",
+                     "fields": {
+                        "af": "Mauritius island$2C Aedes mascarensis (2014)_AF",
+                        "ac": "Mauritius island$2C Aedes mascarensis (2014)_AC",
+                        "an": "Mauritius island$2C Aedes mascarensis (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Tbilisi-Tsereteli$2C Georgia (2015)",
+                     "fields": {
+                        "af": "Tbilisi-Tsereteli$2C Georgia (2015)_AF",
+                        "ac": "Tbilisi-Tsereteli$2C Georgia (2015)_AC",
+                        "an": "Tbilisi-Tsereteli$2C Georgia (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Johannesburg$2C South Africa (2015)",
+                     "fields": {
+                        "af": "Johannesburg$2C South Africa (2015)_AF",
+                        "ac": "Johannesburg$2C South Africa (2015)_AC",
+                        "an": "Johannesburg$2C South Africa (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Gabon$2C Lope Forest (2014)",
+                     "fields": {
+                        "af": "Gabon$2C Lope Forest (2014)_AF",
+                        "ac": "Gabon$2C Lope Forest (2014)_AC",
+                        "an": "Gabon$2C Lope Forest (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cameroon$2C Yaounde Mokolo (2015)",
+                     "fields": {
+                        "af": "Cameroon$2C Yaounde Mokolo (2015)_AF",
+                        "ac": "Cameroon$2C Yaounde Mokolo (2015)_AC",
+                        "an": "Cameroon$2C Yaounde Mokolo (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cebu City$2C Philippines (2013)",
+                     "fields": {
+                        "af": "Cebu City$2C Philippines (2013)_AF",
+                        "ac": "Cebu City$2C Philippines (2013)_AC",
+                        "an": "Cebu City$2C Philippines (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Goudiry$2C Senegal (2012)",
+                     "fields": {
+                        "af": "Goudiry$2C Senegal (2012)_AF",
+                        "ac": "Goudiry$2C Senegal (2012)_AC",
+                        "an": "Goudiry$2C Senegal (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Aedes mascarensis$2C Mauritius (2014)",
+                     "fields": {
+                        "af": "Aedes mascarensis$2C Mauritius (2014)_AF",
+                        "ac": "Aedes mascarensis$2C Mauritius (2014)_AC",
+                        "an": "Aedes mascarensis$2C Mauritius (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Reunion island$2C Reunion Island (2016)",
+                     "fields": {
+                        "af": "Reunion island$2C Reunion Island (2016)_AF",
+                        "ac": "Reunion island$2C Reunion Island (2016)_AC",
+                        "an": "Reunion island$2C Reunion Island (2016)_AN"
+                     }
+                  },
+                  {
+                     "name": "Gabon$2C Lope Village (2014)",
+                     "fields": {
+                        "af": "Gabon$2C Lope Village (2014)_AF",
+                        "ac": "Gabon$2C Lope Village (2014)_AC",
+                        "an": "Gabon$2C Lope Village (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cameroon$2C Yaounde Village (2015)",
+                     "fields": {
+                        "af": "Cameroon$2C Yaounde Village (2015)_AF",
+                        "ac": "Cameroon$2C Yaounde Village (2015)_AC",
+                        "an": "Cameroon$2C Yaounde Village (2015)_AN"
+                     }
+                  },
+                  {
+                     "name": "Siquirres$2C Costa Rica (2014)",
+                     "fields": {
+                        "af": "Siquirres$2C Costa Rica (2014)_AF",
+                        "ac": "Siquirres$2C Costa Rica (2014)_AC",
+                        "an": "Siquirres$2C Costa Rica (2014)_AN"
+                     }
+                  },
+                  {
+                     "name": "Uganda$2C Zika village (2016)",
+                     "fields": {
+                        "af": "Uganda$2C Zika village (2016)_AF",
+                        "ac": "Uganda$2C Zika village (2016)_AC",
+                        "an": "Uganda$2C Zika village (2016)_AN"
+                     }
+                  },
+                  {
+                     "name": "Sedhiou$2C Senegal (2012)",
+                     "fields": {
+                        "af": "Sedhiou$2C Senegal (2012)_AF",
+                        "ac": "Sedhiou$2C Senegal (2012)_AC",
+                        "an": "Sedhiou$2C Senegal (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Jacobina_Jac_POPULATION",
+                     "fields": {
+                        "af": "Jacobina_Jac_POPULATION_AF",
+                        "ac": "Jacobina_Jac_POPULATION_AC",
+                        "an": "Jacobina_Jac_POPULATION_AN"
+                     }
+                  },
+                  {
+                     "name": "Angola$2C Luanda (2016)",
+                     "fields": {
+                        "af": "Angola$2C Luanda (2016)_AF",
+                        "ac": "Angola$2C Luanda (2016)_AC",
+                        "an": "Angola$2C Luanda (2016)_AN"
+                     }
+                  },
+                  {
+                     "name": "Mexico$2C Chetumal lab strain (2013)",
+                     "fields": {
+                        "af": "Mexico$2C Chetumal lab strain (2013)_AF",
+                        "ac": "Mexico$2C Chetumal lab strain (2013)_AC",
+                        "an": "Mexico$2C Chetumal lab strain (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Tahiti$2C Tahiti (2010)",
+                     "fields": {
+                        "af": "Tahiti$2C Tahiti (2010)_AF",
+                        "ac": "Tahiti$2C Tahiti (2010)_AC",
+                        "an": "Tahiti$2C Tahiti (2010)_AN"
+                     }
+                  },
+                  {
+                     "name": "Kenya$2C Nairobi (2012)",
+                     "fields": {
+                        "af": "Kenya$2C Nairobi (2012)_AF",
+                        "ac": "Kenya$2C Nairobi (2012)_AC",
+                        "an": "Kenya$2C Nairobi (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Ho Chih Minh$2C Vietnam (2013)",
+                     "fields": {
+                        "af": "Ho Chih Minh$2C Vietnam (2013)_AF",
+                        "ac": "Ho Chih Minh$2C Vietnam (2013)_AC",
+                        "an": "Ho Chih Minh$2C Vietnam (2013)_AN"
+                     }
+                  },
+                  {
+                     "name": "Uganda$2C Lunyo (2013)",
+                     "fields": {
+                        "af": "Uganda$2C Lunyo (2013)_AF",
+                        "ac": "Uganda$2C Lunyo (2013)_AC",
+                        "an": "Uganda$2C Lunyo (2013)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/aedes_aegypti_lvpagwg/AaegL5/VBP0000015_Aedes_Bonizzono_2013_insecticide_resistance_2_fix1_AaegL5_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Chetumal strain",
+                     "fields": {
+                        "af": "Chetumal strain_AF",
+                        "ac": "Chetumal strain_AC",
+                        "an": "Chetumal strain_AN"
+                     }
+                  },
+                  {
+                     "name": "Rexville D-Puerto Rico strain",
+                     "fields": {
+                        "af": "Rexville D-Puerto Rico strain_AF",
+                        "ac": "Rexville D-Puerto Rico strain_AC",
+                        "an": "Rexville D-Puerto Rico strain_AN"
+                     }
+                  },
+                  {
+                     "name": "Liverpool strain",
+                     "fields": {
+                        "af": "Liverpool strain_AF",
+                        "ac": "Liverpool strain_AC",
+                        "an": "Liverpool strain_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "anopheles_gambiae": [
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000227_g3_snps_AgamP4_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "G3 colony$2C male (2017)",
+                     "fields": {
+                        "af": "G3 colony$2C male (2017)_AF",
+                        "ac": "G3 colony$2C male (2017)_AC",
+                        "an": "G3 colony$2C male (2017)_AN"
+                     }
+                  },
+                  {
+                     "name": "G3 colony$2C female (2017)",
+                     "fields": {
+                        "af": "G3 colony$2C female (2017)_AF",
+                        "ac": "G3 colony$2C female (2017)_AC",
+                        "an": "G3 colony$2C female (2017)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "M (2004)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000003_Agambiae_Broad_SNP_chip_Mali_M_freq.vcf.gz",
+               "short_name": "M (2004)",
+               "include_fields": [
+                  {
+                     "name": "M (2004)",
+                     "fields": {
+                        "af": "M (2004)_AF",
+                        "ac": "M (2004)_AC",
+                        "an": "M (2004)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000007_TEP1.ssaha2.map_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Anopheles gambiae M form (2005)",
+                     "fields": {
+                        "af": "Anopheles gambiae M form (2005)_AF",
+                        "ac": "Anopheles gambiae M form (2005)_AC",
+                        "an": "Anopheles gambiae M form (2005)_AN"
+                     }
+                  },
+                  {
+                     "name": "Anopheles gambiae S form (2005)",
+                     "fields": {
+                        "af": "Anopheles gambiae S form (2005)_AF",
+                        "ac": "Anopheles gambiae S form (2005)_AC",
+                        "an": "Anopheles gambiae S form (2005)_AN"
+                     }
+                  },
+                  {
+                     "name": "Anopheles gambiae S form (2007)",
+                     "fields": {
+                        "af": "Anopheles gambiae S form (2007)_AF",
+                        "ac": "Anopheles gambiae S form (2007)_AC",
+                        "an": "Anopheles gambiae S form (2007)_AN"
+                     }
+                  },
+                  {
+                     "name": "Anopheles gambiae M form (2007)",
+                     "fields": {
+                        "af": "Anopheles gambiae M form (2007)_AF",
+                        "ac": "Anopheles gambiae M form (2007)_AC",
+                        "an": "Anopheles gambiae M form (2007)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000124_Goundry_2016_arabiensis_freq.vcf.gz",
+               "short_name": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
+               "include_fields": [
+                  {
+                     "name": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
+                     "fields": {
+                        "af": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AF",
+                        "ac": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AC",
+                        "an": "A. arabiensis field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "S (2004)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000003_Agambiae_Broad_SNP_chip_Mali_S_freq.vcf.gz",
+               "short_name": "S (2004)",
+               "include_fields": [
+                  {
+                     "name": "S (2004)",
+                     "fields": {
+                        "af": "S (2004)_AF",
+                        "ac": "S (2004)_AC",
+                        "an": "S (2004)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000124_Goundry_2016_coluzzii_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)",
+                     "fields": {
+                        "af": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AF",
+                        "ac": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AC",
+                        "an": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AN"
+                     }
+                  },
+                  {
+                     "name": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
+                     "fields": {
+                        "af": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AF",
+                        "ac": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AC",
+                        "an": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AN"
+                     }
+                  },
+                  {
+                     "name": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)",
+                     "fields": {
+                        "af": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AF",
+                        "ac": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AC",
+                        "an": "A. coluzzii field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000124_Goundry_2016_gambiae_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)",
+                     "fields": {
+                        "af": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AF",
+                        "ac": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AC",
+                        "an": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2010)_AN"
+                     }
+                  },
+                  {
+                     "name": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)",
+                     "fields": {
+                        "af": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AF",
+                        "ac": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AC",
+                        "an": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AN"
+                     }
+                  },
+                  {
+                     "name": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
+                     "fields": {
+                        "af": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AF",
+                        "ac": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AC",
+                        "an": "A. gambiae field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Bamako (2004)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000003_Agambiae_Broad_SNP_chip_Bamako_freq.vcf.gz",
+               "short_name": "Bamako (2004)",
+               "include_fields": [
+                  {
+                     "name": "Bamako (2004)",
+                     "fields": {
+                        "af": "Bamako (2004)_AF",
+                        "ac": "Bamako (2004)_AC",
+                        "an": "Bamako (2004)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "individual specimen from G3 colony (MR4)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000002_MR4_colony_G3_freq.vcf.gz",
+               "short_name": "individual specimen from G3 colony (MR4)",
+               "include_fields": [
+                  {
+                     "name": "individual specimen from G3 colony (MR4)",
+                     "fields": {
+                        "af": "individual specimen from G3 colony (MR4)_AF",
+                        "ac": "individual specimen from G3 colony (MR4)_AC",
+                        "an": "individual specimen from G3 colony (MR4)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "individual specimen from 4ARR colony (MR4)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000002_MR4_colony_4ARR_freq.vcf.gz",
+               "short_name": "individual specimen from 4ARR colony (MR4)",
+               "include_fields": [
+                  {
+                     "name": "individual specimen from 4ARR colony (MR4)",
+                     "fields": {
+                        "af": "individual specimen from 4ARR colony (MR4)_AF",
+                        "ac": "individual specimen from 4ARR colony (MR4)_AC",
+                        "an": "individual specimen from 4ARR colony (MR4)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "individual specimen from Akron colony (MR4)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000002_MR4_colony_akron_freq.vcf.gz",
+               "short_name": "individual specimen from Akron colony (MR4)",
+               "include_fields": [
+                  {
+                     "name": "individual specimen from Akron colony (MR4)",
+                     "fields": {
+                        "af": "individual specimen from Akron colony (MR4)_AF",
+                        "ac": "individual specimen from Akron colony (MR4)_AC",
+                        "an": "individual specimen from Akron colony (MR4)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "individual specimen from Kisumu colony (MR4)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000002_MR4_colony_KISUMU_freq.vcf.gz",
+               "short_name": "individual specimen from Kisumu colony (MR4)",
+               "include_fields": [
+                  {
+                     "name": "individual specimen from Kisumu colony (MR4)",
+                     "fields": {
+                        "af": "individual specimen from Kisumu colony (MR4)_AF",
+                        "ac": "individual specimen from Kisumu colony (MR4)_AC",
+                        "an": "individual specimen from Kisumu colony (MR4)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "individual specimen from L3-5 colony (MR4)",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000002_MR4_colony_L3-5_freq.vcf.gz",
+               "short_name": "individual specimen from L3-5 colony (MR4)",
+               "include_fields": [
+                  {
+                     "name": "individual specimen from L3-5 colony (MR4)",
+                     "fields": {
+                        "af": "individual specimen from L3-5 colony (MR4)_AF",
+                        "ac": "individual specimen from L3-5 colony (MR4)_AC",
+                        "an": "individual specimen from L3-5 colony (MR4)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000004_377271_LSTM_GoldenGate_array_EVA_submission.fixed_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Ghana_2006_M_form (2006)",
+                     "fields": {
+                        "af": "Ghana_2006_M_form (2006)_AF",
+                        "ac": "Ghana_2006_M_form (2006)_AC",
+                        "an": "Ghana_2006_M_form (2006)_AN"
+                     }
+                  },
+                  {
+                     "name": "Guinea-Bissau_1993_M_form (1993)",
+                     "fields": {
+                        "af": "Guinea-Bissau_1993_M_form (1993)_AF",
+                        "ac": "Guinea-Bissau_1993_M_form (1993)_AC",
+                        "an": "Guinea-Bissau_1993_M_form (1993)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cameroon_2006_M_form (2006)",
+                     "fields": {
+                        "af": "Cameroon_2006_M_form (2006)_AF",
+                        "ac": "Cameroon_2006_M_form (2006)_AC",
+                        "an": "Cameroon_2006_M_form (2006)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000004_7165_LSTM_GoldenGate_array_EVA_submission.fixed_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Anopheles gambiae sensu lato individual Municipality of Tororo (2008)",
+                     "fields": {
+                        "af": "Anopheles gambiae sensu lato individual Municipality of Tororo (2008)_AF",
+                        "ac": "Anopheles gambiae sensu lato individual Municipality of Tororo (2008)_AC",
+                        "an": "Anopheles gambiae sensu lato individual Municipality of Tororo (2008)_AN"
+                     }
+                  },
+                  {
+                     "name": "Ghana_2006_S_form (2006)",
+                     "fields": {
+                        "af": "Ghana_2006_S_form (2006)_AF",
+                        "ac": "Ghana_2006_S_form (2006)_AC",
+                        "an": "Ghana_2006_S_form (2006)_AN"
+                     }
+                  },
+                  {
+                     "name": "Cameroon_2006_S_form (2006)",
+                     "fields": {
+                        "af": "Cameroon_2006_S_form (2006)_AF",
+                        "ac": "Cameroon_2006_S_form (2006)_AC",
+                        "an": "Cameroon_2006_S_form (2006)_AN"
+                     }
+                  },
+                  {
+                     "name": "Guinea-Bissau_1993_S_form (1993)",
+                     "fields": {
+                        "af": "Guinea-Bissau_1993_S_form (1993)_AF",
+                        "ac": "Guinea-Bissau_1993_S_form (1993)_AC",
+                        "an": "Guinea-Bissau_1993_S_form (1993)_AN"
+                     }
+                  },
+                  {
+                     "name": "Uganda_2008_S_form (2008)",
+                     "fields": {
+                        "af": "Uganda_2008_S_form (2008)_AF",
+                        "ac": "Uganda_2008_S_form (2008)_AC",
+                        "an": "Uganda_2008_S_form (2008)_AN"
+                     }
+                  },
+                  {
+                     "name": "Anopheles gambiae sensu lato individual Dangme West District (2006)",
+                     "fields": {
+                        "af": "Anopheles gambiae sensu lato individual Dangme West District (2006)_AF",
+                        "ac": "Anopheles gambiae sensu lato individual Dangme West District (2006)_AC",
+                        "an": "Anopheles gambiae sensu lato individual Dangme West District (2006)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000124_Goundry_2016_goundry_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2009)",
+                     "fields": {
+                        "af": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2009)_AF",
+                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2009)_AC",
+                        "an": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2009)_AN"
+                     }
+                  },
+                  {
+                     "name": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)",
+                     "fields": {
+                        "af": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AF",
+                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AC",
+                        "an": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2008)_AN"
+                     }
+                  },
+                  {
+                     "name": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)",
+                     "fields": {
+                        "af": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AF",
+                        "ac": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AC",
+                        "an": "A. coluzzii/gambiae (Goundry form) field isolate$2C Goundry$2C Burkina Faso$2C individual insect (2007)_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "1000_genomes_project",
+         "representative": true,
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000163_ag1000g.phase1.ar3.pass.2L_freq.vcf.gz",
+               "short_name": "1000_genomes_project",
+               "include_fields": [
+                  {
+                     "name": "UGS",
+                     "fields": {
+                        "af": "UGS_AF",
+                        "ac": "UGS_AC",
+                        "an": "UGS_AN"
+                     }
+                  },
+                  {
+                     "name": "CMS",
+                     "fields": {
+                        "af": "CMS_AF",
+                        "ac": "CMS_AC",
+                        "an": "CMS_AN"
+                     }
+                  },
+                  {
+                     "name": "AOM",
+                     "fields": {
+                        "af": "AOM_AF",
+                        "ac": "AOM_AC",
+                        "an": "AOM_AN"
+                     }
+                  },
+                  {
+                     "name": "GAS",
+                     "fields": {
+                        "af": "GAS_AF",
+                        "ac": "GAS_AC",
+                        "an": "GAS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFS",
+                     "fields": {
+                        "af": "BFS_AF",
+                        "ac": "BFS_AC",
+                        "an": "BFS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFM",
+                     "fields": {
+                        "af": "BFM_AF",
+                        "ac": "BFM_AC",
+                        "an": "BFM_AN"
+                     }
+                  },
+                  {
+                     "name": "GWA",
+                     "fields": {
+                        "af": "GWA_AF",
+                        "ac": "GWA_AC",
+                        "an": "GWA_AN"
+                     }
+                  },
+                  {
+                     "name": "GNS",
+                     "fields": {
+                        "af": "GNS_AF",
+                        "ac": "GNS_AC",
+                        "an": "GNS_AN"
+                     }
+                  },
+                  {
+                     "name": "KES",
+                     "fields": {
+                        "af": "KES_AF",
+                        "ac": "KES_AC",
+                        "an": "KES_AN"
+                     }
+                  }
+               ]
+            },
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000163_ag1000g.phase1.ar3.pass.X_freq.vcf.gz",
+               "short_name": "1000_genomes_project",
+               "include_fields": [
+                  {
+                     "name": "UGS",
+                     "fields": {
+                        "af": "UGS_AF",
+                        "ac": "UGS_AC",
+                        "an": "UGS_AN"
+                     }
+                  },
+                  {
+                     "name": "CMS",
+                     "fields": {
+                        "af": "CMS_AF",
+                        "ac": "CMS_AC",
+                        "an": "CMS_AN"
+                     }
+                  },
+                  {
+                     "name": "AOM",
+                     "fields": {
+                        "af": "AOM_AF",
+                        "ac": "AOM_AC",
+                        "an": "AOM_AN"
+                     }
+                  },
+                  {
+                     "name": "GAS",
+                     "fields": {
+                        "af": "GAS_AF",
+                        "ac": "GAS_AC",
+                        "an": "GAS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFS",
+                     "fields": {
+                        "af": "BFS_AF",
+                        "ac": "BFS_AC",
+                        "an": "BFS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFM",
+                     "fields": {
+                        "af": "BFM_AF",
+                        "ac": "BFM_AC",
+                        "an": "BFM_AN"
+                     }
+                  },
+                  {
+                     "name": "GWA",
+                     "fields": {
+                        "af": "GWA_AF",
+                        "ac": "GWA_AC",
+                        "an": "GWA_AN"
+                     }
+                  },
+                  {
+                     "name": "GNS",
+                     "fields": {
+                        "af": "GNS_AF",
+                        "ac": "GNS_AC",
+                        "an": "GNS_AN"
+                     }
+                  },
+                  {
+                     "name": "KES",
+                     "fields": {
+                        "af": "KES_AF",
+                        "ac": "KES_AC",
+                        "an": "KES_AN"
+                     }
+                  }
+               ]
+            },
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000163_ag1000g.phase1.ar3.pass.2R_freq.vcf.gz",
+               "short_name": "1000_genomes_project",
+               "include_fields": [
+                  {
+                     "name": "UGS",
+                     "fields": {
+                        "af": "UGS_AF",
+                        "ac": "UGS_AC",
+                        "an": "UGS_AN"
+                     }
+                  },
+                  {
+                     "name": "CMS",
+                     "fields": {
+                        "af": "CMS_AF",
+                        "ac": "CMS_AC",
+                        "an": "CMS_AN"
+                     }
+                  },
+                  {
+                     "name": "AOM",
+                     "fields": {
+                        "af": "AOM_AF",
+                        "ac": "AOM_AC",
+                        "an": "AOM_AN"
+                     }
+                  },
+                  {
+                     "name": "GAS",
+                     "fields": {
+                        "af": "GAS_AF",
+                        "ac": "GAS_AC",
+                        "an": "GAS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFS",
+                     "fields": {
+                        "af": "BFS_AF",
+                        "ac": "BFS_AC",
+                        "an": "BFS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFM",
+                     "fields": {
+                        "af": "BFM_AF",
+                        "ac": "BFM_AC",
+                        "an": "BFM_AN"
+                     }
+                  },
+                  {
+                     "name": "GWA",
+                     "fields": {
+                        "af": "GWA_AF",
+                        "ac": "GWA_AC",
+                        "an": "GWA_AN"
+                     }
+                  },
+                  {
+                     "name": "GNS",
+                     "fields": {
+                        "af": "GNS_AF",
+                        "ac": "GNS_AC",
+                        "an": "GNS_AN"
+                     }
+                  },
+                  {
+                     "name": "KES",
+                     "fields": {
+                        "af": "KES_AF",
+                        "ac": "KES_AC",
+                        "an": "KES_AN"
+                     }
+                  }
+               ]
+            },
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000163_ag1000g.phase1.ar3.pass.3L_freq.vcf.gz",
+               "short_name": "1000_genomes_project",
+               "include_fields": [
+                  {
+                     "name": "UGS",
+                     "fields": {
+                        "af": "UGS_AF",
+                        "ac": "UGS_AC",
+                        "an": "UGS_AN"
+                     }
+                  },
+                  {
+                     "name": "CMS",
+                     "fields": {
+                        "af": "CMS_AF",
+                        "ac": "CMS_AC",
+                        "an": "CMS_AN"
+                     }
+                  },
+                  {
+                     "name": "AOM",
+                     "fields": {
+                        "af": "AOM_AF",
+                        "ac": "AOM_AC",
+                        "an": "AOM_AN"
+                     }
+                  },
+                  {
+                     "name": "GAS",
+                     "fields": {
+                        "af": "GAS_AF",
+                        "ac": "GAS_AC",
+                        "an": "GAS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFS",
+                     "fields": {
+                        "af": "BFS_AF",
+                        "ac": "BFS_AC",
+                        "an": "BFS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFM",
+                     "fields": {
+                        "af": "BFM_AF",
+                        "ac": "BFM_AC",
+                        "an": "BFM_AN"
+                     }
+                  },
+                  {
+                     "name": "GWA",
+                     "fields": {
+                        "af": "GWA_AF",
+                        "ac": "GWA_AC",
+                        "an": "GWA_AN"
+                     }
+                  },
+                  {
+                     "name": "GNS",
+                     "fields": {
+                        "af": "GNS_AF",
+                        "ac": "GNS_AC",
+                        "an": "GNS_AN"
+                     }
+                  },
+                  {
+                     "name": "KES",
+                     "fields": {
+                        "af": "KES_AF",
+                        "ac": "KES_AC",
+                        "an": "KES_AN"
+                     }
+                  }
+               ]
+            },
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000163_ag1000g.phase1.ar3.pass.3R_freq.vcf.gz",
+               "short_name": "1000_genomes_project",
+               "include_fields": [
+                  {
+                     "name": "UGS",
+                     "fields": {
+                        "af": "UGS_AF",
+                        "ac": "UGS_AC",
+                        "an": "UGS_AN"
+                     }
+                  },
+                  {
+                     "name": "CMS",
+                     "fields": {
+                        "af": "CMS_AF",
+                        "ac": "CMS_AC",
+                        "an": "CMS_AN"
+                     }
+                  },
+                  {
+                     "name": "AOM",
+                     "fields": {
+                        "af": "AOM_AF",
+                        "ac": "AOM_AC",
+                        "an": "AOM_AN"
+                     }
+                  },
+                  {
+                     "name": "GAS",
+                     "fields": {
+                        "af": "GAS_AF",
+                        "ac": "GAS_AC",
+                        "an": "GAS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFS",
+                     "fields": {
+                        "af": "BFS_AF",
+                        "ac": "BFS_AC",
+                        "an": "BFS_AN"
+                     }
+                  },
+                  {
+                     "name": "BFM",
+                     "fields": {
+                        "af": "BFM_AF",
+                        "ac": "BFM_AC",
+                        "an": "BFM_AN"
+                     }
+                  },
+                  {
+                     "name": "GWA",
+                     "fields": {
+                        "af": "GWA_AF",
+                        "ac": "GWA_AC",
+                        "an": "GWA_AN"
+                     }
+                  },
+                  {
+                     "name": "GNS",
+                     "fields": {
+                        "af": "GNS_AF",
+                        "ac": "GNS_AC",
+                        "an": "GNS_AN"
+                     }
+                  },
+                  {
+                     "name": "KES",
+                     "fields": {
+                        "af": "KES_AF",
+                        "ac": "KES_AC",
+                        "an": "KES_AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "UNSPECIFIED",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/anopheles_gambiae/AgamP4/VBP0000212_Agam_SNP_Uganda_2012_Illumina_RADseq_Malar_J_v17_p285_freq.vcf.gz",
+               "short_name": "UNSPECIFIED",
+               "include_fields": [
+                  {
+                     "name": "Kansambwe$2C Nsadzi$2C Uganda (2012)",
+                     "fields": {
+                        "af": "Kansambwe$2C Nsadzi$2C Uganda (2012)_AF",
+                        "ac": "Kansambwe$2C Nsadzi$2C Uganda (2012)_AC",
+                        "an": "Kansambwe$2C Nsadzi$2C Uganda (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Naama$2C Wamala$2C Uganda (2012)",
+                     "fields": {
+                        "af": "Naama$2C Wamala$2C Uganda (2012)_AF",
+                        "ac": "Naama$2C Wamala$2C Uganda (2012)_AC",
+                        "an": "Naama$2C Wamala$2C Uganda (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Lunnyo$2C Entebbe$2C Uganda (2012)",
+                     "fields": {
+                        "af": "Lunnyo$2C Entebbe$2C Uganda (2012)_AF",
+                        "ac": "Lunnyo$2C Entebbe$2C Uganda (2012)_AC",
+                        "an": "Lunnyo$2C Entebbe$2C Uganda (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Sserinya$2C Uganda (2012)",
+                     "fields": {
+                        "af": "Sserinya$2C Uganda (2012)_AF",
+                        "ac": "Sserinya$2C Uganda (2012)_AC",
+                        "an": "Sserinya$2C Uganda (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Lutoboka$2C Bugala$2C Uganda (2012)",
+                     "fields": {
+                        "af": "Lutoboka$2C Bugala$2C Uganda (2012)_AF",
+                        "ac": "Lutoboka$2C Bugala$2C Uganda (2012)_AC",
+                        "an": "Lutoboka$2C Bugala$2C Uganda (2012)_AN"
+                     }
+                  },
+                  {
+                     "name": "Nakibanga$2C Bukasa$2C Uganda (2012)",
+                     "fields": {
+                        "af": "Nakibanga$2C Bukasa$2C Uganda (2012)_AF",
+                        "ac": "Nakibanga$2C Bukasa$2C Uganda (2012)_AC",
+                        "an": "Nakibanga$2C Bukasa$2C Uganda (2012)_AN"
+                     }
+                  }
                ]
             }
          ]

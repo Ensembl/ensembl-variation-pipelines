@@ -1,5 +1,12 @@
 [
   {
+    "name": "Ensembl",
+    "version": "110",
+    "description": "Ensembl",
+    "url": "https://beta.ensembl.org",
+    "accession_url": "https://beta.ensembl.org/"
+  },
+  {
     "name": "dbSNP",
     "version": "157",
     "description": "NCBI db of human variants",

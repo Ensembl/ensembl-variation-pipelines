@@ -21,6 +21,8 @@ from Bio import bgzf
 import argparse
 import json
 import re
+import random
+
 
 HEADERS = [
     {'ID': 'RAF', 'Description': 'Allele frequencies from representative population', 'Type':'Float', 'Number': 'A'},
@@ -114,7 +116,24 @@ def main(args = None):
                         freq_info_display = population["name"].replace("_", " ") + population.get("version", "")
 
                         for file in population["files"]:
-                            freq_csq_fields.append(file["short_name"] + "_" + file["representative_af_field"])
+                            if file.get("representative_af_field"):
+                                af_field = file["representative_af_field"]
+                                freq_csq_fields.append(file["short_name"] + "_" + af_field)
+
+                        # in case of no files with representative af field - pick a random one
+                        if len(freq_csq_fields) == 0:
+                            file = random.choice(population["files"])
+                            af_field = random.choice(file["include_fields"])["fields"]["af"]
+                            freq_csq_fields.append(file["short_name"] + "_" + af_field)
+
+                # In case of no representative population - pick a random one
+                if population_name == "":
+                    population = random.choice(population_data[species_patt])
+                    population_name = population["name"]
+                    freq_info_display = population["name"].replace("_", " ") + population.get("version", "")
+
+                    file = random.choice(population["files"])
+                    freq_csq_fields.append(file["short_name"] + "_" + random.choice(file["include_fields"])["fields"]["af"])
 
         # add to header and write header to output vcf
         if freq_info_display != "":
@@ -153,7 +172,7 @@ def main(args = None):
         os.remove(h_vcf_file)
 
     # parse csq header and get index of each field
-    csq_list = input_vcf.get_header_type("CSQ")['Description'].split("Format: ")[1].split("|")
+    csq_list = input_vcf.get_header_type("CSQ")['Description'].strip('\"').split("Format: ")[1].split("|")
     csq_header_idx = {}
     for index, value in enumerate(csq_list):
         csq_header_idx[value] = index

@@ -102,7 +102,7 @@ def main(args = None):
     if args.rename_clinvar_ids and source == "ClinVar":
         format_id = format_clinvar_id
     else:
-        format_id = lambda x : x
+        format_id = lambda x: '.' if x is None else x
     
     meta = format_meta(META, chromosomes, synonyms)
 

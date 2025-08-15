@@ -177,6 +177,14 @@ def get_division(server: dict, core_db: str) -> str:
         stdout = subprocess.PIPE,
         stderr = subprocess.PIPE
     )
+
+    ensembl_divisions = ["EnsemblVertebrates", "EnsemblFungi", "EnsemblMetazoa", "EnsemblPlants", "EnsemblProtists"]
+    if process.returncode != 0 or process.stdout.decode().strip() not in ensembl_divisions:
+        print(f"[ERROR] Could not get division from core database - {core_db}")
+        print(f"\tDatabase server - mysql://{server['user']}:@{server['host']}:{server['port']}")
+        print(f"\tError - {process.stderr.decode().strip()}")
+
+        exit(1)
     return process.stdout.decode().strip()
 
 @deprecated(version='June 2025', reason="Variation database with old schema should not be used anymore")
@@ -200,7 +208,7 @@ def dump_variant_source(server: dict, variation_db: str, dump_file: str) -> str:
 
 def get_sources_meta_info(sources_meta_file: str) -> dict:
     if not os.path.isfile(sources_meta_file):
-        print("[WARNING] no such file - {sources_meta_file}, cannot get variant sources metadata.")
+        print(f"[WARNING] no such file - {sources_meta_file}, cannot get variant sources metadata.")
         return {}
     
     with open(sources_meta_file, "r") as f:
@@ -211,7 +219,7 @@ def get_sources_meta_info(sources_meta_file: str) -> dict:
 def get_fasta_species_name(species_production_name: str) -> str:
     return species_production_name[0].upper() + species_production_name[1:]
     
-def get_relative_version(version: int, division: str = "EnsemblVertebrates", site: str = "new") -> int:
+def get_relative_version(version: int, division: str = "EnsemblVertebrates", site: str = "old") -> int:
     # obsolete for new site
     if site == "old":
         return (version - 53) if division != "EnsemblVertebrates" else version

@@ -91,7 +91,7 @@ def parse_args(args = None):
     return parser.parse_args(args)
 
 def format_custom_args(file: str, short_name: str, format: str = "vcf", type: str = "exact", coords: int = 0, fields: list = []) -> str:
-    check_file_path = file.replace("##CHR##", "*")
+    check_file_path = file.replace("###CHR###", "*")
     if len(glob.glob(check_file_path)) == 0:
         print(f"[ERROR] Custom annotation file does not exist - {file}. Exiting ...")
         exit(1)

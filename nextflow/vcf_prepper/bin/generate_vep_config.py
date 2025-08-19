@@ -71,6 +71,7 @@ PLUGINS = [
     "ClinPred"
 ]
 
+
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
     
@@ -82,11 +83,13 @@ def parse_args(args = None):
     parser.add_argument('-I', '--ini_file', dest="ini_file", type=str, required = False, help="full path database configuration file, default - DEFAULT.ini in the same directory.")
     parser.add_argument('--vep_config', dest="vep_config", type=str, required = False, help="VEP configuration file, default - <species>_<assembly>.ini in the same directory.")
     parser.add_argument('--cache_dir', dest="cache_dir", type=str, required = False, help="VEP cache directory, must be indexed")
-    parser.add_argument('--fasta_dir', dest="fasta_dir", type=str, required = False, help="Directory containing toplevel FASTA ")
+    parser.add_argument('--fasta_dir', dest="fasta_dir", type=str, required = False, help="Directory containing toplevel FASTA")
+    parser.add_argument('--gff_dir', dest="gff_dir", type=str, required = False, help="Directory containing GFF file")
     parser.add_argument('--conservation_data_dir', dest="conservation_data_dir", type=str, required = False, help="Conservation plugin data dir")
     parser.add_argument('--repo_dir', dest="repo_dir", type=str, required = False, help="Ensembl repositories directory")
     parser.add_argument('--population_data_file', dest="population_data_file", type=str, required = False, help="A JSON file containing population information for all species.")
     parser.add_argument('--structural_variant', dest="structural_variant", action="store_true", help="Run for structural variants")
+    parser.add_argument('--use_old_infra', dest="use_old_infra", action="store_true", help="Use old infrastructure to get FASTA file")
     
     return parser.parse_args(args)
 
@@ -137,8 +140,7 @@ def check_plugin_files(plugin: str, files: list, exit_rule: str = "exit") -> boo
                 print(f"[INFO] Cannot get {plugin} data file - {file}. Skipping ...")
                 return False
 
-            print(f"[INFO] Cannot get {plugin} data file - {file}. Exiting ...")
-            exit(1)
+            raise FileNotFoundError(f"[ERROR] Cannot get {plugin} data file - {file}. Exiting ...")
 
     return True
     
@@ -302,63 +304,7 @@ def get_plugins(
             if plugin_args is not None:
                 plugins.append(plugin_args)
             
-    return plugins
-        
-def generate_vep_config(
-    vep_config: str,
-    species: str,
-    assembly: str,
-    version: str,
-    cache_dir: str,
-    fasta: str,
-    sift: bool = False,
-    polyphen: bool = False,
-    frequencies: list = None,
-    plugins: dict = None,
-    repo_dir: str = REPO_DIR,
-    fork: int = 2,
-    force: bool = False,
-    structural_variant: bool = False) -> None:
-    if os.path.exists(vep_config) and not force:
-        print(f"[INFO] {vep_config} file already exists, skipping ...")
-        return
-    
-    with open(vep_config, "w") as file:
-        file.write("force_overwrite 1\n")
-        file.write(f"fork {fork}\n")
-        file.write(f"species {species}\n")
-        file.write(f"assembly {assembly}\n")
-        file.write(f"cache_version {version}\n")
-        file.write(f"cache {cache_dir}\n")
-        file.write(f"fasta {fasta}\n")
-        file.write("offline 1\n")
-        file.write("vcf 1\n")
-        file.write("spdi 1\n")
-        file.write("regulatory 1\n")
-        file.write("pubmed 1\n")
-        file.write("var_synonyms 1\n")
-        file.write("variant_class 1\n")
-        file.write("protein 1\n")
-        file.write("transcript_version 1\n")
-        
-        if sift:
-            file.write(f"sift b\n")
-        if polyphen:
-            file.write(f"polyphen b\n")
-        if frequencies:
-            for frequency in frequencies:
-                file.write(f"{frequency}\n")
-            
-        if plugins:
-            file.write(f"dir_plugins {repo_dir}/VEP_plugins\n")
-            
-            for plugin in plugins:
-                file.write(f"plugin {plugin}\n")
-
-        if structural_variant:
-            file.write(f"buffer_size 50\n")
-            file.write(f"max_sv_size 1000000000\n")
-    
+    return plugins   
     
 def main(args = None):
     args = parse_args(args)
@@ -379,21 +325,34 @@ def main(args = None):
     # TMP - until we use fasta from new website infra
     species = "homo_sapiens" if species == "homo_sapiens_37" else species
     
-    cache_dir = args.cache_dir or CACHE_DIR
-    cache_version = get_relative_version(version, division)
-    genome_cache_dir = os.path.join(cache_dir, species, f"{cache_version}_{assembly}")         
-    if not os.path.exists(genome_cache_dir):
-        print(f"[ERROR] {genome_cache_dir} directory does not exists, cannot run VEP. Exiting ...")
-        exit(1)
+    if args.cache_dir and args.gff_dir:
+        raise Exception("[ERROR] Cannot use both cache and gff at the same time, but both given.")
+
+    if args.cache_dir:
+        cache_dir = args.cache_dir
+        cache_version = get_relative_version(version, division)
+        genome_cache_dir = os.path.join(cache_dir, species, f"{cache_version}_{assembly}")         
+        if not os.path.exists(genome_cache_dir):
+            raise FileNotFoundError(f"[ERROR] {genome_cache_dir} directory does not exists, cannot run VEP. Exiting ...")
+    elif args.gff_dir:
+        gff_dir = args.gff_dir
+        gff = os.path.join(gff_dir, "sorted_genes.gff3.gz")
+        if not os.path.isfile(gff):
+            raise FileNotFoundError(f"[ERROR] No valid GFF file found, cannot run VEP. Exiting ...")
+    
 
     fasta_species_name = get_fasta_species_name(species)
     fasta_dir = args.fasta_dir or FASTA_DIR
-    fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.primary_assembly.fa.gz")
-    if not os.path.isfile(fasta):
-        fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.toplevel.fa.gz")
-    if not os.path.isfile(fasta):
-        print(f"[ERROR] No valid fasta file found, cannot run VEP. Exiting ...")
-        exit(1)
+    if args.use_old_infra:
+        fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.primary_assembly.fa.gz")
+        if not os.path.isfile(fasta):
+            fasta = os.path.join(fasta_dir, f"{fasta_species_name}.{assembly}.dna.toplevel.fa.gz")
+        if not os.path.isfile(fasta):
+            raise FileNotFoundError(f"[ERROR] No valid FASTA file found, cannot run VEP. Exiting ...")
+    else:
+        fasta = os.path.join(fasta_dir, "unmasked.fa.gz")
+        if not os.path.isfile(fasta):
+            raise FileNotFoundError(f"[ERROR] No valid FASTA file found, cannot run VEP. Exiting ...")
 
     conservation_data_dir = args.conservation_data_dir or CONSERVATION_DATA_DIR
     structural_variant = args.structural_variant
@@ -422,20 +381,43 @@ def main(args = None):
     
     plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
     
-    generate_vep_config(
-        vep_config = vep_config,
-        species = species,
-        assembly = assembly,
-        version = cache_version,
-        cache_dir = cache_dir,
-        fasta = fasta,
-        sift = sift,
-        polyphen = polyphen,
-        frequencies = frequencies,
-        plugins = plugins,
-        repo_dir = repo_dir,
-        structural_variant = structural_variant
-    )
+    # write the VEP config file
+    with open(vep_config, "w") as file:
+        file.write("force_overwrite 1\n")
+        file.write(f"fork 2\n")
+        file.write(f"species {species}\n")
+        file.write(f"assembly {assembly}\n")
+        file.write(f"fasta {fasta}\n")
+        file.write("vcf 1\n")
+        file.write("spdi 1\n")
+        file.write("regulatory 1\n")
+        file.write("pubmed 1\n")
+        file.write("var_synonyms 1\n")
+        file.write("variant_class 1\n")
+        file.write("protein 1\n")
+        file.write("transcript_version 1\n")
+    
+        if args.cache_dir:
+            file.write(f"cache_version {version}\n")
+            file.write(f"cache {args.cache_dir}\n")
+            file.write("offline 1\n")
+        elif args.gff_dir:
+            file.write(f"gff {gff}\n")
+
+        if sift:
+            file.write(f"sift b\n")
+        if polyphen:
+            file.write(f"polyphen b\n")
+        if frequencies:
+            for frequency in frequencies:
+                file.write(f"{frequency}\n")
+            
+        if plugins:
+            file.write(f"dir_plugins {repo_dir}/VEP_plugins\n")
+            
+            for plugin in plugins:
+                file.write(f"plugin {plugin}\n")
+    
     
 if __name__ == "__main__":
     sys.exit(main())

@@ -29,19 +29,25 @@ process PROCESS_FASTA {
   shell:
   genome = meta.genome
   species = meta.species
+  genome_uuid = meta.genome_uuid
   assembly = meta.assembly
   version = params.version
+  out_dir = meta.genome_temp_dir
   ini_file = params.ini_file
   fasta_dir = meta.fasta_dir
   force_create_config = params.force_create_config ? "--force" : ""
+  use_old_infra = params.use_old_infra ? "--use_old_infra" : ""
   
   '''
   process_fasta.py \
-    !{species} \
-    !{assembly} \
-    !{version} \
+    --species !{species} \
+    --genome_uuid !{genome_uuid} \
+    --assembly !{assembly} \
+    --version !{version} \
+    --out_dir !{out_dir} \
     --ini_file !{ini_file} \
     --fasta_dir !{fasta_dir} \
-    !{force_create_config}
+    !{force_create_config} \
+    !{use_old_infra}
   '''
 }

@@ -9,7 +9,8 @@ process PROCESS_GFF {
 	out_filename = gff.getName().replace(".gz", ".bgz")
 
 	'''
-	gzip -dc !{gff} | sort -k1,1 -k4,4n -k5,5n -t$'\t' | bgzip -c > !{out_filename}
+	gzip -dc !{gff} > test.gff
+	(grep "^#" test.gff & grep -v "^#" test.gff | sort -k1,1 -k4,4n -k5,5n -t$'\t') | bgzip -c > !{out_filename}
 	tabix -p gff -C !{out_filename}
 
 	# move

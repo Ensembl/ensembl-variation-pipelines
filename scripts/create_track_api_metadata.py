@@ -23,10 +23,12 @@ import subprocess
 import requests
 from uuid import UUID
 from cyvcf2 import VCF
+import re
 
 def parse_args(args = None):
     parser = argparse.ArgumentParser()
     
+    parser.add_argument("--tracks_outdir", dest="tracks_outdir", type=str, required = True, help="path to a vcf prepper tracks output directory")
     parser.add_argument("--input_config", dest="input_config", type=str, required = True, help="input_config json file used in vcf_prepper")
     
     return parser.parse_args(args)
@@ -55,28 +57,45 @@ def parse_input_config(input_config: str) -> dict:
             species_metadata[genome_uuid]["source_name"] = genome["source_name"]
             species_metadata[genome_uuid]["species"] = genome["species"]
 
+            if "sources" in genome:
+                species_metadata[genome_uuid]["sources"] = genome["sources"]
+
     return species_metadata
 
-def get_source_info(source: str) -> str:
-    if source == "dbSNP":
-        return "dbSNP - build 156"
-    elif source == "EVA":
-        return "European Variation Archive (EVA) - release 5"
-    elif source == "Ensembl":
-        return "Ensembl - e110"
+def get_source_header(api_file: str) -> dict:
+    vcf = VCF(api_file)
+    source_header = vcf.get_header_type("source")
+    vcf.close()
 
-def get_source_url(source: str) -> str:
+    if not 'source' in source_header:
+        raise Exception("No source header found in api file")
+
+    header_content = source_header["source"]
+    _, source_info_line = header_content.split("\" ", 1)
+    source_info = dict(re.findall('(.+?)="(.+?)"\s*', source_info_line))
+
+    return source_info
+
+def get_source_desc_prefix(source: str, source_version: str) -> str:
     if source == "dbSNP":
-        return "https://www.ncbi.nlm.nih.gov/snp"
+        return f" from dbSNP - build {source_version}"
     elif source == "EVA":
-        return "https://www.ebi.ac.uk/eva"
+        return f" from European Variation Archive (EVA) - release {source_version}"
     elif source == "Ensembl":
-        return "https://www.ensembl.org/index.html"
+        return f" from Ensembl - e{source_version}"
+    elif source == "MULTIPLE":
+        return ""
+    else:
+        desc_prefix = f" from {source}"
+        if source_version is not None:
+            desc_prefix += f"- {source_version}"
+        return desc_prefix
     
 def main(args = None):
     args = parse_args(args)
     
     input_config = args.input_config
+    tracks_outdir = args.tracks_outdir
 
     species_metadata = {}
     if input_config is not None:
@@ -91,23 +110,52 @@ def main(args = None):
         source = species_metadata[genome_uuid]["source_name"]
         species = species_metadata[genome_uuid]["species"]
 
-        source.replace("%20", " ")
-        source.replace("%2F", "/")
+        source = source.replace("%20", " ")
+        source = source.replace("%2F", "/")
 
-        source_info = get_source_info(source)
-        source_url = get_source_url(source)
+        api_file = os.path.join(os.path.dirname(tracks_outdir), "api", genome_uuid, "variation.vcf.gz")
+        if not os.path.isfile(api_file):
+            raise FileNotFoundError(api_file)
+        source_info = get_source_header(api_file)
+
+        source_desc_prefix = get_source_desc_prefix(source, source_info.get('version', None))
+        source_url = source_info.get("url", "")
+
+        # track files
+        bb_file = os.path.join(tracks_outdir, genome_uuid, f"variant-{source.lower()}-details.bb")
+        if not os.path.isfile(bb_file):
+            raise FileNotFoundError(bb_file)
+        bw_file = os.path.join(tracks_outdir, genome_uuid, f"variant-{source.lower()}-summary.bw")
+        if not os.path.isfile(bw_file):
+            raise FileNotFoundError(bw_file)
+
+        # focus track files
+        focus_bb_file = os.path.join(tracks_outdir, genome_uuid, f"variant-details.bb")
+        if not os.path.isfile(focus_bb_file):
+            raise FileNotFoundError(focus_bb_file)
+        focus_bw_file = os.path.join(tracks_outdir, genome_uuid, f"variant-summary.bw")
+        if not os.path.isfile(focus_bw_file):
+            raise FileNotFoundError(focus_bw_file)
 
         metadata[genome_uuid] = {}
-        metadata[genome_uuid]["label"] = f"{source} short variants"
+        if source == "MULTIPLE":
+            metadata[genome_uuid]["label"] = "Short variants (all sources)"
+        else:
+            metadata[genome_uuid]["label"] = f"{source} short variants"
 
         metadata[genome_uuid]["datafiles"] = {}
-        metadata[genome_uuid]["datafiles"]["details"] = f"variant-{source.lower()}-details.bb"
-        metadata[genome_uuid]["datafiles"]["summary"] = f"variant-{source.lower()}-summary.bw"
+        metadata[genome_uuid]["datafiles"]["details"] = bb_file
+        metadata[genome_uuid]["datafiles"]["summary"] = bw_file
+        metadata[genome_uuid]["datafiles"]["focus_details"] = focus_bb_file
+        metadata[genome_uuid]["datafiles"]["focus_summary"] = focus_bw_file
 
-        metadata[genome_uuid]["description"] = f"All short variants (SNPs and indel) data from {source_info}"
+        metadata[genome_uuid]["description"] = "All short variants (SNPs and indels) data" + source_desc_prefix
         
         metadata[genome_uuid]["source"] = {}
-        metadata[genome_uuid]["source"]["name"] = source
+        if source == "MULTIPLE":
+            metadata[genome_uuid]["source"]["name"] = ", ".join(species_metadata[genome_uuid]["sources"])
+        else:
+            metadata[genome_uuid]["source"]["name"] = source
         metadata[genome_uuid]["source"]["url"] = source_url 
             
     print(json.dumps(metadata, indent = 4))

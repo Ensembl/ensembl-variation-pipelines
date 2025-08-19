@@ -16,30 +16,33 @@
  * limitations under the License.
  */
  
-process UPDATE_FIELDS {
-  label 'process_medium'
 
-  input: 
-  tuple val(meta), path(vcf), path(vcf_index)
+process PROCESS_GFF {
+  cache false
   
+  input:
+  val meta
+
   output:
-  tuple val(meta), path(output_file)
+  val genome
   
   shell:
-  output_file = "UPDATED_S_" + file(vcf).getName()
-  source = meta.source
-  synonym_file = meta.synonym_file
-  rename_clinvar_ids = params.rename_clinvar_ids ? "--rename_clinvar_ids" : ""
-  sources = meta.sources
-  sources_meta_file = params.sources_meta_file
-
+  genome = meta.genome
+  genome_uuid = meta.genome_uuid
+  release_id = meta.release_id
+  version = params.version
+  out_dir = meta.genome_temp_dir
+  ini_file = params.ini_file
+  gff_dir = meta.gff_dir
+  force_create_config = params.force_create_config ? "--force" : ""
+  
   '''
-  chrs=$(tabix !{vcf} -l | xargs | tr ' ' ',')
-  update_fields.py !{vcf} !{source} !{synonym_file} \
-    !{rename_clinvar_ids} \
-    -O !{output_file} \
-    --chromosomes ${chrs} \
-    --sources !{sources} \
-    --sources_meta_file !{sources_meta_file}
+  process_gff.py \
+    !{genome_uuid} \
+    !{release_id} \
+    --out_dir !{out_dir} \
+    --ini_file !{ini_file} \
+    --gff_dir !{gff_dir} \
+    !{force_create_config}
   '''
 }

@@ -64,9 +64,11 @@ def parse_config (config) {
 
       // if source is MULTIPLE there are multiple sources; they must be listed  in sources field in the input config
       if (meta.source == "MULTIPLE"){
-        meta.sources = meta.sources.join(",")
-        meta.sources = meta.sources.replace(" ", "%20") // we cannot use whitespace in cmd argument
+        meta.sources = source_data.sources.join(",")
+        meta.sources = meta.sources.replaceAll(" ", "%20") // we cannot use whitespace in cmd argument
       }
+
+      meta.release_id = source_data.release_id ?: params.release_id
       
       input_set.add([meta, vcf])
     }  
@@ -78,6 +80,10 @@ def parse_config (config) {
 workflow VCF_PREPPER {
   if (params.skip_vep && params.skip_tracks && params.skip_stats) {
     exit 0, "Skipping VEP and track file generation, nothing to do ..."
+  }
+
+  if (params.use_old_infra && !params.use_vep_cache) {
+    exit 0, "Cannot use old infrastructure without VEP cache, please re-run with --use_vep_cache 1."
   }
   
   input_set = parse_config(params.config)

@@ -253,16 +253,21 @@ def main(args = None):
                     ac_csq_idc = [csq_header_idx.get(freq_csq_field.replace("AF", "AC")) for freq_csq_field in freq_csq_fields]
                     an_csq_idc = [csq_header_idx.get(freq_csq_field.replace("AF", "AN")) for freq_csq_field in freq_csq_fields]
 
-                    if len(ac_csq_idc) !=  len(ac_csq_idc):
+                    if len(ac_csq_idc) != len(an_csq_idc):
                         print("[ERROR] Attempt to calculate frequency from AC and AN failed.")
                         print(f"{ac_csq_idc} number of AC field compared to {an_csq_idc} number of AN fields in CSQ. Exiting...")
                         exit(1)
 
                     frequencies = []
                     for idx, _ in enumerate(ac_csq_idc):
-                        ac_csq_idx = ac_csq_idc[idx]
-                        an_csq_idx = an_csq_idc[idx]
-                        
+                        (ac_csq_idx, an_csq_idx) = (ac_csq_idc[idx], an_csq_idc[idx])
+                        if ac_csq_idx is None or an_csq_idx is None:
+                            print(f"[ERROR] Unable to retrieve CSQ field index for RAF.")
+                            print(f"\tGiven RAF fields: {', '.join(freq_csq_fields)}.")
+                            print(f"\tCSQ fields: {', '.join(csq_list)}.")
+                            print("Exiting ...")
+                            exit(1)
+
                         if csq_values[ac_csq_idx] and csq_values[an_csq_idx]:
                             frequency = str(int(csq_values[ac_csq_idx]) / int(csq_values[an_csq_idx]))
                             frequencies.append(frequency)

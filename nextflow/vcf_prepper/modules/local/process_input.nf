@@ -35,6 +35,8 @@ def remote_exists(url){
 
 process PROCESS_INPUT {
   cache false
+  errorStrategy 'retry'
+  maxRetries 3
   
   input:
   tuple val(meta), val(vcf)

@@ -87,10 +87,14 @@ writers['short_variant'] = {
     gt_idx: Writer(os.path.join(out_dir, filename), input_vcf) 
     for gt_idx, filename in filenames['short_variant'].items()
 }
-writers['structural_variant'] = {
-    gt_idx: Writer(os.path.join(out_dir, filename), input_vcf) 
-    for gt_idx, filename in filenames['structural_variant'].items()
-}
+# Separate files only in split mode, else point to the same writer objects
+if args.split_sv:
+    writers['structural_variant'] = {
+        gt_idx: Writer(os.path.join(out_dir, filename), input_vcf) 
+        for gt_idx, filename in filenames['structural_variant'].items()
+    }
+else:
+    writers['structural_variant'] = writers['short_variant']
 
 sample_idx = input_vcf.samples.index(sample)
 counter = 100

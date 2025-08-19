@@ -1,0 +1,13 @@
+# ruff.toml (for Ruff 0.12.7)
+# Docs: https://docs.astral.sh/ruff/
+
+# --- Linting rules ---
+line-length = 88 # Black style
+target-version = "py310"
+
+# --- Formatting ---
+[format]
+# Use double quotes everywhere (Black default)
+quote-style = "double"
+# Reformat docstrings too
+docstring-code-format = true

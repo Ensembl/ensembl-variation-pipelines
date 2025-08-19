@@ -20,12 +20,14 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 def pytest_addoption(parser):
     parser.addoption("--vcf", type=str, default=None)
     parser.addoption("--bigbed", type=str, default=None)
     parser.addoption("--bigwig", type=str, default=None)
     parser.addoption("--source_vcf", type=str, default=None)
     parser.addoption("--species", type=str, default=None)
+
 
 def pytest_generate_tests(metafunc):
     if "vcf" in metafunc.fixturenames:
@@ -39,15 +41,18 @@ def pytest_generate_tests(metafunc):
     if "species" in metafunc.fixturenames:
         metafunc.parametrize("species", [metafunc.config.getoption("species")])
 
+
 @pytest.fixture()
 def vcf_reader(vcf):
     vcf_reader = VCF(vcf)
     return vcf_reader
 
+
 @pytest.fixture()
 def bb_reader(bigbed):
     bb_reader = pyBigWig.open(bigbed)
     return bb_reader
+
 
 @pytest.fixture()
 def bw_reader(bigwig):

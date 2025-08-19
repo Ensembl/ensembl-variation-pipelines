@@ -29,19 +29,30 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-def parse_args(args = None):
+
+def parse_args(args=None):
     parser = argparse.ArgumentParser()
-    
-    parser.add_argument("--dir", dest="dir", type=str, default = os.getcwd())
+
+    parser.add_argument("--dir", dest="dir", type=str, default=os.getcwd())
     parser.add_argument("--input_config", dest="input_config", type=str)
-    parser.add_argument("-O", "--output_dir", dest="output_dir", type=str, default = os.getcwd())
-    parser.add_argument("-M", "--mem", dest="memory", type=str, default = '2000')
-    parser.add_argument("-t", "--time", dest="time", type=str, default = '01:00:00')
-    parser.add_argument("-p", "--partition", dest="partition", type=str, default = 'production')
-    parser.add_argument("--mail-user", dest="mail_user", type=str, default = getpass.getuser() + "@ebi.ac.uk")
-    parser.add_argument(type=str, nargs="?", dest="tests", default = "./")
-    
+    parser.add_argument(
+        "-O", "--output_dir", dest="output_dir", type=str, default=os.getcwd()
+    )
+    parser.add_argument("-M", "--mem", dest="memory", type=str, default="2000")
+    parser.add_argument("-t", "--time", dest="time", type=str, default="01:00:00")
+    parser.add_argument(
+        "-p", "--partition", dest="partition", type=str, default="production"
+    )
+    parser.add_argument(
+        "--mail-user",
+        dest="mail_user",
+        type=str,
+        default=getpass.getuser() + "@ebi.ac.uk",
+    )
+    parser.add_argument(type=str, nargs="?", dest="tests", default="./")
+
     return parser.parse_args(args)
+
 
 def get_species_metadata(input_config: str = None) -> dict:
     if input_config is None or not os.path.isfile(input_config):
@@ -63,6 +74,7 @@ def get_species_metadata(input_config: str = None) -> dict:
 
     return species_metadata
 
+
 def is_valid_uuid(uuid: str):
     try:
         uuid_obj = UUID(uuid)
@@ -70,7 +82,8 @@ def is_valid_uuid(uuid: str):
         return False
     return str(uuid_obj) == uuid
 
-def main(args = None):
+
+def main(args=None):
     args = parse_args(args)
 
     input_config = args.input_config or None
@@ -104,7 +117,7 @@ def main(args = None):
         timestamp = int(datetime.datetime.now().timestamp())
         with open(f"dc_{timestamp}.sh", "w") as file:
             file.write("#!/bin/bash\n\n")
-            
+
             file.write(f"#SBATCH --time={args.time}\n")
             file.write(f"#SBATCH --mem={args.memory}\n")
             file.write(f"#SBATCH --partition={args.partition}\n")
@@ -113,14 +126,20 @@ def main(args = None):
             file.write(f"#SBATCH --mail-type=FAIL\n")
             file.write("\n")
 
-            file.write(f"pytest --source_vcf={source_vcf} --bigbed={bigbed} --bigwig={bigwig} --vcf={vcf} --species={species} {args.tests}\n")
+            file.write(
+                f"pytest --source_vcf={source_vcf} --bigbed={bigbed} --bigwig={bigwig} --vcf={vcf} --species={species} {args.tests}\n"
+            )
 
-        subprocess.run([
+        subprocess.run(
+            [
                 "sbatch",
-                "-J", f"dc_{species}",
-                "--output", f"{output_dir}/dc_{species}.out",
-                "--error", f"{output_dir}/dc_{species}.err",
-                f"dc_{timestamp}.sh"
+                "-J",
+                f"dc_{species}",
+                "--output",
+                f"{output_dir}/dc_{species}.out",
+                "--error",
+                f"{output_dir}/dc_{species}.err",
+                f"dc_{timestamp}.sh",
             ]
         )
 
@@ -140,6 +159,7 @@ def main(args = None):
         #         f"{args.tests}"
         #     ]
         # )
+
 
 if __name__ == "__main__":
     sys.exit(main())

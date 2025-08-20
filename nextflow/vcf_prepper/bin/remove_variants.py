@@ -148,8 +148,7 @@ def parse_chrom_sizes(chrom_sizes: str) -> list:
 def main(args=None):
     """Main entry point for remove_variants script.
 
-    Parses arguments, determines which identifiers should be removed and writes a processed
-    VCF excluding those variants (and optionally filtering chromosomes).
+    Process a VCF and write a new one removing variant lines on different criteria.
 
     Args:
         args (list|None): Optional list of arguments for testing; if None uses sys.argv.

@@ -179,7 +179,7 @@ def format_custom_args(
 ) -> str:
     """Format a custom annotation argument line for VEP.
 
-    Validates that files matching the file pattern exist (supports placeholder ###CHR###)
+    Validates that files matching the file pattern exist (supports placeholder, e.g. - ###CHR###)
     and returns a single-line 'custom' configuration for the VEP ini.
 
     Args:
@@ -214,7 +214,7 @@ def get_frequency_args(
     """Construct VEP custom arguments for population frequency resources.
 
     Parses the provided population JSON and constructs custom lines for each population
-    data file. Also adds 1kg frequency entry for human species.
+    data file.
 
     Args:
         population_data_file (str): Path to population JSON file.

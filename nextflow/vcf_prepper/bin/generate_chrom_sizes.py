@@ -71,8 +71,7 @@ def generate_chrom_sizes(
 ) -> None:
     """Generate a chromosome sizes file from the core database.
 
-    Writes seq_region lengths and synonym lengths, deduplicates and ensures lengths
-    are incremented by one to accommodate downstream tools.
+    Writes seq_region lengths and synonym lengths with deduplication.
 
     Args:
         server (dict): Server connection mapping.

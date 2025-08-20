@@ -97,7 +97,7 @@ def format_clinvar_id(id: str) -> str:
 
 
 def format_meta(meta: str, chromosomes: str = None, synonyms: list = None) -> str:
-    """Append contig meta lines for the requested chromosomes.
+    """Append contig meta header lines for the requested chromosomes.
 
     Args:
         meta (str): Existing meta header text.

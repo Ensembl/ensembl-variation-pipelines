@@ -28,6 +28,15 @@ EVA_REST_ENDPOINT = "https://www.ebi.ac.uk/eva/webservices/release/v1"
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for create_input_config.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        argparse.Namespace: Parsed arguments including release_candidates_file, version,
+            ini_file and output_file.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -52,6 +61,18 @@ def parse_args(args=None):
 
 
 def parse_ini(ini_file: str, section: str = "database") -> dict:
+    """Read connection parameters from an ini file section.
+
+    Args:
+        ini_file (str): Path to ini file.
+        section (str): Section name to read.
+
+    Returns:
+        dict: Mapping containing 'host', 'port' and 'user'.
+
+    Exits:
+        Exits the process with code 1 if the section is missing.
+    """
     config = configparser.ConfigParser()
     config.read(ini_file)
 
@@ -69,6 +90,17 @@ def parse_ini(ini_file: str, section: str = "database") -> dict:
 def get_db_name(
     server: dict, version: str, species: str = "homo_sapiens", type: str = "core"
 ) -> str:
+    """Return the database name matching species, type and version on a MySQL server.
+
+    Args:
+        server (dict): Server connection mapping with keys 'host','port','user'.
+        version (str): Release version fragment to match.
+        species (str): Species production name.
+        type (str): Database type, e.g. 'core'.
+
+    Returns:
+        str: First matching database name (stdout of mysql query).
+    """
     query = f"SHOW DATABASES LIKE '{species}_{type}%{version}%';"
     process = subprocess.run(
         [
@@ -90,6 +122,15 @@ def get_db_name(
 
 
 def get_assembly_name(server: dict, core_db: str) -> str:
+    """Retrieve the assembly.default value from a core database meta table.
+
+    Args:
+        server (dict): Server connection mapping.
+        core_db (str): Core database name.
+
+    Returns:
+        str: Assembly name (as returned by the query).
+    """
     query = f"SELECT meta_value FROM meta where meta_key = 'assembly.default';"
     process = subprocess.run(
         [
@@ -112,12 +153,29 @@ def get_assembly_name(server: dict, core_db: str) -> str:
     return process.stdout.decode().strip()
 
 
-# TBD: currently this scripts only support EVA
 def get_source() -> str:
+    """Return the variant source identifier used by this script.
+
+    Currently this function is implemented to return 'EVA' only.
+
+    Returns:
+        str: Source string (e.g. 'EVA').
+    """
     return "EVA"
 
 
 def get_genome_uuid(server: dict, meta_db: str, species, assembly) -> str:
+    """Query metadata DB to obtain genome_uuid for a given species and assembly.
+
+    Args:
+        server (dict): Server connection mapping.
+        meta_db (str): Metadata database name.
+        species (str): Species production name.
+        assembly (str): Assembly accession.
+
+    Returns:
+        str: genome_uuid string (empty if not found).
+    """
     query = f"SELECT genome_uuid FROM genome AS g, organism AS o, assembly AS a WHERE g.assembly_id = a.assembly_id and g.organism_id = o.organism_id and a.accession = '{assembly}' and o.ensembl_name = '{species}';"
     process = subprocess.run(
         [
@@ -142,6 +200,11 @@ def get_genome_uuid(server: dict, meta_db: str, species, assembly) -> str:
 
 
 def get_latest_eva_version() -> int:
+    """Query EVA REST API to obtain the latest EVA release version.
+
+    Returns:
+        int|None: Latest release version integer if retrievable, otherwise None.
+    """
     url = EVA_REST_ENDPOINT + "/info/latest"
     headers = {"Accept": "application/json"}
 
@@ -165,6 +228,17 @@ def get_latest_eva_version() -> int:
 
 
 def main(args=None):
+    """Construct an input_config JSON from release candidates and database metadata.
+
+    Builds a mapping of genome -> list of source entries including genome_uuid, species,
+    assembly, source name and file location and writes it to the specified output file.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     release_candidates_file = args.release_candidates_file

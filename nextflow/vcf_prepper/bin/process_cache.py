@@ -28,6 +28,15 @@ CACHE_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/tabixconverted"
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for cache processing.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        argparse.Namespace: Parsed arguments including species, assembly, version, division,
+            ini_file, cache_dir and force flag.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -61,6 +70,15 @@ def parse_args(args=None):
 
 
 def uncompress_cache(cache_dir: str, compressed_cache: str) -> None:
+    """Unpack a compressed VEP cache tarball into the cache directory.
+
+    Args:
+        cache_dir (str): Destination directory to extract into.
+        compressed_cache (str): Path to the compressed tar.gz cache file.
+
+    Raises:
+        SystemExit: Exits with non-zero status if the tar extraction fails.
+    """
     process = subprocess.run(
         ["tar", "-xvzf", compressed_cache, "-C", cache_dir],
         stdout=subprocess.PIPE,
@@ -73,6 +91,17 @@ def uncompress_cache(cache_dir: str, compressed_cache: str) -> None:
 
 
 def main(args=None):
+    """Main entry point for processing VEP cache archives.
+
+    Locates cache files (local or remote), downloads if necessary, and unpacks the cache
+    into the expected directory structure.
+
+    Args:
+        args (list|None): Optional argument list for testing; if None uses sys.argv.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     species = args.species

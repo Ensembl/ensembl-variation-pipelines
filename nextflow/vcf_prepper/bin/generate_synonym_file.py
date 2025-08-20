@@ -24,6 +24,14 @@ from helper import parse_ini, get_db_name
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for generate_synonym_file.
+
+    Args:
+        args (list|None): Optional argument list for testing; if None uses sys.argv.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -57,6 +65,20 @@ def parse_args(args=None):
 def generate_synonym_file(
     server: dict, core_db: str, synonym_file: str, force: bool = False
 ) -> None:
+    """Generate a chromosome synonym file from the core database.
+
+    Queries seq_region and seq_region_synonym tables, post-processes to remove duplicates
+    and resolves names longer than 31 characters where possible.
+
+    Args:
+        server (dict): Server connection mapping.
+        core_db (str): Core database name.
+        synonym_file (str): Output file path.
+        force (bool): If True overwrite existing file, otherwise skip if exists.
+
+    Returns:
+        None
+    """
     if os.path.exists(synonym_file) and not force:
         print(f"[INFO] {synonym_file} file already exists, skipping ...")
         return
@@ -130,6 +152,16 @@ def generate_synonym_file(
 
 
 def main(args=None):
+    """Main entry point to create a synonyms file.
+
+    Parses arguments, determines the core database and invokes generate_synonym_file.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     species = args.species

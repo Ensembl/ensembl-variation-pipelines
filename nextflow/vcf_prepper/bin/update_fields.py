@@ -33,6 +33,16 @@ VARIATION_SOURCE_DUMP_FILENAME = "variation_source.txt"
 
 
 def parse_args(args=None, description: bool = None):
+    """Parse command-line arguments for update_fields.
+
+    Args:
+        args (list|None): List of arguments to parse (for testing). If None, argparse will
+            read from sys.argv.
+        description (str|None): Optional description to use for the ArgumentParser.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(dest="input_file", type=str, help="Input VCF file")
@@ -68,6 +78,17 @@ def parse_args(args=None, description: bool = None):
 
 
 def format_clinvar_id(id: str) -> str:
+    """Format a ClinVar identifier to the canonical VCV style.
+
+    If the identifier is numeric or does not already start with 'VCV', this function pads
+    with leading zeros and prefixes 'VCV' to produce the standard identifier.
+
+    Args:
+        id (str): Input ClinVar identifier (numeric string or already-formatted).
+
+    Returns:
+        str: Formatted ClinVar identifier starting with 'VCV'.
+    """
     if not id.startswith("VCV"):
         leading_zero = 9 - len(id)
         return "VCV" + ("0" * leading_zero) + id
@@ -76,6 +97,16 @@ def format_clinvar_id(id: str) -> str:
 
 
 def format_meta(meta: str, chromosomes: str = None, synonyms: list = None) -> str:
+    """Append contig meta header lines for the requested chromosomes.
+
+    Args:
+        meta (str): Existing meta header text.
+        chromosomes (str|None): Comma-separated chromosome names to include as contigs.
+        synonyms (dict|None): Mapping of chromosome names to synonyms.
+
+    Returns:
+        str: Updated meta header including contig lines if chromosomes provided.
+    """
     if chromosomes is None:
         return meta
 
@@ -86,6 +117,14 @@ def format_meta(meta: str, chromosomes: str = None, synonyms: list = None) -> st
 
 
 def process_variant_source() -> dict:
+    """Load a mapping of variant name to source from a dump file.
+
+    Reads the file named VARIATION_SOURCE_DUMP_FILENAME and returns a dictionary that maps
+    variant names to their source.
+
+    Returns:
+        dict: Mapping variant_name -> source.
+    """
     variant_source = {}
     with open(VARIATION_SOURCE_DUMP_FILENAME, "r") as file:
         for line in file:
@@ -96,6 +135,17 @@ def process_variant_source() -> dict:
 
 
 def main(args=None):
+    """Main entry point for update_fields script.
+
+    Parses arguments, reads an input VCF, rewrites selected INFO fields and writes a
+    simplified, bgzf-compressed VCF with updated header and INFO tags.
+
+    Args:
+        args (list|None): Optional list of arguments for testing; if None uses sys.argv.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     input_file = args.input_file

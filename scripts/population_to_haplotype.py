@@ -37,6 +37,14 @@ args = parser.parse_args()
 
 
 def get_sample_genotype_prefix(sample):
+    """Return genotype prefix mapping for a sample.
+
+    Args:
+        sample (str): Sample name.
+
+    Returns:
+        dict: Mapping from genotype index to string prefix (e.g. {0: 'paternal', 1: 'maternal'}).
+    """
     if sample == "GRCh38":
         return {0: "GCA_000001405.29"}
     else:
@@ -44,6 +52,16 @@ def get_sample_genotype_prefix(sample):
 
 
 def generate_filenames(sample, split_sv):
+    """Generate output filenames for each genotype and variant type.
+
+    Args:
+        sample (str): Sample name used as filename prefix.
+        split_sv (bool): Whether to split short and structural variants into separate files.
+
+    Returns:
+        dict: Dictionary with keys "short_variant" and "structural_variant" each mapping genotype
+            indices to filenames.
+    """
     genotype_prefix = get_sample_genotype_prefix(sample)
     output_files = {
         gt_idx: f"{sample}_{prefix}.vcf" for gt_idx, prefix in genotype_prefix.items()
@@ -67,6 +85,18 @@ def generate_filenames(sample, split_sv):
 
 
 def bgzip_file(file: str) -> bool:
+    """Compress a file using bgzip and raise on failure.
+
+    Args:
+        file (str): Path to the file to compress.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        Exception: If bgzip returns a non-zero exit code.
+
+    Returns:
+        bool: Nothing is explicitly returned; function may raise on error.
+    """
     if not os.path.isfile(file):
         raise FileNotFoundError(f"File not found - {file}")
 
@@ -76,6 +106,18 @@ def bgzip_file(file: str) -> bool:
 
 
 def index_file(file: str) -> bool:
+    """Create a tabix index for a VCF file and raise on failure.
+
+    Args:
+        file (str): Path to the VCF file to index.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        Exception: If tabix returns a non-zero exit code.
+
+    Returns:
+        bool: Nothing is explicitly returned; function may raise on error.
+    """
     if not os.path.isfile(file):
         raise FileNotFoundError(f"File not found - {file}")
 

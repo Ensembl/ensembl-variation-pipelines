@@ -22,6 +22,15 @@ import json
 
 
 def fetch_data(url):
+    """Fetch JSON data from a URL using HTTP GET.
+
+    Args:
+        url (str): URL to request.
+
+    Returns:
+        dict|list|None: Parsed JSON response if the request and parsing succeed,
+            otherwise None on any RequestException.
+    """
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -32,6 +41,19 @@ def fetch_data(url):
 
 
 def main(argv):
+    """Validate track API endpoints against a local track metadata file.
+
+    Reads a track metadata JSON file, queries the remote /track_categories and /track
+    API endpoints for each genome UUID and compares returned values (label, description,
+    datafile names) with the expected values from the metadata file. Prints mismatches.
+
+    Args:
+        argv (list): Command-line argument vector; argv[1] should be the path to the
+            track metadata JSON file.
+
+    Raises:
+        FileNotFoundError: If the provided track metadata file does not exist.
+    """
     track_metadata_file = argv[1]
     if not os.path.isfile(track_metadata_file):
         raise FileNotFoundError(

@@ -84,6 +84,18 @@ write_output = args.write_output
 
 
 def parse_ini(ini_file: str, section: str = "database") -> dict:
+    """Parse an ini file and return database connection parameters for a section.
+
+    Args:
+        ini_file (str): Path to the ini file.
+        section (str): Section name to read.
+
+    Returns:
+        dict: Dictionary containing 'host', 'port' and 'user'.
+
+    Exits:
+        Exits with an error if the section cannot be found.
+    """
     config = configparser.ConfigParser()
     config.read(ini_file)
 
@@ -99,6 +111,20 @@ def parse_ini(ini_file: str, section: str = "database") -> dict:
 
 
 def get_db_name(server: dict, version: str, species: str, type: str) -> str:
+    """Return a matching database name for given species and version.
+
+    Queries MySQL server to list databases that match the pattern and returns the
+    first match. Emits a warning if multiple matches are present.
+
+    Args:
+        server (dict): Server connection dict with keys 'host','port','user'.
+        version (str): Release version string.
+        species (str): Species production name.
+        type (str): Database type, e.g. 'variation'.
+
+    Returns:
+        str: First matching database name.
+    """
     query = f"SHOW DATABASES LIKE '{species}_{type}%{version}%';"
     process = subprocess.run(
         [
@@ -127,6 +153,15 @@ def get_db_name(server: dict, version: str, species: str, type: str) -> str:
 
 
 def get_population_against_id(server: dict, variation_db: str) -> str:
+    """Retrieve population id -> name mapping from variation DB.
+
+    Args:
+        server (dict): Server connection mapping.
+        variation_db (str): Variation database name.
+
+    Returns:
+        dict: Mapping {population_id: population_name} or empty dict on failure.
+    """
     query = f"SELECT population_id, name from population;"
     process = subprocess.run(
         [
@@ -159,6 +194,15 @@ def get_population_against_id(server: dict, variation_db: str) -> str:
 
 
 def get_population_structure(server: dict, variation_db: str) -> str:
+    """Return mapping of sub-population to its super-population id.
+
+    Args:
+        server (dict): Server connection mapping.
+        variation_db (str): Variation database name.
+
+    Returns:
+        dict: Mapping {sub_population_id: super_population_id} or empty dict on failure.
+    """
     query = f"SELECT super_population_id, sub_population_id from population_structure;"
     process = subprocess.run(
         [
@@ -191,6 +235,15 @@ def get_population_structure(server: dict, variation_db: str) -> str:
 
 
 def get_sample_against_id(server: dict, variation_db: str) -> str:
+    """Retrieve sample id -> name mapping from variation DB.
+
+    Args:
+        server (dict): Server connection mapping.
+        variation_db (str): Variation database name.
+
+    Returns:
+        dict: Mapping {sample_id: sample_name} or empty dict on failure.
+    """
     query = f"SELECT sample_id, name from sample;"
     process = subprocess.run(
         [
@@ -223,6 +276,15 @@ def get_sample_against_id(server: dict, variation_db: str) -> str:
 
 
 def get_sample_populations(server: dict, variation_db: str) -> str:
+    """Retrieve mapping of samples to population ids.
+
+    Args:
+        server (dict): Server connection mapping.
+        variation_db (str): Variation database name.
+
+    Returns:
+        dict: Mapping {sample_id: [population_id, ...]} or empty dict on failure.
+    """
     query = f"SELECT sample_id, population_id from sample_population;"
     process = subprocess.run(
         [
@@ -257,6 +319,17 @@ def get_sample_populations(server: dict, variation_db: str) -> str:
 
 
 def generate_sample_population(server: dict, variation_db: str) -> dict:
+    """Construct mapping of sample name -> list of population names.
+
+    Uses population, sample and sample_population tables.
+
+    Args:
+        server (dict): Server connection mapping.
+        variation_db (str): Variation database name.
+
+    Returns:
+        dict: Mapping {sample_name: [population_name, ...]} or empty dict on failure.
+    """
     populations = get_population_against_id(server, variation_db)
     samples = get_sample_against_id(server, variation_db)
     sample_populations = get_sample_populations(server, variation_db)
@@ -277,6 +350,16 @@ def generate_sample_population(server: dict, variation_db: str) -> dict:
 
 
 def get_input_file(config: dict) -> str:
+    """Derive an accessible input VCF path from configuration.
+
+    Supports absolute paths, remote URLs (downloaded to a tmp dir) and data_root_dir-based paths.
+
+    Args:
+        config (dict): VCF collection configuration containing 'filename_template'.
+
+    Returns:
+        str|None: Local path to the input VCF, or None if the file could not be resolved.
+    """
     # get input file path
     filename_template = config["filename_template"]
 
@@ -325,6 +408,16 @@ def get_input_file(config: dict) -> str:
 
 
 def format_population_name(pop_name: str) -> str:
+    """Sanitise population name for use as INFO field prefix.
+
+    Replaces commas with a safe token used in header IDs.
+
+    Args:
+        pop_name (str): Original population name.
+
+    Returns:
+        str: Sanitised population name.
+    """
     return pop_name.replace(",", "$2C")
 
 

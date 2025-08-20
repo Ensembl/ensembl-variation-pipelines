@@ -24,6 +24,14 @@ from helper import parse_ini, get_db_name
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for generate_chrom_sizes.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -61,6 +69,20 @@ def generate_chrom_sizes(
     assembly: str = "grch38",
     force: bool = False,
 ) -> None:
+    """Generate a chromosome sizes file from the core database.
+
+    Writes seq_region lengths and synonym lengths with deduplication.
+
+    Args:
+        server (dict): Server connection mapping.
+        core_db (str): Core database name.
+        chrom_sizes (str): Output chrom sizes filename.
+        assembly (str): Assembly identifier used to filter coord_system.
+        force (bool): If True overwrite existing file.
+
+    Returns:
+        None
+    """
     if os.path.exists(chrom_sizes) and not force:
         print(f"[INFO] {chrom_sizes} file already exists, skipping ...")
         return
@@ -152,6 +174,16 @@ def generate_chrom_sizes(
 
 
 def main(args=None):
+    """Main entry point to create chromosome sizes file.
+
+    Parses arguments, determines the core DB and invokes generate_chrom_sizes.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     species = args.species

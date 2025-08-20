@@ -107,18 +107,34 @@ CSQ_FIELDS = {
 
 class TestFile:
     def test_exist(self, vcf):
+        """Assert that the provided VCF path exists on disk.
+
+        Args:
+            vcf (str): Path to the VCF file passed via pytest options.
+
+        Raises:
+            AssertionError: If the file does not exist.
+        """
         assert os.path.isfile(vcf)
 
 
 class TestHeader:
     def test_file_format(self, vcf_reader):
+        """Assert VCF file defines a fileformat header entry."""
         assert vcf_reader.get_header_type("fileformat")
 
     def test_header_line(self, vcf_reader):
+        """Assert the VCF header contains the mandatory CHROM/POS/ID/REF/ALT columns."""
         header_line = vcf_reader.raw_header.split("\n")[-2]
         assert header_line.startswith("#CHROM\tPOS\tID\tREF\tALT")
 
     def test_info_csq(self, vcf_reader, species):
+        """Verify CSQ header exists and contains expected fields for the species.
+
+        Args:
+            vcf_reader: cyvcf2 VCF reader.
+            species (str): Species production name passed to the tests.
+        """
         assert vcf_reader.get_header_type("CSQ")
 
         csq_info_description = vcf_reader.get_header_type("CSQ")["Description"].strip(
@@ -147,21 +163,43 @@ class TestHeader:
 
 class TestDuplicate:
     def get_positioned_id(self, variant: Variant) -> str:
-        "Get variant positioned id"
+        """Return a positioned identifier for a variant (chrom:pos:id).
 
+        Args:
+            variant (Variant): cyvcf2 Variant object.
+
+        Returns:
+            str: Formatted positioned identifier.
+        """
         id = variant.ID or "unknown"
         return variant.CHROM + ":" + str(variant.POS) + ":" + id
 
     def get_id(self, variant: Variant) -> str:
-        "Get variant id"
+        """Return the raw variant ID.
 
+        Args:
+            variant (Variant): cyvcf2 Variant object.
+
+        Returns:
+            str|None: Variant ID as present in the VCF (or None).
+        """
         return variant.ID
 
     def no_duplicated_identifier(
         self, vcf_reader: VCF, get_identifier: Callable
     ) -> bool:
-        "Generate hash against variant about its removal status"
+        """Check that no duplicate identifiers are present in the VCF.
 
+        Iterates through the VCF and ensures each identifier produced by get_identifier
+        is unique.
+
+        Args:
+            vcf_reader (VCF): cyvcf2 VCF reader.
+            get_identifier (Callable): Function that, given a Variant, returns an identifier.
+
+        Returns:
+            bool: True if no duplicates were found, False otherwise.
+        """
         removal_status = {}
         for variant in vcf_reader:
             variant_identifier = get_identifier(variant)
@@ -172,14 +210,26 @@ class TestDuplicate:
         return True
 
     def test_duplicate_positioned_id(self, vcf_reader):
+        """Assert there are no duplicate positioned identifiers in the VCF."""
         assert self.no_duplicated_identifier(vcf_reader, self.get_positioned_id)
 
     def test_duplicate_id(self, vcf_reader):
+        """Assert there are no duplicate variant IDs in the VCF."""
         assert self.no_duplicated_identifier(vcf_reader, self.get_id)
 
 
 class TestSrcCount:
     def get_total_variant_count_from_vcf(self, vcf: str) -> int:
+        """Return the total number of variants in a VCF.
+
+        Uses 'bcftools index --nrecords' and falls back to naive iteration if the command fails.
+
+        Args:
+            vcf (str): Path to VCF file.
+
+        Returns:
+            int: Number of records, or -1 on failure.
+        """
         if vcf is None:
             logger.warning(f"Could not get variant count - no file provided")
             return -1
@@ -210,6 +260,17 @@ class TestSrcCount:
         return int(process.stdout.decode().strip())
 
     def get_variant_count_from_vcf_by_chr(self, vcf: str) -> dict:
+        """Return per-chromosome variant counts for a VCF.
+
+        Attempts to use 'bcftools index --stats' and falls back to iterating by chromosome
+        if the command fails.
+
+        Args:
+            vcf (str): Path to VCF file.
+
+        Returns:
+            dict|int: Mapping {chrom: count} or -1 on failure.
+        """
         if vcf is None:
             logger.warning(f"Could not get variant count - no file provided")
             return -1
@@ -274,6 +335,11 @@ class TestSrcCount:
 
 class TestContent:
     def test_csq_content(self, vcf_reader):
+        """Sample CSQ annotations from random variants and check field presence.
+
+        Selects a number of variants and ensures specified CSQ fields are present or
+        allowed to be empty according to CSQ_FIELDS configuration.
+        """
         NO_VARIANTS = 100
         NO_ITER = 100000
 
@@ -344,6 +410,7 @@ class TestSummaryStatistics:
     ]
 
     def test_summary_statistics_per_variant(self, vcf_reader):
+        """Validate per-variant summary fields such as NCITE against CSQ PUBMED entries."""
         NO_VARIANTS = 100
         NO_ITER = 100000
 
@@ -384,6 +451,7 @@ class TestSummaryStatistics:
             iter += 1
 
     def test_summary_statistics_per_allele(self, vcf_reader, species):
+        """Validate per-allele summary fields (NTCSQ, NRCSQ, NGENE, NGPHN, NVPHN) computed from CSQ."""
         NO_VARIANTS = 100
         NO_ITER = 100000
 
@@ -513,6 +581,10 @@ class TestSummaryStatistics:
             iter += 1
 
     def test_summary_statistics_frequency(self, vcf_reader, species):
+        """Validate representative allele frequency (RAF) matches frequencies from CSQ fields.
+
+        This test is only applicable to human species (GRCh38 and GRCh37).
+        """
         if species not in ["homo_sapiens", "homo_sapiens_37"]:
             pytest.skip("Unsupported species, skipping ...")
 

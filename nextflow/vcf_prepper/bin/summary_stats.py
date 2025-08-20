@@ -92,6 +92,15 @@ SKIP_CONSEQUENCE = [
 
 
 def parse_args(args=None, description: bool = None):
+    """Parse command-line arguments for summary_stats.
+
+    Args:
+        args (list|None): Argument list to parse (for testing). If None, argparse reads from sys.argv.
+        description (str|None): Optional description for the ArgumentParser.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -109,6 +118,18 @@ def parse_args(args=None, description: bool = None):
 
 
 def header_match(want_header: dict, got_header: dict) -> bool:
+    """Compare a desired INFO header entry with an existing VCF header entry.
+
+    The function removes the 'IDX' key from the obtained header before performing
+    the comparison of ID, Type, Number and Description.
+
+    Args:
+        want_header (dict): Desired header specification.
+        got_header (dict): Header entry returned by cyvcf2 for a key.
+
+    Returns:
+        bool: True if the headers match, False otherwise.
+    """
     got_header.pop("IDX")
 
     return (
@@ -120,6 +141,18 @@ def header_match(want_header: dict, got_header: dict) -> bool:
 
 
 def minimise_allele(ref: str, alts: list) -> str:
+    """Minimise allele representation by trimming a common leading base.
+
+    If all alleles share the same first base, remove it from REF and ALT alleles; an empty
+    allele becomes '-' to preserve representation.
+
+    Args:
+        ref (str): Reference allele.
+        alts (list): List of alternate alleles.
+
+    Returns:
+        tuple: (minimised_ref, minimised_alts) where minimised_alts is a list of strings.
+    """
     alleles = [ref] + alts
     first_bases = {allele[0] for allele in alleles}
 
@@ -138,6 +171,18 @@ def minimise_allele(ref: str, alts: list) -> str:
 
 
 def main(args=None):
+    """Compute and add summary INFO fields to VCF records.
+
+    Parses arguments, optionally loads representative population configuration and then
+    iterates through VCF records to compute summary tags (e.g. NTCSQ, RAF) based on CSQ
+    annotations and writes the updated records to the output VCF.
+
+    Args:
+        args (list|None): Optional list of arguments for testing; if None uses sys.argv.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     species = args.species

@@ -16,6 +16,15 @@ import logging
 
 
 def logAssert(test, msg):
+    """Log a pass/fail message according to the boolean test.
+
+    Args:
+        test (bool): Condition that indicates pass (True) or fail (False).
+        msg (str): Message to include in the log.
+
+    Returns:
+        None
+    """
     if not test:
         logging.error("FAILED:", msg)
     else:

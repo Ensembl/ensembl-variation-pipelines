@@ -31,6 +31,15 @@ FASTA_FILE_NAME = "unmasked.fa.gz"
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for processing FASTA files.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        argparse.Namespace: Parsed arguments including species, genome_uuid, assembly,
+            version, out_dir, division, ini_file, fasta_dir, use_old_infra and force.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -85,6 +94,18 @@ def parse_args(args=None):
 
 
 def index_fasta(bgzipped_fasta: str, force: str = False) -> None:
+    """Index a bgzipped FASTA file, creating .fai and .gzi files.
+
+    Uses a Perl HTS::Faidx call to create indices. If index files already exist and
+    force is False the function does nothing.
+
+    Args:
+        bgzipped_fasta (str): Path to bgzipped FASTA file.
+        force (bool): If False and index files exist, skip indexing.
+
+    Raises:
+        SystemExit: Exits with error code 1 if indexing fails.
+    """
     if not os.path.isfile(bgzipped_fasta):
         FileNotFoundError(
             f"Cannot index fasta. File does not exist - {bgzipped_fasta}."
@@ -120,6 +141,17 @@ def index_fasta(bgzipped_fasta: str, force: str = False) -> None:
 
 
 def main(args=None):
+    """Main entry point for processing FASTA files for VEP.
+
+    Handles both 'old infra' and 'new infra' modes: copies or downloads FASTA files,
+    (un)compresses, bgzips and indexes them as needed.
+
+    Args:
+        args (list|None): Optional argument list for testing; if None uses sys.argv.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     out_dir = args.out_dir or os.getcwd()

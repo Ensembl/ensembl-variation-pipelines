@@ -29,6 +29,15 @@ GFF_FILE_NAME = "sorted_genes.gff3.gz"
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for processing a GFF.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        argparse.Namespace: Parsed arguments including genome_uuid, release_id, out_dir,
+            ini_file, gff_dir and force flag.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(dest="genome_uuid", type=str, help="Genome uuid")
     parser.add_argument(
@@ -57,6 +66,16 @@ def parse_args(args=None):
 
 
 def index_gff(bgzipped_gff: str, force: str = False) -> None:
+    """Create a CSI index for a bgzipped GFF file using tabix.
+
+    Args:
+        bgzipped_gff (str): Path to the bgzipped GFF file.
+        force (bool): If False and a .csi exists, skip indexing.
+
+    Raises:
+        FileNotFoundError: If the GFF file does not exist.
+        SystemExit: Exits with error code 1 if tabix indexing fails.
+    """
     if not os.path.isfile(bgzipped_gff):
         raise FileNotFoundError(
             f"Could not run tabix index. File does not exist - {bgzipped_gff}"
@@ -81,6 +100,19 @@ def index_gff(bgzipped_gff: str, force: str = False) -> None:
 
 
 def sort_gff(file: str, sorted_file: str = None) -> str:
+    """Sort a GFF file by seqname and start/end positions while preserving header lines.
+
+    Args:
+        file (str): Path to the input GFF file.
+        sorted_file (str|None): Optional output path for the sorted file. If omitted,
+            a file named "sorted_<basename>" is created in the same directory.
+
+    Returns:
+        str: Path to the sorted file.
+
+    Raises:
+        FileNotFoundError: If the input file does not exist.
+    """
     if not os.path.isfile(file):
         raise FileNotFoundError(f"Could not sort. File does not exist - {file}")
 
@@ -96,6 +128,17 @@ def sort_gff(file: str, sorted_file: str = None) -> str:
 
 
 def main(args=None):
+    """Main entry point for processing and indexing a GFF for a genome.
+
+    Uses metadata to locate the appropriate GFF source when necessary, copies, sorts,
+    bgzips and indexes the GFF file.
+
+    Args:
+        args (list|None): Optional argument list for testing; if None uses sys.argv.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     genome_uuid = args.genome_uuid

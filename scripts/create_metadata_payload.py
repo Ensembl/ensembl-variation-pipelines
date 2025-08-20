@@ -26,6 +26,15 @@ from cyvcf2 import VCF
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for metadata payload creation.
+
+    Args:
+        args (list|None): Optional argument list for testing; if None argparse reads from sys.argv.
+
+    Returns:
+        argparse.Namespace: Parsed arguments including api_outdir, input_config, endpoint,
+            dataset_type and debug flag.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -56,6 +65,14 @@ def parse_args(args=None):
 
 
 def is_valid_uuid(uuid: str):
+    """Check whether a string is a canonical UUID.
+
+    Args:
+        uuid (str): Candidate UUID string.
+
+    Returns:
+        bool: True if the string is a valid canonical UUID, False otherwise.
+    """
     try:
         uuid_obj = UUID(uuid)
     except ValueError:
@@ -64,6 +81,14 @@ def is_valid_uuid(uuid: str):
 
 
 def get_variant_count(file: str) -> str:
+    """Return the number of variant records in a VCF using bcftools.
+
+    Args:
+        file (str): Path to the VCF file.
+
+    Returns:
+        int|None: Number of records, or None if the count cannot be determined.
+    """
     process = subprocess.run(
         ["bcftools", "index", "--nrecords", file],
         stdout=subprocess.PIPE,
@@ -79,6 +104,15 @@ def get_variant_count(file: str) -> str:
 
 
 def get_csq_field_index(csq: str, field: str = "Consequence") -> int:
+    """Return the index of a specific CSQ field name within the CSQ header string.
+
+    Args:
+        csq (str): CSQ header description string (the part after 'Format: ').
+        field (str): Field name to locate (default 'Consequence').
+
+    Returns:
+        int|None: Index of the named field within the CSQ fields, or None if not found.
+    """
     prefix = "Consequence annotations from Ensembl VEP. Format: "
     csq_list = csq[len(prefix) :].split("|")
 
@@ -90,6 +124,18 @@ def get_csq_field_index(csq: str, field: str = "Consequence") -> int:
 
 
 def get_variant_example(file: str, species: str) -> str:
+    """Select an example variant identifier from a VCF for the given species.
+
+    Prefers rs699 for human in a specific range, otherwise chooses a missense_variant
+    example, and finally falls back to a first-chromosome example.
+
+    Args:
+        file (str): Path to the VCF file.
+        species (str): Species production name.
+
+    Returns:
+        str: A string of the form 'chrom:pos:id' representing an example variant.
+    """
     vcf = VCF(file)
 
     csq_info_description = vcf.get_header_type("CSQ")["Description"].strip('"')
@@ -125,6 +171,16 @@ def get_variant_example(file: str, species: str) -> str:
 
 
 def get_evidence_count(file: str, csq_field: str) -> int:
+    """Count variants that have a non-empty value in a specified CSQ subfield.
+
+    Args:
+        file (str): Path to the VCF file.
+        csq_field (str): CSQ subfield name to test (e.g. 'PHENOTYPES', 'PUBMED').
+
+    Returns:
+        int|None: Count of variants with non-empty value in that CSQ field, or None
+            if the field is not present in the CSQ header.
+    """
     vcf = VCF(file)
 
     csq_info_description = vcf.get_header_type("CSQ")["Description"].strip('"')
@@ -150,6 +206,14 @@ def get_evidence_count(file: str, csq_field: str) -> int:
 
 
 def parse_input_config(input_config: str) -> dict:
+    """Parse an input_config JSON to a mapping keyed by genome UUID.
+
+    Args:
+        input_config (str): Path to the input_config JSON file.
+
+    Returns:
+        dict|list: Mapping {genome_uuid: {species, assembly}} or an empty list if the file is missing.
+    """
     if not os.path.isfile(input_config):
         return []
 
@@ -170,10 +234,31 @@ def parse_input_config(input_config: str) -> dict:
 
 
 def submit_payload(endpoint: str, payload: str) -> str:
+    """Submit a payload to a metadata API endpoint via HTTP PUT.
+
+    Args:
+        endpoint (str): API endpoint URL.
+        payload (str|dict): Payload to send.
+
+    Returns:
+        None
+    """
     requests.put(endpoint, payload)
 
 
 def main(args=None):
+    """Collect statistics from api VCFs and submit or print payloads.
+
+    Iterates over genomes in the API output directory, computes counts/attributes for
+    either 'variation' or 'evidence' dataset types, and either prints aggregated payloads
+    (debug mode) or submits them to the provided endpoint.
+
+    Args:
+        args (list|None): Optional argument list for testing; if None uses sys.argv.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     api_outdir = args.api_outdir or os.getcwd()

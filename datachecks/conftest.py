@@ -22,6 +22,10 @@ logger.setLevel(logging.INFO)
 
 
 def pytest_addoption(parser):
+    """Add custom pytest command-line options.
+
+    Adds options to supply paths to vcf, bigbed, bigwig, source_vcf and species.
+    """
     parser.addoption("--vcf", type=str, default=None)
     parser.addoption("--bigbed", type=str, default=None)
     parser.addoption("--bigwig", type=str, default=None)
@@ -30,6 +34,10 @@ def pytest_addoption(parser):
 
 
 def pytest_generate_tests(metafunc):
+    """Parametrise fixtures from provided command-line options.
+
+    For each known fixture name, set a single parameterised value from the CLI option.
+    """
     if "vcf" in metafunc.fixturenames:
         metafunc.parametrize("vcf", [metafunc.config.getoption("vcf")])
     if "bigbed" in metafunc.fixturenames:
@@ -44,17 +52,20 @@ def pytest_generate_tests(metafunc):
 
 @pytest.fixture()
 def vcf_reader(vcf):
+    """Provide a cyvcf2 VCF reader for the supplied VCF file path."""
     vcf_reader = VCF(vcf)
     return vcf_reader
 
 
 @pytest.fixture()
 def bb_reader(bigbed):
+    """Provide a pyBigWig reader opened on a bigBed file path."""
     bb_reader = pyBigWig.open(bigbed)
     return bb_reader
 
 
 @pytest.fixture()
 def bw_reader(bigwig):
+    """Provide a pyBigWig reader opened on a bigWig file path."""
     bw_reader = pyBigWig.open(bigwig)
     return bw_reader

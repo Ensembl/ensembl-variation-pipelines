@@ -27,6 +27,14 @@ import re
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for creating track API metadata.
+
+    Args:
+        args (list|None): Argument list for testing. If None, argparse reads from sys.argv.
+
+    Returns:
+        argparse.Namespace: Parsed arguments, including tracks_outdir and input_config.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -48,6 +56,14 @@ def parse_args(args=None):
 
 
 def is_valid_uuid(uuid: str):
+    """Check whether a string is a canonical UUID.
+
+    Args:
+        uuid (str): Candidate UUID string.
+
+    Returns:
+        bool: True if valid canonical UUID, False otherwise.
+    """
     try:
         uuid_obj = UUID(uuid)
     except ValueError:
@@ -56,6 +72,15 @@ def is_valid_uuid(uuid: str):
 
 
 def parse_input_config(input_config: str) -> dict:
+    """Parse vcf_prepper input_config JSON to a mapping keyed by genome UUID.
+
+    Args:
+        input_config (str): Path to input_config JSON.
+
+    Returns:
+        dict|list: Mapping {genome_uuid: {source_name, species, sources?}} or empty list
+            if file missing.
+    """
     if not os.path.isfile(input_config):
         return []
 
@@ -79,6 +104,17 @@ def parse_input_config(input_config: str) -> dict:
 
 
 def get_source_header(api_file: str) -> dict:
+    """Extract source header information from an api VCF file.
+
+    Args:
+        api_file (str): Path to the api VCF file (variation.vcf.gz).
+
+    Returns:
+        dict: Parsed key/value pairs from the 'source' header entry.
+
+    Raises:
+        Exception: If no 'source' header is found in the VCF.
+    """
     vcf = VCF(api_file)
     source_header = vcf.get_header_type("source")
     vcf.close()
@@ -94,6 +130,15 @@ def get_source_header(api_file: str) -> dict:
 
 
 def get_source_desc_prefix(source: str, source_version: str) -> str:
+    """Return a human-readable source description suffix for use in metadata descriptions.
+
+    Args:
+        source (str): Source short name (e.g. 'dbSNP', 'EVA', 'Ensembl', 'MULTIPLE').
+        source_version (str|None): Version string for the source, if available.
+
+    Returns:
+        str: Description suffix (leading space included when appropriate).
+    """
     if source == "dbSNP":
         return f" from dbSNP - build {source_version}"
     elif source == "EVA":
@@ -110,6 +155,17 @@ def get_source_desc_prefix(source: str, source_version: str) -> str:
 
 
 def main(args=None):
+    """Generate a JSON object describing track files for each genome UUID.
+
+    Parses the input_config, inspects the tracks output directory, extracts source info
+    from the api VCF and builds a metadata dictionary printed as JSON.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Raises:
+        FileNotFoundError: If expected files (api VCF or track files) are absent.
+    """
     args = parse_args(args)
 
     input_config = args.input_config

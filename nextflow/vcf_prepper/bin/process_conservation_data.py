@@ -29,6 +29,15 @@ CONSERVATION_DATA_DIR = "/nfs/production/flicek/ensembl/variation/data/Conservat
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for conservation data processing.
+
+    Args:
+        args (list|None): Optional argument list for testing.
+
+    Returns:
+        argparse.Namespace: Parsed arguments including species, assembly, version, division,
+            ini_file, conservation_data_dir and force flag.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument(dest="species", type=str, help="species production name")
@@ -62,6 +71,17 @@ def parse_args(args=None):
 
 
 def main(args=None):
+    """Main entry point to ensure conservation bigWig data is available.
+
+    Determines the expected conservation bigWig location, attempts to copy from local
+    FTP or download from remote FTP, and honours the 'force' flag to overwrite existing files.
+
+    Args:
+        args (list|None): Optional argument list for testing; if None uses sys.argv.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     species = args.species

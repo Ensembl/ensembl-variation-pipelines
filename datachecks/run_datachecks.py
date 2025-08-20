@@ -31,6 +31,16 @@ logger.setLevel(logging.INFO)
 
 
 def parse_args(args=None):
+    """Parse command-line arguments for running datachecks.
+
+    Args:
+        args (list|None): List of arguments to parse (for testing). If None, argparse
+            reads from sys.argv.
+
+    Returns:
+        argparse.Namespace: Parsed arguments with attributes such as dir, input_config,
+            output_dir, memory, time, partition, mail_user and tests.
+    """
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--dir", dest="dir", type=str, default=os.getcwd())
@@ -55,6 +65,19 @@ def parse_args(args=None):
 
 
 def get_species_metadata(input_config: str = None) -> dict:
+    """Load species metadata mapping from a JSON configuration file.
+
+    The returned mapping uses genome UUIDs as keys and maps to a dict containing
+    'species', 'assembly' and 'file_location'.
+
+    Args:
+        input_config (str|None): Path to JSON input configuration file. If None or
+            the file does not exist, the function returns an empty list.
+
+    Returns:
+        dict|list: Mapping {genome_uuid: {species, assembly, file_location}} or an
+            empty list if the input file is missing or invalid.
+    """
     if input_config is None or not os.path.isfile(input_config):
         return []
 
@@ -76,6 +99,15 @@ def get_species_metadata(input_config: str = None) -> dict:
 
 
 def is_valid_uuid(uuid: str):
+    """Validate whether a string is a canonical UUID.
+
+    Args:
+        uuid (str): Candidate UUID string.
+
+    Returns:
+        bool: True if the string is a valid UUID and matches its canonical representation,
+            False otherwise.
+    """
     try:
         uuid_obj = UUID(uuid)
     except ValueError:
@@ -84,6 +116,19 @@ def is_valid_uuid(uuid: str):
 
 
 def main(args=None):
+    """Main entry point to submit datachecks jobs.
+
+    Parses arguments, optionally loads species metadata, scans api and track output
+    directories for genome UUIDs and submits a job (sbatch) that runs pytest for each
+    detected genome, writing per-species sbatch wrapper scripts.
+
+    Args:
+        args (list|None): Optional list of arguments for testing; if None parsed from
+            sys.argv.
+
+    Returns:
+        None
+    """
     args = parse_args(args)
 
     input_config = args.input_config or None

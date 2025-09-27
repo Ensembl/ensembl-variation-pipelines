@@ -1,0 +1,59 @@
+{
+    "gff_file - proper": {
+        "content": [
+            {
+                "0": [
+                    {
+                        "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+                    }
+                ],
+                "1": [
+                    "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.gff.txt:md5,f8b4cdc15afca33437765b81deb1ebcc"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2025-09-21T00:17:32.654864"
+    },
+    "factory - new_ftp": {
+        "content": [
+            {
+                "0": [
+                    {
+                        "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+                    }
+                ],
+                "1": [
+                    "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.gff.txt:md5,74c5f3d846d6c3701a0003b7b6b84c35"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2025-09-23T21:46:07.993836"
+    },
+    "gff_dir - proper": {
+        "content": [
+            {
+                "0": [
+                    {
+                        "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+                    }
+                ],
+                "1": [
+                    "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.gff.txt:md5,f8b4cdc15afca33437765b81deb1ebcc"
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2025-09-21T00:20:21.141167"
+    }
+}

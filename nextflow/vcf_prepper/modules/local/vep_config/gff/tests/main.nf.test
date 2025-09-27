@@ -1,0 +1,178 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_process {
+
+    name "Test process PROCESS_GFF_CONFIG"
+    script "../main.nf"
+    process "PROCESS_GFF_CONFIG"
+
+    test("gff_file - gzipped") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                gff_meta = [:]
+                gff_meta["file"] = "${moduleDir}/tests/testdata/genes_gzip.gff3.gz"
+
+                input[0] = tuple(genome, gff_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorReport.contains("either not bgzipped or missing tabix index")
+        }
+    }
+
+    test("gff_file - no index") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                gff_meta = [:]
+                gff_meta["file"] = "${moduleDir}/tests/testdata/genes_bgzip_noindex.gff3.gz"
+
+                input[0] = tuple(genome, gff_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorReport.contains("either not bgzipped or missing tabix index")
+        }
+    }
+
+    test("gff_file - proper") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                gff_meta = [:]
+                gff_meta["file"] = "${moduleDir}/tests/testdata/genes.gff3.gz"
+
+                input[0] = tuple(genome, gff_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+    test("gff_dir - no file") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                gff_meta = [:]
+                gff_meta["dir"] = "${moduleDir}/tests"
+
+                input[0] = tuple(genome, gff_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorReport.contains("FileNotFoundError")
+        }
+    }
+
+    test("gff_dir - proper") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                gff_meta = [:]
+                gff_meta["dir"] = "${moduleDir}/tests/testdata"
+
+                input[0] = tuple(genome, gff_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+    test("factory - no ini file") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                gff_meta = [:]
+
+                input[0] = tuple(genome, gff_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorReport.contains("FileNotFoundError")
+        }
+    }
+
+    test("factory - new ftp") {
+
+        when {
+            params {
+                ini_file = "${projectDir}/tests/testdata/test_db.ini"
+            }
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                gff_meta = [:]
+
+                input[0] = tuple(genome, gff_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+}

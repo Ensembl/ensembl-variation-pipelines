@@ -1,0 +1,37 @@
+{
+    "run workflow": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "file_type": "local",
+                            "source": "dbSNP",
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950",
+                            "sources_meta_file": "sources_meta.json:md5,2a825f7bdb1b8d158094073c7b6a7286",
+                            "index_type": "tbi"
+                        },
+                        "FORMATTED_test.vcf.gz:md5,c79a04c23606627b7b6d840b869026ae"
+                    ]
+                ],
+                "files": [
+                    [
+                        {
+                            "file_type": "local",
+                            "source": "dbSNP",
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950",
+                            "sources_meta_file": "sources_meta.json:md5,2a825f7bdb1b8d158094073c7b6a7286",
+                            "index_type": "tbi"
+                        },
+                        "FORMATTED_test.vcf.gz:md5,c79a04c23606627b7b6d840b869026ae"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2025-09-09T15:04:48.226156"
+    }
+}

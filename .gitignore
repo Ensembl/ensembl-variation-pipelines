@@ -1,6 +1,10 @@
+**/.DS_Store
 **/target
 **/DEFAULT.ini
 **/.nextflow
+**/.nextflow.log*
 **/.nf-test
+**/.nf-test.log*
 **/__pycache__
 **/.python-version
+**/venv

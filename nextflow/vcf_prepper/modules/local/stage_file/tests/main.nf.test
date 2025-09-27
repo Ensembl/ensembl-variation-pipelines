@@ -1,0 +1,81 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_process {
+
+    name "Test Process STAGE_FILE"
+    script "../main.nf"
+    process "STAGE_FILE"
+
+    test('remote file - tbi index') {
+
+        when {
+            process {
+                """
+                meta = [:]
+                meta["file_type"] = "remote"
+                file = "https://ftp.ncbi.nlm.nih.gov/pub/dbVar/data/Homo_sapiens/by_study/vcf/nstd14.GRCh38.variant_call.vcf.gz"
+                input[0] = tuple(meta, file)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+    test('remote file - csi index') {
+
+        when {
+            process {
+                """
+                meta = [:]
+                meta["file_type"] = "remote"
+                file = "https://ftp.ebi.ac.uk/pub/databases/eva/rs_releases/release_6/by_species/triticum_aestivum/GCA_900519105.1/4565_GCA_900519105.1_merged_ids.vcf.gz"
+                input[0] = tuple(meta, file)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+        test('local file') {
+
+        when {
+            process {
+                """
+                meta = [:]
+                meta["file_type"] = "local"
+                file = "${projectDir}/assets/examples/test.vcf.gz"
+                input[0] = tuple(meta, file)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+}

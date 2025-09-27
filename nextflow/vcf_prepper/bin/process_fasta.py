@@ -21,14 +21,11 @@ import os
 import glob
 import re
 
-from helper import *
+from ensembl.variation_utils.file_utils import is_bgzip, bgzip_file, ungzip_file
+from ensembl.variation_utils.file_locator import ftp, fasta
+from ensembl.variation_utils.clients import core, metadata
 
-FASTA_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/fasta"
-FASTA_FTP_BASE_DIR = (
-    "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
-)
 FASTA_FILE_NAME = "unmasked.fa.gz"
-
 
 def parse_args(args=None):
     """Parse command-line arguments for processing FASTA files.
@@ -43,29 +40,29 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--species", dest="species", type=str, help="species production name"
-    )
-    parser.add_argument(
         "--genome_uuid", dest="genome_uuid", type=str, help="Genome uuid"
     )
     parser.add_argument(
-        "--assembly", dest="assembly", type=str, help="assembly default"
+        "--species", dest="species", nargs="?", help="species production name"
     )
     parser.add_argument(
-        "--version", dest="version", type=int, help="Ensembl release version"
+        "--assembly", dest="assembly", nargs="?", help="assembly default"
     )
+    parser.add_argument(
+        "--version", dest="version", nargs="?", help="Ensembl release version"
+    )
+    parser.add_argument(
+        "--fasta_file", dest="fasta_file", nargs="?", default=None, required=False, help="FASTA file"
+    )
+    parser.add_argument(
+        "--fasta_dir", dest="fasta_dir", nargs="?", default=None, help="FASTA directory"
+    )
+    parser.add_argument("--factory", dest="factory", type=str, help="FASTA factory")
     parser.add_argument(
         "--out_dir",
         dest="out_dir",
-        type=str,
+        nargs="?",
         help="Out directory where processed GFF file will be created",
-    )
-    parser.add_argument(
-        "--division",
-        dest="division",
-        type=str,
-        required=False,
-        help="Ensembl division the species belongs to",
     )
     parser.add_argument(
         "-I",
@@ -75,21 +72,7 @@ def parse_args(args=None):
         required=False,
         help="full path database configuration file, default - DEFAULT.ini in the same directory.",
     )
-    parser.add_argument(
-        "--fasta_dir",
-        dest="fasta_dir",
-        type=str,
-        required=False,
-        help="FASTA directory",
-    )
-    parser.add_argument(
-        "--use_old_infra",
-        dest="use_old_infra",
-        action="store_true",
-        help="Use old infrastructure to get FASTA file",
-    )
-    parser.add_argument("--force", dest="force", action="store_true")
-
+    
     return parser.parse_args(args)
 
 
@@ -154,158 +137,73 @@ def main(args=None):
     """
     args = parse_args(args)
 
+    species = args.species
+    assembly = args.assembly
+    version = args.version
+    genome_uuid = args.genome_uuid
+    fasta_file = args.fasta_file
+    fasta_dir = args.fasta_dir
     out_dir = args.out_dir or os.getcwd()
+    factory = args.factory
     ini_file = args.ini_file or "DEFAULT.ini"
-    fasta_dir = args.fasta_dir or FASTA_DIR
 
-    if args.use_old_infra:
-        species = args.species
-        assembly = args.assembly
-        version = args.version
+    fasta_vep_config_file = genome_uuid + ".fasta.txt"
 
-        if species is None or assembly is None or version is None:
-            raise Exception(
-                "[ERROR] Cannot run in old infra mode, make sure you have provided --species, --assembly and --version"
-            )
-
-        core_server = parse_ini(ini_file, "core")
-        core_db = get_db_name(core_server, args.version, species, type="core")
-        division = args.division or get_division(core_server, core_db)
-        fasta_species_name = get_fasta_species_name(species)
-
-        # TMP - until we use fasta from new website infra
-        if species == "homo_sapiens_37":
-            fasta_species_name = "Homo_sapiens"
-
-        fasta_glob = os.path.join(
-            fasta_dir, f"{fasta_species_name}.{assembly}.dna.*.fa.gz"
-        )
-
-        fasta = None
-        if glob.glob(fasta_glob) and not args.force:
-            print(f"[INFO] {fasta_glob} exists. Skipping ...")
-
-            fasta = os.path.join(
-                fasta_dir, f"{fasta_species_name}.{assembly}.dna.primary_assembly.fa.gz"
-            )
-            if not os.path.isfile(fasta):
-                fasta = os.path.join(
-                    fasta_dir, f"{fasta_species_name}.{assembly}.dna.toplevel.fa.gz"
-                )
-            if not os.path.isfile(fasta):
-                print(f"[ERROR] No valid fasta file found, cannot run VEP. Exiting ...")
-                exit(1)
+    if fasta_file:
+        if is_bgzip(fasta_file) and (os.path.isfile(fasta_file + ".fai") and os.path.isfile(fasta_file + ".gzi")):
+            with open(fasta_vep_config_file, "w") as f:
+                f.write(f"fasta\t{fasta_file}")
         else:
-            if glob.glob(fasta_glob):
-                print(f"[INFO] {fasta_glob} exists. Will be overwritten ...")
-                for f in glob.glob(fasta_glob):
-                    os.remove(f)
+            print(f"[ERROR] {fasta_file} either not bgzipped or missing index")
+            exit(1)
 
-            rl_version = get_relative_version(version, division)
-            src_compressed_fasta = get_ftp_path(
-                species,
-                assembly,
-                division,
-                rl_version,
-                "fasta",
-                "local",
-                fasta_species_name,
-            )
+    elif fasta_dir:
+        filename = FASTA_FILE_NAME
+        if factory == "old":
+            filename = f"{species[0].upper() + species[1:]}.{assembly}.dna.toplevel.fa.gz"
 
-            if src_compressed_fasta is not None:
-                compressed_fasta = os.path.join(
-                    fasta_dir, os.path.basename(src_compressed_fasta)
-                )
-                returncode = copyto(src_compressed_fasta, compressed_fasta)
+        fasta_file = os.path.join(fasta_dir, filename)
+        if not os.path.isfile(fasta_file):
+            raise FileNotFoundError(f"[ERROR] {filename} not found in {fasta_dir}")
 
-            if src_compressed_fasta is None or returncode != 0:
-                print(
-                    f"[INFO] Failed to copy fasta file - {src_compressed_fasta}, will retry using remote FTP"
-                )
-
-                compressed_fasta_url = get_ftp_path(
-                    species,
-                    assembly,
-                    division,
-                    rl_version,
-                    "fasta",
-                    "remote",
-                    fasta_species_name,
-                )
-
-                compressed_fasta = os.path.join(
-                    fasta_dir, compressed_fasta_url.split("/")[-1]
-                )
-                returncode = download_file(compressed_fasta, compressed_fasta_url)
-                if returncode != 0:
-                    print(
-                        f"[ERROR] Could not download fasta file - {compressed_fasta_url}"
-                    )
-                    exit(1)
-
-            unzipped_fasta = ungzip_file(compressed_fasta)
-            fasta = bgzip_file(unzipped_fasta)
-
-        if fasta is not None:
-            index_fasta(fasta, force=args.force)
+        if is_bgzip(fasta_file) and (os.path.isfile(fasta_file + ".fai") or os.path.isfile(fasta_file + ".gzi")):
+            with open(fasta_vep_config_file, "w") as f:
+                f.write(f"fasta\t{fasta_file}")
+        else:
+            print(f"[ERROR] {fasta_file} either not bgzipped or missing index")
+            exit(1)
 
     else:
-        metadb_server = parse_ini(ini_file, "metadata")
-        genome_uuid = args.genome_uuid
+        if not os.path.isfile(ini_file):
+            raise FileNotFoundError(f"[ERROR] INI file not found - {ini_file}")
 
-        if genome_uuid is None:
-            raise Exception(
-                "[ERROR] Cannot run in new infra mode, make sure you have provided --genome_uuid"
-            )
+        fasta_locator_factory = fasta.FASTALocatorFactory()
+        locator = fasta_locator_factory.set_locator(factory)
+        
+        source_fasta_file = None
+        if isinstance(locator, ftp.OldFTPFileLocator):
+            core_db_client = core.CoreDBClient(ini_file=ini_file, species=species, version=version)
+            locator.core_db_client = core_db_client
+            source_fasta_file = locator.locate_file()
+        else:
+            metadata_client = metadata.MetadataDBClient(ini_file=ini_file)
+            locator.metadata_client = metadata_client
+            source_fasta_file = locator.locate_file(genome_uuid)
+            
+        if not source_fasta_file or (source_fasta_file and not os.path.isfile(source_fasta_file)):
+            raise FileNotFoundError(f"Could not find - {source_fasta_file}")
+        else:
+            compressed_fasta = os.path.join(out_dir, FASTA_FILE_NAME)
+            copied = locator.copy_file(compressed_fasta)
+            if not copied:
+                raise Exception("[ERROR] Copy failed.")
 
-        source_fasta = os.path.join(fasta_dir, FASTA_FILE_NAME)
+            unzipped_fasta = ungzip_file(compressed_fasta)
+            bgzipped_fasta = bgzip_file(unzipped_fasta)
+            index_fasta(bgzipped_fasta)
 
-        if (
-            not os.path.isfile(source_fasta)
-            or not os.path.isfile(source_fasta + ".fai")
-            or not os.path.isfile(source_fasta + ".gzi")
-            or args.force
-        ):
-            scientific_name = get_scientific_name(
-                metadb_server, "ensembl_genome_metadata", genome_uuid
-            ).replace(" ", "_")
-            if scientific_name == "" or scientific_name is None:
-                raise Exception(
-                    f"[ERROR] Could not retrieve scientific name for genome uuid - {genome_uuid}"
-                )
-            scientific_name = re.sub("[^a-zA-Z0-9]+", " ", scientific_name)
-            scientific_name = re.sub(" +", "_", scientific_name)
-            scientific_name = re.sub("^_+|_+$", "", scientific_name)
-            assembly_accession = get_assembly_accession(
-                metadb_server, "ensembl_genome_metadata", genome_uuid
-            )
-            if assembly_accession == "" or assembly_accession is None:
-                raise Exception(
-                    f"[ERROR] Could not retrieve assembly accession for genome uuid - {genome_uuid}"
-                )
-
-            source_fasta = os.path.join(
-                FASTA_FTP_BASE_DIR,
-                scientific_name,
-                assembly_accession,
-                "genome",
-                FASTA_FILE_NAME,
-            )
-
-            if not os.path.isfile(source_fasta):
-                raise FileNotFoundError(f"Could not find - {source_fasta}")
-            else:
-                compressed_fasta = os.path.join(out_dir, FASTA_FILE_NAME)
-                returncode = copyto(source_fasta, compressed_fasta)
-                if returncode != 0:
-                    raise Exception(
-                        f"Failed to copy.\n\tSource - {source_fasta}\n\tTarget - {compressed_fasta}"
-                    )
-
-                unzipped_fasta = ungzip_file(compressed_fasta)
-                bgzipped_fasta = bgzip_file(unzipped_fasta)
-                index_fasta(bgzipped_fasta, force=args.force)
-
+            with open(fasta_vep_config_file, "w") as f:
+                f.write(f"fasta\t{bgzipped_fasta}")
 
 if __name__ == "__main__":
     sys.exit(main())

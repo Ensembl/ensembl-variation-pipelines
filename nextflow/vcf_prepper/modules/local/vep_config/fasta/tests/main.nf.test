@@ -1,0 +1,234 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_process {
+
+    name "Test process PROCESS_FASTA_CONFIG"
+    script "../main.nf"
+    process "PROCESS_FASTA_CONFIG"
+
+    test("fasta_file - gzipped") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                fasta_meta = [:]
+                fasta_meta["file"] = "${moduleDir}/tests/testdata/unmasked_gzip.fa.gz"
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorReport.contains("either not bgzipped or missing index")
+        }
+    }
+
+    test("fasta_file - no index") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                fasta_meta = [:]
+                fasta_meta["file"] = "${moduleDir}/tests/testdata/unmasked_bgzip_noindex.fa.gz"
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorReport.contains("either not bgzipped or missing index")
+        }
+    }
+
+    test("fasta_file - proper") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                fasta_meta = [:]
+                fasta_meta["file"] = "${moduleDir}/tests/testdata/unmasked.fa.gz"
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+    test("fasta_dir - no file") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                fasta_meta = [:]
+                fasta_meta["dir"] = "${moduleDir}/tests"
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorReport.contains("FileNotFoundError")
+        }
+    }
+
+    test("fasta_dir - current factory") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                fasta_meta = [:]
+                fasta_meta["dir"] = "${moduleDir}/tests/testdata"
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+    test("fasta_dir - old factory") {
+
+        when {
+            params {
+                version = "110"
+            }
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+                genome["species"] = "homo_sapiens"
+                genome["assembly"] = "GRCh38"
+
+                fasta_meta = [:]
+                fasta_meta["dir"] = "${moduleDir}/tests/testdata"
+                fasta_meta["factory"] = "old"
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+    test("factory - no ini file") {
+
+        when {
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                fasta_meta = [:]
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorReport.contains("FileNotFoundError")
+        }
+    }
+
+    test("factory - new ftp") {
+
+        when {
+            params {
+                ini_file = "${projectDir}/tests/testdata/test_db.ini"
+            }
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+
+                fasta_meta = [:]
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+
+    test("factory - old ftp") {
+
+        when {
+            params {
+                ini_file = "${projectDir}/tests/testdata/test_db.ini"
+                version = "110"
+            }
+            process {
+                """
+                genome = [:]
+                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+                genome["species"] = "homo_sapiens"
+                genome["assembly"] = "GRCh38"
+
+                fasta_meta = [:]
+                fasta_meta["factory"] = "old"
+
+                input[0] = tuple(genome, fasta_meta)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+        }
+    }
+}

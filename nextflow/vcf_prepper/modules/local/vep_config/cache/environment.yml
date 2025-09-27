@@ -1,0 +1,7 @@
+name: vcf_prepper
+channels:
+  - conda-forge
+dependencies:
+  - pip
+  - pip:
+    - -e "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/src/python"

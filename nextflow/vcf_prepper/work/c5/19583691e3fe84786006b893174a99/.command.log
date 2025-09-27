@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/nextflow/vcf_prepper/bin/update_fields.py", line 270, in <module>
+    sys.exit(main())
+  File "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/nextflow/vcf_prepper/bin/update_fields.py", line 172, in main
+    with open(synonym_file) as file:
+FileNotFoundError: [Errno 2] No such file or directory: 'null'

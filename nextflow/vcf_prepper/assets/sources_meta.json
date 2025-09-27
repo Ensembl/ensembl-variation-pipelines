@@ -21,6 +21,12 @@
     "accession_url": "https://www.ebi.ac.uk/eva/?variant&accessionID="
   },
   {
+    "name": "dbVar",
+    "description": "NCBI's database of human genomic Structural Variation",
+    "url": "https://www.ncbi.nlm.nih.gov/dbvar/",
+    "accession_url": "https://www.ncbi.nlm.nih.gov/dbvar/variants="
+  },
+  {
     "name": "The_1001_Genomes_Project",
     "version": "2016",
     "description": "The 1001 Genomes Project provides a catalog of genetic variation in the reference plant Arabidopsis thaliana. Launched at the beginning of 2008 to discover sequence variation in at least 1001 strains (accessions). Since 2010, several sets of genomes have been released. The first phase of the project was completed in 2016 with publication of a detailed analysis of 1,135 genomes.",

@@ -69,8 +69,8 @@ nextflow_process {
         then {
             assert process.success
 
-            def output_file = file(process.out.get(0).get(0).get(1))
-            def lines = output_file.readLines()
+            def lines = path(process.out.get("0").get(0).get(1)).linesGzip()
+            //def lines = output_file.readLines()
             assert lines.size() == 7
 
             assert lines[0].equals("##fileformat=VCFv4.2")

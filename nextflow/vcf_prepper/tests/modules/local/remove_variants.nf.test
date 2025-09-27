@@ -13,7 +13,8 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                meta = [:]
+                input[0] = tuple(meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }

@@ -15,25 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 
 process BED_TO_BIGBED {
-  label 'process_high'
-  
-  input: 
-  tuple val(meta), path(bed)
-  
-  output:
-  path "variant-${source}-details.bb"
-  
-  shell:
-  source = meta.source.toLowerCase()
-  output_bb = "${meta.genome_tracks_outdir}/variant-${source}-details.bb"
-  chrom_sizes = meta.chrom_sizes
-  // structural variant has extent as 10th column
-  type = params.structural_variant ? "-type=bed3+7" : "-type=bed3+6"
-  
-  '''
+    label 'process_high'
+
+    input:
+    tuple val(meta), path(bed)
+
+    output:
+    path "variant-${source}-details.bb"
+
+    shell:
+    source = meta.source.toLowerCase()
+    output_bb = "${meta.genome_tracks_outdir}/variant-${source}-details.bb"
+    chrom_sizes = meta.chrom_sizes
+    // structural variant has extent as 10th column
+    type = params.structural_variant ? "-type=bed3+7" : "-type=bed3+6"
+
+    '''
   bedToBigBed !{type} !{bed} !{chrom_sizes} !{output_bb}
   ln -sf !{output_bb} "variant-!{source}-details.bb"
   

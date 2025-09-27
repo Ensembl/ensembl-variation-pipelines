@@ -15,17 +15,15 @@
 # limitations under the License.
 
 import sys
-import configparser
 import argparse
 import subprocess
 import os
-import requests
-import shutil
 
 from helper import *
 
-CACHE_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/tabixconverted"
-
+from ensembl.variation_utils.file_utils import is_bgzip, bgzip_file, ungzip_file
+from ensembl.variation_utils.file_locator import ftp, vep_cache
+from ensembl.variation_utils.clients import core, metadata
 
 def parse_args(args=None):
     """Parse command-line arguments for cache processing.
@@ -39,15 +37,19 @@ def parse_args(args=None):
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(dest="species", type=str, help="species production name")
-    parser.add_argument(dest="assembly", type=str, help="assembly default")
-    parser.add_argument(dest="version", type=int, help="Ensembl release version")
     parser.add_argument(
-        "--division",
-        dest="division",
-        type=str,
+        "--genome_uuid", dest="genome_uuid", type=str, help="Genome uuid"
+    )
+    parser.add_argument("--species", dest="species", type=str, help="species production name")
+    parser.add_argument("--assembly", dest="assembly", type=str, help="assembly default")
+    parser.add_argument("--version", dest="version", type=int, help="Ensembl release version")
+    parser.add_argument("--factory", dest="factory", type=str, help="VEP Cache factory")
+    parser.add_argument(
+        "--cache_dir",
+        dest="cache_dir",
+        nargs="?",
         required=False,
-        help="Ensembl division the species belongs to",
+        help="VEP cache directory",
     )
     parser.add_argument(
         "-I",
@@ -58,13 +60,11 @@ def parse_args(args=None):
         help="full path database configuration file, default - DEFAULT.ini in the same directory.",
     )
     parser.add_argument(
-        "--cache_dir",
-        dest="cache_dir",
-        type=str,
-        required=False,
-        help="VEP cache directory",
+        "--out_dir",
+        dest="out_dir",
+        nargs="?",
+        help="Out directory where processed GFF file will be created",
     )
-    parser.add_argument("--force", dest="force", action="store_true")
 
     return parser.parse_args(args)
 
@@ -107,48 +107,52 @@ def main(args=None):
     species = args.species
     assembly = args.assembly
     version = args.version
+    genome_uuid = args.genome_uuid
+    cache_dir = args.cache_dir
+    out_dir = args.out_dir or os.getcwd()
+    factory = args.factory
     ini_file = args.ini_file or "DEFAULT.ini"
-    core_server = parse_ini(ini_file, "core")
-    core_db = get_db_name(core_server, args.version, species, type="core")
-    division = args.division or get_division(core_server, core_db)
 
-    # TMP - until we use fasta from new website infra
-    cachedir_species_name = "homo_sapiens" if species == "homo_sapiens_37" else species
+    cache_vep_config_file = genome_uuid + ".cache.txt"
 
-    cache_dir = args.cache_dir or CACHE_DIR
-    rl_version = get_relative_version(version, division)
-    genome_cache_dir = os.path.join(
-        cache_dir, cachedir_species_name, f"{rl_version}_{assembly}"
-    )
-    if os.path.exists(genome_cache_dir):
-        if not args.force:
-            print(f"[INFO] {genome_cache_dir} directory exists. Skipping ...")
-            exit(0)
+    if not os.path.isfile(ini_file):
+        raise FileNotFoundError(f"[ERROR] INI file not found - {ini_file}")
+
+    core_db_client = core.CoreDBClient(ini_file=ini_file, species=species, version=version)
+    division = core_db_client.get_division()
+    rl_version = (version - 53) if division != "EnsemblVertebrates" else version
+    if cache_dir:
+        cachedir_species_name = "homo_sapiens" if species == "homo_sapiens_37" else species
+        genome_cache_dir = os.path.join(
+            cache_dir, cachedir_species_name, f"{rl_version}_{assembly}"
+        )
+        if os.path.exists(genome_cache_dir):
+            with open(cache_vep_config_file, "w") as f:
+                f.write(f"cache\t{cache_dir}\n")
+                f.write(f"cache_version\t{rl_version}")
         else:
-            print(
-                f"[INFO] {genome_cache_dir} directory exists. Will be overwritten ..."
-            )
-            shutil.rmtree(genome_cache_dir)
+            raise FileNotFoundError(f"[ERROR] {cache_dir} does not exist in {genome_cache_dir}")
 
-    compressed_cache = get_ftp_path(species, assembly, division, rl_version, "cache")
+    else:
+        cache_locator_factory = vep_cache.VEPCacheLocatorFactory()
+        locator = cache_locator_factory.set_locator(factory)
 
-    if compressed_cache is None:
-        print(
-            f"[INFO] Could not find cache in local ftp directory, will retry using remote FTP"
-        )
+        locator.core_db_client = core_db_client
+        source_cache_file = locator.locate_file()
 
-        compressed_cache_url = get_ftp_path(
-            species, assembly, division, rl_version, "cache", "remote"
-        )
+        if not source_cache_file or (source_cache_file and not os.path.isfile(source_cache_file)):
+            raise FileNotFoundError(f"Could not find - {source_cache_file}")
+        else:
+            copied = locator.copy_file(out_dir)
+            if not copied:
+                raise Exception("[ERROR] Copy failed.")
 
-        compressed_cache = os.path.join(cache_dir, compressed_cache_url.split("/")[-1])
-        returncode = download_file(compressed_cache, compressed_cache_url)
-        if returncode != 0:
-            print(f"[ERROR] Could not download cache file - {compressed_cache_url}")
-            exit(1)
+            source_cache_filename = os.path.basename(source_cache_file)
+            uncompress_cache(out_dir, source_cache_filename)
 
-    uncompress_cache(cache_dir, compressed_cache)
-
+            with open(cache_vep_config_file, "w") as f:
+                f.write(f"cache\t{out_dir}\n")
+                f.write(f"cache_version\t{rl_version}")
 
 if __name__ == "__main__":
     sys.exit(main())

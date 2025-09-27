@@ -1,0 +1,16 @@
+flowchart TB
+    subgraph " "
+    v0["Channel.of"]
+    end
+    subgraph PROCESS_INPUT
+    v1([DOWNLOAD_WITH_INDEX])
+    v2([UPDATE_FIELDS])
+    v3([REMOVE_VARIANTS])
+    end
+    subgraph " "
+    v4[" "]
+    end
+    v0 --> v1
+    v1 --> v2
+    v2 --> v3
+    v3 --> v4

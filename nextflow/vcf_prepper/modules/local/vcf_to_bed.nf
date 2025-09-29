@@ -26,10 +26,16 @@ process VCF_TO_BED {
   
   shell:
   output_file = vcf.getName().replace(".vcf.gz", ".bed")
-  structural_variant = params.structural_variant
+  bed_fields = params.bed_fields
+  structural_variant = params.structural_variant ? "--structural-variant" : ""
   
   '''
-  vcf_to_bed !{vcf} !{output_file} !{rank_file} !{structural_variant}
+  vcf_to_bed \
+    --vcf !{vcf} \
+    --output !{output_file} \
+    --rank !{rank_file} \
+    --bed-fields !{bed_fields} \
+    !{structural_variant}
     
   rm !{vcf}
   '''

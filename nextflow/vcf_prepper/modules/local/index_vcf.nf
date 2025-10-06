@@ -33,6 +33,6 @@ process INDEX_VCF {
   
   '''
   ln -sf !{vcf} !{new_vcf}
-  bcftools index !{flag_index} !{new_vcf}
+  bcftools index -f !{flag_index} !{new_vcf}
   '''
 }

@@ -24,7 +24,7 @@ process WIG_TO_BIGWIG {
   path "variant-${source}-summary.bw"
   
   memory  { (wig.size() * 7.B + 1.GB) * task.attempt } // wig size is ~5-6GB, step takes ~27GB
-  time    { 1.hour * task.attempt }
+  time    { 2.hour * task.attempt }
   
   shell:
   source = meta.source.toLowerCase()

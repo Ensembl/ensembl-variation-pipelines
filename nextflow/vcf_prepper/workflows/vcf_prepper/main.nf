@@ -19,81 +19,48 @@
 // The Goal of this workflow is to process and annotate VCF files and generate related track files for genome browser
 //
 
-import groovy.json.JsonSlurper
-import java.io.File
-
-def slurper = new JsonSlurper()
-params.config = slurper.parse(new File(params.input_config))
-
 include { STAGE_FILE as STAGE_VCF } from "../../modules/local/stage_file"
-include { FORMAT_VCF } from "../../modules/local/vcf/format"
+include { FORMAT_VCF } from "../../modules/local/format_vcf"
+include { GENERATE_VEP_CONFIG } from "../../subworkflows/local/generate_vep_config"
+include { RUN_VEP } from "../../subworkflows/local/run_vep"
+include { COUNT_VCF_VARIANT } from "../../modules/local/count_vcf_variant.nf"
+include { CREATE_RANK_FILE } from "../../modules/local/create_rank_file"
+include { SPLIT_VCF } from "../../subworkflows/local/split_vcf.nf"
+include { VCF_TO_BED } from "../../modules/local/vcf_to_bed"
+include { CONCAT_BEDS } from "../../modules/local/concat_beds"
+include { BED_TO_BIGBED } from "../../modules/local/bed_to_bigbed"
+include { BED_TO_WIG } from "../../modules/local/bed_to_wig"
+include { WIG_TO_BIGWIG } from "../../modules/local/wig_to_bigwig"
+include { SUMMARY_STATS } from "../../modules/local/summary_stats"
 
-def parse_config (config) {
-  input_set = []
-  
-  genomes = config.keySet()
-  for (genome in genomes) {
-    source_data = params.config.get(genome)
-    multiple_source = source_data.size() > 1 ? true : false
-    for (source_datum in source_data) {
-      vcf = source_datum.file_location
-      
-      meta = [:]
-      meta.genome = genome
-      meta.genome_uuid = source_datum.genome_uuid
-      meta.species = source_datum.species
-      meta.assembly = source_datum.assembly
-      meta.source = source_datum.source_name.replace(" ", "_")
-      meta.file_type = source_datum.file_type
-      meta.multiple_source = multiple_source
-
-      // replace whitespace and / character which causes issue in file name
-      meta.source = meta.source.replace(" ", "%20")
-      meta.source = meta.source.replace("/", "%2F")
-
-      // if source is MULTIPLE there are multiple sources; they must be listed  in sources field in the input config
-      if (meta.source == "MULTIPLE"){
-        meta.sources = source_data.sources.join(",")
-        meta.sources = meta.sources.replaceAll(" ", "%20") // we cannot use whitespace in cmd argument
-      }
-
-      meta.release_id = source_data.release_id ?: params.release_id
-      
-      input_set.add([meta, vcf])
-    }  
-  }
-  
-  return input_set
-}
 
 workflow VCF_PREPPER {
 	take:
-    ch_vcf                          // channel: [ val(genome), val(meta), [ val(vcf) ] ]
-    genome_uuid                      // val: genome UUID
-    fasta_meta                  // val: 
-    gff_meta                    // channel: [ val(genome), val(gff_meta) ]
-    vep_cache_meta                  // channel: [ val(genome), val(cache_meta) ]
-    default_options             // channel: [ val(genome), val(defaul_options) ]
-    plugins_meta                // channel: [ val(genome), val(plugins_meta) ]
-    custom_annotations_meta      // channel: [ val(genome), val(custom_annotation_meta) ]
-    synonym_file                 // channel: [ val(genome), path(synonym_file) ]
-    chrom_size_file              // channel: [ val(genome), path(chrom_size_file ) ]
-    structural_variant              // bool:    Boolean - vcf contains structural variant
-    version                         // val:     Ensembl schema version
-    release_id                      // val:     Ensembl release id
+    ch_genome                       // channel: [ val(genome_meta) ]
+    ch_vcf                          // channel: [ val(genome_meta), val(file_meta), val(vcf) ]
+    fasta                           //     map: fasta meta map 
+    gff                             //     map: gff meta map
+    vep_cache                       //     map: cache meta map
+    default_options                 //     map: fasta meta map
+    vep_plugins                     //     map: fasta meta map
+    custom_annotations              //     map: fasta meta map
+    ch_synonym_file                 // channel: [ val(genome_meta), val(synonym_file) ]
+    ch_chrom_sizes_file             // channel: [ val(genome_meta), val(chrom_sizes_file ) ]
+    ini_file                        //     str: INI file with database connection info
+    structural_variant              //    bool: vcf contains structural variant?
+    version                         //     int: Ensembl (old) release version / schema version
+    release_id                      //     int: Ensembl release id
+    repo_dir                        //     str: path to Ensembl repositories
+    population_data_file            //     str: path to population_data.json
+    skip_vep                        //    bool: skip running VEP?
+    skip_tracks                     //.   bool: skip creating tracks?
+    skip_stats                      //    bool: skip adding summary stats?
 
 
     main:
-    if (params.skip_vep && params.skip_tracks && params.skip_stats) {
-        exit 0, "Skipping VEP and track file generation, nothing to do ..."
+    if (skip_vep && skip_tracks && skip_stats) {
+        error("Nothing to do...")
     }
-
-    if (params.use_old_infra && !params.use_vep_cache) {
-        exit 0, "Cannot use old infrastructure without VEP cache, please re-run with --use_vep_cache 1."
-    }
-  
-    input_set = parse_config(params.config)
-    ch_input = Channel.fromList( input_set )
   
     // setup
     STAGE_VCF( ch_vcf )
@@ -101,21 +68,26 @@ workflow VCF_PREPPER {
     // api files
     if (!params.skip_vep) {
         FORMAT_VCF( 
-            STAGE_VCF.out.vcf
+            STAGE_VCF.out
         )
 
         GENERATE_VEP_CONFIG(
-            genome_uuid,
+            ch_genome,
+            fasta,
+            gff,
+            vep_cache,
             default_options,
-            fasta_meta,
-            gff_meta,
-            vep_cache_meta,
-            plugins_meta,
-            custom_annotations_meta
+            vep_plugins,
+            custom_annotations,
+            ini_file,
+            version,
+            release_id,
+            repo_dir,
+            population_data_file
         )    
               
         RUN_VEP( 
-            FORMAT_VCF.out.vcf
+            FORMAT_VCF.out
             .combine( GENERATE_VEP_CONFIG.out, by: 0 )
         )
         

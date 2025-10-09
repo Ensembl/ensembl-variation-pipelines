@@ -1,7 +1,12 @@
 import os
 import pytest
+from unittest import mock
 
 from ensembl.variation_utils.clients import clients
+
+def pytest_sessionstart(session, monkeypatch):
+    print("pytest_sessionstart has been called")
+    monkeypatch.setenv("ENSEMBL_ROOT_DIR", "fdfd")
 
 @pytest.fixture(scope="session")
 def data_dir():
@@ -9,11 +14,23 @@ def data_dir():
     return os.path.join(script_dir, "data")
 
 @pytest.fixture(scope="session")
-def ini_file():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.join(script_dir, "data")
-
+def ini_file(data_dir):
     return os.path.join(data_dir, "db_config.ini")
+
+@pytest.fixture(scope="session")
+def repo_dir(data_dir):
+    return os.path.join(data_dir, "ensembl_repos")
+
+@pytest.fixture(scope="session")
+def plugin_data_dir(data_dir):
+    return os.path.join(data_dir, "enseweb-data_tools")
+
+@pytest.fixture(scope="session")
+def set_env(monkeypatch, plugin_data_dir, repo_dir):
+    with mock.patch.dict(os.environ, clear=True):
+        monkeypatch.setenv("PLUGIN_DATA_DIR", plugin_data_dir)
+        monkeypatch.setenv("ENSEMBL_ROOT_DIR", repo_dir)
+        yield
 
 def create_core_db(ini_file, data_dir, dbname):
     db_client = clients.DBClient(ini_file=ini_file, section="core")

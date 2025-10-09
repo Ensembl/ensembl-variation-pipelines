@@ -49,21 +49,19 @@ def parse_args(args=None):
     parser.add_argument(
         "--genome_uuid", dest="genome_uuid", type=str, help="Genome UUID"
     )
-    parser.add_argument(dest="species", nargs="?", help="Species production name")
-    parser.add_argument(dest="assembly", nargs="?", help="Assembly default")
-    parser.add_argument(dest="version", nargs="?", help="Ensembl release version")
+    parser.add_argument("--species", dest="species", nargs="?", help="Species production name")
+    parser.add_argument("--assembly", dest="assembly", nargs="?", help="Assembly default")
+    parser.add_argument("--version", dest="version", nargs="?", type=int, help="Ensembl release version")
     parser.add_argument(
         "--conf",
         dest="conf",
-        type=str,
-        required=False,
+        nargs="?",
         help="VEP plugin configuration file",
     )
     parser.add_argument(
         "--repo_dir",
         dest="repo_dir",
         nargs="?",
-        required=False,
         help="",
     )
 
@@ -90,7 +88,10 @@ def main(args=None):
     config = args.conf
     repo_dir = args.repo_dir or os.environ["ENSEMBL_ROOT_DIR"]
 
-    plugin_vep_config_file = genome_uuid + ".plugin.txt"
+    if config is None or not os.path.isfile(config):
+        raise FileNotFoundError("[ERROR] No plugin config file provided")
+
+    plugin_vep_config_file = genome_uuid + ".plugins.txt"
 
     plugin_builder_factory = plugin.PluginArgsBuilderFactory()
     plugin_builder = plugin_builder_factory.set_builder()
@@ -100,32 +101,30 @@ def main(args=None):
     plugin_builder.assembly = assembly
     plugin_builder.version = version
 
-    # write the VEP config file
     with open(config) as f:
         config_json = json.load(f)
 
     with open(plugin_vep_config_file, "w") as f:
         f.write(f"dir_plugins {repo_dir}/VEP_plugins\n")
-
         for plugin_config in config_json:
             plugin_name = plugin_config["name"]
-            keyed = plugin_config["keyed"]
+            keyed = plugin_config.get("keyed", False)
 
             if not plugin_builder.match(plugin_name):
                 continue
 
             plugin_args = plugin_builder.get_args(plugin_name)
 
-            for arg in plugin_config["args"]:
-                plugin_args[arg] = plugin_config["args"].get(arg)
+            for arg in plugin_config.get("args", []):
+                plugin_args[arg] = plugin_config["args"].get(arg, plugin_args[arg])
 
             if keyed:
-                f.write(f"plugin {plugin_name}" 
+                f.write(f"plugin {plugin_name}," 
                         + ",".join([f"{k}={v}" for k, v in plugin_args.items()]) 
                         + "\n"
                     )
             else:    
-                f.write(f"plugin {plugin_name}" 
+                f.write(f"plugin {plugin_name}," 
                         + ",".join(plugin_args.values()) 
                         + "\n"
                     )

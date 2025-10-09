@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import List
 import json
 import re
-from enum import Enum
 
 class CustomAnnotationArgsBuilder(ABC):
     @abstractmethod
@@ -15,25 +14,20 @@ class CustomAnnotationArgsBuilder(ABC):
     
 class FrequencyArgsBuilderFactory():
     def __init__(self):
-        self._builder = None
+        self._builder: CustomAnnotationArgsBuilder = None
 
-    @property
-    def builder(self):
-        return self._builder
-
-    def set_builder(self, type: str) -> CustomAnnotationArgsBuilder:
-        """Set the underlying file locator based on infrastructure type"""
+    def set_builder(self, type: str = "CURRENT") -> CustomAnnotationArgsBuilder:
         if type == "CURRENT":
-            self._bulider = PopulationDataConfigBuilder()
+            self._builder = PopulationDataConfigBuilder()
         return self._builder
 
 class PopulationDataConfigBuilder(CustomAnnotationArgsBuilder):
     def __init__(
                 self,
-                population_data_file: str,
-                species: str,
+                population_data_file: str = None,
+                species: str = None,
                 assembly_accession: str = None
-            ):
+            ) -> None:
         self.population_data_file = population_data_file
         self.species = species
         self.assembly_accession = assembly_accession
@@ -45,8 +39,10 @@ class PopulationDataConfigBuilder(CustomAnnotationArgsBuilder):
     @population_data_file.setter
     def population_data_file(self, population_data_file: str) -> str:
         self._population_data_file = population_data_file
-        with open(self._population_data_file, "r") as file:
-            self._population_data = json.load(file)
+
+        if population_data_file is not None:
+            with open(self._population_data_file, "r") as file:
+                self._population_data = json.load(file)
 
         return self._population_data_file
 
@@ -85,6 +81,7 @@ class PopulationDataConfigBuilder(CustomAnnotationArgsBuilder):
                 args.append({
                     "short_name": short_name,
                     "file": file_location,
+                    "format": "vcf",
                     "fields": fields
                 })
 

@@ -26,13 +26,10 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                fasta_meta = [:]
-                fasta_meta["file"] = "${moduleDir}/tests/testdata/unmasked_gzip.fa.gz"
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
+                input[1] = ['file':"${moduleDir}/tests/testdata/unmasked_gzip.fa.gz"]
+                input[2] = 110
+                input[3] = 'NONE'
                 """
             }
         }
@@ -48,13 +45,10 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                fasta_meta = [:]
-                fasta_meta["file"] = "${moduleDir}/tests/testdata/unmasked_bgzip_noindex.fa.gz"
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
+                input[1] = ['file':"${moduleDir}/tests/testdata/unmasked_bgzip_noindex.fa.gz"]
+                input[2] = 110
+                input[3] = 'NONE'
                 """
             }
         }
@@ -70,13 +64,10 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                fasta_meta = [:]
-                fasta_meta["file"] = "${moduleDir}/tests/testdata/unmasked.fa.gz"
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
+                input[1] = ['file':"${moduleDir}/tests/testdata/unmasked.fa.gz"]
+                input[2] = 110
+                input[3] = 'NONE'
                 """
             }
         }
@@ -92,13 +83,10 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                fasta_meta = [:]
-                fasta_meta["dir"] = "${moduleDir}/tests"
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
+                input[1] = ['dir':"${moduleDir}/tests"]
+                input[2] = 110
+                input[3] = 'NONE'
                 """
             }
         }
@@ -114,13 +102,10 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                fasta_meta = [:]
-                fasta_meta["dir"] = "${moduleDir}/tests/testdata"
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
+                input[1] = ['dir':"${moduleDir}/tests/testdata"]
+                input[2] = 110
+                input[3] = 'NONE'
                 """
             }
         }
@@ -134,21 +119,12 @@ nextflow_process {
     test("fasta_dir - old factory") {
 
         when {
-            params {
-                version = "110"
-            }
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-                genome["species"] = "homo_sapiens"
-                genome["assembly"] = "GRCh38"
-
-                fasta_meta = [:]
-                fasta_meta["dir"] = "${moduleDir}/tests/testdata"
-                fasta_meta["factory"] = "old"
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
+                input[1] = ['dir':"${moduleDir}/tests/testdata", 'factory':'old']
+                input[2] = 110
+                input[3] = 'NONE'
                 """
             }
         }
@@ -156,6 +132,9 @@ nextflow_process {
         then {
             assert process.success
             assert snapshot(process.out).match()
+
+            // genome_meta does not change
+            assert process.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
         }
     }
 
@@ -164,12 +143,10 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                fasta_meta = [:]
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
+                input[1] = [:]
+                input[2] = 110
+                input[3] = 'NONE'
                 """
             }
         }
@@ -183,17 +160,12 @@ nextflow_process {
     test("factory - new ftp") {
 
         when {
-            params {
-                ini_file = "${projectDir}/tests/testdata/test_db.ini"
-            }
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                fasta_meta = [:]
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
+                input[1] = [:]
+                input[2] = 110
+                input[3] = "${projectDir}/tests/testdata/test_db.ini"
                 """
             }
         }
@@ -201,27 +173,21 @@ nextflow_process {
         then {
             assert process.success
             assert snapshot(process.out).match()
+
+            // genome_meta does not change
+            assert process.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
         }
     }
 
     test("factory - old ftp") {
 
         when {
-            params {
-                ini_file = "${projectDir}/tests/testdata/test_db.ini"
-                version = "110"
-            }
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-                genome["species"] = "homo_sapiens"
-                genome["assembly"] = "GRCh38"
-
-                fasta_meta = [:]
-                fasta_meta["factory"] = "old"
-
-                input[0] = tuple(genome, fasta_meta)
+                input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
+                input[1] = ['factory':'old']
+                input[2] = 110
+                input[3] = "${projectDir}/tests/testdata/test_db.ini"
                 """
             }
         }
@@ -229,6 +195,9 @@ nextflow_process {
         then {
             assert process.success
             assert snapshot(process.out).match()
+
+            // genome_meta does not change
+            assert process.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
         }
     }
 }

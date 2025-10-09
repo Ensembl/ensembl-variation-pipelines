@@ -21,7 +21,7 @@ def remote_exists(url){
     try {
         HttpURLConnection.setFollowRedirects(false);
         HttpURLConnection connection =
-            (HttpURLConnection) new URL(url).openConnection();
+            new URL(url).openConnection();
         connection.setRequestMethod("HEAD");
         return (connection.getResponseCode() == HttpURLConnection.HTTP_OK);
     }
@@ -37,13 +37,18 @@ process STAGE_FILE {
     maxRetries 3
 
     input:
-    tuple val(meta), val(file)
+    tuple val(genome_meta), 
+        val(file_meta),
+        val(file)
 
     output:
-    tuple val(meta), path(output_file), path("${output_file}.${index_type}")
+    tuple val(genome_meta), 
+        val(file_meta),
+        path(output_file),
+        path("${output_file}.${index_type}")
 
     script:
-    file_type = meta.file_type
+    file_type = file_meta.file_type
     output_file = file(file).getName()
     // new Utils
 
@@ -53,7 +58,7 @@ process STAGE_FILE {
     else {
         index_type = file(file + ".tbi").exists() ? "tbi" : "csi"
     }
-    meta.index_type = index_type
+    file_meta.index_type = index_type
 
     """
     if [[ ${file_type} == "remote" ]]; then

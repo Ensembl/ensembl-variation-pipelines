@@ -4,9 +4,6 @@ import os
 import subprocess
 from abc import ABC, abstractmethod
 
-from . import genome_matcher
-from ..file_locator import file_locator
-
 #
 # Plugin Matchers
 #
@@ -22,7 +19,7 @@ class PluginArgsBuilderFactory():
     def __init__(self):
         self._builder: PluginArgsBuilder = None
 
-    def set_builder(self, type: str) -> PluginArgsBuilder:
+    def set_builder(self, type: str = "CURRENT") -> PluginArgsBuilder:
         if type == "CURRENT":
             self._builder = CurrentPluginArgsBuilder()
         return self._builder
@@ -31,13 +28,36 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
     def __init__(self, species: str = None, assembly: str = None, version: int = None) -> None:
         self.matcher = RepoPluginConfigMatcher()
         self.species = species
-        self.assembly = assembly
-        self.version = version
+        self._assembly = assembly
+        self._version = version
 
         # REMOVE THIS!! /nfs/production/flicek/ensembl/variation/enseweb-data_tools
-        self._base_path = f"{os.environ['PLUGIN_DATA_DIR']}/grch38/e{str(version)}/vep/plugin_data"
-        if self.assembly == "GRCh37":
-            self._base_path = self._base_path.replace("grch38", "grch37")
+        self.base_path = f"{os.environ['PLUGIN_DATA_DIR']}/grch38/e{str(version)}/vep/plugin_data"
+        if self._assembly == "GRCh37":
+            self.base_path = self.base_path.replace("grch38", "grch37")
+
+    @property
+    def assembly(self):
+        return self._assembly
+    
+    @assembly.setter
+    def assembly(self, assembly):
+        self._assembly = assembly
+        if self._assembly == "GRCh37":
+            self.base_path = self.base_path.replace("grch38", "grch37")
+
+        return self._assembly
+    
+    @property
+    def version(self):
+        return self._version
+    
+    @version.setter
+    def version(self, version: int):
+        self.base_path = self.base_path.replace(str(self._version), str(version))
+        self._version = version
+
+        return self._version
 
     def match(self, plugin_name: str) -> bool:
         return self.matcher.match(plugin_name, self.species)
@@ -45,38 +65,38 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
     def get_args(self, plugin_name: str) -> Dict:
         if plugin_name == "CADD":
             # CADD have data v1.7 data file from e113
-            if self.version < 113:
-                self._base_path = self._base_path.replace(f"{self.version}", "113")
+            if self._version < 113:
+                self.base_path = self.base_path.replace(f"{self._version}", "113")
 
             if self.species == "sus_scrofa":
-                snv = os.path.join(self._base_path, "ALL_pCADD-PHRED-scores.tsv.gz")
+                snv = os.path.join(self.base_path, "ALL_pCADD-PHRED-scores.tsv.gz")
                 self.check_plugin_files(plugin_name, [snv])
 
                 return {"snv": snv}
 
             snv = os.path.join(
-                self._base_path, f"CADD_{self.assembly}_1.7_whole_genome_SNVs.tsv.gz"
+                self.base_path, f"CADD_{self._assembly}_1.7_whole_genome_SNVs.tsv.gz"
             )
-            indels = os.path.join(self._base_path, f"CADD_{self.assembly}_1.7_InDels.tsv.gz")
+            indels = os.path.join(self.base_path, f"CADD_{self._assembly}_1.7_InDels.tsv.gz")
 
             self.check_plugin_files(plugin_name, [snv, indels])
 
             return {"snv": snv, "indels": indels}
 
         if plugin_name == "REVEL":
-            data_file = f"/nfs/production/flicek/ensembl/variation/data/REVEL/2021-may/new_tabbed_revel_{assembly.lower()}.tsv.gz"
+            data_file = f"/nfs/production/flicek/ensembl/variation/data/REVEL/2021-may/new_tabbed_revel_{self._assembly.lower()}.tsv.gz"
 
             self.check_plugin_files(plugin_name, [data_file])
 
             return {"data_file": data_file}
 
         if plugin_name == "SpliceAI":
-            ucsc_assembly = "hg38" if self.assembly == "GRCh38" else "hg19"
+            ucsc_assembly = "hg38" if self._assembly == "GRCh38" else "hg19"
             snv = os.path.join(
-                self._base_path, f"spliceai_scores.masked.snv.{ucsc_assembly}.vcf.gz"
+                self.base_path, f"spliceai_scores.masked.snv.{ucsc_assembly}.vcf.gz"
             )
             indels = os.path.join(
-                self._base_path, f"spliceai_scores.masked.indel.{ucsc_assembly}.vcf.gz"
+                self.base_path, f"spliceai_scores.masked.indel.{ucsc_assembly}.vcf.gz"
             )
 
             self.check_plugin_files(plugin_name, [snv, indels])
@@ -84,10 +104,10 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
             return {"snv": snv, "indel": indels}
 
         if plugin_name == "Phenotypes":
-            pl_assembly = f"_{self.assembly}" if self.species == "homo_sapiens" else ""
+            pl_assembly = f"_{self._assembly}" if self.species == "homo_sapiens" else ""
             file = os.path.join(
-                self._base_path,
-                f"Phenotypes_data_files/Phenotypes.pm_{species}_{self.version}{pl_assembly}.gvf.gz",
+                self.base_path,
+                f"Phenotypes_data_files/Phenotypes.pm_{self.species}_{self._version}{pl_assembly}.gvf.gz",
             )
 
             if not self.check_plugin_files(plugin_name, [file], "skip"):
@@ -100,8 +120,8 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
             }
 
         if plugin_name == "IntAct":
-            mutation_file = os.path.join(self._base_path, "mutations.tsv")
-            mapping_file = os.path.join(self._base_path, "mutation_gc_map.txt.gz")
+            mutation_file = os.path.join(self.base_path, "mutations.tsv")
+            mapping_file = os.path.join(self.base_path, "mutation_gc_map.txt.gz")
 
             self.check_plugin_files(plugin_name, [mutation_file, mapping_file])
 
@@ -113,9 +133,9 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
 
         if plugin_name == "AncestralAllele":
             # TMP - 110 datafile has 109 in the file name
-            pl_version = "109" if self.assembly == "GRCh38" else "e75"
+            pl_version = "109" if self._assembly == "GRCh38" else "e75"
             file = os.path.join(
-                self._base_path, f"homo_sapiens_ancestor_{self.assembly}_{pl_version}.fa.gz"
+                self.base_path, f"homo_sapiens_ancestor_{self._assembly}_{pl_version}.fa.gz"
             )
 
             self.check_plugin_files(plugin_name, [file])
@@ -125,7 +145,7 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
         if plugin_name == "Conservation":
             conservation_data_dir = "/nfs/production/flicek/ensembl/variation/data/Conservation"
             file = os.path.join(
-                conservation_data_dir, f"gerp_conservation_scores.{species}.{self.assembly}.bw"
+                conservation_data_dir, f"gerp_conservation_scores.{self.species}.{self._assembly}.bw"
             )
 
             if not self.check_plugin_files(plugin_name, [file], "skip"):
@@ -134,7 +154,7 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
             return {"file": file}
 
         if plugin_name == "MaveDB":
-            file = os.path.join(self._base_path, "MaveDB_variants.tsv.gz")
+            file = os.path.join(self.base_path, "MaveDB_variants.tsv.gz")
 
             if not self.check_plugin_files(plugin_name, [file], "skip"):
                 return None
@@ -147,9 +167,9 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
 
         if plugin_name == "AlphaMissense":
             # Alphamissense do not have data file in e110 directory or below
-            if self.version < 111:
-                self._base_path = self._base_path.replace(f"{self.version}", "111")
-            file = os.path.join(self._base_path, "AlphaMissense_hg38.tsv.gz")
+            if self._version < 111:
+                self.base_path = self.base_path.replace(f"{self._version}", "111")
+            file = os.path.join(self.base_path, "AlphaMissense_hg38.tsv.gz")
 
             if not self.check_plugin_files(plugin_name, [file], "skip"):
                 return None
@@ -158,14 +178,14 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
 
         if plugin_name == "ClinPred":
             # ClinPred do not have data file in e113 directory or below
-            if self.version < 113:
-                self._base_path = self._base_path.replace(f"{self.version}", "113")
+            if self._version < 113:
+                self.base_path = self.base_path.replace(f"{self._version}", "113")
             file_name = (
                 "ClinPred_hg38_sorted_tabbed.tsv.gz"
-                if self.assembly == "GRCh38"
+                if self._assembly == "GRCh38"
                 else "ClinPred_tabbed.tsv.gz"
             )
-            file = os.path.join(self._base_path, "ClinPred", file_name)
+            file = os.path.join(self.base_path, "ClinPred", file_name)
 
             if not self.check_plugin_files(plugin_name, [file], "skip"):
                 return None
@@ -175,7 +195,7 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
         return None
 
 
-    def check_plugin_files(plugin: str, files: List, exit_rule: str = "exit") -> bool:
+    def check_plugin_files(self, plugin: str, files: List, exit_rule: str = "exit") -> bool:
         """Verify presence of plugin data files.
 
         Args:
@@ -201,15 +221,16 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
 
         return True
 
-class RepoPluginConfigMatcher(genome_matcher.GenomeMatcher):
+class RepoPluginConfigMatcher():
     def __init__(
                 self,
                 repo_dir: str = os.environ["ENSEMBL_ROOT_DIR"],
                 config_filename: str = "plugin_config.txt"
             ):
-        self._repo_dir = repo_dir
-        self._config_file = os.path.join(
-                self._repo_dir,
+
+        self.repo_dir = repo_dir
+        self.config_file = os.path.join(
+                self.repo_dir,
                 "VEP_plugins",
                 config_filename
             )
@@ -217,7 +238,7 @@ class RepoPluginConfigMatcher(genome_matcher.GenomeMatcher):
     def match(self, plugin_name: str, species) -> bool:
 
         cmd_generate_plugin_config_json = "use JSON;"
-        cmd_generate_plugin_config_json += f"open IN, '{self._config_file}';"
+        cmd_generate_plugin_config_json += f"open IN, '{self.config_file}';"
         cmd_generate_plugin_config_json += "my @content = <IN>;"
         cmd_generate_plugin_config_json += "close IN;"
         cmd_generate_plugin_config_json += (
@@ -232,18 +253,19 @@ class RepoPluginConfigMatcher(genome_matcher.GenomeMatcher):
         )
         if process.returncode != 0:
             print(
-                f"[ERROR] Cannot read plugin config file - {self._config_file}"
+                f"[ERROR] Cannot read plugin config file - {self.config_file}"
                 + "\tError{process.stderr.decode()}\nExiting ..."
             )
             return False
 
         plugin_config = json.loads(process.stdout)
 
-        for plugin_config in plugin_config["plugins"]:
-            if plugin_config["key"] == plugin_name:
-                if "species" not in plugin_config:
+        for plugin in plugin_config["plugins"]:
+            if plugin["key"] == plugin_name:
+                if "species" not in plugin:
                     return True
                 else:
-                    return species in plugin_config["species"]
-            else:
-                return False
+                    return species in plugin["species"]
+        
+        print(f"[WARNING] Could not find {plugin_name} in config {self.config_file}")
+        return False

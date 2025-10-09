@@ -22,12 +22,12 @@
         "content": [
             {
                 "0": [
-                    {
-                        "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-                    }
-                ],
-                "1": [
-                    "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,3f0c6815f7ac60684d6b4f11ceb67633"
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+                        },
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,3f0c6815f7ac60684d6b4f11ceb67633"
+                    ]
                 ]
             }
         ],
@@ -35,20 +35,20 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-23T23:57:01.586486"
+        "timestamp": "2025-10-09T18:37:54.016165"
     },
     "fasta_dir - old factory": {
         "content": [
             {
                 "0": [
-                    {
-                        "assembly": "GRCh38",
-                        "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
-                        "species": "homo_sapiens"
-                    }
-                ],
-                "1": [
-                    "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,0ae926d296714cbced39a91e55303d33"
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                            "species": "homo_sapiens",
+                            "assembly": "GRCh38"
+                        },
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,0ae926d296714cbced39a91e55303d33"
+                    ]
                 ]
             }
         ],
@@ -56,18 +56,18 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-24T00:24:17.544709"
+        "timestamp": "2025-10-09T18:38:06.28555"
     },
     "fasta_dir - current factory": {
         "content": [
             {
                 "0": [
-                    {
-                        "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-                    }
-                ],
-                "1": [
-                    "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,3f0c6815f7ac60684d6b4f11ceb67633"
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+                        },
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,3f0c6815f7ac60684d6b4f11ceb67633"
+                    ]
                 ]
             }
         ],
@@ -75,6 +75,6 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-24T23:52:26.047886"
+        "timestamp": "2025-10-09T18:38:02.272624"
     }
 }

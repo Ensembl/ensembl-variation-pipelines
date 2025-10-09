@@ -1,0 +1,24 @@
+{
+    "synonym_file": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "genome": "homo_sapiens_grch38",
+                            "species": "homo_sapiens",
+                            "assembly": "GRCh38",
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,2e6bf0348c272e8d6c9829e4cb50d585"
+                        },
+                        "homo_sapiens_grch38.synonyms:md5,2e6bf0348c272e8d6c9829e4cb50d585"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2025-10-07T16:09:18.082914"
+    }
+}

@@ -20,26 +20,27 @@ process PROCESS_CACHE_CONFIG {
     cache false
 
     input:
-    tuple val(genome), val(cache_meta)
+    val genome_meta
+    val cache_meta
+    val version
+    val ini_file
 
     output:
-    val genome
-    path cache_config
+    tuple val(genome_meta), path(cache_config)
 
     script:
-    def prefix = task.ext.prefix ?: "${genome.genome_uuid}"
+    def prefix = task.ext.prefix ?: "${genome_meta.genome_uuid}"
     cache_config = "${prefix}.cache.txt"
 
-    genome_uuid = genome.genome_uuid
+    genome_uuid = genome_meta.genome_uuid
 
     cache_dir = cache_meta.dir ?: ""
     
     factory = cache_meta.factory ?: "old"
-    out_dir = genome.tmp_dir ?: ""
-    ini_file = params.ini_file
+    out_dir = genome_meta.genome_temp_dir ?: ""
 
     ext_args = factory == "old" ?
-        "--species ${genome.species} --assembly ${genome.assembly} --version ${params.version}"
+        "--species ${genome_meta.species} --assembly ${genome_meta.assembly} --version ${version}"
         : ""
 
     """

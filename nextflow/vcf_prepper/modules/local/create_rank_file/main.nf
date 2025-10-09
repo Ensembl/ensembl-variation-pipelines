@@ -1,3 +1,5 @@
+#!/usr/bin/env nextflow
+
 /*
  * See the NOTICE file distributed with this work for additional information
  * regarding copyright ownership.
@@ -13,27 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-//
-// Workflow to run Ensembl Variation vcf prepper Pipeline
-// The Goal of this workflow is to process and annotate VCF files and generate related track files for genome browser
-//
 
+process CREATE_RANK_FILE {
+  label 'process_low'
 
-workflow PROCESS_DBVAR_INPUT {
-    take:
-	ch_variant_region_vcf       // channel: [ val(meta), path(file) ]
-    ch_variant_call_vcf         // channel: [ val(meta), path(file) ]
-    ch_variant_region_gvf       // channel: [ val(meta), path(file) ]
-    ch_variant_call_gvf         // channel: [ val(meta), path(file) ]
-
-    main:
-    ch_download = DOWNLOAD_WITH_INDEX( ch_input_files )
-    
-    PROCESS_DBVAR()
-	PREPARE_VCF( PREPARE_GENOME.out )
-
-
-    emit:
-    vcf =  
+  input:
+  val rank_file
+  
+  output: 
+  val rank_file
+  
+  shell:
+  '''
+  if [[ -f !{rank_file} ]]; then
+    rm !{rank_file}
+  fi
+  
+  generate_consequence_rank.pl -o !{rank_file}
+  '''
 }

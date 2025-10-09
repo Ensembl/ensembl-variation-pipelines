@@ -15,12 +15,11 @@
 # limitations under the License.
 
 import sys
-import configparser
 import argparse
 import subprocess
 import os
 
-from helper import parse_ini, get_db_name
+from ensembl.variation_utils.clients import core
 
 
 def parse_args(args=None):
@@ -52,59 +51,41 @@ def parse_args(args=None):
         required=False,
         help="file with chromomsome synonyms, default - <species>_<assembly>.synonyms in the same directory.",
     )
-    parser.add_argument(
-        "--force",
-        dest="force",
-        action="store_true",
-        help="forcefully create config even if already exists",
-    )
 
     return parser.parse_args(args)
 
 
-def generate_synonym_file(
-    server: dict, core_db: str, synonym_file: str, force: bool = False
-) -> None:
-    """Generate a chromosome synonym file from the core database.
+def main(args=None):
+    """Main entry point to create a synonyms file.
 
-    Queries seq_region and seq_region_synonym tables, post-processes to remove duplicates
-    and resolves names longer than 31 characters where possible.
+    Parses arguments, determines the core database and invokes generate_synonym_file.
 
     Args:
-        server (dict): Server connection mapping.
-        core_db (str): Core database name.
-        synonym_file (str): Output file path.
-        force (bool): If True overwrite existing file, otherwise skip if exists.
+        args (list|None): Optional argument list for testing.
 
     Returns:
         None
     """
-    if os.path.exists(synonym_file) and not force:
+    args = parse_args(args)
+
+    species = args.species
+    assembly = args.assembly
+    version = args.version
+    synonym_file = args.synonym_file or f"{species}_{assembly}.synonyms"
+    ini_file = args.ini_file or "DEFAULT.ini"
+
+    if os.path.exists(synonym_file):
         print(f"[INFO] {synonym_file} file already exists, skipping ...")
         return
+    
+    core_client = core.CoreDBClient(ini_file=ini_file)
+    core_client.species = species
+    core_client.version = version
 
     query = f"SELECT ss.synonym, sr.name FROM seq_region AS sr, seq_region_synonym AS ss WHERE sr.seq_region_id = ss.seq_region_id;"
-    process = subprocess.run(
-        [
-            "mysql",
-            "--host",
-            server["host"],
-            "--port",
-            server["port"],
-            "--user",
-            server["user"],
-            "--database",
-            core_db,
-            "-N",
-            "--execute",
-            query,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-
+    query_output = core_client.run_query(query)
     with open(synonym_file, "w") as file:
-        file.write(process.stdout.decode().strip())
+        file.write(query_output)
 
     # remove duplicates and change seq region name that are longer than 31 character
     with open(synonym_file, "r") as file:
@@ -149,29 +130,6 @@ def generate_synonym_file(
     with open(synonym_file, "w") as file:
         for synonym in new_names:
             file.write(f"{synonym}\t{new_names[synonym]}\n")
-
-
-def main(args=None):
-    """Main entry point to create a synonyms file.
-
-    Parses arguments, determines the core database and invokes generate_synonym_file.
-
-    Args:
-        args (list|None): Optional argument list for testing.
-
-    Returns:
-        None
-    """
-    args = parse_args(args)
-
-    species = args.species
-    assembly = args.assembly
-    synonym_file = args.synonym_file or f"{species}_{assembly}.synonyms"
-    ini_file = args.ini_file or "DEFAULT.ini"
-    core_server = parse_ini(ini_file, "core")
-    core_db = get_db_name(core_server, args.version, species, type="core")
-
-    generate_synonym_file(core_server, core_db, synonym_file, args.force)
 
 
 if __name__ == "__main__":

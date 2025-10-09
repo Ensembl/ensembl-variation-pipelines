@@ -23,27 +23,28 @@ process PROCESS_FASTA_CONFIG {
     conda "${moduleDir}/environment.yml"
 
     input:
-    tuple val(genome), val(fasta_meta)
+    val genome_meta
+    val fasta_meta
+    val version
+    val ini_file
 
     output:
-    val genome
-    path fasta_config
+    tuple val(genome_meta), path(fasta_config)
 
     script:
-    def prefix = task.ext.prefix ?: "${genome.genome_uuid}"
+    def prefix = task.ext.prefix ?: "${genome_meta.genome_uuid}"
     fasta_config = "${prefix}.fasta.txt"
 
-    genome_uuid = genome.genome_uuid
+    genome_uuid = genome_meta.genome_uuid
 
     fasta_file = fasta_meta.file ?: ""
     fasta_dir = fasta_meta.dir ?: ""
 
     factory = fasta_meta.factory ?: "current"
-    out_dir = genome.tmp_dir ?: ""
-    ini_file = params.ini_file
+    out_dir = genome_meta.genome_temp_dir ?: ""
 
     ext_args = factory == "old"? 
-        "--species ${genome.species} --assembly ${genome.assembly} --version ${params.version}"
+        "--species ${genome_meta.species} --assembly ${genome_meta.assembly} --version ${version}"
         : ""
 
     """

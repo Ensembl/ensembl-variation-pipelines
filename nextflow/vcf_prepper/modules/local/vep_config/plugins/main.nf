@@ -20,25 +20,24 @@ process PROCESS_PLUGINS_CONFIG {
     cache false
 
     input:
-    tuple val(genome), val(plugins_meta)
+    val genome_meta
+    val plugins_meta
     val version
+    val repo_dir        // can we make it optional? using ext.args and nextflow.config
 
     output:
-    val genome
-    path plugins_config
+    tuple val(genome_meta), path(plugins_config)
 
     script:
-    def prefix = task.ext.prefix ?: "${genome.genome_uuid}"
+    def prefix = task.ext.prefix ?: "${genome_meta.genome_uuid}"
     plugins_config = "${prefix}.plugins.txt"
 
-    genome_uuid = genome.genome_uuid
+    genome_uuid = genome_meta.genome_uuid
     conf = plugins_meta.conf ?: ""
-    repo_dir = params.repo_dir ?: ""
 
     factory = plugins_meta.factory ?: "old"
-
     ext_args = factory == "old" ?
-        "--species ${genome.species} --assembly ${genome.assembly} --version ${params.version}"
+        "--species ${genome_meta.species} --assembly ${genome_meta.assembly} --version ${version}"
         : ""
 
     """

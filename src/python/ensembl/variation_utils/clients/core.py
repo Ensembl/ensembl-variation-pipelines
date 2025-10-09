@@ -79,6 +79,9 @@ class CoreDBClient(clients.DBClient):
         self._version = version
         self._configure_db()
 
+    def run_query(self, query):
+        return super().run_query(query, dbname=self.dbname)
+
     def get_meta_value(self, meta_key: str) -> str:
         query = f"SELECT meta_value FROM meta WHERE meta_key = '{meta_key}';"
 
@@ -145,3 +148,60 @@ class CoreDBClient(clients.DBClient):
             return None
         
         return division
+    
+    def get_coord_id_by_version(self, version: str) -> str:
+        query = f"SELECT coord_system_id FROM coord_system WHERE version = '{version}';"
+
+        process = subprocess.run(
+            [
+                "mysql",
+                "--host", self.host,
+                "--port", self.port,
+                "--user", self.user,
+                "--database", self.dbname,
+                "-N",
+                "--execute",
+                query,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        if (process.returncode != 0):
+            print(f"[WARNING] Could not get coord_id for version - {version}")
+            print(
+                f"\tDatabase server - mysql://{self.user}:@{self.host}:{self.port}/{self.dbname}"
+            )
+            print(f"\tError - {process.stderr.decode().strip()}")
+
+            return None
+        return process.stdout.decode().strip()
+    
+    def get_coord_id_by_version(self, version: str) -> str:
+        query = f"SELECT coord_system_id FROM coord_system WHERE version = '{version}';"
+
+        process = subprocess.run(
+            [
+                "mysql",
+                "--host", self.host,
+                "--port", self.port,
+                "--user", self.user,
+                "--database", self.dbname,
+                "-N",
+                "--execute",
+                query,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        if (process.returncode != 0):
+            print(f"[WARNING] Could not get coord_id for version - {version}")
+            print(
+                f"\tDatabase server - mysql://{self.user}:@{self.host}:{self.port}/{self.dbname}"
+            )
+            print(f"\tError - {process.stderr.decode().strip()}")
+
+            return None
+        return process.stdout.decode().strip()
+    

@@ -35,6 +35,8 @@ process PROCESS_FASTA_CONFIG {
     def prefix = task.ext.prefix ?: "${genome_meta.genome_uuid}"
     fasta_config = "${prefix}.fasta.txt"
 
+    active = fasta_meta.active
+
     genome_uuid = genome_meta.genome_uuid
 
     fasta_file = fasta_meta.file ?: ""
@@ -48,13 +50,18 @@ process PROCESS_FASTA_CONFIG {
         : ""
 
     """
-    process_fasta.py \
-        ${ext_args} \
-        --genome_uuid ${genome_uuid} \
-        --fasta_file ${fasta_file} \
-        --fasta_dir ${fasta_dir} \
-        --factory ${factory} \
-        --out_dir ${out_dir} \
-        --ini_file ${ini_file}
+    if [[ $active == 'false' ]]
+    then
+        echo '' > ${fasta_config}
+    else
+        process_fasta.py \
+            ${ext_args} \
+            --genome_uuid ${genome_uuid} \
+            --fasta_file ${fasta_file} \
+            --fasta_dir ${fasta_dir} \
+            --factory ${factory} \
+            --out_dir ${out_dir} \
+            --ini_file ${ini_file}
+    fi
     """
 }

@@ -26,11 +26,6 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                custom_annotation_meta = [:]
-
                 input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
                 input[1] = [:]
                 input[2] = 110
@@ -51,12 +46,6 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                custom_annotation_meta = [:]
-                custom_annotation_meta["conf"] = "${moduleDir}/tests/testdata/non_existing.json"
-
                 input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
                 input[1] = ['conf':"${moduleDir}/tests/testdata/non_existing.json"]
                 input[2] = 110
@@ -77,12 +66,6 @@ nextflow_process {
         when {
             process {
                 """
-                genome = [:]
-                genome["genome_uuid"] = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-
-                custom_annotation_meta = [:]
-                custom_annotation_meta["conf"] = "${moduleDir}/tests/testdata/test_conf.json"
-
                 input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
                 input[1] = ['conf':"${moduleDir}/tests/testdata/test_conf.json"]
                 input[2] = 110

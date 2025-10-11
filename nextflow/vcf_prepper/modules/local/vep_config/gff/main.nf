@@ -25,6 +25,7 @@ process PROCESS_GFF_CONFIG {
     input:
     val genome_meta
     val gff_meta
+    val ini_file
 
     output:
     tuple val(genome_meta), path(gff_config)
@@ -33,6 +34,8 @@ process PROCESS_GFF_CONFIG {
     def prefix = task.ext.prefix ?: "${genome_meta.genome_uuid}"
     gff_config = "${prefix}.gff.txt"
 
+    active = gff_meta.active
+
     genome_uuid = genome_meta.genome_uuid
 
     gff_file = gff_meta.file ?: ""
@@ -40,15 +43,19 @@ process PROCESS_GFF_CONFIG {
 
     factory = gff_meta.factory ?: "current"
     out_dir = genome_meta.genome_temp_dir ?: ""
-    ini_file = params.ini_file
 
     """
-    process_gff.py \
-        --genome_uuid ${genome_uuid} \
-        --gff_file ${gff_file} \
-        --gff_dir ${gff_dir} \
-        --factory ${factory} \
-        --out_dir ${out_dir} \
-        --ini_file ${ini_file} \
+    if [[ $active == 'false' ]]
+    then
+        echo '' > ${gff_config}
+    else
+        process_gff.py \
+            --genome_uuid ${genome_uuid} \
+            --gff_file ${gff_file} \
+            --gff_dir ${gff_dir} \
+            --factory ${factory} \
+            --out_dir ${out_dir} \
+            --ini_file ${ini_file}
+    fi
     """
 }

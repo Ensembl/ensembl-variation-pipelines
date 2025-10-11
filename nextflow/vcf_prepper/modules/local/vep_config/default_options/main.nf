@@ -30,11 +30,12 @@ process PROCESS_DEFAULT_OPTIONS_CONFIG {
     def prefix = task.ext.prefix ?: "${genome_meta.genome_uuid}"
     default_options_config = "${prefix}.default_options.txt"
 
-    default_options_str = ""
+    default_options_list = []
     default_options.each {
         option ->
-            default_options_str += "${option.key}\t${option.value}\n"
+            default_options_list.add("${option.key}\t${option.value}")
     }
+    default_options_str = default_options_list.join("\n")
 
     """
     # mv ${prefix}.temp.default_options.txt ${default_options_config}

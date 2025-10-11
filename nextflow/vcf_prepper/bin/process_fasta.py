@@ -152,7 +152,7 @@ def main(args=None):
     if fasta_file:
         if is_bgzip(fasta_file) and (os.path.isfile(fasta_file + ".fai") and os.path.isfile(fasta_file + ".gzi")):
             with open(fasta_vep_config_file, "w") as f:
-                f.write(f"fasta\t{fasta_file}")
+                f.write(f"fasta\t{fasta_file}\n")
         else:
             print(f"[ERROR] {fasta_file} either not bgzipped or missing index")
             exit(1)
@@ -168,7 +168,7 @@ def main(args=None):
 
         if is_bgzip(fasta_file) and (os.path.isfile(fasta_file + ".fai") or os.path.isfile(fasta_file + ".gzi")):
             with open(fasta_vep_config_file, "w") as f:
-                f.write(f"fasta\t{fasta_file}")
+                f.write(f"fasta\t{fasta_file}\n")
         else:
             print(f"[ERROR] {fasta_file} either not bgzipped or missing index")
             exit(1)
@@ -203,7 +203,7 @@ def main(args=None):
             index_fasta(bgzipped_fasta)
 
             with open(fasta_vep_config_file, "w") as f:
-                f.write(f"fasta\t{bgzipped_fasta}")
+                f.write(f"fasta\t{bgzipped_fasta}\n")
 
 if __name__ == "__main__":
     sys.exit(main())

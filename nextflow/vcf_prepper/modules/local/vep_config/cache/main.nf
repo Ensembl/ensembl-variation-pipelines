@@ -32,6 +32,8 @@ process PROCESS_CACHE_CONFIG {
     def prefix = task.ext.prefix ?: "${genome_meta.genome_uuid}"
     cache_config = "${prefix}.cache.txt"
 
+    active = cache_meta.active
+
     genome_uuid = genome_meta.genome_uuid
 
     cache_dir = cache_meta.dir ?: ""
@@ -44,12 +46,17 @@ process PROCESS_CACHE_CONFIG {
         : ""
 
     """
-    process_cache.py \
-        ${ext_args} \
-        --genome_uuid ${genome_uuid} \
-        --cache_dir ${cache_dir} \
-        --factory ${factory} \
-        --out_dir ${out_dir} \
-        --ini_file ${ini_file}
+    if [[ $active == 'false' ]]
+    then
+        echo '' > ${cache_config}
+    else
+        process_cache.py \
+            ${ext_args} \
+            --genome_uuid ${genome_uuid} \
+            --cache_dir ${cache_dir} \
+            --factory ${factory} \
+            --out_dir ${out_dir} \
+            --ini_file ${ini_file}
+    fi
     """
 }

@@ -20,6 +20,7 @@ nextflow_process {
     name "Test process PROCESS_PLUGINS_CONFIG"
     script "../main.nf"
     process "PROCESS_PLUGINS_CONFIG"
+    config "modules/local/vep_config/plugins/tests/nextflow.config"
 
     test("no conf") {
 

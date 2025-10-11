@@ -147,8 +147,7 @@ def main(args=None):
             if not copied:
                 raise Exception("[ERROR] Copy failed.")
 
-            source_cache_filename = os.path.basename(source_cache_file)
-            uncompress_cache(out_dir, source_cache_filename)
+            uncompress_cache(out_dir, source_cache_file)
 
             with open(cache_vep_config_file, "w") as f:
                 f.write(f"cache\t{out_dir}\n")

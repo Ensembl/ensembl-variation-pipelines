@@ -40,7 +40,7 @@ workflow GENERATE_VEP_CONFIG {
   
   main:
     PROCESS_FASTA_CONFIG( genome_meta, fasta, version, ini_file )
-    PROCESS_GFF_CONFIG( genome_meta, gff )
+    PROCESS_GFF_CONFIG( genome_meta, gff, ini_file )
     PROCESS_CACHE_CONFIG( genome_meta, vep_cache, version, ini_file )
     PROCESS_DEFAULT_OPTIONS_CONFIG( genome_meta, default_options )
     PROCESS_PLUGINS_CONFIG( genome_meta, vep_plugins, version, repo_dir )

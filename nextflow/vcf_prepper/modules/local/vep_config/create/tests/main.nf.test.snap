@@ -1,0 +1,23 @@
+{
+    "cache inactive": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                            "species": "homo_sapiens",
+                            "assembly": "GRCh38"
+                        },
+                        "homo_sapiens_GRCh38.ini:md5,a07cc1fa4caa71989a4d8628a13d6adf"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2025-10-11T20:08:56.114725"
+    }
+}

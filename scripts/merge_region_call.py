@@ -75,6 +75,7 @@ def generate_output(region_vcf, region_calls, out_vcf_path, header):
         if calls:
             new_rec.info["ALLELE_NAME"] = ",".join(call["ALLELE_NAME"] for call in calls)
             new_rec.info["ALLELE_TYPE"] = aggregate_sv_type(call["ALLELE_TYPE"] for call in calls)
+            new_rec.alts = tuple([f"<{call['ALLELE_TYPE']}>" for call in calls])
             new_rec.info["SVLEN"] = ",".join(call["SVLEN"][0] for call in calls if call["SVLEN"] is not None)
             if any(call.get("COPY_NUMBER") is not None for call in calls):
                 new_rec.info["CN"] = ",".join(call.get("COPY_NUMBER", "NA") for call in calls)

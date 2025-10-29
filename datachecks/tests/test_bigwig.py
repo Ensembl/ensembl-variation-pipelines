@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import os
 import subprocess
-import random
+import numpy as np
 
 
 class TestFile:
@@ -29,28 +28,12 @@ class TestFile:
 
 
 class TestSrcExistence:
-    def test_variant_exist_from_source(self, bw_reader, vcf_reader):
+    def test_variant_exist_from_source(self, bw_reader, variant_list):
         """Sample variants from VCF and ensure BigWig has non-zero scores at those positions."""
-        NO_VARIANTS = 100
-        NO_ITER = 100000
 
-        chrs = vcf_reader.seqnames
-
-        variants = []
-        iter = 0
-        while len(variants) < NO_VARIANTS and iter <= NO_ITER:
-            chr = random.choice(chrs)
-            start = random.choice(range(10000, 1000000))
-
-            for variant in vcf_reader(f"{chr}:{start}"):
-                variants.append(variant)
-                break
-
-            iter += 1
-
-        for variant in variants:
-            chr = variant.CHROM
-            start = int(variant.POS) - 1
+        for variant_id in variant_list:
+            chr = variant_list[variant_id]["chrom"]
+            start = variant_list[variant_id]["pos"] - 1
             end = start + 2
 
             bw_state = bw_reader.stats(chr, start, end)[0]
@@ -94,12 +77,13 @@ class TestSrcCount:
         """
         variant_counts = 0
         for chr in bw_reader.chroms():
-            non_zero_vals = [
-                val
-                for val in bw_reader.values(chr, 0, bw_reader.chroms(chr))
-                if val > 0.0
-            ]
-            variant_counts += len(non_zero_vals)
+            end = bw_reader.chroms(chr)
+
+            window = 1000000
+            for s_i in range(0, end, window):
+                e_i = min(s_i+window, end)
+                values = np.array(bw_reader.values(chr, s_i, e_i))
+                variant_counts += np.count_nonzero(values)
         return variant_counts
 
     def test_compare_count_with_source(self, vcf, bw_reader):

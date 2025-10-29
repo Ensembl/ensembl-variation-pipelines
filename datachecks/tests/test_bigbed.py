@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import os
 import subprocess
 import random
@@ -38,8 +37,8 @@ class TestSrcCount:
         Returns:
             int: Number of records or -1 on failure.
         """
-        if vcf is None:
-            logger.warning(f"Could not get variant count - no file provided")
+        if not os.path.isfile(vcf):
+            logger.warning(f"Could not get variant count from VCF - file not found")
             return -1
 
         process = subprocess.run(
@@ -49,66 +48,66 @@ class TestSrcCount:
         )
 
         if process.returncode != 0:
-            logger.warning(f"Could not get variant count from vcf - {vcf}")
+            logger.warning(f"Could not get variant count from VCF - {process.stderr.decode()}")
             return -1
 
         return int(process.stdout.decode().strip())
 
-    def get_total_variant_count_from_bb(self, bb_reader) -> int:
+    def get_total_variant_count_from_bb(self, bigbed) -> int:
         """Count entries across all chromosomes in a bigBed reader.
 
         Args:
-            bb_reader: bigBed reader instance.
+            bigbed (str): Path to bigBed file.
 
         Returns:
             int: Total number of entries.
         """
-        variant_counts = 0
-        for chr in bb_reader.chroms():
-            variant_counts += len(bb_reader.entries(chr, 0, bb_reader.chroms(chr)))
-        return variant_counts
+        if not os.path.isfile(bigbed):
+            logger.warning(f"Could not get variant count in bigBed - file not found")
+            return -1
+    
+        process = subprocess.run(
+            ["bigBedInfo", bigbed],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
-    def test_compare_count_with_source(self, vcf, bb_reader):
+        if process.returncode != 0:
+            logger.warning(f"Could not get variant count in bigBed - {process.stderr.decode()}")
+            return -1
+        
+        bb_summaries = process.stdout.decode().split("\n")
+        for line in bb_summaries:
+            if "itemCount" in line:
+                return int(line.split(":")[1].replace(",", "").strip())
+        
+        logger.warning(f"Could not get variant count in bigBed - failed parsing bigBedInfo output")
+        return -1
+
+    def test_compare_count_with_source(self, vcf, bigbed):
         """Compare approximate counts between VCF and bigBed-derived counts."""
         variant_count_vcf = self.get_total_variant_count_from_vcf(vcf)
-        variant_count_bb = self.get_total_variant_count_from_bb(bb_reader)
+        variant_count_bb = self.get_total_variant_count_from_bb(bigbed)
 
         assert variant_count_bb > variant_count_vcf * 0.95
 
 
 class TestSrcExistence:
-    def test_variant_exist_from_source(self, bb_reader, vcf_reader):
+    def test_variant_exist_from_source(self, bb_reader, variant_list):
         """Sample variants from VCF and ensure corresponding bigBed entries exist and include IDs."""
-        NO_VARIANTS = 100
-        NO_ITER = 100000
-
-        chrs = vcf_reader.seqnames
-
-        variants = []
-        iter = 0
-        while len(variants) < NO_VARIANTS and iter <= NO_ITER:
-            chr = random.choice(chrs)
-            start = random.choice(range(10000, 1000000))
-
-            for variant in vcf_reader(f"{chr}:{start}"):
-                variants.append(variant)
-                break
-
-            iter += 1
-
-        for variant in variants:
-            chr = variant.CHROM
-            start = int(variant.POS) - 1
+        
+        for variant_id in variant_list:
+            chr = variant_list[variant_id]['chrom']
+            start = variant_list[variant_id]['pos'] - 1
             end = start + 2  # for insertion
 
             bb_entries = bb_reader.entries(chr, start, end)
             assert bb_entries is not None
             assert len(bb_entries) >= 1
 
-            id_in_vcf = variant.ID
             ids_in_bb = []
             for bb_entry in bb_entries:
                 id = bb_entry[2].split("\t")[0]
                 ids_in_bb.append(id)
 
-            assert id_in_vcf in ids_in_bb
+            assert variant_id in ids_in_bb

@@ -43,22 +43,17 @@ def parse_args(args=None):
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--dir", dest="dir", type=str, default=os.getcwd())
+    parser.add_argument("--dir", dest="dir", type=str, default=os.getcwd(), help="Directory containining pipeline output files")
     parser.add_argument("--input_config", dest="input_config", type=str)
     parser.add_argument(
-        "-O", "--output_dir", dest="output_dir", type=str, default=os.getcwd()
+        "-O", "--output_dir", dest="output_dir", type=str, default=os.path.join(os.getcwd(), "output")
     )
     parser.add_argument("-M", "--mem", dest="memory", type=str, default="2000")
     parser.add_argument("-t", "--time", dest="time", type=str, default="01:00:00")
     parser.add_argument(
         "-p", "--partition", dest="partition", type=str, default="production"
     )
-    parser.add_argument(
-        "--mail-user",
-        dest="mail_user",
-        type=str,
-        default=getpass.getuser() + "@ebi.ac.uk",
-    )
+    parser.add_argument("--mail-user", dest="mail_user", type=str)
     parser.add_argument(type=str, nargs="?", dest="tests", default="./")
 
     return parser.parse_args(args)
@@ -134,15 +129,16 @@ def main(args=None):
     input_config = args.input_config or None
     dir = args.dir
     output_dir = args.output_dir
+    tmp_dir = os.path.join(os.getcwd(), "tmp")
 
     # create output directory if not already exist
     os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(tmp_dir, exist_ok=True)
 
     species_metadata = {}
     if input_config is not None:
         species_metadata = get_species_metadata(input_config)
 
-    vcf_files = []
     api_outdir = os.path.join(dir, "api")
     track_outdir = os.path.join(dir, "tracks")
     for genome_uuid in os.listdir(api_outdir):
@@ -159,20 +155,22 @@ def main(args=None):
         bigbed = os.path.join(track_outdir, genome_uuid, "variant-details.bb")
         bigwig = os.path.join(track_outdir, genome_uuid, "variant-summary.bw")
 
-        timestamp = int(datetime.datetime.now().timestamp())
-        with open(f"dc_{timestamp}.sh", "w") as file:
+        script_file = os.path.join(tmp_dir, f"dc_{species}.sh")
+        with open(script_file, "w") as file:
             file.write("#!/bin/bash\n\n")
 
             file.write(f"#SBATCH --time={args.time}\n")
             file.write(f"#SBATCH --mem={args.memory}\n")
             file.write(f"#SBATCH --partition={args.partition}\n")
-            file.write(f"#SBATCH --mail-user={args.mail_user}\n")
-            file.write(f"#SBATCH --mail-type=END\n")
-            file.write(f"#SBATCH --mail-type=FAIL\n")
+            if args.mail_user is not None:
+                file.write(f"#SBATCH --mail-user={args.mail_user}\n")
+                file.write(f"#SBATCH --mail-type=END\n")
+                file.write(f"#SBATCH --mail-type=FAIL\n")
             file.write("\n")
 
+            file.write("module load bcftools\n")
             file.write(
-                f"pytest --source_vcf={source_vcf} --bigbed={bigbed} --bigwig={bigwig} --vcf={vcf} --species={species} {args.tests}\n"
+                f"pytest --tap --tb=short --source_vcf={source_vcf} --bigbed={bigbed} --bigwig={bigwig} --vcf={vcf} --species={species} {args.tests}\n"
             )
 
         subprocess.run(
@@ -184,26 +182,9 @@ def main(args=None):
                 f"{output_dir}/dc_{species}.out",
                 "--error",
                 f"{output_dir}/dc_{species}.err",
-                f"dc_{timestamp}.sh",
+                script_file,
             ]
         )
-
-        # subprocess.run([
-        #         "bsub",
-        #         f"-M{args.memory}",
-        #         "-q", f"{args.parition}",
-        #         "-J", f"dc_{species}",
-        #         "-oo", f"{output_dir}/dc_{species}.out",
-        #         "-eo", f"{output_dir}/dc_{species}.err",
-        #         f"pytest " + \
-        #         f"--source_vcf={source_vcf} " + \
-        #         f"--bigbed={bigbed} " + \
-        #         f"--bigwig={bigwig} " + \
-        #         f"--vcf={vcf} " + \
-        #         f"--species={species} " + \
-        #         f"{args.tests}"
-        #     ]
-        # )
 
 
 if __name__ == "__main__":

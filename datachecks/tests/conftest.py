@@ -33,6 +33,7 @@ def pytest_addoption(parser):
     parser.addoption("--bigwig", type=str, default=None)
     parser.addoption("--source_vcf", type=str, default=None)
     parser.addoption("--species", type=str, default=None)
+    parser.addoption("--skip_xfail", action="store_true", default=None)
 
 
 def pytest_generate_tests(metafunc):
@@ -50,6 +51,8 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("source_vcf", [metafunc.config.getoption("source_vcf")], ids=['source_vcf'], scope="session")
     if "species" in metafunc.fixturenames:
         metafunc.parametrize("species", [metafunc.config.getoption("species")], ids=[metafunc.config.getoption("species")], scope="session")
+    if "skip_xfail" in metafunc.fixturenames:
+        metafunc.parametrize("skip_xfail", [metafunc.config.getoption("skip_xfail")], ids=[f"skip_xfail={metafunc.config.getoption('skip_xfail')}"], scope="session")
 
 
 @pytest.fixture(scope="session")

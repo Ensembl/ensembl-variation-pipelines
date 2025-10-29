@@ -328,7 +328,7 @@ class TestContent:
         return params
 
     @pytest.mark.parametrize("csq_field, canbe_empty", get_csq_params())
-    def test_csq_content(self, variant_list, csq_field, canbe_empty):
+    def test_csq_content(self, variant_list, csq_field, canbe_empty, skip_xfail):
         """Sample CSQ annotations from random variants and check field presence.
 
         Selects a number of variants and ensures specified CSQ fields are present or
@@ -345,6 +345,8 @@ class TestContent:
         if not canbe_empty:
             assert csq_field_cnt == max_variants
         else:
+            if skip_xfail:
+                pytest.skip('Skipping xfail')
             assert csq_field_cnt > 0
 
 

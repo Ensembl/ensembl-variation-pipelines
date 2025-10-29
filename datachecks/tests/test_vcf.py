@@ -372,7 +372,10 @@ class TestSummaryStatistics:
         """Validate per-variant summary fields such as NCITE against CSQ PUBMED entries."""
         
         for variant_id in variant_list:
+            chrom = variant_list[variant_id]["chrom"]
+            pos = variant_list[variant_id]["pos"]
             citation = set()
+
             csqs = variant_list[variant_id]['csqs']
             for csq in csqs:
                 if "PUBMED" in csq:
@@ -382,12 +385,17 @@ class TestSummaryStatistics:
                             citation.add(cite)
         
             if len(citation) > 0:
-                assert len(citation) == int(variant_list[variant_id]['NCITE'])
+                actual = len(citation)
+                got = int(variant_list[variant_id]['NCITE'])
+                if not actual == got:
+                    raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual}; got - {got}") 
 
     def test_summary_statistics_per_allele(self, variant_list):
         """Validate per-allele summary fields (NTCSQ, NRCSQ, NGENE, NGPHN, NVPHN) computed from CSQ."""
 
         for variant_id in variant_list:
+            chrom = variant_list[variant_id]["chrom"]
+            pos = variant_list[variant_id]["pos"]
             transcript_consequence = {}
             regulatory_consequence = {}
             gene = {}
@@ -436,61 +444,25 @@ class TestSummaryStatistics:
                             f"{name}:{source}:{feature}"
                         )
 
-            if len(regulatory_consequence) > 1:
-                assert sorted(
-                    [len(val) for val in regulatory_consequence.values()]
-                ) == sorted(variant_list[variant_id]["NRCSQ"])
-            elif len(regulatory_consequence) == 1:
-                assert [len(val) for val in regulatory_consequence.values()] == [
-                    variant_list[variant_id]["NRCSQ"]
-                ]
-            else:
-                assert variant_list[variant_id]["NRCSQ"] is None
+            for field in self.PER_ALLELE_FIELDS:
+                ss_info_field = self.PER_ALLELE_FIELDS[field]
+                field_object = locals()[field]
 
-            if len(transcript_consequence) > 1:
-                assert sorted(
-                    [len(val) for val in transcript_consequence.values()]
-                ) == sorted(variant_list[variant_id]["NTCSQ"])
-            elif len(transcript_consequence) == 1:
-                assert [len(val) for val in transcript_consequence.values()] == [
-                    variant_list[variant_id]["NTCSQ"]
-                ]
-            else:
-                assert variant_list[variant_id]["NTCSQ"] is None
-
-            if len(gene) > 1:
-                assert sorted([len(val) for val in gene.values()]) == sorted(
-                    variant_list[variant_id]["NGENE"]
-                )
-            elif len(gene) == 1:
-                assert [len(val) for val in gene.values()] == [
-                    variant_list[variant_id]["NGENE"]
-                ]
-            else:
-                assert variant_list[variant_id]["NGENE"] is None
-
-            if len(gene_phenotype) > 1:
-                assert sorted(
-                    [len(val) for val in gene_phenotype.values()]
-                ) == sorted(variant_list[variant_id]["NGPHN"])
-            elif len(gene_phenotype) == 1:
-                assert [len(val) for val in gene_phenotype.values()] == [
-                    variant_list[variant_id]["NGPHN"]
-                ]
-            else:
-                assert variant_list[variant_id]["NGPHN"] is None
-
-            if len(variant_phenotype) > 1:
-                assert sorted(
-                    [len(val) for val in variant_phenotype.values()]
-                ) == sorted(variant_list[variant_id]["NVPHN"])
-            elif len(variant_phenotype) == 1:
-                assert [len(val) for val in variant_phenotype.values()] == [
-                    variant_list[variant_id]["NVPHN"]
-                ]
-            else:
-                assert variant_list[variant_id]["NVPHN"] is None
-
+                if len(field_object) > 1:
+                    actual = sorted([len(val) for val in field_object.values()])
+                    got = sorted(variant_list[variant_id][ss_info_field])
+                    if not actual == got:
+                        raise AssertionError(f"[{chrom}:{pos}:{variant_id} - {ss_info_field}] actual - {actual}; got - {got}") 
+                elif len(field_object) == 1:
+                    actual = [len(val) for val in field_object.values()]
+                    got = [variant_list[variant_id][ss_info_field]]
+                    if not actual == got:
+                        raise AssertionError(f"[{chrom}:{pos}:{variant_id} - {ss_info_field}] actual - {actual}; got - {got}") 
+                else:
+                    got = variant_list[variant_id][ss_info_field]
+                    if not got is None:
+                        raise AssertionError(f"[{chrom}:{pos}:{variant_id} - {ss_info_field}] actual - None; got - {got}")
+            
     def test_summary_statistics_frequency(self, variant_list, species):
         """Validate representative allele frequency (RAF) matches frequencies from CSQ fields.
 
@@ -501,6 +473,8 @@ class TestSummaryStatistics:
 
         freq_csq_field = "gnomAD_genomes_AF"
         for variant_id in variant_list:
+            chrom = variant_list[variant_id]["chrom"]
+            pos = variant_list[variant_id]["pos"]
             frequency = {}
 
             csqs = variant_list[variant_id]['csqs']
@@ -526,14 +500,16 @@ class TestSummaryStatistics:
                     [val for val in variant_list[variant_id]["RAF"] if val is not None]
                 )
                 for idx, _ in enumerate(actual):
-                    assert isclose(actual[idx], got[idx], rel_tol=1e-5)
+                    if not isclose(actual[idx], got[idx], rel_tol=1e-5):
+                        raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual[idx]}; got - {got[idx]}") 
             elif len(frequency) == 1:
                 actual = frequency[list(frequency.keys())[0]]
                 if type(variant_list[variant_id]["RAF"]) is tuple:
                     got = [val for val in variant_list[variant_id]["RAF"] if val is not None]
-                    assert len(got) == 1
-                    assert isclose(actual, got[0], rel_tol=1e-5)
+                    if (not len(got) == 1) or (not isclose(actual, got[0], rel_tol=1e-5)):
+                        raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual}; got - {got[0]}")
                 else:
-                    assert isclose(actual, variant_list[variant_id]["RAF"], rel_tol=1e-5)
+                    if not isclose(actual, variant_list[variant_id]["RAF"], rel_tol=1e-5):
+                        raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual}; got - {variant_list[variant_id]['RAF']}")
             else:
                 assert variant_list[variant_id]["RAF"] is None

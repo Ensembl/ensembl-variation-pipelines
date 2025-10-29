@@ -504,12 +504,21 @@ class TestSummaryStatistics:
             frequency = {}
 
             csqs = variant_list[variant_id]['csqs']
+            skip_variant = False
             for csq in csqs:
                 allele = csq["Allele"]
                 freq = csq[freq_csq_field]
 
                 if freq != "":
+                    # in some cases we have multiple frequency separated by & which we do not handle yet
+                    if "&" in freq:
+                        skip_variant = True
+                        continue
+
                     frequency[allele] = float(freq)
+            
+            if skip_variant:
+                continue
 
             if len(frequency) > 1:
                 actual = sorted(frequency.values())

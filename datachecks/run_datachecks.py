@@ -54,6 +54,7 @@ def parse_args(args=None):
         "-p", "--partition", dest="partition", type=str, default="production"
     )
     parser.add_argument("--mail-user", dest="mail_user", type=str)
+    parser.add_argument("--skip-xfail", dest="skip_xfail", action="store_true")
     parser.add_argument(type=str, nargs="?", dest="tests", default="./")
 
     return parser.parse_args(args)
@@ -155,6 +156,10 @@ def main(args=None):
         bigbed = os.path.join(track_outdir, genome_uuid, "variant-details.bb")
         bigwig = os.path.join(track_outdir, genome_uuid, "variant-summary.bw")
 
+        skip_xfail_arg = ""
+        if args.skip_xfail:
+            skip_xfail_arg = "--skip_xfail"
+
         script_file = os.path.join(tmp_dir, f"dc_{species}.sh")
         with open(script_file, "w") as file:
             file.write("#!/bin/bash\n\n")
@@ -170,7 +175,7 @@ def main(args=None):
 
             file.write("module load bcftools\n")
             file.write(
-                f"pytest --tap --tb=short --source_vcf={source_vcf} --bigbed={bigbed} --bigwig={bigwig} --vcf={vcf} --species={species} {args.tests}\n"
+                f"pytest --tap --tb=short {skip_xfail_arg} --source_vcf={source_vcf} --bigbed={bigbed} --bigwig={bigwig} --vcf={vcf} --species={species} {args.tests}\n"
             )
 
         subprocess.run(

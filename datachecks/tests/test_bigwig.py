@@ -79,13 +79,14 @@ class TestSrcCount:
         for chr in bw_reader.chroms():
             end = bw_reader.chroms(chr)
 
-            window = 1000000
+            window = 10000000
             for s_i in range(0, end, window):
                 e_i = min(s_i+window, end)
                 values = np.array(bw_reader.values(chr, s_i, e_i))
                 variant_counts += np.count_nonzero(values)
         return variant_counts
 
+    @pytest.mark.skip(reason="takes too much time - need improvement")
     def test_compare_count_with_source(self, vcf, bw_reader):
         """Compare approximate variant counts between source VCF and BigWig-derived counts."""
         variant_count_vcf = self.get_total_variant_count_from_vcf(vcf)

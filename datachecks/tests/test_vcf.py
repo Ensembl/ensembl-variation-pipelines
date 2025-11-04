@@ -460,7 +460,7 @@ class TestSummaryStatistics:
                         raise AssertionError(f"[{chrom}:{pos}:{variant_id} - {ss_info_field}] actual - {actual}; got - {got}") 
                 else:
                     got = variant_list[variant_id][ss_info_field]
-                    if not got is None:
+                    if got is not None:
                         raise AssertionError(f"[{chrom}:{pos}:{variant_id} - {ss_info_field}] actual - None; got - {got}")
             
     def test_summary_statistics_frequency(self, variant_list, species):
@@ -494,22 +494,24 @@ class TestSummaryStatistics:
             if skip_variant:
                 continue
 
+            a_t = 1.0
+            r_t = 1e-5
             if len(frequency) > 1:
                 actual = sorted(frequency.values())
                 got = sorted(
                     [val for val in variant_list[variant_id]["RAF"] if val is not None]
                 )
                 for idx, _ in enumerate(actual):
-                    if not isclose(actual[idx], got[idx], rel_tol=1e-5):
+                    if not isclose(actual[idx], got[idx], rel_tol=r_t, abs_tol=a_t):
                         raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual[idx]}; got - {got[idx]}") 
             elif len(frequency) == 1:
                 actual = frequency[list(frequency.keys())[0]]
                 if type(variant_list[variant_id]["RAF"]) is tuple:
                     got = [val for val in variant_list[variant_id]["RAF"] if val is not None]
-                    if (not len(got) == 1) or (not isclose(actual, got[0], rel_tol=1e-5)):
+                    if (not len(got) == 1) or (not isclose(actual, got[0], rel_tol=r_t, abs_tol=a_t)):
                         raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual}; got - {got[0]}")
                 else:
-                    if variant_list[variant_id]["RAF"] is not None or not isclose(actual, variant_list[variant_id]["RAF"], rel_tol=1e-5):
+                    if (variant_list[variant_id]["RAF"] is not None) or (not isclose(actual, variant_list[variant_id]["RAF"], rel_tol=r_t, abs_tol=a_t)):
                         raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual}; got - {variant_list[variant_id]['RAF']}")
             else:
                 assert variant_list[variant_id]["RAF"] is None

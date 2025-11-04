@@ -87,7 +87,6 @@ class TestSrcCount:
                 variant_counts += np.count_nonzero(values)
         return variant_counts
 
-    @pytest.mark.skip(reason="takes too much time - need improvement")
     def test_compare_count_with_source(self, vcf, bw_reader):
         """Compare approximate variant counts between source VCF and BigWig-derived counts."""
         variant_count_vcf = self.get_total_variant_count_from_vcf(vcf)

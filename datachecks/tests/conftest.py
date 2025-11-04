@@ -21,7 +21,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-NO_VARIANTS = 1000
+NO_VARIANTS = 10000
 
 def pytest_addoption(parser):
     """Add custom pytest command-line options.
@@ -78,6 +78,7 @@ def bw_reader(bigwig):
 
 @pytest.fixture(scope="session")
 def variant_list(vcf_reader):
+    test = {}
     csq_info_description = vcf_reader.get_header_type("CSQ")["Description"]
     csq_list = [
         csq.strip() for csq in csq_info_description.split("Format: ")[1].split("|")
@@ -92,7 +93,7 @@ def variant_list(vcf_reader):
     total_no_variants = 0
     while total_no_variants < NO_VARIANTS:
         chr = random.choice(chrs)
-        start = random.choice(range(10000, 1000000))
+        start = random.choice(range(1000, 100000000))
 
         no_variants = 0
         for variant in vcf_reader(f"{chr}:{start}"):
@@ -115,7 +116,7 @@ def variant_list(vcf_reader):
             
             total_no_variants += 1
             no_variants += 1
-            if no_variants > 100:
+            if no_variants > 1000:
                 break
 
     return variant_list

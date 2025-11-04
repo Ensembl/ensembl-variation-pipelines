@@ -48,7 +48,7 @@ def parse_args(args=None):
     parser.add_argument(
         "-O", "--output_dir", dest="output_dir", type=str, default=os.path.join(os.getcwd(), "output")
     )
-    parser.add_argument("-M", "--mem", dest="memory", type=str, default="2000")
+    parser.add_argument("-M", "--mem", dest="memory", type=str, default="6000")
     parser.add_argument("-t", "--time", dest="time", type=str, default="01:00:00")
     parser.add_argument(
         "-p", "--partition", dest="partition", type=str, default="production"
@@ -169,8 +169,8 @@ def main(args=None):
             file.write(f"#SBATCH --partition={args.partition}\n")
             if args.mail_user is not None:
                 file.write(f"#SBATCH --mail-user={args.mail_user}\n")
-                file.write(f"#SBATCH --mail-type=END\n")
-                file.write(f"#SBATCH --mail-type=FAIL\n")
+                file.write("#SBATCH --mail-type=END\n")
+                file.write("#SBATCH --mail-type=FAIL\n")
             file.write("\n")
 
             file.write("module load bcftools\n")

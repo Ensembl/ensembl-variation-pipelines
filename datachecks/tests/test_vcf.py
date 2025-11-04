@@ -511,7 +511,7 @@ class TestSummaryStatistics:
                     if (not len(got) == 1) or (not isclose(actual, got[0], rel_tol=r_t, abs_tol=a_t)):
                         raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual}; got - {got[0]}")
                 else:
-                    if (variant_list[variant_id]["RAF"] is not None) or (not isclose(actual, variant_list[variant_id]["RAF"], rel_tol=r_t, abs_tol=a_t)):
+                    if (variant_list[variant_id]["RAF"] is None) or (not isclose(actual, variant_list[variant_id]["RAF"], rel_tol=r_t, abs_tol=a_t)):
                         raise AssertionError(f"[{chrom}:{pos}:{variant_id}] actual - {actual}; got - {variant_list[variant_id]['RAF']}")
             else:
                 assert variant_list[variant_id]["RAF"] is None

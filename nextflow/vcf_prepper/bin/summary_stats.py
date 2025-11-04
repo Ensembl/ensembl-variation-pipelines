@@ -153,6 +153,9 @@ def minimise_allele(ref: str, alts: list) -> str:
     Returns:
         tuple: (minimised_ref, minimised_alts) where minimised_alts is a list of strings.
     """
+    if len(alts) <= 1 or len(ref) == len(alts[0]):
+        return (ref, alts)
+    
     alleles = [ref] + alts
     first_bases = {allele[0] for allele in alleles}
 

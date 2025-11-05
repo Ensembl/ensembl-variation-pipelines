@@ -49,7 +49,7 @@ def parse_args(args=None):
         "-O", "--output_dir", dest="output_dir", type=str, default=os.path.join(os.getcwd(), "output")
     )
     parser.add_argument("-M", "--mem", dest="memory", type=str, default="6000")
-    parser.add_argument("-t", "--time", dest="time", type=str, default="01:00:00")
+    parser.add_argument("-t", "--time", dest="time", type=str, default="05:00:00")
     parser.add_argument(
         "-p", "--partition", dest="partition", type=str, default="production"
     )

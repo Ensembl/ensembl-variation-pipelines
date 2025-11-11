@@ -38,8 +38,8 @@ class TestSrcExistence:
             end = start + 2
 
             bw_state = bw_reader.stats(chr, start, end)[0]
-            if not bw_state > 0.0:
-                raise AssertionError(f"bigWig value does not match with source - {chr}:{start}-{end}") 
+            if bw_state is None or not bw_state > 0.0:
+                raise AssertionError(f"bigWig value does exist or match with source - {chr}:{start}-{end}") 
 
 
 class TestSrcCount:

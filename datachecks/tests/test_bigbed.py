@@ -102,8 +102,8 @@ class TestSrcExistence:
             end = start + 2  # for insertion
 
             bb_entries = bb_reader.entries(chr, start, end)
-            if bb_entries is None or len(bb_entries) < 1
-                raise AssertionError(f"bigBed entries not found - {chr}:{start}-{end}") 
+            if bb_entries is None or len(bb_entries) < 1:
+                raise AssertionError(f"bigBed entries does not exist or match with source - {chr}:{start}-{end}") 
 
             ids_in_bb = []
             for bb_entry in bb_entries:

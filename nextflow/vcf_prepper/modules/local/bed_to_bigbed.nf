@@ -29,10 +29,18 @@ process BED_TO_BIGBED {
   source = meta.source.toLowerCase()
   output_bb = "${meta.genome_tracks_outdir}/variant-${source}-details.bb"
   chrom_sizes = meta.chrom_sizes
-  // structural variant has extent as 10th column
-  type = params.structural_variant ? "-type=bed3+7" : "-type=bed3+6"
+  bed_fields = params.bed_fields
   
   '''
+  total_fields=$(cat !{bed_fields} | jq .fields | jq length)
+  extra_fields=$((total_fields-3))
+  if [ "$extra_fields" -lt "0" ]
+  then
+    echo "Extra fields cannot be less than 0"
+    exit 1
+  fi
+
+  type="-type=bed3+${extra_fields}"
   bedToBigBed !{type} !{bed} !{chrom_sizes} !{output_bb}
   ln -sf !{output_bb} "variant-!{source}-details.bb"
   

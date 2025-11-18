@@ -1,6 +1,6 @@
 {
-	"name": "short_variant",
-	"description": "BED fields for short variant track in genome browser",
+	"name": "structural_variant",
+	"description": "BED fields for structural variant track in genome browser",
 	"fields": {
 		"chromosome": {
 			"type": "string",

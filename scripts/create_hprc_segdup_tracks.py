@@ -45,7 +45,7 @@ def parse_args(args=None):
     parser.add_argument(
         "--extra_fields",
         dest="extra_fields",
-        action="action_true",
+        action="store_true",
         help="add extra fields in the bed file"
     )
     parser.add_argument(
@@ -302,7 +302,7 @@ def main(args=None):
             if bed_fields['chr1'].startswith("chr"):
                 bed_fields['chr1'] = bed_fields['chr1'][3:]
             if bed_fields['chr1'] == "M":
-                if bed_fields['chr1'] = "MT"
+                bed_fields['chr1'] = "MT"
 
             if bed_fields['chr1'] not in avail_chrom:
                 skipped_chrom.add(bed_fields['chr1'])
@@ -330,8 +330,8 @@ def main(args=None):
             }
             if extra_fields:
                 new_bed_fields["percentage_match"] = bed_fields['fracMatch']
-                new_bed_fields["duplicated_region"] = bed_fields['name'],
-                new_bed_fields["duplicated_region_strand"] = bed_fields['strand2'] 
+                new_bed_fields["duplicated_region"] = bed_fields['name']
+                new_bed_fields["duplicated_region_strand"] = bed_fields['strand2']
 
             w_f.write("\t".join(new_bed_fields.values()) + "\n")
     print(f"Skipped {skipped_count} entries from chromosomes - {','.join(skipped_chrom)}")

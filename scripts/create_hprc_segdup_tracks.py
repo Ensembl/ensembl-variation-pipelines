@@ -232,13 +232,6 @@ def generate_chrom_sizes_file(
         name, length = [col.strip() for col in line.split("\t")]
         if name not in lengths or int(lengths[name]) < int(length):
             lengths[name] = length
-            
-            # do we need to add chr prefix for all chrom?
-            lengths["chr"+name] = length
-
-            if name == "MT":
-                lengths["M"] = length
-                lengths["chrM"] = length
 
     with open(chrom_sizes_file, "w") as file:
         for name in lengths:
@@ -304,6 +297,12 @@ def main(args=None):
                 continue
             
             bed_fields = {header[col_no]:col_value for col_no, col_value in enumerate(line.strip().split("\t"))}
+
+            # remove chr prefix and rename M to MT
+            if bed_fields['chr1'].startswith("chr"):
+                bed_fields['chr1'] = bed_fields['chr1'][3:]
+            if bed_fields['chr1'] == "M":
+                if bed_fields['chr1'] = "MT"
 
             if bed_fields['chr1'] not in avail_chrom:
                 skipped_chrom.add(bed_fields['chr1'])

@@ -43,6 +43,12 @@ def parse_args(args=None):
         help="output file name prefix, all files will be named - <output_prefix>.<extension>",
     )
     parser.add_argument(
+        "--extra_fields",
+        dest="extra_fields",
+        action="action_true",
+        help="add extra fields in the bed file"
+    )
+    parser.add_argument(
         "--chrom_sizes_file",
         dest="chrom_sizes_file",
         type=str,
@@ -252,8 +258,9 @@ def main(args=None):
     args = parse_args(args)
 
     input_bed = args.input_bed
-    chrom_sizes_file = args.chrom_sizes_file
     output_prefix = args.output_prefix or os.path.basename(input_bed).replace(".bed", "_out")
+    extra_fields = args.extra_fields
+    chrom_sizes_file = args.chrom_sizes_file
     output_bed = f"{output_prefix}.bed"
     autosql = f"{output_prefix}.as"
     output_bb = f"{output_prefix}.bb"
@@ -320,11 +327,12 @@ def main(args=None):
                 "analysis": "SEDEF",
                 "repeatName": "segdup",
                 "repeatClass": "segmental_duplication",
-                "repeatType": "/".join(segdup_type),
-                "percentage_match": bed_fields['fracMatch'],
-                "duplicated_region": bed_fields['name'],
-                "duplicated_region_strand": bed_fields['strand2'] 
+                "repeatType": "/".join(segdup_type)
             }
+            if extra_fields:
+                new_bed_fields["percentage_match"] = bed_fields['fracMatch']
+                new_bed_fields["duplicated_region"] = bed_fields['name'],
+                new_bed_fields["duplicated_region_strand"] = bed_fields['strand2'] 
 
             w_f.write("\t".join(new_bed_fields.values()) + "\n")
     print(f"Skipped {skipped_count} entries from chromosomes - {','.join(skipped_chrom)}")
@@ -340,20 +348,27 @@ def main(args=None):
         '\tstring  analysis;    "Type of repeat analysis"',
         '\tstring  repeatName;  "Name of repeat"',
         '\tstring  repeatClass; "Class of repeat"',
-        '\tstring  repeatType;  "Type of repeat"'
-        '\tstring  match;  "Match percentage with duplicated region"'
-        '\tstring  duplicated_region;  "Duplicated region (formatted as chrom:start-end)"'
-        '\tstring  duplicated_region_strand;  "Strand of duplicated region"',
-        "\t)"
+        '\tstring  repeatType;  "Type of repeat"',
+        "\t)",
     ]
+    if extra_fields:
+        AutoSQL.pop()
+        AutoSQL.append('\tstring  match;  "Match percentage with duplicated region"')
+        AutoSQL.append('\tstring  duplicated_region;  "Duplicated region (formatted as chrom:start-end)"')
+        AutoSQL.append('\tstring  duplicated_region_strand;  "Strand of duplicated region"')
+        AutoSQL.append('\t)')
+
     with open(autosql, "w") as w_f:
         for line in AutoSQL:
             w_f.write(line + "\n")
 
     # generate bigBed
     print("Generating bigBed ...")
+    type_arg = "-type=bed3+5"
+    if extra_fields:
+        type_arg = "-type=bed3+8"
     process = subprocess.run(
-        ["bedToBigBed", "-tab", "-type=bed3+8", f"-as={autosql}", output_bed, chrom_sizes_file, output_bb],
+        ["bedToBigBed", "-tab", type_arg, f"-as={autosql}", output_bed, chrom_sizes_file, output_bb],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )

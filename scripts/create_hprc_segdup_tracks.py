@@ -56,6 +56,13 @@ def parse_args(args=None):
         help="file with chromomsome sizes, if not given the script will generate it.",
     )
     parser.add_argument(
+        "--synonym_file",
+        dest="synonym_file",
+        type=str,
+        required=False,
+        help="file with chromomsome synonym, if not given the script will generate it.",
+    )
+    parser.add_argument(
         "-I",
         "--ini_file",
         dest="ini_file",
@@ -239,6 +246,89 @@ def generate_chrom_sizes_file(
             length = int(lengths[name]) + 1
             file.write(f"{name}\t{str(length)}\n")
 
+def generate_synonym_file(
+    server: dict, core_db: str, synonym_file: str
+) -> None:
+    """Generate a chromosome synonym file from the core database.
+
+    Queries seq_region and seq_region_synonym tables, post-processes to remove duplicates
+    and resolves names longer than 31 characters where possible.
+
+    Args:
+        server (dict): Server connection mapping.
+        core_db (str): Core database name.
+        synonym_file (str): Output file path.
+
+    Returns:
+        None
+    """
+    query = f"SELECT ss.synonym, sr.name FROM seq_region AS sr, seq_region_synonym AS ss WHERE sr.seq_region_id = ss.seq_region_id;"
+    process = subprocess.run(
+        [
+            "mysql",
+            "--host",
+            server["host"],
+            "--port",
+            server["port"],
+            "--user",
+            server["user"],
+            "--database",
+            core_db,
+            "-N",
+            "--execute",
+            query,
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    with open(synonym_file, "w") as file:
+        file.write(process.stdout.decode().strip())
+
+    # remove duplicates and change seq region name that are longer than 31 character
+    with open(synonym_file, "r") as file:
+        lines = file.readlines()
+
+    names = {}
+    for line in lines:
+        synonym, name = [col.strip() for col in line.split("\t")]
+        if synonym not in names or len(names[synonym]) > len(name):
+            names[synonym] = name
+
+    new_names = {}
+    for synonym in names:
+        name = names[synonym]
+
+        # add entries for chr prefixed chromsome name from UCSC cases
+        if name.isdigit() or name in ["X", "Y", "MT"]:
+            new_names[f"chr{name}"] = name
+
+        # if name is longer than 31 character we try to take a synonym instead of the name
+        if len(name) > 31:
+            # if the current synonym is less than 31 character we can take it
+            # and it does not need to be in the file
+            if len(synonym) <= 31:
+                pass
+            # if the current synonym is longer than 31 character we look for another synonym of the name
+            else:
+                change_name = synonym
+                for alt_synonym in names:
+                    if names[alt_synonym] == synonym and len(alt_synonym) < 31:
+                        change_name = alt_synonym
+
+                if len(change_name) > 31:
+                    print(
+                        f"[WARNING] cannot resolve {name} to a synonym which is under 31 character"
+                    )
+
+                new_names[synonym] = change_name
+        else:
+            new_names[synonym] = name
+
+    with open(synonym_file, "w") as file:
+        for synonym in new_names:
+            file.write(f"{synonym}\t{new_names[synonym]}\n")
+
 def main(args=None):
     """Construct a bigBed and bigWig that can be used in Ensembl new website
 
@@ -254,6 +344,10 @@ def main(args=None):
     output_prefix = args.output_prefix or os.path.basename(input_bed).replace(".bed", "_out")
     extra_fields = args.extra_fields
     chrom_sizes_file = args.chrom_sizes_file
+    synonym_file = args.synonym_file
+    species = args.species
+    assembly = args.assembly
+    ini_file = args.ini_file or "DEFAULT.ini"
     output_bed = f"{output_prefix}.bed"
     autosql = f"{output_prefix}.as"
     output_bb = f"{output_prefix}.bb"
@@ -264,15 +358,11 @@ def main(args=None):
     if (not chrom_sizes_file) or (not os.path.isfile(chrom_sizes_file)):
         print("No chrom sizes file provided, generating...")
 
-        species = args.species
-        assembly = args.assembly
-        ini_file = args.ini_file or "DEFAULT.ini"
-
         if (not species) or (not assembly) or (not os.path.isfile(ini_file)):
-            print("[ERROR] Need --species, --assembly and --ini_file to generate chrom_sizes_file")
+            print("[ERROR] Need --species, --assembly and --ini_file to generate chrom sizes file")
             exit(1)
 
-        chrom_sizes_file = f"{species}.chrom_sizes_file"
+        chrom_sizes_file = f"{species}.chrom_sizes"
         core_server = parse_ini(ini_file, "core")
         core_db = get_db_name(core_server, species, type="core")
         generate_chrom_sizes_file(core_server, core_db, chrom_sizes_file, assembly)
@@ -282,6 +372,25 @@ def main(args=None):
         for line in f:
             [chrom, length] = line.strip().split("\t")
             chrom_sizes[chrom] = length
+
+    # generate synonym file if not provided
+    if (not synonym_file) or (not os.path.isfile(synonym_file)):
+        print("No synonym file provided, generating...")
+
+        if (not species) or (not os.path.isfile(ini_file)):
+            print("[ERROR] Need --species and --ini_file to generate synonym file")
+            exit(1)
+
+        synonym_file = f"{species}.synonym"
+        generate_synonym_file(core_server, core_db, synonym_file)
+
+    synonyms = {}
+    with open(synonym_file) as file:
+        for line in file:
+            chr = line.split("\t")[0].strip()
+            synonym = line.split("\t")[1].strip()
+
+            synonyms[chr] = synonym
 
     # format input bed to be ingestable by the web client
     print("Generating bed ...")
@@ -296,13 +405,22 @@ def main(args=None):
                 header = line.strip().replace("#", "").split("\t")
                 continue
             
-            bed_fields = {header[col_no]:col_value for col_no, col_value in enumerate(line.strip().split("\t"))}
+            bed_fields = {}
+            for col_no, col_value in enumerate(line.strip().split("\t")):
+                # some cases there were duplicate start1, end1 fields containing invalid location
+                # not overriding the actual start1, end1
+                if not header[col_no] in bed_fields:
+                    bed_fields[header[col_no]] = col_value 
 
-            # remove chr prefix and rename M to MT
+            # remove chr prefix and rename M to MT; some have haplotype#version# prefix
+            bed_fields['chr1'] = bed_fields['chr1'].split("#")[-1]
             if bed_fields['chr1'].startswith("chr"):
                 bed_fields['chr1'] = bed_fields['chr1'][3:]
             if bed_fields['chr1'] == "M":
                 bed_fields['chr1'] = "MT"
+
+            # replace synonyms
+            bed_fields['chr1'] = synonyms.get(bed_fields['chr1'], bed_fields['chr1'])
 
             if bed_fields['chr1'] not in avail_chrom:
                 skipped_chrom.add(bed_fields['chr1'])
@@ -334,6 +452,15 @@ def main(args=None):
                 new_bed_fields["duplicated_region_strand"] = bed_fields['strand2']
 
             w_f.write("\t".join(new_bed_fields.values()) + "\n")
+    process = subprocess.run(
+        ["sort", "-k1,1", "-k2,2n", "-k3,3n", "-o", output_bed, output_bed],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if process.returncode != 0:
+        print(f"[ERROR] Could not sort bed - {process.stderr.decode()}")
+        exit(1)
+    
     print(f"Skipped {skipped_count} entries from chromosomes - {','.join(skipped_chrom)}")
     
     # create AutoSQL for bigBed

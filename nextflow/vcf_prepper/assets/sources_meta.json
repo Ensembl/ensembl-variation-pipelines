@@ -1,12 +1,5 @@
 [
 	{
-		"name": "ClinVar",
-		"version": "2025-11-09",
-		"description": "ClinVar is a freely accessible, public archive of reports of the relationships among human variations and phenotypes, hosted by the National Center for Biotechnology Information (NCBI) and funded by the National Institutes of Health (NIH) [oai_citation:0‡clinicalgenome.org](https://www.clinicalgenome.org/data-sharing/clinvar/#:~:text=ClinVar%20is%20a%20a%20freely,NIH%29%20funding).",
-		"url": "https://www.ncbi.nlm.nih.gov/clinvar/",
-		"accession_url": "https://www.ncbi.nlm.nih.gov/clinvar/snp/"
-	},
-	{
 		"name": "Ensembl",
 		"version": "110",
 		"description": "Ensembl",
@@ -152,5 +145,12 @@
 	{
 		"name": "Panzea_2.7GBS",
 		"description": "Remapped to Zm-B73-REFERENCE-NAM-5.0"
+	},
+	{
+		"name": "ClinVar",
+		"version": "2025-11-09",
+		"description": "ClinVar is a freely accessible, public archive of reports of the relationships among human variations and phenotypes, hosted by the National Center for Biotechnology Information (NCBI) and funded by the National Institutes of Health (NIH) [oai_citation:0‡clinicalgenome.org](https://www.clinicalgenome.org/data-sharing/clinvar/#:~:text=ClinVar%20is%20a%20a%20freely,NIH%29%20funding).",
+		"url": "https://www.ncbi.nlm.nih.gov/clinvar/",
+		"accession_url": "https://www.ncbi.nlm.nih.gov/clinvar/snp/"
 	}
 ]

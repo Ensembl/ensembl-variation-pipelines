@@ -149,8 +149,8 @@
 	{
 		"name": "ClinVar",
 		"version": "2025-11-09",
-		"description": "ClinVar is a freely accessible, public archive of reports of the relationships among human variations and phenotypes, hosted by the National Center for Biotechnology Information (NCBI) and funded by the National Institutes of Health (NIH) [oai_citation:0‡clinicalgenome.org](https://www.clinicalgenome.org/data-sharing/clinvar/#:~:text=ClinVar%20is%20a%20a%20freely,NIH%29%20funding).",
+		"description": "ClinVar is a free public archive of reports of the relationships between human variations and phenotypes.",
 		"url": "https://www.ncbi.nlm.nih.gov/clinvar/",
-		"accession_url": "https://www.ncbi.nlm.nih.gov/clinvar/snp/"
+		"accession_url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/"
 	}
 ]

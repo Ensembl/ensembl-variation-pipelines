@@ -100,7 +100,7 @@ def bgzip_file(file: str) -> bool:
     if not os.path.isfile(file):
         raise FileNotFoundError(f"File not found - {file}")
 
-    process = subprocess.run(["bgzip", file])
+    process = subprocess.run(["bgzip", "-f", file])
     if process.returncode != 0:
         raise Exception("Failed to bgzip - {file}")
 

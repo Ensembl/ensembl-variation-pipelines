@@ -4,24 +4,42 @@ import pysam
 import re
 from collections import defaultdict
 from uu import Error
+from lxml import etree
 import xml.etree.ElementTree as ET
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
+acession_copy_number_map  = {}
+
+# def find_variant_by_accession(xml_file, accession)  -> dict|None:
+#     with gzip.open(xml_file, 'rb') as f:
+#         context = ET.iterparse(f, events=("end",))
+#         for event, elem in context:
+#             if elem.tag == "VARIANT_CALL" and elem.attrib.get("variant_call_accession") == accession:
+#                 result = {
+#                     "variant_call_accession": elem.attrib.get("variant_call_accession"),
+#                     "copy_number": elem.attrib.get("copy_number")
+#                 }
+#                 elem.clear()
+#                 return result
+#             elem.clear()
+#     return None
+
+
 def find_variant_by_accession(xml_file, accession)  -> dict|None:
-    with gzip.open(xml_file, 'rb') as f:
-        context = ET.iterparse(f, events=("end",))
-        for event, elem in context:
-            if elem.tag == "VARIANT_CALL" and elem.attrib.get("variant_call_accession") == accession:
-                result = {
-                    "variant_call_accession": elem.attrib.get("variant_call_accession"),
-                    "copy_number": elem.attrib.get("copy_number")
-                }
-                elem.clear()
-                return result
-            elem.clear()
-    return None
+    if not acession_copy_number_map:
+        tree = etree.parse(xml_file)
+        root = tree.getroot()
+        for vc in root.findall("VARIANT_CALL"):
+            accession_from_file = vc.get("variant_call_accession")
+            copy_num = vc.get("copy_number")
+            acession_copy_number_map[accession_from_file] = copy_num
+    if accession in acession_copy_number_map:
+        return {
+            "variant_call_accession": accession,
+            "copy_number": acession_copy_number_map[accession]
+        }           
 
 
 
@@ -37,6 +55,7 @@ def get_calls_by_region(call_vcf, call_xml_path) -> dict:
             call_record["CHROM"] = rec.chrom
             call_record["POS"] = rec.pos
             call_record["REF"] = rec.ref
+            call_record["ALT"] = rec.alts[0] if rec.alts else None
             call_record["ALLELE_NAME"] = rec.id or f"{rec.chrom}:{rec.pos}"
             call_record["ALLELE_TYPE"] = rec.info.get("SVTYPE")
             call_record["END"] = rec.stop
@@ -51,7 +70,6 @@ def get_output_header(header: pysam.VariantHeader)-> pysam.VariantHeader:
     header.info.add("ALLELE_TYPE", 1, "String", "Aggregated type of supporting calls")
     header.info.add("CN", ".", "String", "Comma-separated list of copy numbers of supporting calls")
     if "SVLEN" not in header.info:
-        del header.info['SVLEN']
         header.info.add("SVLEN", ".", "Integer", "List of SV lengths of supporting calls")
     return header
 
@@ -89,8 +107,8 @@ def generate_output(region_vcf, region_calls, out_vcf_path, header) -> None:
         if calls:
             new_rec.info["ALLELE_NAME"] = ",".join(call["ALLELE_NAME"] for call in calls)
             new_rec.info["ALLELE_TYPE"] = aggregate_sv_type(call["ALLELE_TYPE"] for call in calls)
-            new_rec.alts = tuple([f"<{call['ALLELE_TYPE']}>" for call in calls])
-            new_rec.info["SVLEN"] = ",".join(call["SVLEN"][0] for call in calls if call["SVLEN"] is not None)
+            new_rec.alts = tuple([call["ALT"] for call in calls])
+            new_rec.info["SVLEN"] = ",".join(call["SVLEN"][0] if call["SVLEN"] is not None else "." for call in calls)
             if any(call.get("COPY_NUMBER") is not None for call in calls):
                 new_rec.info["CN"] = ",".join(call.get("COPY_NUMBER", "NA") for call in calls)
             if rec.stop != max(call["END"] for call in calls):

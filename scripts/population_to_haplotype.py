@@ -47,6 +47,8 @@ def get_sample_genotype_prefix(sample):
     """
     if sample == "GRCh38":
         return {0: "GCA_000001405.29"}
+    elif sample == "CHM13":
+        return {0: "GCA_009914755.4"}
     else:
         return {0: "paternal", 1: "maternal"}
 

@@ -14,8 +14,10 @@
 
 import os
 import subprocess
-import random
+import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class TestFile:
     def test_exist(self, bigbed):

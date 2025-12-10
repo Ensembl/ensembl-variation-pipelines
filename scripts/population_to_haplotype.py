@@ -163,7 +163,7 @@ for variant in input_vcf:
 
     genotype = variant.genotypes[sample_idx]
     for gt_idx, gt in enumerate(genotype[:-1]):
-        if gt:
+        if gt == 1:
             writer = writers[type][gt_idx]
             writer.write_record(variant)
 

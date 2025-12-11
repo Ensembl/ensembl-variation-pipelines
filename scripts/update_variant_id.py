@@ -75,6 +75,12 @@ def main(args=None):
             output_file = input_file.replace(".vcf", "_renamed.vcf")
 
             input_vcf = VCF(input_file)
+            input_vcf.add_info_to_header({
+                'ID': 'NODEID', 
+                'Description': 'Identifier of the nodes this variant belong to',
+                'Type':'String', 
+                'Number': '1'
+            })
             output_vcf = Writer(output_file, input_vcf, mode="wz")
             
             csq_header_info = input_vcf.get_header_type("CSQ")["Description"]
@@ -96,6 +102,7 @@ def main(args=None):
                     exit(1)
                 unique_ids[identifier] = new_spdi
 
+                variant.INFO['NODEID'] = variant.ID
                 variant.ID = new_spdi
 
                 output_vcf.write_record(variant)

@@ -18,7 +18,10 @@ from cyvcf2 import VCF, Writer
 import os
 import argparse
 import subprocess
-from enum import Enum
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
 
 parser = argparse.ArgumentParser()
 parser.add_argument(dest="input", type=str, help="Population VCF file path")
@@ -130,10 +133,18 @@ def index_file(file: str) -> bool:
 
 STRUCTURAL_VARIANT_LEN = 50
 sample = args.sample
+
 input_vcf = VCF(args.input, samples=[sample])
+input_vcf.add_info_to_header({
+    'ID': 'NODEID', 
+    'Description': 'Identifier of the nodes this variant belong to',
+    'Type':'String', 
+    'Number': '1'
+})
+
 out_dir = (
     args.output_dir
-    or "/nfs/production/flicek/ensembl/variation/new_website/SV/process_hgvs3/outputs/"
+    or os.getcwd()
 )
 filenames = generate_filenames(sample, args.split_sv)
 writers = {}
@@ -150,22 +161,74 @@ if args.split_sv:
 else:
     writers["structural_variant"] = writers["short_variant"]
 
+    
 sample_idx = input_vcf.samples.index(sample)
 counter = 100
+cache = {
+    "location": ""
+}
 for variant in input_vcf:
-    # id_tag = variant.INFO.get("ID")
-    # var_type = id_tag.split("-")[2]
+    orig_alt = variant.ALT
+    orig_id = variant.ID
 
     max_allele_len = max([len(allele) for allele in variant.ALT + [variant.REF]])
     type = "short_variant"
     if max_allele_len > STRUCTURAL_VARIANT_LEN:
         type = "structural_variant"
-
+    
     genotype = variant.genotypes[sample_idx]
     for gt_idx, gt in enumerate(genotype[:-1]):
-        if gt == 1:
+        if gt > 0:
+            ref = variant.REF
+            alt = variant.ALT[gt-1] # gt=0 is ref 
+            location = f"{variant.CHROM}:{variant.POS}"
+            allele_string = f"{ref.upper()}/{alt.upper()}"
+
+            # remove anchor and calculate modified spdi
+            if ref[0] == alt[0]:
+                ref = ref[1:]
+                alt = alt[1:]
+            deleted_length = len(ref) if len(ref) else ""
+            inserted_length = len(alt) if len(alt) else ""
+            mod_spdi = f"{variant.CHROM}:{variant.POS}:{deleted_length}:{inserted_length}"
+            
+            # for new location initialise the lookup cache
+            if cache["location"] != location:
+                cache = {
+                    "location": location
+                }
+            cache[mod_spdi] = cache.get(mod_spdi, {})
+            
+            # checking variants with same SPDI 
+            if gt_idx in cache[mod_spdi]:
+                
+                # if same SPDI have different allele we need to check why that is so
+                if allele_string != cache[mod_spdi][gt_idx]:
+                    logger.warning("Same SPDI with different allele string")
+                    logger.warning(f"\tlocation - {location}; spdi - {mod_spdi}")
+                    logger.warning(f"\tallele_string 1: {cache[mod_spdi][gt_idx]}")
+                    logger.warning(f"\tallele_string 2: {allele_string}")
+                
+                # same SPDI with same allele string is basically same variant  
+                # it sometimes happen when the different path in graph gives same variant 
+                # take only one and ignore the others
+                else:
+                    logger.info(f"Duplicate variant - {mod_spdi}, only one will be taken")
+                    break
+
+            cache[mod_spdi][gt_idx] = allele_string
+
+            # update variant and store
+            variant.INFO["NODEID"] = orig_id
+            variant.ID = mod_spdi
+            variant.ALT = [variant.ALT[gt-1]]
+
             writer = writers[type][gt_idx]
             writer.write_record(variant)
+
+            # restore the values for next gt
+            variant.ID = orig_id
+            variant.ALT = orig_alt
 
     if args.debug and not counter:
         break

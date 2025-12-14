@@ -47,6 +47,12 @@ def parse_args(args=None):
         type=str,
         help="path to a vcf prepper output directory",
     )
+    parser.add_argument(
+        "--keep_node_id",
+        dest="keep_node_id",
+        action="store_true",
+        help="keep node identifier in INFO/NODEID field",
+    )
 
     return parser.parse_args(args)
 
@@ -75,12 +81,13 @@ def main(args=None):
             output_file = input_file.replace(".vcf", "_renamed.vcf")
 
             input_vcf = VCF(input_file)
-            input_vcf.add_info_to_header({
-                'ID': 'NODEID', 
-                'Description': 'Identifier of the nodes this variant belong to',
-                'Type':'String', 
-                'Number': '1'
-            })
+            if args.keep_node_id:
+                input_vcf.add_info_to_header({
+                    'ID': 'NODEID', 
+                    'Description': 'Identifier of the nodes this variant belong to',
+                    'Type':'String', 
+                    'Number': '1'
+                })
             output_vcf = Writer(output_file, input_vcf, mode="wz")
             
             csq_header_info = input_vcf.get_header_type("CSQ")["Description"]
@@ -91,8 +98,10 @@ def main(args=None):
                 spdi = variant.INFO.get('CSQ').split(",")[0].split("|")[spdi_idx]
                 
                 (chr, pos, deleted, inserted) = spdi.split(":")
-                deleted_length = len(deleted) if len(deleted) else ""
-                inserted_length = len(inserted) if len(inserted) else ""
+                deleted_length = int(deleted) if deleted.isdecimal() else len(deleted)
+                deleted_length = deleted_length if deleted_length != 0 else ""
+                inserted_length = int(inserted) if inserted.isdecimal() else len(inserted)
+                inserted_length = inserted_length if inserted_length != 0 else ""
                 new_spdi = f"{chr}:{pos}:{deleted_length}:{inserted_length}"
 
                 identifier = f"{variant.CHROM}:{variant.POS}:{variant.ID}"
@@ -102,7 +111,8 @@ def main(args=None):
                     exit(1)
                 unique_ids[identifier] = new_spdi
 
-                variant.INFO['NODEID'] = variant.ID
+                if args.keep_node_id:
+                    variant.INFO['NODEID'] = variant.ID
                 variant.ID = new_spdi
 
                 output_vcf.write_record(variant)

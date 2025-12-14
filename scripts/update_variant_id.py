@@ -21,8 +21,10 @@ import os
 import argparse
 import json
 import subprocess
-import pyBigWig
+import logging
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def parse_args(args=None):
     """Parse command-line arguments for creating track API metadata.
@@ -63,7 +65,8 @@ def main(args=None):
     pipeline_outdir = args.pipeline_outdir or os.getcwd()
 
     if input_config is None or not os.path.isfile(input_config):
-        print(f"[ERROR] Please provide input config to proceed")
+        logger.error(f"Please provide input config to proceed")
+        exit(1)
 
     with open(input_config, "r") as file:
         species_metadata = json.load(file)
@@ -72,10 +75,10 @@ def main(args=None):
         for input_config in species_metadata[genome]:
             genome_uuid = input_config["genome_uuid"]
             source = input_config["source_name"]
-            print(f"Running for: {source}")
+            logger.info(f"Running for: {source}")
 
             # update ID in VCF
-            print("Processing VCF...")
+            logger.info("Processing VCF...")
 
             input_file = os.path.join(pipeline_outdir, "api", genome_uuid, f"variation_{source}.vcf.gz")
             output_file = input_file.replace(".vcf", "_renamed.vcf")
@@ -106,8 +109,8 @@ def main(args=None):
 
                 identifier = f"{variant.CHROM}:{variant.POS}:{variant.REF}:{','.join(variant.ALT)}"
                 if identifier in unique_ids:
-                    print(f"[ERROR] Identifier clash for {identifier}: {unique_ids[identifier]} vs {new_spdi}")
-                    print("Cannot proceed...")
+                    logger.error(f"Identifier clash for {identifier}: {unique_ids[identifier]} vs {new_spdi}")
+                    logger.error("Cannot proceed...")
                     exit(1)
                 unique_ids[identifier] = new_spdi
 
@@ -128,11 +131,11 @@ def main(args=None):
                 stderr=subprocess.PIPE
             )
             if process.returncode != 0:
-                print("[ERROR] Failed to index output - ", process.stderr.decode().strip())
+                logger.error("Failed to index output - ", process.stderr.decode().strip())
                 exit(1)
 
             # update ID in bigBed
-            print("Processing bigBed...")
+            logger.info("Processing bigBed...")
             
             input_bb = os.path.join(pipeline_outdir, "tracks", genome_uuid, f"variant-{source.lower()}-details.bb")
             bed_file = input_bb.replace(".bb", ".bed")
@@ -145,7 +148,7 @@ def main(args=None):
                 stderr=subprocess.PIPE
             )
             if process.returncode != 0:
-                print("[ERROR] Failed to convert bb to bed - ", process.stderr.decode().strip())
+                logger.error("Failed to convert bb to bed - ", process.stderr.decode().strip())
                 exit(1)
 
             # update ID fields in bed file
@@ -159,7 +162,7 @@ def main(args=None):
                     else:
                         identifier = f"{fields[0]}:{int(fields[1])+1}:{fields[5]}:{fields[6]}"
                     if identifier not in unique_ids:
-                        print(f"[ERROR] identifier lookup failed for - {identifier}")
+                        logger.error(f"Identifier lookup failed for - {identifier}")
                         exit(1)
                     fields[3] = unique_ids[identifier]
                     field_num = len(fields)
@@ -176,7 +179,7 @@ def main(args=None):
                 stderr=subprocess.PIPE
             )
             if process.returncode != 0:
-                print("[ERROR] Failed to convert bed to bb - ", process.stderr.decode().strip())
+                logger.error("Failed to convert bed to bb - ", process.stderr.decode().strip())
                 exit(1)
 
             # replace current vcf and bb file

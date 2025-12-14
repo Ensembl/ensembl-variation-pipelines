@@ -35,6 +35,12 @@ parser.add_argument(
     action="store_true",
     help="Split the output file into short and structural variant",
 )
+parser.add_argument(
+    "--update_id",
+    dest="update_id",
+    action="store_true",
+    help="Update variant identifier to be a modified SPDI notation",
+)
 parser.add_argument("--debug", dest="debug", action="store_true", help="Debug mode")
 args = parser.parse_args()
 
@@ -135,12 +141,13 @@ STRUCTURAL_VARIANT_LEN = 50
 sample = args.sample
 
 input_vcf = VCF(args.input, samples=[sample])
-input_vcf.add_info_to_header({
-    'ID': 'NODEID', 
-    'Description': 'Identifier of the nodes this variant belong to',
-    'Type':'String', 
-    'Number': '1'
-})
+if args.update_id:
+    input_vcf.add_info_to_header({
+        'ID': 'NODEID', 
+        'Description': 'Identifier of the nodes this variant belong to',
+        'Type':'String', 
+        'Number': '1'
+    })
 
 out_dir = (
     args.output_dir
@@ -219,8 +226,9 @@ for variant in input_vcf:
             cache[mod_spdi][gt_idx] = allele_string
 
             # update variant and store
-            variant.INFO["NODEID"] = orig_id
-            variant.ID = mod_spdi
+            if args.update_id:
+                variant.INFO["NODEID"] = orig_id
+                variant.ID = mod_spdi
             variant.ALT = [variant.ALT[gt-1]]
 
             writer = writers[type][gt_idx]

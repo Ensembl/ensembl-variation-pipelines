@@ -104,7 +104,7 @@ def main(args=None):
                 inserted_length = inserted_length if inserted_length != 0 else ""
                 new_spdi = f"{chr}:{pos}:{deleted_length}:{inserted_length}"
 
-                identifier = f"{variant.CHROM}:{variant.POS}:{variant.ID}"
+                identifier = f"{variant.CHROM}:{variant.POS}:{variant.REF}:{','.join(variant.ALT)}"
                 if identifier in unique_ids:
                     print(f"[ERROR] Identifier clash for {identifier}: {unique_ids[identifier]} vs {new_spdi}")
                     print("Cannot proceed...")
@@ -155,9 +155,9 @@ def main(args=None):
                 for line in r_f:
                     fields = line.split("\t")
                     if fields[4] == "insertion":
-                        identifier = f"{fields[0]}:{int(fields[1])-1}:{fields[3]}"
+                        identifier = f"{fields[0]}:{int(fields[1])-1}:{fields[5]}:{fields[6]}"
                     else:
-                        identifier = f"{fields[0]}:{int(fields[1])+1}:{fields[3]}"
+                        identifier = f"{fields[0]}:{int(fields[1])+1}:{fields[5]}:{fields[6]}"
                     if identifier not in unique_ids:
                         print(f"[ERROR] identifier lookup failed for - {identifier}")
                         exit(1)

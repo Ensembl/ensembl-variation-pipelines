@@ -1072,6 +1072,25 @@
    ],
    "triticum_aestivum": [
       {
+         "name": "MAGIC-16",
+         "files": [
+            {
+               "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/MAGIC.vcf.gz",
+               "short_name": "MAGIC-16",
+               "include_fields": [
+                  {
+                     "name": "MAGIC-16",
+                     "fields": {
+                        "af": "AF",
+                        "ac": "AC",
+                        "an": "AN"
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
          "name": "Axiom",
          "files": [
             {

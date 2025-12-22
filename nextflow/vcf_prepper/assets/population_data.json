@@ -1072,14 +1072,14 @@
    ],
    "triticum_aestivum": [
       {
-         "name": "MAGIC-16",
+         "name": "MAGIC-16-Diversity",
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/MAGIC.vcf.gz",
-               "short_name": "MAGIC-16",
+               "short_name": "MAGIC-16-Diversity",
                "include_fields": [
                   {
-                     "name": "MAGIC-16",
+                     "name": "MAGIC-16-Diversity",
                      "fields": {
                         "af": "AF",
                         "ac": "AC",

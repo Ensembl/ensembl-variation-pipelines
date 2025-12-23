@@ -64,7 +64,7 @@ def parse_config (config) {
 
       // if source is MULTIPLE there are multiple sources; they must be listed  in sources field in the input config
       if (meta.source == "MULTIPLE"){
-        meta.sources = source_data.sources.join(",")
+        meta.sources = source_datum.sources.join(",")
         meta.sources = meta.sources.replaceAll(" ", "%20") // we cannot use whitespace in cmd argument
       }
 

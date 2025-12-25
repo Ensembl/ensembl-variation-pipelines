@@ -1,0 +1,122 @@
+# See the NOTICE file distributed with this work for additional information
+# regarding copyright ownership.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import pytest
+import pyBigWig
+import random
+from cyvcf2 import VCF
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+NO_VARIANTS = 10000
+
+def pytest_addoption(parser):
+    """Add custom pytest command-line options.
+
+    Adds options to supply paths to vcf, bigbed, bigwig, source_vcf and species.
+    """
+    parser.addoption("--vcf", type=str, default=None)
+    parser.addoption("--bigbed", type=str, default=None)
+    parser.addoption("--bigwig", type=str, default=None)
+    parser.addoption("--source_vcf", type=str, default=None)
+    parser.addoption("--species", type=str, default=None)
+    parser.addoption("--skip_xfail", action="store_true", default=None)
+
+
+def pytest_generate_tests(metafunc):
+    """Parametrise fixtures from provided command-line options.
+
+    For each known fixture name, set a single parameterised value from the CLI option.
+    """
+    if "vcf" in metafunc.fixturenames:
+        metafunc.parametrize("vcf", [metafunc.config.getoption("vcf")], ids=['vcf'], scope="session")
+    if "bigbed" in metafunc.fixturenames:
+        metafunc.parametrize("bigbed", [metafunc.config.getoption("bigbed")], ids=['bb'], scope="session")
+    if "bigwig" in metafunc.fixturenames:
+        metafunc.parametrize("bigwig", [metafunc.config.getoption("bigwig")], ids=['bw'], scope="session")
+    if "source_vcf" in metafunc.fixturenames:
+        metafunc.parametrize("source_vcf", [metafunc.config.getoption("source_vcf")], ids=['source_vcf'], scope="session")
+    if "species" in metafunc.fixturenames:
+        metafunc.parametrize("species", [metafunc.config.getoption("species")], ids=[metafunc.config.getoption("species")], scope="session")
+    if "skip_xfail" in metafunc.fixturenames:
+        metafunc.parametrize("skip_xfail", [metafunc.config.getoption("skip_xfail")], ids=[f"skip_xfail={metafunc.config.getoption('skip_xfail')}"], scope="session")
+
+
+@pytest.fixture(scope="session")
+def vcf_reader(vcf):
+    """Provide a cyvcf2 VCF reader for the supplied VCF file path."""
+    vcf_reader = VCF(vcf)
+    return vcf_reader
+
+
+@pytest.fixture()
+def bb_reader(bigbed):
+    """Provide a pyBigWig reader opened on a bigBed file path."""
+    bb_reader = pyBigWig.open(bigbed)
+    return bb_reader
+
+
+@pytest.fixture()
+def bw_reader(bigwig):
+    """Provide a pyBigWig reader opened on a bigWig file path."""
+    bw_reader = pyBigWig.open(bigwig)
+    return bw_reader
+
+
+@pytest.fixture(scope="session")
+def variant_list(vcf_reader):
+    test = {}
+    csq_info_description = vcf_reader.get_header_type("CSQ")["Description"]
+    csq_list = [
+        csq.strip() for csq in csq_info_description.split("Format: ")[1].split("|")
+    ]
+    csq_field_idx = {}
+    for csq_field in csq_list:
+        csq_field_idx[csq_field] = csq_list.index(csq_field)
+    summary_stats_fields = ['NVPHN', 'NGPHN', 'NTCSQ', 'NRCSQ', 'NGENE', 'NCITE', 'RAF']
+
+    chrs = vcf_reader.seqnames
+    variant_list = {}
+    total_no_variants = 0
+    while total_no_variants < NO_VARIANTS:
+        chr = random.choice(chrs)
+        start = random.choice(range(1000, 100000000))
+
+        no_variants = 0
+        for variant in vcf_reader(f"{chr}:{start}"):
+            variant_id = variant.ID
+            variant_list[variant_id] = {
+                'chrom': variant.CHROM,
+                'pos': variant.POS,
+                'ref': variant.REF,
+                'alts': variant.ALT,
+                'csqs': []
+            }
+
+            for csq in variant.INFO["CSQ"].split(","):
+                csq_field_vals = csq.split("|")
+                csq_hash = {csq_list[idx]:csq_val for idx, csq_val in enumerate(csq_field_vals)}
+                variant_list[variant_id]['csqs'].append(csq_hash)
+            
+            for ss_field in summary_stats_fields:
+                variant_list[variant_id][ss_field] = variant.INFO.get(ss_field, None)
+            
+            total_no_variants += 1
+            no_variants += 1
+            if no_variants > 1000:
+                break
+
+    return variant_list

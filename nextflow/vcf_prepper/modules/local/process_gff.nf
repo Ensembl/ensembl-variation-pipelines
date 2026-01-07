@@ -29,7 +29,7 @@ process PROCESS_GFF {
   shell:
   genome = meta.genome
   genome_uuid = meta.genome_uuid
-  release_id = meta.release_id
+  release_id = params.release_id
   version = params.version
   out_dir = meta.genome_temp_dir
   ini_file = params.ini_file

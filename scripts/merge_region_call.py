@@ -12,20 +12,6 @@ logging.basicConfig(level=logging.INFO)
 
 acession_copy_number_map  = {}
 
-# def find_variant_by_accession(xml_file, accession)  -> dict|None:
-#     with gzip.open(xml_file, 'rb') as f:
-#         context = ET.iterparse(f, events=("end",))
-#         for event, elem in context:
-#             if elem.tag == "VARIANT_CALL" and elem.attrib.get("variant_call_accession") == accession:
-#                 result = {
-#                     "variant_call_accession": elem.attrib.get("variant_call_accession"),
-#                     "copy_number": elem.attrib.get("copy_number")
-#                 }
-#                 elem.clear()
-#                 return result
-#             elem.clear()
-#     return None
-
 
 def find_variant_by_accession(xml_file, accession)  -> dict|None:
     if not acession_copy_number_map:

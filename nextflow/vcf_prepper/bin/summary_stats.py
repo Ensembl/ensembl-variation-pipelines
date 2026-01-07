@@ -225,24 +225,18 @@ def main(args=None):
 
                 # In case of no representative population - pick a random one
                 if population_name == "":
-                    # If no population data for this species/assembly (i.e. it's been removed from assets/population_data.json), skip adding population fields
-                    if not population_data[species_patt]:
-                        population = None
-                    else:
-                        population = random.choice(population_data[species_patt])
+                    population = random.choice(population_data[species_patt])
+                    population_name = population["name"]
+                    freq_info_display = population["name"].replace(
+                        "_", " "
+                    ) + population.get("version", "")
 
-                    if population:
-                        population_name = population["name"]
-                        freq_info_display = population["name"].replace(
-                            "_", " "
-                        ) + population.get("version", "")
-
-                        file = random.choice(population["files"])
-                        freq_csq_fields.append(
-                            file["short_name"]
-                            + "_"
-                            + random.choice(file["include_fields"])["fields"]["af"]
-                        )
+                    file = random.choice(population["files"])
+                    freq_csq_fields.append(
+                        file["short_name"]
+                        + "_"
+                        + random.choice(file["include_fields"])["fields"]["af"]
+                    )
 
         # add to header and write header to output vcf
         if freq_info_display != "":

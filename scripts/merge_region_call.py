@@ -55,6 +55,8 @@ def get_calls_by_region(call_vcf, call_xml_path) -> dict:
             call_record["CHROM"] = rec.chrom
             call_record["POS"] = rec.pos
             call_record["REF"] = rec.ref
+            if len(rec.alts) != 1:
+                logging.warning(f"Not bi-allelic variant call - {rec.id or f'{rec.chrom}:{rec.pos}'}") 
             call_record["ALT"] = rec.alts[0] if rec.alts else None
             call_record["ALLELE_NAME"] = rec.id or f"{rec.chrom}:{rec.pos}"
             call_record["ALLELE_TYPE"] = rec.info.get("SVTYPE")
@@ -87,9 +89,7 @@ def aggregate_sv_type(sv_types)-> str:
 # to validate calls for CHROM, POS, REF
 def validate_calls(region_rec, calls)   -> bool:    
     for field in (("CHROM","chrom"), ("POS","pos"), ("REF","ref")):
-        print(set([call[field[0]] for call in calls]))
         if len(set([call[field[0]] for call in calls])) != 1 or set([call[field[0]] for call in calls]).pop() != getattr(region_rec,field[1]):
-            print("Not matching")
             logging.warning(f"{field[0]} does not match for region and call files")
             return False
     return True
@@ -111,8 +111,9 @@ def generate_output(region_vcf, region_calls, out_vcf_path, header) -> None:
             new_rec.info["SVLEN"] = ",".join(call["SVLEN"][0] if call["SVLEN"] is not None else "." for call in calls)
             if any(call.get("COPY_NUMBER") is not None for call in calls):
                 new_rec.info["CN"] = ",".join(call.get("COPY_NUMBER", "NA") for call in calls)
-            if rec.stop != max(call["END"] for call in calls):
-                raise Error("END of calls does not match with region") 
+            calls_max_stop = max(call["END"] for call in calls)
+            if rec.stop != calls_max_stop:
+                 logging.warning(f"END of calls does not match with region ({rec.stop} vs. {calls_max_stop}) for variant region - {rec.id}:{rec.contig}:{rec.start}") 
         else:
             new_rec.info["ALLELE_NAME"] = None
             new_rec.info["ALLELE_TYPE"] = rec.info.get("SVTYPE")

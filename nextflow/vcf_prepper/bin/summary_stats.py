@@ -226,7 +226,7 @@ def main(args=None):
                 # In case of no representative population - pick a random one
                 if population_name == "":
                     # If no population data for this species/assembly (i.e. it's been removed from assets/population_data.json), skip adding population fields
-                    if species_patt not in population_data or not population_data[species_patt]:
+                    if not population_data[species_patt]:
                         population = None
                     else:
                         population = random.choice(population_data[species_patt])

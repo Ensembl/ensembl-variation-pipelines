@@ -143,12 +143,13 @@ def get_variant_example(file: str, species: str) -> str:
 
     # if human, try to find rs699 in 400kbp range
     if species.startswith("homo_sapiens"):
-        for variant in vcf("1:230500000-230900000"):
-            if variant.ID == "rs699":
-                chrom = variant.CHROM
-                pos = variant.POS
-                id = variant.ID
-                return f"{chrom}:{pos}:{id}"
+        if '1' in vcf.seqnames:
+            for variant in vcf("1:230500000-230900000"):
+                if variant.ID == "rs699":
+                    chrom = variant.CHROM
+                    pos = variant.POS
+                    id = variant.ID
+                    return f"{chrom}:{pos}:{id}"
 
     # find a missense_variant
     for variant in vcf:

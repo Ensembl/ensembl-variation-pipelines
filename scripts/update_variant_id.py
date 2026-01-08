@@ -21,8 +21,11 @@ import os
 import argparse
 import json
 import subprocess
-import pyBigWig
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def parse_args(args=None):
     """Parse command-line arguments for creating track API metadata.
@@ -47,6 +50,12 @@ def parse_args(args=None):
         type=str,
         help="path to a vcf prepper output directory",
     )
+    parser.add_argument(
+        "--keep_node_id",
+        dest="keep_node_id",
+        action="store_true",
+        help="keep node identifier in INFO/NODEID field",
+    )
 
     return parser.parse_args(args)
 
@@ -57,7 +66,8 @@ def main(args=None):
     pipeline_outdir = args.pipeline_outdir or os.getcwd()
 
     if input_config is None or not os.path.isfile(input_config):
-        print(f"[ERROR] Please provide input config to proceed")
+        logger.error(f"Please provide input config to proceed")
+        exit(1)
 
     with open(input_config, "r") as file:
         species_metadata = json.load(file)
@@ -66,15 +76,22 @@ def main(args=None):
         for input_config in species_metadata[genome]:
             genome_uuid = input_config["genome_uuid"]
             source = input_config["source_name"]
-            print(f"Running for: {source}")
+            logger.info(f"Running for: {source}")
 
             # update ID in VCF
-            print("Processing VCF...")
+            logger.info("Processing VCF...")
 
             input_file = os.path.join(pipeline_outdir, "api", genome_uuid, f"variation_{source}.vcf.gz")
             output_file = input_file.replace(".vcf", "_renamed.vcf")
 
             input_vcf = VCF(input_file)
+            if args.keep_node_id:
+                input_vcf.add_info_to_header({
+                    'ID': 'NODEID', 
+                    'Description': 'Identifier of the nodes this variant belong to',
+                    'Type':'String', 
+                    'Number': '1'
+                })
             output_vcf = Writer(output_file, input_vcf, mode="wz")
             
             csq_header_info = input_vcf.get_header_type("CSQ")["Description"]
@@ -85,17 +102,21 @@ def main(args=None):
                 spdi = variant.INFO.get('CSQ').split(",")[0].split("|")[spdi_idx]
                 
                 (chr, pos, deleted, inserted) = spdi.split(":")
-                deleted_length = len(deleted) if len(deleted) else ""
-                inserted_length = len(inserted) if len(inserted) else ""
+                deleted_length = int(deleted) if deleted.isdecimal() else len(deleted)
+                deleted_length = deleted_length if deleted_length != 0 else ""
+                inserted_length = int(inserted) if inserted.isdecimal() else len(inserted)
+                inserted_length = inserted_length if inserted_length != 0 else ""
                 new_spdi = f"{chr}:{pos}:{deleted_length}:{inserted_length}"
 
-                identifier = f"{variant.CHROM}:{variant.POS}:{variant.ID}"
+                identifier = f"{variant.CHROM}:{variant.POS}:{variant.REF}:{','.join(variant.ALT)}"
                 if identifier in unique_ids:
-                    print(f"[ERROR] Identifier clash for {identifier}: {unique_ids[identifier]} vs {new_spdi}")
-                    print("Cannot proceed...")
+                    logger.error(f"Identifier clash for {identifier}: {unique_ids[identifier]} vs {new_spdi}")
+                    logger.error("Cannot proceed...")
                     exit(1)
                 unique_ids[identifier] = new_spdi
 
+                if args.keep_node_id:
+                    variant.INFO['NODEID'] = variant.ID
                 variant.ID = new_spdi
 
                 output_vcf.write_record(variant)
@@ -111,11 +132,11 @@ def main(args=None):
                 stderr=subprocess.PIPE
             )
             if process.returncode != 0:
-                print("[ERROR] Failed to index output - ", process.stderr.decode().strip())
+                logger.error("Failed to index output - ", process.stderr.decode().strip())
                 exit(1)
 
             # update ID in bigBed
-            print("Processing bigBed...")
+            logger.info("Processing bigBed...")
             
             input_bb = os.path.join(pipeline_outdir, "tracks", genome_uuid, f"variant-{source.lower()}-details.bb")
             bed_file = input_bb.replace(".bb", ".bed")
@@ -128,7 +149,7 @@ def main(args=None):
                 stderr=subprocess.PIPE
             )
             if process.returncode != 0:
-                print("[ERROR] Failed to convert bb to bed - ", process.stderr.decode().strip())
+                logger.error("Failed to convert bb to bed - ", process.stderr.decode().strip())
                 exit(1)
 
             # update ID fields in bed file
@@ -138,11 +159,11 @@ def main(args=None):
                 for line in r_f:
                     fields = line.split("\t")
                     if fields[4] == "insertion":
-                        identifier = f"{fields[0]}:{int(fields[1])-1}:{fields[3]}"
+                        identifier = f"{fields[0]}:{int(fields[1])-1}:{fields[5]}:{fields[6]}"
                     else:
-                        identifier = f"{fields[0]}:{int(fields[1])+1}:{fields[3]}"
+                        identifier = f"{fields[0]}:{int(fields[1])+1}:{fields[5]}:{fields[6]}"
                     if identifier not in unique_ids:
-                        print(f"[ERROR] identifier lookup failed for - {identifier}")
+                        logger.error(f"Identifier lookup failed for - {identifier}")
                         exit(1)
                     fields[3] = unique_ids[identifier]
                     field_num = len(fields)
@@ -159,7 +180,7 @@ def main(args=None):
                 stderr=subprocess.PIPE
             )
             if process.returncode != 0:
-                print("[ERROR] Failed to convert bed to bb - ", process.stderr.decode().strip())
+                logger.error("Failed to convert bed to bb - ", process.stderr.decode().strip())
                 exit(1)
 
             # replace current vcf and bb file

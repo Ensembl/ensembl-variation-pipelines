@@ -41,7 +41,7 @@ process BED_TO_BIGBED {
   fi
 
   type="-type=bed3+${extra_fields}"
-  bedToBigBed !{type} !{bed} !{chrom_sizes} !{output_bb}
+  bedToBigBed ${type} !{bed} !{chrom_sizes} !{output_bb}
   ln -sf !{output_bb} "variant-!{source}-details.bb"
   
   # temp: for one source we create symlink for focus if only one source present

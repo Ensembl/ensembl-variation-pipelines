@@ -431,6 +431,8 @@ def main(args=None):
         for field in PER_ALLELE_FIELDS:
             field_nums = []
             for allele_num in range(1, num_of_alleles + 1):
+                allele_num = str(allele_num)
+
                 if allele_num in items_per_allele and field in items_per_allele[allele_num]:
                     field_len = len(items_per_allele[allele_num][field])
                     if field_len > 0:
@@ -442,6 +444,8 @@ def main(args=None):
         # create summary info for frequency
         field_vals = []
         for allele_num in range(1, num_of_alleles + 1):
+            allele_num = str(allele_num)
+
             if allele_num in items_per_allele and "frequency" in items_per_allele[allele_num]:
                 field_vals.append(items_per_allele[allele_num]["frequency"])
             else:

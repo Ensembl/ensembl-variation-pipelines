@@ -276,7 +276,7 @@ def main(args=None):
         for csq in csqs.split(","):
             csq_values = csq.split("|")
 
-            allele_num = csq_values[csq_header_idx["ALLELE_NUM"]]
+            allele_num = csq_values[csq_header_idx.get("ALLELE_NUM", 1)]
             if allele_num not in items_per_allele:
                 items_per_allele[allele_num] = {item: set() for item in PER_ALLELE_FIELDS}
 

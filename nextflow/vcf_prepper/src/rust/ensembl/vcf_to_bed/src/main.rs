@@ -15,7 +15,7 @@
  */
  
 use std::{io::{BufReader,Write}, fs::File, process::exit, collections::HashMap, collections::HashSet};
-use vcf::{VCFError, VCFReader};
+use vcf::{VCFError, VCFReader, VCFHeader};
 use flate2::read::MultiGzDecoder;
 use clap::Parser;
 
@@ -219,6 +219,42 @@ impl Line {
     }
 }
 
+fn gen_csq_info_idx(header: &VCFHeader) -> HashMap<&str, usize> {
+    let csq_info_desc = match header.info("CSQ".as_bytes()) {
+        Some(csq_info) => {
+            match str::from_utf8(csq_info.description) {
+                Ok(desc) => desc,
+                Err(_) => {
+                    println!("[ERROR] cannot parse header to get INFO/CSQ");
+                    exit(1);
+                }
+            }
+        },
+        None => {
+            println!("[ERROR] cannot parse header to get INFO/CSQ");
+            exit(1);
+        }
+    };
+    let csq_header_idx: HashMap<&str, usize> = match csq_info_desc.split("Format: ").nth(1) {
+        Some(csq_headers) => {
+            let mut i: usize = 0;
+            let mut tmp_csq_header_idx = HashMap::new();
+            for header in csq_headers.split("|") {
+                tmp_csq_header_idx.insert(header, i);
+                i += 1;
+            }
+
+            tmp_csq_header_idx
+        },
+        None => {
+            println!("[ERROR] cannot parse header to get INFO/CSQ");
+            exit(1);
+        }
+    };
+
+    return csq_header_idx;
+}
+
 fn main() -> Result<(), VCFError> {
     // read cli arguments
     let args = Args::parse();
@@ -229,6 +265,24 @@ fn main() -> Result<(), VCFError> {
     let rank = std::fs::read_to_string(args.rank).unwrap();
     let bed_fields = std::fs::read_to_string(args.bed_fields).unwrap();
     let is_sv = args.structural_variant;
+
+    // generate Hashmap of INFO/CSQ header indexes and retrieve relavant header indexes
+    let header = reader.header();
+    let csq_header_idx: HashMap<&str, usize> = gen_csq_info_idx(&header);
+    let &csqh_allele_idx = match csq_header_idx.get("Allele") {
+        Some(idx) => idx,
+        None => {
+            println!("[ERROR] could not determine index of 'Allele' field from INFO/CSQ");
+            exit(1);
+        }
+    };
+    let &csqh_variant_class_idx = match csq_header_idx.get("VARIANT_CLASS") {
+        Some(idx) => idx,
+        None => {
+            println!("[ERROR] could not determine index of 'VARIANT_CLASS' field from INFO/CSQ");
+            exit(1);
+        }
+    };
     
     // load bed fields json and map it to writable fields
     let bfields = serde_json::from_str::<serde_json::Value>(&bed_fields).unwrap();
@@ -311,11 +365,10 @@ fn main() -> Result<(), VCFError> {
         }).collect::<Result<HashSet<_>,_>>().unwrap();
         
         // read INFO/CSQ/Consequence:
-        // TBD: replace hardcoded index value - .nth(1)
         let csq = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
-                s.split("|").nth(1).unwrap_or("").to_string()
+                s.split("|").nth(csqh_allele_idx).unwrap_or("").to_string()
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         // SKIP if csq is empty
@@ -328,11 +381,10 @@ fn main() -> Result<(), VCFError> {
         }
         
         // INFO/CSQ/VARIANT_CLASS
-        // TBD: replace hardcoded index value - .nth(21)
         let class = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
-                s.split("|").nth(21).unwrap_or("").to_string()
+                s.split("|").nth(csqh_variant_class_idx).unwrap_or("").to_string()
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         

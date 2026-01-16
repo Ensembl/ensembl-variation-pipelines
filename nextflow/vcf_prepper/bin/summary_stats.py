@@ -140,39 +140,6 @@ def header_match(want_header: dict, got_header: dict) -> bool:
     )
 
 
-def minimise_allele(ref: str, alts: list) -> str:
-    """Minimise allele representation by trimming a common leading base.
-
-    If all alleles share the same first base, remove it from REF and ALT alleles; an empty
-    allele becomes '-' to preserve representation.
-
-    Args:
-        ref (str): Reference allele.
-        alts (list): List of alternate alleles.
-
-    Returns:
-        tuple: (minimised_ref, minimised_alts) where minimised_alts is a list of strings.
-    """
-    if len(alts) <= 1 or len(ref) == len(alts[0]):
-        return (ref, alts)
-    
-    alleles = [ref] + alts
-    first_bases = {allele[0] for allele in alleles}
-
-    if len(first_bases) == 1:
-        ref = ref[1:] or "-"
-
-        temp_alts = []
-        for alt in alts:
-            if "*" in alt:
-                temp_alts.append(alt)
-            else:
-                temp_alts.append(alt[1:] or "-")
-        alts = temp_alts
-
-    return (ref, alts)
-
-
 def main(args=None):
     """Compute and add summary INFO fields to VCF records.
 
@@ -295,7 +262,11 @@ def main(args=None):
     # iterate through the file
     for variant in input_vcf:
         # create minimalized allele order
-        (ref, allele_order) = minimise_allele(variant.REF, variant.ALT)
+        num_of_alleles = len(variant.ALT)
+
+        if "ALLELE_NUM" not in csq_header_idx and num_of_alleles > 1:
+            print("[ERROR] INFO/CSQ must contain ALLELE_NUM for input with multi-allelic variants")
+            exit(1)
 
         items_per_variant = {item: set() for item in PER_VARIANT_FIELDS}
         items_per_allele = {}
@@ -305,9 +276,9 @@ def main(args=None):
         for csq in csqs.split(","):
             csq_values = csq.split("|")
 
-            allele = csq_values[csq_header_idx["Allele"]]
-            if allele not in items_per_allele:
-                items_per_allele[allele] = {item: set() for item in PER_ALLELE_FIELDS}
+            allele_num = csq_values[csq_header_idx.get("ALLELE_NUM", 1)]
+            if allele_num not in items_per_allele:
+                items_per_allele[allele_num] = {item: set() for item in PER_ALLELE_FIELDS}
 
             consequences = csq_values[csq_header_idx["Consequence"]]
             feature_stable_id = csq_values[csq_header_idx["Feature"]]
@@ -325,16 +296,16 @@ def main(args=None):
             if add_transcript_feature:
                 # genes
                 gene = csq_values[csq_header_idx["Gene"]]
-                items_per_allele[allele]["gene"].add(gene)
+                items_per_allele[allele_num]["gene"].add(gene)
 
                 # transcipt consequences
-                items_per_allele[allele]["transcipt_consequence"].add(
+                items_per_allele[allele_num]["transcipt_consequence"].add(
                     f"{feature_stable_id}:{consequences}"
                 )
 
             # regualtory consequences
             if add_regulatory_feature:
-                items_per_allele[allele]["regulatory_consequence"].add(
+                items_per_allele[allele_num]["regulatory_consequence"].add(
                     f"{feature_stable_id}:{consequences}"
                 )
 
@@ -349,11 +320,11 @@ def main(args=None):
 
                     (name, source, feature) = pheno_per_allele_fields
                     if feature.startswith("ENS"):
-                        items_per_allele[allele]["gene_phenotype"].add(
+                        items_per_allele[allele_num]["gene_phenotype"].add(
                             f"{name}:{source}:{feature}"
                         )
                     else:
-                        items_per_allele[allele]["variant_phenotype"].add(
+                        items_per_allele[allele_num]["variant_phenotype"].add(
                             f"{name}:{source}:{feature}"
                         )
 
@@ -425,14 +396,16 @@ def main(args=None):
                     exit(1)
 
                 if len(frequencies) == 1:
-                    items_per_allele[allele]["frequency"] = frequencies[0]
+                    items_per_allele[allele_num]["frequency"] = frequencies[0]
 
         # create summary info for per allele fields
         for field in PER_ALLELE_FIELDS:
             field_nums = []
-            for allele in allele_order:
-                if allele in items_per_allele and field in items_per_allele[allele]:
-                    field_len = len(items_per_allele[allele][field])
+            for allele_num in range(1, num_of_alleles + 1):
+                allele_num = str(allele_num)
+
+                if allele_num in items_per_allele and field in items_per_allele[allele_num]:
+                    field_len = len(items_per_allele[allele_num][field])
                     if field_len > 0:
                         field_nums.append(str(field_len))
 
@@ -441,9 +414,11 @@ def main(args=None):
 
         # create summary info for frequency
         field_vals = []
-        for allele in allele_order:
-            if allele in items_per_allele and "frequency" in items_per_allele[allele]:
-                field_vals.append(items_per_allele[allele]["frequency"])
+        for allele_num in range(1, num_of_alleles + 1):
+            allele_num = str(allele_num)
+
+            if allele_num in items_per_allele and "frequency" in items_per_allele[allele_num]:
+                field_vals.append(items_per_allele[allele_num]["frequency"])
             else:
                 field_vals.append(".")
 

@@ -17,7 +17,7 @@
 
 nextflow_pipeline {
 
-    name "Test workfloe VCF_PREPPER"
+    name "Test workflow VCF_PREPPER"
     script "../main.nf"
     tag "pipeline"
 
@@ -25,7 +25,6 @@ nextflow_pipeline {
 
         when {
             params {
-                repo_dir = "/Users/snhossain/ensembl-repos"
 				input_config = "${projectDir}/tests/testdata/input_config.json"
 				vep_config = "${projectDir}/tests/testdata/vep_config.json"
                 skip_vep = 1
@@ -44,8 +43,7 @@ nextflow_pipeline {
 
         when {
             params {
-                repo_dir = "/Users/snhossain/ensembl-repos"
-				output_dir = "/Users/snhossain/ensembl-repos"
+				output_dir = ${projectDir}
 				input_config = "${projectDir}/tests/testdata/input_config.json"
 				vep_config = "${projectDir}/tests/testdata/vep_config.json"
 				ini_file = "${projectDir}/tests/testdata/test_db.ini"

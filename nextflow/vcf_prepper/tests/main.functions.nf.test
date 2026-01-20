@@ -26,7 +26,6 @@ nextflow_function {
 
         when {
             params {
-                repo_dir = "/Users/snhossain/ensembl-repos"
                 output_dir = "path/to/output"
                 temp_dir = "path/to/temp"
             }
@@ -50,7 +49,6 @@ nextflow_function {
 
         when {
             params {
-                repo_dir = "/Users/snhossain/ensembl-repos"
                 vep_config = "${projectDir}/tests/testdata/vep_config.json"
                 skip_vep = 0
             }
@@ -97,9 +95,6 @@ nextflow_function {
         function "genome_map_from_input_config"
 
         when {
-            params {
-                repo_dir = "/Users/snhossain/ensembl-repos"
-            }
             function {
                 """
                 example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
@@ -127,9 +122,6 @@ nextflow_function {
         function "get_vcf_channel_list"
 
         when {
-            params {
-                repo_dir = "/Users/snhossain/ensembl-repos"
-            }
             function {
                 """
                 example_input_config = "${moduleDir}/assets/examples/example_input_config.json"

@@ -33,12 +33,17 @@ process PROCESS_PLUGINS_CONFIG {
     plugins_config = "${prefix}.plugins.txt"
 
     genome_uuid = genome_meta.genome_uuid
-    conf = plugins_meta.conf ?: ""
+    conf = plugins_meta.conf ?: [:]
 
     factory = plugins_meta.factory ?: "old"
     ext_args = factory == "old" ?
         "--species ${genome_meta.species} --assembly ${genome_meta.assembly} --version ${version}"
         : ""
+
+	// convert plugin conf from groovy map to json file
+	plugin_meta_json = new groovy.json.JsonBuilder(conf).toPrettyString()
+	conf = workDir + "/plugin_conf.json"
+	file(conf).text = plugin_meta_json
 
     """
     process_vep_plugins.py \

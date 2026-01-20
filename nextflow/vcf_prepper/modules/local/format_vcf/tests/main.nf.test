@@ -30,14 +30,22 @@ nextflow_process {
             }
             process {
                 """
-                meta = [:]
-                meta["source"] = "dbSNP"
-                meta["synonym_file"] = "${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
-                meta["sources_meta_file"] = "${projectDir}/assets/sources_meta.json"
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbSNP',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
                 vcf = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz"
                 vcf_index = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz.tbi"
 
-                input[0] = tuple(meta, file(vcf), file(vcf_index))
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
                 """
             }
         }
@@ -74,14 +82,22 @@ nextflow_process {
             }
             process {
                 """
-                meta = [:]
-                meta["source"] = "dbSNP"
-                meta["synonym_file"] = "${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
-                meta["sources_meta_file"] = "${projectDir}/assets/sources_meta.json"
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbSNP',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
                 vcf = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz"
                 vcf_index = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz.tbi"
 
-                input[0] = tuple(meta, file(vcf), file(vcf_index))
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
                 """
             }
         }
@@ -119,14 +135,22 @@ nextflow_process {
             }
             process {
                 """
-                meta = [:]
-                meta["source"] = "dbSNP"
-                meta["synonym_file"] = "${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
-                meta["sources_meta_file"] = "${projectDir}/assets/sources_meta.json"
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbSNP',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
                 vcf = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz"
                 vcf_index = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz.tbi"
 
-                input[0] = tuple(meta, file(vcf), file(vcf_index))
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
                 """
             }
         }
@@ -164,14 +188,22 @@ nextflow_process {
             }
             process {
                 """
-                meta = [:]
-                meta["source"] = "dbSNP"
-                meta["synonym_file"] = "${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
-                meta["sources_meta_file"] = "${projectDir}/assets/sources_meta.json"
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbSNP',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
                 vcf = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz"
                 vcf_index = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz.tbi"
 
-                input[0] = tuple(meta, file(vcf), file(vcf_index))
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
                 """
             }
         }
@@ -211,15 +243,23 @@ nextflow_process {
             }
             process {
                 """
-                meta = [:]
-                meta["source"] = "MULTIPLE"
-                meta["sources"] = "CerealsDB,Watkins-exome-capture"
-                meta["synonym_file"] = "${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
-                meta["sources_meta_file"] = "${projectDir}/assets/sources_meta.json"
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'MULTIPLE',
+                        'sources':'CerealsDB,Watkins-exome-capture',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
                 vcf = "${moduleTestDir}/testdata/test_multiple_source.vcf.gz"
                 vcf_index = "${moduleTestDir}/testdata/test_multiple_source.vcf.gz.tbi"
 
-                input[0] = tuple(meta, file(vcf), file(vcf_index))
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
                 """
             }
         }
@@ -248,14 +288,22 @@ nextflow_process {
             }
             process {
                 """
-                meta = [:]
-                meta["source"] = "dbVar"
-                meta["synonym_file"] = "${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
-                meta["sources_meta_file"] = "${projectDir}/assets/sources_meta.json"
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbVar',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
                 vcf = "${moduleTestDir}/testdata/test_structural_variant.vcf.gz"
                 vcf_index = "${moduleTestDir}/testdata/test_structural_variant.vcf.gz.tbi"
 
-                input[0] = tuple(meta, file(vcf), file(vcf_index))
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
                 """
             }
         }

@@ -55,7 +55,7 @@ nextflow_workflow {
             assert file("${workDir}/path/to/output/api/a7335667-93e7-11ec-a39d-005056b38ce3").exists()
             assert file("${workDir}/path/to/output/tracks/a7335667-93e7-11ec-a39d-005056b38ce3").exists()
 
-            // check genome_meta is same
+            // genome_meta does not change
             assert workflow.out.get(0).get(0).get(0) == [
                         'genome_uuid':'a7335667-93e7-11ec-a39d-005056b38ce3',
                         'genome':'homo_sapiens_grch38', 

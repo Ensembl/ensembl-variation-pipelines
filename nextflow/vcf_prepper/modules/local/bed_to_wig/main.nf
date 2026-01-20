@@ -17,21 +17,20 @@
  */
 
 process BED_TO_WIG {
-  input: 
-  tuple val(meta), path(bed)
-  
-  output:
-  tuple val(meta), path(output_wig)
-  
-  memory  { (bed.size() * 4.B + 8.GB) * task.attempt }
-  time    { 48.hour * task.attempt }
-  afterScript 'rm all.bed'
-  
-  shell:
-  source = meta.source.toLowerCase()
-  output_wig = "variant-${source}-summary.wig"
-  
-  '''
-  bed_to_wig !{bed} !{output_wig}
-  '''
+	memory { (bed.size() * 4.B + 8.GB) * task.attempt }
+	time { 48.hour * task.attempt }
+
+	input:
+	tuple val(genome_meta), path(bed)
+
+	output:
+	tuple val(genome_meta), path(output_wig)
+
+	script:
+	source = genome_meta.source.toLowerCase()
+	output_wig = "variant-${source}-summary.wig"
+
+	"""
+	bed_to_wig ${bed} ${output_wig}
+	"""
 }

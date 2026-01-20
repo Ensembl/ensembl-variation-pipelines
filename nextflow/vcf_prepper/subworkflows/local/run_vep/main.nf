@@ -15,32 +15,19 @@
  */
 
 repo_dir = params.repo_dir
-
-include { INDEX_VCF } from "../../../modules/local/index_vcf.nf"
 include { vep } from "${repo_dir}/ensembl-vep/nextflow/workflows/run_vep.nf"
 
 workflow RUN_VEP {
     take:
-    ch_input                // channel: [ val(genome), path(vcf), path(vcf_config) ]
-  
+    ch_input                // channel: [ val(genome_meta), path(vcf), path(vcf_index), path(vep_config) ]
+
     main:
-    // create index file at the exact location where input vcf file is as nextflow-vep requires as such
-    // ch_input
-    // .map {
-    //     meta, vcf, vcf_config ->
-    //     // vcf_fullpath = vcf.toString()
-    //     [meta, vcf]
-    // }
-    // .set { ch_index_vcf }
-    // INDEX_VCF( ch_index_vcf )
-  
     ch_input
     .map {
-        genome, vcf, vep_config ->
-        vcf_index = vcf + ".csi"
+        genome_meta, vcf, vcf_index, vep_config ->
 
-        vep_meta = [:]
-        vep_meta.output_dir = genome.genome_temp_dir
+        def vep_meta = [:]
+        vep_meta.output_dir = genome_meta.genome_temp_dir
         vep_meta.one_to_many = 0
         vep_meta.index_type = "csi"
         vep_meta.filters = "amino_acids not match X[A-Za-z*]?\\/"
@@ -49,29 +36,30 @@ workflow RUN_VEP {
     }
     .set { ch_vep }
     vep( ch_vep )
-  
-    input
-    .map {
-        genome, vcf, vep_config ->
-        // tag here is the output vcf file from nextflow-vep
-        filename = file("${genome.genome}-${meta.source}.vcf.gz").getBaseName() + "_VEP.vcf.gz"
-        tag = "${meta.genome_temp_dir}/${filename}"
 
-        [tag, meta]
+    // join nextflow-vep output with genome_meta
+    ch_input
+    .map {
+        genome_meta, vcf, vcf_index, vep_config ->
+
+        // match with nextflow-vep output filename - set in FORMAT_VCF step
+        filename = vcf.baseName + "_VEP.vcf.gz"
+        vep_output_file = "${genome_meta.genome_temp_dir}/${filename}"
+
+        [vep_output_file, genome_meta]
     }
     .join ( vep.out, failOnDuplicate: true )
     .map {
-        tag, meta ->
-        vcf = tag
-        vcf_index = "${tag}.${meta.index_type}"
+        vep_output_file, genome_meta ->
+        index_file = "${vep_output_file}.csi"
 
-        if (! file(vcf).exists() || ! file(vcf_index).exists()){
+        if (! file(vep_output_file).exists() || ! file(index_file).exists()) {
             exit 1, "ERROR: Could not find nextflow-vep output files. Check the following - \n\tVCF - ${vcf}\n\tVCF index - ${vcf_index}"
         }
       
-        [meta, vcf, vcf_index]
+        [genome_meta, vep_output_file, index_file]
     }.set { ch_post_vep }
   
-  emit:
+    emit:
     ch_post_vep
 }

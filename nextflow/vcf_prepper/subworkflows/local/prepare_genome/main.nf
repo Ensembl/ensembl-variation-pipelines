@@ -39,7 +39,6 @@ workflow PREPARE_GENOME {
         meta
     }.set { ch_prepare_genome }
 
-    ch_prepare_genome.view()
     GENERATE_SYNONYM_FILE( 
         ch_prepare_genome,
         version,

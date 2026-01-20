@@ -15,24 +15,11 @@
 # limitations under the License.
 
 import sys
-import configparser
 import argparse
-import subprocess
 import os
 import json
-import re
-import glob
 
 from ensembl.variation_utils.vep_config import plugin
-
-from helper import (
-    parse_ini,
-    get_db_name,
-    get_division,
-    get_fasta_species_name,
-    get_relative_version,
-    Placeholders,
-)
 
 
 def parse_args(args=None):
@@ -88,10 +75,21 @@ def main(args=None):
     config = args.conf
     repo_dir = args.repo_dir or os.environ["ENSEMBL_ROOT_DIR"]
 
+    plugin_vep_config_file = genome_uuid + ".plugins.txt"
+
     if config is None or not os.path.isfile(config):
         raise FileNotFoundError("[ERROR] No plugin config file provided")
 
-    plugin_vep_config_file = genome_uuid + ".plugins.txt"
+    with open(config) as f:
+        config_json = json.load(f)
+
+    # if there is no plugin in config create empty file and exit
+    if not config_json:
+        with open(plugin_vep_config_file, "w") as f:
+            pass
+        
+        print("[INFO] No plugin mentioned in config...")
+        exit(0)
 
     plugin_builder_factory = plugin.PluginArgsBuilderFactory()
     plugin_builder = plugin_builder_factory.set_builder()
@@ -100,9 +98,6 @@ def main(args=None):
     plugin_builder.species = "homo_sapiens" if species == "homo_sapiens_37" else species
     plugin_builder.assembly = assembly
     plugin_builder.version = version
-
-    with open(config) as f:
-        config_json = json.load(f)
 
     with open(plugin_vep_config_file, "w") as f:
         f.write(f"dir_plugins {repo_dir}/VEP_plugins\n")

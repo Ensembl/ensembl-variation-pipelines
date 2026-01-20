@@ -21,7 +21,7 @@ workflow {
     initialise(params)
 
     def input_config = new groovy.json.JsonSlurper().parse(file(params.input_config))
-    def vep_config = new groovy.json.JsonSlurper().parse(file(params.vep_config))
+	vep_config = process_vep_config(params)
 
     def genome_map = genome_map_from_input_config(input_config)
     def ch_vcf_list = get_vcf_channel_list(input_config, genome_map)
@@ -51,7 +51,8 @@ workflow {
         params.population_data_file,
         params.skip_vep,
         params.skip_tracks,
-        params.skip_stats
+        params.skip_stats,
+		params.bed_fields
     )
 
     // Print summary
@@ -98,6 +99,45 @@ def initialise(params) {
     // Create output directory structure
     nextflow.Nextflow.file("${params.output_dir}/api").mkdirs()
     nextflow.Nextflow.file("${params.output_dir}/tracks").mkdirs()
+}
+
+def process_vep_config(params) {
+	def vep_config = [:]
+
+	if (params.vep_config && file(params.vep_config).exists()) {
+		vep_config = new groovy.json.JsonSlurper().parse(file(params.vep_config))
+	}
+
+	if (! vep_config.annotation_source.cache) {
+		log.warn("No VEP cache config found for VEP, disabling...")
+		vep_config.annotation_source.cache = [
+			'active': false
+		]
+	}
+
+	if (! vep_config.annotation_source.gff) {
+		log.warn("No GFF config found for VEP, disabling...")
+		vep_config.annotation_source.gff = [
+			'active': false
+		]
+	}
+
+	if (! vep_config.annotation_source.fasta) {
+		log.warn("No FASTA config found for VEP, enabling...")
+		vep_config.annotation_source.fasta = [
+			'active': true
+		]
+	}
+
+	if (
+			(! vep_config.annotation_source.cache.active) 
+			&& (! vep_config.annotation_source.gff.active) 
+			&& (! params.skip_vep)
+	) {
+		error("Both VEP cache and GFF cannot be disabled when --skip_vep is not set")
+	}
+
+	return vep_config
 }
 
 def genome_map_from_input_config(input_config) {

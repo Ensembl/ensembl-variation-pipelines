@@ -15,22 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 process VCF_TO_BED {
-  input: 
-  path rank_file
-  tuple val(meta), path(vcf) 
-  
-  output:
-  tuple val(meta), path(output_file)
-  
-  shell:
-  output_file = vcf.getName().replace(".vcf.gz", ".bed")
-  structural_variant = params.structural_variant
-  
-  '''
-  vcf_to_bed !{vcf} !{output_file} !{rank_file} !{structural_variant}
-    
-  rm !{vcf}
-  '''
+	input:
+	tuple val(genome_meta), path(vcf)
+	path rank_file
+	val bed_fields
+	val structural_variant
+
+	output:
+	tuple val(genome_meta), path(output_file)
+
+	script:
+	output_file = vcf.getName().replace(".vcf.gz", ".bed")
+	structural_variant_param = structural_variant ? "--structural-variant" : ""
+
+	"""
+	vcf_to_bed \
+		--vcf ${vcf} \
+		--output ${output_file} \
+		--rank ${rank_file} \
+		--bed-fields ${bed_fields} \
+		${structural_variant_param}
+		
+	rm ${vcf}
+	"""
 }

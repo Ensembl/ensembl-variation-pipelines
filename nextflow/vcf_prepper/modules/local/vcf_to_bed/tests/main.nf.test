@@ -1,0 +1,151 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_process {
+
+    name "Test Process VCF_TO_BED"
+    script "../main.nf"
+    process "VCF_TO_BED"
+
+    test("vcf_to_bed - short_variants") {
+
+        when {
+            process {
+                """
+                input[0] = tuple([:], file("${moduleDir}/tests/testdata/test_vcftobed.vcf.gz"))
+                input[1] = "${projectDir}/assets/variation_consequnce_rank.json"
+                input[2] = "${projectDir}/assets/short_variant_bedfields.json"
+                input[3] = false
+                """
+            }
+        }
+
+        then {
+			// not checking snapshot - for multi-allelic the alleles can come in any order
+            assert process.success 
+            
+            // assert the content of the output file
+            def output_file = file(process.out.get(0).get(0).get(1))
+            def lines = output_file.readLines()
+            assert lines.size() == 14
+            
+            // vcf file line 2: ignored - rsID equals to "."
+			// so, no line in bed file
+            
+            // vcf file line 4: bi-allelic SNV
+            assert lines[2] == "chr13 32357724 32357725 rs754065641 SNV G C 2 splice_polypyrimidine_tract_variant"
+            // vcf file line 11: bi-allelic substitution
+            assert lines[7] == "NC_000001.11 63737 63740 rs869033224 substitution ACT CTA 3 non_coding_transcript_exon_variant"
+            // vcf file line 14: bi-allelic insertion
+            assert lines[10] == "KI270521.1 1784 1784 rs2088361900 insertion G GTGAT 5 intergenic_variant"
+            // vcf file line 3: bi-allelic deletion
+            assert lines[1] == "chr1 10107 10114 rs1377973775 deletion CAACCCT C 5 upstream_gene_variant"
+            // vcf file line 15: bi-allelic indel
+            assert lines[11] == "GL000214.1 10121 10123 rs71287572 indel GG GTGAGTTT 5 intergenic_variant"
+            
+            // vcf file line 16: multi-allelic SNV
+            assert (
+              lines[12] == "GL000214.1 17029 17030 rs4023684 SNV C G,T 5 intergenic_variant" ||
+              lines[12] == "GL000214.1 17029 17030 rs4023684 SNV C T,G 5 intergenic_variant"
+            )
+            // vcf file line 17: multi-allelic insertion
+            assert (
+              lines[13] == "GL000214.1 39434 39434 rs4023573 insertion C CTTT,CTTTTTTTTT 5 intergenic_variant" ||
+              lines[13] == "GL000214.1 39434 39434 rs4023573 insertion C CTTTTTTTTT,CTTT 5 intergenic_variant"
+            )
+            // vcf file line 13: multi-allelic indel
+            assert (
+              lines[9] == "KI270521.1 1593 1596 rs1556105830 indel ACT AA,AG 5 intergenic_variant" ||
+              lines[9] == "KI270521.1 1593 1596 rs1556105830 indel ACT AG,AA 5 intergenic_variant"
+            )
+            // vcf file line 10: multi-allelic indel (with insertion and deletion)
+            assert (
+              lines[6] == "NC_000001.11 10054 10056 rs768019142 indel TA TAA,T 5 upstream_gene_variant"  ||          
+              lines[6] == "NC_000001.11 10054 10056 rs768019142 indel TA T,TAA 5 upstream_gene_variant"            
+            )
+            
+            // vcf file line 1: convert sequence_alteration --> indel (the alt alleles can be in any order as Rust hashset is random ordered)
+            assert (
+              lines[0] == "1 15110140 15110159 rs1356759330 indel TTGTGTATGTGTGTGCATA TTGTGTATGTGTGTGCATATGTGTATGTGTGTGCATA,T 3 intron_variant" ||
+              lines[0] == "1 15110140 15110159 rs1356759330 indel TTGTGTATGTGTGTGCATA T,TTGTGTATGTGTGTGCATATGTGTATGTGTGTGCATA 3 intron_variant"
+            )
+            // vcf file line 12: do not convert sequence_alteration --> indel
+            assert (
+              lines[8] == "2D 2306439 2306441 2D_2306439 sequence_alteration TT T,TG 5 intergenic_variant" ||
+              lines[8] == "2D 2306439 2306441 2D_2306439 sequence_alteration TT TG,T 5 intergenic_variant"
+            )
+            
+            // vcf file line 5: ignored - redundant variant
+            
+            // vcf file line 6 and 7: not comapatible variant - do not merge
+            assert lines[3] == "chr13 57932508 57932508 rs1555257542 insertion T TATATATATACACAC 5 intergenic_variant"
+            assert lines[4] == "chr13 57932508 57932508 rs1555257544 insertion T TATATATATATACACACACACACAC 5 intergenic_variant"
+            
+            // vcf file line 8 and 9: comapatible variant - so merge
+            assert (
+              lines[5] == "chr19 60557 60558 rs1260281513 SNV A G,T 5 downstream_gene_variant" ||
+              lines[5] == "chr19 60557 60558 rs1260281513 SNV A T,G 5 downstream_gene_variant"
+            )
+        }
+
+    }
+
+	test("vcf_to_bed - --structural_variant for symbolic alts") {
+
+        when {
+            process {
+                """
+                input[0] = tuple([:], file("${moduleDir}/tests/testdata/test_symbolic.vcf.gz"))
+                input[1] = "${projectDir}/assets/variation_consequnce_rank.json"
+                input[2] = "${projectDir}/assets/short_variant_bedfields.json"
+                input[3] = true
+                """
+            }
+        }
+
+		then {
+			assert process.success
+            assert snapshot(process.out).match()
+
+            // assert the content of the output file
+            def output_file = file(process.out.get(0).get(0).get(1))
+            def lines = output_file.readLines()
+            assert lines.size() == 1
+
+			assert lines[0] == "7 147730664 147738995 esv275461 HGNC G <CN=2> 0 intron_variant"
+		}
+	}
+
+	test("vcf_to_bed - --structural_variant not given for symbolic alts") {
+
+        when {
+            process {
+                """
+                input[0] = tuple([:], file("${moduleDir}/tests/testdata/test_symbolic.vcf.gz"))
+                input[1] = "${projectDir}/assets/variation_consequnce_rank.json"
+                input[2] = "${projectDir}/assets/short_variant_bedfields.json"
+                input[3] = false
+                """
+            }
+        }
+
+		then {
+			assert process.failed
+			assert process.errorReport.contains("structural variant detected, but not running in structural variant mode")
+		}
+	}
+}

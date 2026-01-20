@@ -17,20 +17,20 @@
  */
 
 process CREATE_RANK_FILE {
-  label 'process_low'
+	label 'process_low'
 
-  input:
-  val rank_file
-  
-  output: 
-  val rank_file
-  
-  shell:
-  '''
-  if [[ -f !{rank_file} ]]; then
-    rm !{rank_file}
-  fi
-  
-  generate_consequence_rank.pl -o !{rank_file}
-  '''
+	input:
+	val rank_file
+
+	output:
+	val rank_file
+
+	script:
+	"""
+	if [[ -f ${rank_file} ]]; then
+		rm ${rank_file}
+	fi
+	
+	generate_consequence_rank.pl -o ${rank_file}
+	"""
 }

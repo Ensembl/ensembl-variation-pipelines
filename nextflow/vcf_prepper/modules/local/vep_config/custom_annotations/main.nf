@@ -34,7 +34,7 @@ process PROCESS_CUSTOM_ANNOTATIONS_CONFIG {
     custom_annotations_config = "${prefix}.custom_annotations.txt"
 
     genome_uuid = genome_meta.genome_uuid
-    conf = custom_annotation_meta.conf ?: ""
+    conf = custom_annotation_meta.conf ?: [:]
     skip_file_check = skip_file_check ? "--skip_file_check" : ""
 
     factory = custom_annotation_meta.factory ?: "old"
@@ -42,6 +42,11 @@ process PROCESS_CUSTOM_ANNOTATIONS_CONFIG {
     ext_args = factory == "old" ? 
         "--species ${genome_meta.species} --assembly ${genome_meta.assembly} --version ${version} --population_data_file ${population_data_file}"
         : ""
+
+	// convert custom annotation conf from groovy map to json file
+	custom_annotations_meta_json = new groovy.json.JsonBuilder(conf).toPrettyString()
+	conf = workDir + "/custom_annotations_conf.json"
+	file(conf).text = custom_annotations_meta_json
 
     """
     process_custom_annotations.py \

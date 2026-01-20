@@ -27,10 +27,10 @@ process FORMAT_VCF {
         path(vcf_index)
 
     output:
-    tuple val(genome_meta), path(output_file)
+    tuple val(genome_meta), path(output_file), path("${output_file}.csi")
 
     script:
-    output_file =  "FORMATTED_" + file(vcf).getName()
+    output_file =  "FORMATTED-" + genome_meta.genome + "-" + vcf.baseName + ".vcf.gz"
     chrom_sizes = genome_meta.chrom_sizes_file
     remove_nonunique_ids = params.remove_nonunique_ids ? "--remove_nonunique_ids" : ""
     remove_patch_regions = params.remove_patch_regions ? "--remove_patch_regions" : ""
@@ -60,6 +60,8 @@ process FORMAT_VCF {
         --chrom_sizes ${chrom_sizes} \
         ${remove_nonunique_ids} \
         ${remove_patch_regions} \
-        -O ${output_file} \
+        -O ${output_file}
+
+    bcftools index -c ${output_file}
     """
 }

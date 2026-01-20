@@ -15,33 +15,54 @@
  */
 
 
- nextflow_workflow {
+nextflow_workflow {
 
-    name "Test subworkflow PROCESS_INPUT"
+    name "Test subworkflow RUN_VEP"
     script "../main.nf"
-    workflow "PROCESS_INPUT"
+    workflow "RUN_VEP"
 
-    test("run workflow") {
+    test("run_vep") {
+        config "${projectDir}/subworkflows/local/run_vep/tests/nextflow.config"
 
         when {
             workflow {
                 """
-                meta = [:]
-                meta["file_type"] = "local"
-                meta["source"] = "dbSNP"
-                meta["synonym_file"] = "${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
-                meta["sources_meta_file"] = "${projectDir}/assets/sources_meta.json"
-                
-                file = "${projectDir}/assets/examples/test.vcf.gz"
+                // use moduleDir for consistent snapshot
+                tmp_dir = "${moduleDir}/tests/temp"
+                file(tmp_dir).mkdirs()
 
-                input[0] = tuple(meta, file)
+                genome_meta = [
+                        'genome':'homo_sapiens_grch38',
+                        'genome_temp_dir':tmp_dir
+                    ]
+                vcf = file("${moduleDir}/tests/testdata/test.vcf.gz")
+                vcf_index = file("${moduleDir}/tests/testdata/test.vcf.gz.csi")
+                vep_config = file("${moduleDir}/tests/testdata/test_vep_config.ini")
+
+                input[0] = Channel.of([genome_meta, vcf, vcf_index, vep_config])
                 """
             }
         }
 
         then {
+            // Do not check snapshot - it will change every time because of timestamp in header
             assert workflow.success
-            assert snapshot(workflow.out).match()
-        }
+
+			// genome_meta does not change
+			def tmp_dir = "${moduleDir}/tests/temp"
+			assert workflow.out.get(0).get(0).get(0) == [
+                        'genome':'homo_sapiens_grch38',
+                        'genome_temp_dir':tmp_dir
+                    ]
+			
+			// file name ok
+			assert workflow.out.get(0).get(0).get(1) == tmp_dir + "/test.vcf_VEP.vcf.gz"
+			assert workflow.out.get(0).get(0).get(2) == tmp_dir + "/test.vcf_VEP.vcf.gz.csi"
+
+			// file content ok
+            assert path(workflow.out.get(0).get(0).get(1)).linesGzip.size() == 11
+            assert path(workflow.out.get(0).get(0).get(1)).vcf.variants.size() == 1
+			def variant_line = path(workflow.out.get(0).get(0).get(1)).linesGzip[-1]
+			assert variant_line.equals("1\t230710048\trs699\tA\tG\t.\t.\tCSQ=G|missense_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000366667.6|protein_coding|2/5||||843|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000355627|genes.gff3.gz|||,G|missense_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000679684.1|protein_coding|2/5||||1287|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000505981|genes.gff3.gz|||,G|missense_variant&NMD_transcript_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000679738.1|nonsense_mediated_decay|2/7||||1366|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000505063|genes.gff3.gz|||,G|missense_variant&NMD_transcript_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000679802.1|nonsense_mediated_decay|2/8||||1287|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000505184|genes.gff3.gz|||,G|non_coding_transcript_exon_variant|MODIFIER|AGT|ENSG00000135744|Transcript|ENST00000679854.1|retained_intron|2/6||||1287|||||||-1||SNV|1:230710047:A:G||||genes.gff3.gz|||,G|missense_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000679957.1|protein_coding|2/5||||1287|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000506646|genes.gff3.gz|||,G|missense_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000680041.1|protein_coding|2/5||||991|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000504866|genes.gff3.gz|||,G|missense_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000680783.1|protein_coding|2/3||||1287|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000506329|genes.gff3.gz|||,G|missense_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000681269.1|protein_coding|2/5||||868|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000505985|genes.gff3.gz|||,G|non_coding_transcript_exon_variant|MODIFIER|AGT|ENSG00000135744|Transcript|ENST00000681347.1|retained_intron|2/6||||1287|||||||-1||SNV|1:230710047:A:G||||genes.gff3.gz|||,G|missense_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000681514.1|protein_coding|3/6||||930|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000505963|genes.gff3.gz|||,G|missense_variant&NMD_transcript_variant|MODERATE|AGT|ENSG00000135744|Transcript|ENST00000681772.1|nonsense_mediated_decay|2/7||||1287|776|259|M/T|aTg/aCg|||-1||SNV|1:230710047:A:G|||ENSP00000505829|genes.gff3.gz|||")        }
     }
 }

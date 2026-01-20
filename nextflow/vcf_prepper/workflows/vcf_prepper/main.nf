@@ -23,15 +23,15 @@ include { STAGE_FILE as STAGE_VCF } from "../../modules/local/stage_file"
 include { FORMAT_VCF } from "../../modules/local/format_vcf"
 include { GENERATE_VEP_CONFIG } from "../../subworkflows/local/generate_vep_config"
 include { RUN_VEP } from "../../subworkflows/local/run_vep"
-include { COUNT_VCF_VARIANT } from "../../modules/local/count_vcf_variant.nf"
+include { COUNT_VCF_VARIANT } from "../../modules/local/count_vcf_variant"
 include { CREATE_RANK_FILE } from "../../modules/local/create_rank_file"
-include { SPLIT_VCF } from "../../subworkflows/local/split_vcf.nf"
+include { SPLIT_VCF } from "../../subworkflows/local/split_vcf"
 include { VCF_TO_BED } from "../../modules/local/vcf_to_bed"
 include { CONCAT_BEDS } from "../../modules/local/concat_beds"
 include { BED_TO_BIGBED } from "../../modules/local/bed_to_bigbed"
 include { BED_TO_WIG } from "../../modules/local/bed_to_wig"
 include { WIG_TO_BIGWIG } from "../../modules/local/wig_to_bigwig"
-include { SUMMARY_STATS } from "../../modules/local/summary_stats"
+include { SUMMARY_STATS as POST_FORMAT_VCF } from "../../modules/local/summary_stats"
 
 
 workflow VCF_PREPPER {
@@ -55,6 +55,7 @@ workflow VCF_PREPPER {
     skip_vep                        //    bool: skip running VEP?
     skip_tracks                     //.   bool: skip creating tracks?
     skip_stats                      //    bool: skip adding summary stats?
+	bed_fields						// 	   str:	path to *_bedfields.json
 
 
     main:
@@ -62,10 +63,10 @@ workflow VCF_PREPPER {
         error("Nothing to do...")
     }
   
-    // setup
+    // download/stage input VCF
     STAGE_VCF( ch_vcf )
     
-    // api files
+    // api files - run VEP annotation
     if (!params.skip_vep) {
         FORMAT_VCF( 
             STAGE_VCF.out
@@ -90,55 +91,73 @@ workflow VCF_PREPPER {
             FORMAT_VCF.out
             .combine( GENERATE_VEP_CONFIG.out, by: 0 )
         )
-        
-        COUNT_VCF_VARIANT( RUN_VEP.out )
-        ch_post_vep = COUNT_VCF_VARIANT.out
-        .map {
-            meta, vcf, vcf_index, variant_count ->
-                // if vcf has no variant - remove output directories and filter channel 
-                if ( variant_count.equals("0") ) {
-                    file(meta.genome_api_outdir).delete()
-                    file(meta.genome_tracks_outdir).delete()
 
-                    "NO_VARIANT"
-                }
-                else {
-                    [meta, vcf, vcf_index]
-                }
-        }
-        .filter { ! it.equals("NO_VARIANT") }
-    }
+		ch_post_vep = RUN_VEP.out
+	}
     else {
         ch_post_vep = STAGE_VCF.out
+			.map {
+				genome_meta, _file_meta, vcf, vcf_index ->
+					[genome_meta, vcf, vcf_index ]
+			}
     }
+        
+	// filter if no variant annotated from VEP
+	// it can happen, for example, when the input VCF has seq regions not present in VEP cache/gff/fasta
+	COUNT_VCF_VARIANT( ch_post_vep )
+	COUNT_VCF_VARIANT.out
+	.map {
+		meta, vcf, vcf_index, variant_count ->
+			// if vcf has no variant - remove output directories and filter channel 
+			if ( variant_count.equals("0") ) {
+				file(meta.genome_api_outdir).delete()
+				file(meta.genome_tracks_outdir).delete()
 
+				"NO_VARIANT"
+			}
+			else {
+				[meta, vcf, vcf_index]
+			}
+	}
+	.filter { ! it.equals("NO_VARIANT") }
+	.set { ch_filtered }
+
+	// summary stats/post format annotated VCF
     if (!params.skip_stats) {
-        ch_post_stats = POST_FORMAT_VCF( ch_post_vep )
+        ch_post_stats = POST_FORMAT_VCF( 
+				ch_filtered,
+				population_data_file 
+			)
     }
     else {
-        ch_post_stats = ch_post_vep
+        ch_post_stats = ch_filtered
     }
 
     // track files
     if (!params.skip_tracks) {
         // create bed from VCF
         // TODO: vcf_to_bed maybe faster without SPLIT_VCF - needs benchmarking
-        SPLIT_VCF( ch_post_api )
+        SPLIT_VCF( ch_filtered )
         CREATE_RANK_FILE( params.rank_file )
-        VCF_TO_BED( CREATE_RANK_FILE.out, SPLIT_VCF.out.transpose() )
+        VCF_TO_BED( 
+			SPLIT_VCF.out.transpose(),
+			CREATE_RANK_FILE.out,
+			bed_fields,
+			structural_variant
+		)
         CONCAT_BEDS( VCF_TO_BED.out.groupTuple() )
 
         // create source tracks
         // TODO: remove symlink creation for focus track when we have multiple source
-        BED_TO_BIGBED( CONCAT_BEDS.out )
+        BED_TO_BIGBED( CONCAT_BEDS.out, bed_fields )
         BED_TO_WIG( CONCAT_BEDS.out )
         WIG_TO_BIGWIG( BED_TO_WIG.out )
 
         // if track generation is run vep-ed VCF file move needs to wait for this step to finish
         SPLIT_VCF.out
         .map {
-        meta, splits ->
-            [meta]
+        	meta, _splits ->
+            	[meta]
         }
         .set { ch_split_finish }
     }
@@ -147,7 +166,7 @@ workflow VCF_PREPPER {
   if (!params.skip_vep || !params.skip_stats){
     if(!params.skip_stats && !params.skip_tracks) {
       ch_split_finish
-      .join ( ch_stats_finish )
+      .join ( ch_post_stats )
       .map {
         meta, vcf, vcf_index ->
           [meta, vcf, vcf_index]
@@ -159,11 +178,11 @@ workflow VCF_PREPPER {
       .set { ch_post_process }
     }
     else if (!params.skip_stats && params.skip_tracks) {
-      ch_stats_finish
+      ch_post_stats
       .set { ch_post_process }
     }
     else {
-      ch_post_api
+      ch_post_stats
       .set { ch_post_process }
     }
 
@@ -171,10 +190,10 @@ workflow VCF_PREPPER {
     .map {
       meta, vcf, vcf_index ->
         // TODO: when we have multiple source per genome we need to delete source specific files
-        new_vcf = meta.multiple_source ? 
+        def new_vcf = meta.multiple_source ? 
           "${meta.genome_api_outdir}/variation_${meta.source}.vcf.gz"
           : "${meta.genome_api_outdir}/variation.vcf.gz"
-        new_vcf_index = "${new_vcf}.${meta.index_type}"
+        def new_vcf_index = "${new_vcf}.${meta.index_type}"
         
         // in -resume vcf and vcf_index may not exists as already renamed
         // moveTo instead of renameTo - in -resume dest file may exists from previous run

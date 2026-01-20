@@ -17,33 +17,34 @@
  */
 
 process WIG_TO_BIGWIG {
-  input: 
-  tuple val(meta), path(wig)
-  
-  output:
-  path "variant-${source}-summary.bw"
-  
-  memory  { (wig.size() * 10.B + 1.GB) * task.attempt }
-  time    { 48.hour * task.attempt }
-  
-  shell:
-  source = meta.source.toLowerCase()
-  output_bw = "${meta.genome_tracks_outdir}/variant-${source}-summary.bw"
-  chrom_sizes = meta.chrom_sizes
-  
-  '''
-  wigToBigWig -clip -keepAllChromosomes -fixedSummaries \
-    !{wig} \
-    !{chrom_sizes} \
-    !{output_bw}
-    
-  ln -sf !{output_bw} "variant-!{source}-summary.bw"
-  
-  # temp: for one source we create symlink for focus if only one source present
-  if [[ ! !{meta.multiple_source} ]]
-  then
-    cd !{meta.genome_tracks_outdir}
-    ln -sf variant-!{source}-summary.bw variant-summary.bw
-  fi
-  '''
+	memory { (wig.size() * 10.B + 1.GB) * task.attempt }
+	time { 48.hour * task.attempt }
+
+	input:
+	tuple val(genome_meta), path(wig)
+
+	output:
+	path "variant-${source}-summary.bw"
+
+	script:
+	source = genome_meta.source.toLowerCase()
+	output_bw = "${genome_meta.genome_tracks_outdir}/variant-${source}-summary.bw"
+	chrom_sizes = genome_meta.chrom_sizes_file
+
+	"""
+	wigToBigWig -clip -keepAllChromosomes -fixedSummaries \
+		${wig} \
+		${chrom_sizes} \
+		${output_bw}
+
+	# for the purpose of output and caching
+	ln -sf ${output_bw} "variant-${source}-summary.bw"
+	
+	# temp: for one source we create symlink for focus if only one source present
+	if [[ "${genome_meta.multiple_source}" == "false" ]]
+	then
+		cd ${genome_meta.genome_tracks_outdir}
+		ln -sf variant-${source}-summary.bw variant-summary.bw
+	fi
+	"""
 }

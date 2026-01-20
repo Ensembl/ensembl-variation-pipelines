@@ -5,10 +5,7 @@
                 "0": [
                     [
                         {
-                            "source": "MULTIPLE",
-                            "sources": "CerealsDB,Watkins-exome-capture",
-                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950",
-                            "sources_meta_file": "sources_meta.json:md5,2a825f7bdb1b8d158094073c7b6a7286"
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
                         "FORMATTED_test_multiple_source.vcf.gz:md5,b3f2fab1478211bc65b69ed3da22144b"
                     ]
@@ -19,7 +16,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-09T14:14:08.780595"
+        "timestamp": "2025-10-11T23:02:11.174716"
     },
     "remove criteria - none": {
         "content": [
@@ -27,9 +24,7 @@
                 "0": [
                     [
                         {
-                            "source": "dbSNP",
-                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950",
-                            "sources_meta_file": "sources_meta.json:md5,2a825f7bdb1b8d158094073c7b6a7286"
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
                         "FORMATTED_test_format_vcf.vcf.gz:md5,01efbdf3a0bee8bd81111aec7df8bf58"
                     ]
@@ -40,7 +35,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-09T14:14:05.144332"
+        "timestamp": "2025-10-11T22:59:26.764917"
     },
     "remove criteria - patch regions": {
         "content": [
@@ -48,9 +43,7 @@
                 "0": [
                     [
                         {
-                            "source": "dbSNP",
-                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950",
-                            "sources_meta_file": "sources_meta.json:md5,2a825f7bdb1b8d158094073c7b6a7286"
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
                         "FORMATTED_test_format_vcf.vcf.gz:md5,7966b0a654b4cf9357335a61ef5b9be7"
                     ]
@@ -61,7 +54,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-09T14:14:01.735486"
+        "timestamp": "2025-10-11T22:59:23.116575"
     },
     "SV fields - SVLEN and END": {
         "content": [
@@ -69,9 +62,7 @@
                 "0": [
                     [
                         {
-                            "source": "dbVar",
-                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950",
-                            "sources_meta_file": "sources_meta.json:md5,2a825f7bdb1b8d158094073c7b6a7286"
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
                         "FORMATTED_test_structural_variant.vcf.gz:md5,92d8d0cceda013c4bbce9a0a0962085b"
                     ]
@@ -82,7 +73,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-09T14:14:12.18055"
+        "timestamp": "2025-10-11T22:59:33.396683"
     },
     "remove criteria - non-unique ids": {
         "content": [
@@ -90,9 +81,7 @@
                 "0": [
                     [
                         {
-                            "source": "dbSNP",
-                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950",
-                            "sources_meta_file": "sources_meta.json:md5,2a825f7bdb1b8d158094073c7b6a7286"
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
                         "FORMATTED_test_format_vcf.vcf.gz:md5,d2e97ad07af9dd834dcb696f3cac7769"
                     ]
@@ -103,7 +92,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-09T14:13:58.334131"
+        "timestamp": "2025-10-11T22:59:19.79906"
     },
     "remove criteria - all": {
         "content": [
@@ -111,9 +100,7 @@
                 "0": [
                     [
                         {
-                            "source": "dbSNP",
-                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950",
-                            "sources_meta_file": "sources_meta.json:md5,2a825f7bdb1b8d158094073c7b6a7286"
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
                         "FORMATTED_test_format_vcf.vcf.gz:md5,f96e5f994a88ca71d42cd9a704bbf9d2"
                     ]
@@ -124,6 +111,6 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-09T14:13:55.02125"
+        "timestamp": "2025-10-11T22:59:16.438894"
     }
 }

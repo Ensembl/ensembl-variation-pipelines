@@ -43,7 +43,7 @@ nextflow_pipeline {
 
         when {
             params {
-				output_dir = ${projectDir}
+				output_dir = "${projectDir}"
 				input_config = "${projectDir}/tests/testdata/input_config.json"
 				vep_config = "${projectDir}/tests/testdata/vep_config.json"
 				ini_file = "${projectDir}/tests/testdata/test_db.ini"

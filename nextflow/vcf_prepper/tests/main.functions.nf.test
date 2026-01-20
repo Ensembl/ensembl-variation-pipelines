@@ -81,8 +81,7 @@ nextflow_function {
 					'variant_class':1, 
 					'protein':1, 
 					'transcript_version':1, 
-					'gencode_promoter':1, 
-					'offline':1
+					'gencode_promoter':1
 				], 
 				'plugins':[:], 
 				'custom_annotaions':[:]
@@ -95,10 +94,15 @@ nextflow_function {
         function "genome_map_from_input_config"
 
         when {
+            params {
+                output_dir = "${projectDir}"
+                temp_dir = "${projectDir}/tmp"
+            }
             function {
                 """
                 example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
                 def input_config = new groovy.json.JsonSlurper().parse(file(example_input_config))
+
                 input[0] = input_config
                 """
             }
@@ -107,13 +111,40 @@ nextflow_function {
         then {
             assert function.success
             assert function.result == [
-                    'a7335667-93e7-11ec-a39d-005056b38ce3':
-                        ['genome':'homo_sapiens_grch38', 'species':'homo_sapiens', 'assembly':'GRCh38'], 
-                    '3704ceb1-948d-11ec-a39d-005056b38ce3':
-                        ['genome':'homo_sapiens_grch37', 'species':'homo_sapiens_37', 'assembly':'GRCh37'], 
-                    'a73357ab-93e7-11ec-a39d-005056b38ce3':
-                        ['genome':'triticum_aestivum_IWGSC', 'species':'triticum_aestivum', 'assembly':'IWGSC']
+                    'a7335667-93e7-11ec-a39d-005056b38ce3':[
+                        'genome_uuid':'a7335667-93e7-11ec-a39d-005056b38ce3',
+                        'genome':'homo_sapiens_grch38', 
+                        'species':'homo_sapiens', 
+                        'assembly':'GRCh38',
+                        'genome_temp_dir':"${projectDir}/tmp/a7335667-93e7-11ec-a39d-005056b38ce3",
+                        'genome_api_outdir':"${projectDir}/api/a7335667-93e7-11ec-a39d-005056b38ce3",
+                        'genome_tracks_outdir':"${projectDir}/tracks/a7335667-93e7-11ec-a39d-005056b38ce3",
+                        'synonym_file':"${projectDir}/tmp/a7335667-93e7-11ec-a39d-005056b38ce3/homo_sapiens_grch38.synonyms",
+                        'chrom_sizes_file':"${projectDir}/tmp/a7335667-93e7-11ec-a39d-005056b38ce3/homo_sapiens_grch38.chrom.sizes"
+                    ], 
+                    '3704ceb1-948d-11ec-a39d-005056b38ce3':[
+                        'genome_uuid':'3704ceb1-948d-11ec-a39d-005056b38ce3',
+                        'genome':'homo_sapiens_grch37', 
+                        'species':'homo_sapiens_37', 
+                        'assembly':'GRCh37',
+                        'genome_temp_dir':"${projectDir}/tmp/3704ceb1-948d-11ec-a39d-005056b38ce3",
+                        'genome_api_outdir':"${projectDir}/api/3704ceb1-948d-11ec-a39d-005056b38ce3",
+                        'genome_tracks_outdir':"${projectDir}/tracks/3704ceb1-948d-11ec-a39d-005056b38ce3",
+                        'synonym_file':"${projectDir}/tmp/3704ceb1-948d-11ec-a39d-005056b38ce3/homo_sapiens_grch37.synonyms",
+                        'chrom_sizes_file':"${projectDir}/tmp/3704ceb1-948d-11ec-a39d-005056b38ce3/homo_sapiens_grch37.chrom.sizes"
+                    ], 
+                    'a73357ab-93e7-11ec-a39d-005056b38ce3':[
+                        'genome_uuid':'a73357ab-93e7-11ec-a39d-005056b38ce3',
+                        'genome':'triticum_aestivum_IWGSC', 
+                        'species':'triticum_aestivum', 
+                        'assembly':'IWGSC',
+                        'genome_temp_dir':"${projectDir}/tmp/a73357ab-93e7-11ec-a39d-005056b38ce3",
+                        'genome_api_outdir':"${projectDir}/api/a73357ab-93e7-11ec-a39d-005056b38ce3",
+                        'genome_tracks_outdir':"${projectDir}/tracks/a73357ab-93e7-11ec-a39d-005056b38ce3",
+                        'synonym_file':"${projectDir}/tmp/a73357ab-93e7-11ec-a39d-005056b38ce3/triticum_aestivum_IWGSC.synonyms",
+                        'chrom_sizes_file':"${projectDir}/tmp/a73357ab-93e7-11ec-a39d-005056b38ce3/triticum_aestivum_IWGSC.chrom.sizes"
                     ]
+                ]
         }
     }
 
@@ -134,6 +165,7 @@ nextflow_function {
                     'a73357ab-93e7-11ec-a39d-005056b38ce3':
                         ['genome':'triticum_aestivum_IWGSC', 'species':'triticum_aestivum', 'assembly':'IWGSC']
                     ]
+
                 input[0] = input_config
                 input[1] = genome_map
                 """

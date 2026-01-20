@@ -23,26 +23,26 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          name: Ensembl/ensembl-vep
+          repository: Ensembl/ensembl-vep
           ref: main
           path: 'repos'
       - uses: actions/checkout@v4
         with:
-          name: Ensembl/ensembl-variation
+          repository: Ensembl/ensembl-variation
           ref: main
           path: 'repos'
       - uses: actions/checkout@v4
         with:
-          name: Ensembl/VEP_plugins
+          repository: Ensembl/VEP_plugins
           ref: main
           path: 'repos'
       - uses: actions/setup-java@v2
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'adopt'
       - uses: nf-core/setup-nextflow@v1
         with:
-          version: "latest-edge"
+          version: '24.04.3'
 
       - name: setup
         run: |

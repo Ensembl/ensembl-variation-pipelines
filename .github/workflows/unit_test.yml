@@ -25,17 +25,17 @@ jobs:
         with:
           repository: Ensembl/ensembl-vep
           ref: main
-          path: 'repos'
+          path: 'nextflow/vcf_prepper/repos'
       - uses: actions/checkout@v4
         with:
           repository: Ensembl/ensembl-variation
           ref: main
-          path: 'repos'
+          path: 'nextflow/vcf_prepper/repos'
       - uses: actions/checkout@v4
         with:
           repository: Ensembl/VEP_plugins
           ref: main
-          path: 'repos'
+          path: 'nextflow/vcf_prepper/repos'
       - uses: actions/setup-java@v2
         with:
           java-version: '17'

@@ -21,9 +21,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          name: Ensembl/ensembl-vep
+          ref: main
+          path: 'repos'
+      - uses: actions/checkout@v4
+        with:
+          name: Ensembl/ensembl-variation
+          ref: main
+          path: 'repos'
+      - uses: actions/checkout@v4
+        with:
+          name: Ensembl/VEP_plugins
+          ref: main
+          path: 'repos'
+      - uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
       - uses: nf-core/setup-nextflow@v1
+        with:
+          version: "latest-edge"
+
       - name: setup
-        run: curl -fsSL https://code.askimed.com/install/nf-test | bash
+        run: |
+          wget -qO- https://get.nf-test.com | bash
+          sudo mv nf-test /usr/local/bin/
+
       - name: test
         working-directory: nextflow/vcf_prepper
-        run: ${GITHUB_WORKSPACE}/nf-test test tests
+        run: nf-test test tests --ci --profile github

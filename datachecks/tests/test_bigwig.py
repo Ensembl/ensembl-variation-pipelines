@@ -16,6 +16,7 @@ import os
 import subprocess
 import numpy as np
 import logging
+from cyvcf2 import VCF
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -70,7 +71,7 @@ class TestSrcCount:
 
         return int(process.stdout.decode().strip())
 
-    def get_total_variant_count_from_bw(self, bw_reader) -> int:
+    def get_total_variant_count_from_bw(self, bw_reader, chroms = None) -> int:
         """Count non-zero value positions across all chromosomes in a BigWig.
 
         Args:
@@ -80,7 +81,11 @@ class TestSrcCount:
             int: Count of positions with value > 0.0.
         """
         variant_counts = 0
-        for chr in bw_reader.chroms():
+
+        if chroms is None:
+            chroms = bw_reader.chroms()
+
+        for chr in chroms:
             end = bw_reader.chroms(chr)
 
             window = 10000000
@@ -93,6 +98,14 @@ class TestSrcCount:
     def test_compare_count_with_source(self, vcf, bw_reader):
         """Compare approximate variant counts between source VCF and BigWig-derived counts."""
         variant_count_vcf = self.get_total_variant_count_from_vcf(vcf)
-        variant_count_bw = self.get_total_variant_count_from_bw(bw_reader)
+
+        variant_count_bw = 0
+        try:
+            vcf_reader = VCF(vcf)
+            chroms = vcf_reader.seqnames
+            vcf_reader.close()
+            variant_count_bw = self.get_total_variant_count_from_bw(bw_reader, chroms)
+        except:
+            variant_count_bw = self.get_total_variant_count_from_bw(bw_reader)
 
         assert variant_count_bw > variant_count_vcf * 0.95

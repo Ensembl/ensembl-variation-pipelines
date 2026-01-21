@@ -91,6 +91,7 @@ def variant_list(vcf_reader):
     chrs = vcf_reader.seqnames
     variant_list = {}
     total_no_variants = 0
+    iteration = 0
     while total_no_variants < NO_VARIANTS:
         chr = random.choice(chrs)
         start = random.choice(range(1000, 100000000))
@@ -116,7 +117,12 @@ def variant_list(vcf_reader):
             
             total_no_variants += 1
             no_variants += 1
-            if no_variants > 1000:
+            if no_variants > 10:
                 break
 
+        # break the infinite loop - we can sometimes may not be able to gather required number of variant
+        iteration += 1
+        if iteration > 100:
+            break
+ 
     return variant_list

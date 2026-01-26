@@ -16,6 +16,10 @@
 name: unit-test
 on: [push, pull_request]
 
+env:
+  FTP_NFS_DIR:
+  OLD_FTP_NFS_DIR:
+
 jobs:
   nf-test:
     runs-on: ubuntu-latest
@@ -48,6 +52,7 @@ jobs:
         run: |
           wget -qO- https://get.nf-test.com | bash
           sudo mv nf-test /usr/local/bin/
+          pip install nextflow/vcf_prepper/requirements.txt
 
       - name: test
         working-directory: nextflow/vcf_prepper

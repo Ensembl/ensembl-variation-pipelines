@@ -102,7 +102,7 @@ jobs:
           
           ./configure --prefix=/usr/local
           make -j$(nproc)
-          make install
+          sudo make install
 
           echo "PATH=/usr/local/bin:$PATH" >> $GITHUB_ENV
 

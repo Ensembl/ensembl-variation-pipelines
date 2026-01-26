@@ -28,6 +28,18 @@ jobs:
       run:
         shell: bash
         working-directory: nextflow/vcf_prepper
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -53,12 +65,11 @@ jobs:
         with:
           version: '24.04.3'
 
-      - name: setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql version: '8.0'
-          mysql database: 'test_db'
-          mysql root password: 'password'
+      - name: wait for MySQL
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P3306 --silent; do
+            sleep 1
+          done
 
       - name: load databases
         run: |

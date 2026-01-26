@@ -118,15 +118,23 @@ jobs:
 
       - name: setup Perl dependencies
         run: |
+          BIOPERL_VERSION=release-1-6-924
+          HTSLIB_VERSION=1.19
           BIOHTS_VERSION=2.11
 
           sudo apt-get update
-          sudo apt-get install -y bioperl
+          sudo apt-get install -y cpanminus
+          cpanm Module::Build
+
+          wget https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERSION.zip
+          unzip $BIOPERL_VERSION.zip
+          mv bioperl-live-$BIOPERL_VERSION/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 
           wget https://github.com/Ensembl/Bio-DB-HTS/archive/$BIOHTS_VERSION.zip
           unzip $BIOHTS_VERSION.zip
           cd Bio-DB-HTS-$BIOHTS_VERSION
-          perl INSTALL.pl
+          perl Build.PL --htslib ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/htslib-${HTSLIB_VERSION}
+          ./Build
           mv lib/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 
           for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules 

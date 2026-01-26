@@ -18,10 +18,7 @@ on: [push, pull_request]
 
 # relative to job working directory ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper
 env:
-  PYTHON_SRC_DIR: ../../src/python
   ENSEMBL_ROOT_DIR: repos
-  FTP_NFS_DIR: tests/testdata
-  OLD_FTP_NFS_DIR: tests/testdata
 
 jobs:
   vcf_prepper:
@@ -93,7 +90,7 @@ jobs:
 
       - name: setup Python dependencies
         run: |
-          python3 -m pip install ${{ env.PYTHON_SRC_DIR }}
+          python3 -m pip install ${GITHUB_WORKSPACE}/src/python
           python3 -m pip install -r requirements.txt
 
       - name: setup Perl dependencies
@@ -105,4 +102,7 @@ jobs:
           echo "PERL5LIB=$PERL5LIB" >> $GITHUB_ENV
 
       - name: test
-        run: nf-test test tests --ci --profile github
+        run: |
+          export FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
+          export OLD_FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
+          nf-test test tests --ci --profile github

@@ -17,9 +17,10 @@ name: unit-test
 on: [push, pull_request]
 
 env:
-  PYTHON_SRC_DIR: src/python
-  FTP_NFS_DIR:
-  OLD_FTP_NFS_DIR:
+  PYTHON_SRC_DIR: ${{ GITHUB_WORKSPACE }}/src/python
+  ENSEMBL_ROOT_DIR: ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper/repos
+  FTP_NFS_DIR: ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper/tests/testdata
+  OLD_FTP_NFS_DIR: ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper/tests/testdata
 
 jobs:
   vcf_prepper:
@@ -82,7 +83,7 @@ jobs:
         run: |
           wget -qO- https://get.nf-test.com | bash
           sudo mv nf-test /usr/local/bin/
-          python3 -m pip install ../../${{ env.PYTHON_SRC_DIR }}
+          python3 -m pip install ${{ env.PYTHON_SRC_DIR }}
           python3 -m pip install -r requirements.txt
 
       - name: test

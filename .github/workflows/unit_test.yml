@@ -21,25 +21,29 @@ env:
   OLD_FTP_NFS_DIR:
 
 jobs:
-  nf-test:
+  vcf_prepper:
     runs-on: ubuntu-latest
+    defaults:
+    run:
+      shell: bash
+      working-directory: nextflow/vcf_prepper
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
           repository: Ensembl/ensembl-vep
           ref: main
-          path: 'nextflow/vcf_prepper/repos/ensembl-vep'
+          path: './repos/ensembl-vep'
       - uses: actions/checkout@v4
         with:
           repository: Ensembl/ensembl-variation
           ref: main
-          path: 'nextflow/vcf_prepper/repos/ensembl-variation'
+          path: './repos/ensembl-variation'
       - uses: actions/checkout@v4
         with:
           repository: Ensembl/VEP_plugins
           ref: main
-          path: 'nextflow/vcf_prepper/repos/VEP_plugins'
+          path: './repos/VEP_plugins'
       - uses: actions/setup-java@v2
         with:
           java-version: '17'
@@ -52,8 +56,7 @@ jobs:
         run: |
           wget -qO- https://get.nf-test.com | bash
           sudo mv nf-test /usr/local/bin/
-          pip install nextflow/vcf_prepper/requirements.txt
+          pip install -r requirements.txt
 
       - name: test
-        working-directory: nextflow/vcf_prepper
         run: nf-test test tests --ci --profile github

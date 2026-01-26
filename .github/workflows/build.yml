@@ -16,8 +16,8 @@ name: build
 on: [push, pull_request]
 
 env:
-  PYTHON_SRC_DIR: nextflow/vcf_prepper
-  RUST_SRC_DIR: nextflow/vcf_prepper/src/rust/ensembl
+  PYTHON_SRC_DIR: src/python/ensembl
+  RUST_SRC_DIR: src/rust/ensembl
   BIN_DIR: nextflow/vcf_prepper/bin
 
 jobs:

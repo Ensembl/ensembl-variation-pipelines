@@ -125,6 +125,7 @@ jobs:
           BIOPERL_VERSION=release-1-6-924
           HTSLIB_VERSION=1.19
           BIOHTS_VERSION=2.11
+          LIB_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 
           # add module path to PERL5LIB
           for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules 
@@ -141,7 +142,7 @@ jobs:
           # install Bioperl - needed for Bio::DB::HTS
           wget https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERSION.zip
           unzip $BIOPERL_VERSION.zip
-          rsync -r bioperl-live-$BIOPERL_VERSION/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
+          rsync -r bioperl-live-$BIOPERL_VERSION/Bio ${LIB_DIR}/
 
           # install Bio::DB::HTS
           wget https://github.com/Ensembl/Bio-DB-HTS/archive/$BIOHTS_VERSION.zip
@@ -149,7 +150,8 @@ jobs:
           cd Bio-DB-HTS-$BIOHTS_VERSION
           perl Build.PL --htslib ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/htslib-${HTSLIB_VERSION}
           ./Build
-          rsync -r lib/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
+          rsync -r lib/Bio ${LIB_DIR}/
+          rsync blib/arch/auto/Bio/DB/HTS/Faidx/Faidx.so ${LIB_DIR}/
 
           tree ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 

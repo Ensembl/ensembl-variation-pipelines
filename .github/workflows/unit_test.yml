@@ -86,6 +86,15 @@ jobs:
       - name: setup htslib
         run: |
           HTSLIB_VERSION=1.19
+
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            zlib1g-dev \
+            libbz2-dev \
+            liblzma-dev \
+            libcurl4-openssl-dev \
+            libssl-dev
           
           wget -q https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2
           tar -xjf htslib-${HTSLIB_VERSION}.tar.bz2

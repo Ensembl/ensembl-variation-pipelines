@@ -126,6 +126,13 @@ jobs:
           HTSLIB_VERSION=1.19
           BIOHTS_VERSION=2.11
 
+          # add module path to PERL5LIB
+          for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules 
+          do
+            PERL5LIB=${lib_path}:$PERL5LIB
+          done
+          export PERL5LIB
+
           # install Module::Build - needed for Bio::DB::HTS
           sudo apt-get update
           sudo apt-get install -y cpanminus
@@ -144,10 +151,7 @@ jobs:
           ./Build
           rsync -r lib/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 
-          for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules 
-          do
-            PERL5LIB=${lib_path}:$PERL5LIB
-          done
+          # add PERL5LIB to env variable
           echo "PERL5LIB=$PERL5LIB" >> $GITHUB_ENV
 
       - name: test

@@ -92,7 +92,7 @@ jobs:
 
       - name: setup Perl dependencies
         run: |
-          for lib_path in repos/ensembl*/lib repos/ensembl*/modules 
+          for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/modules 
           do
             PERL5LIB=${lib_path}:$PERL5LIB
           done

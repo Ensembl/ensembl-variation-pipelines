@@ -34,7 +34,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: ''
         ports:
           - 3306:3306
         options: >-
@@ -80,10 +80,10 @@ jobs:
 
       - name: load databases
         run: |
-          mysql -h 127.0.0.1 -u root -ppassword -e 'CREATE DATABASE ensembl_genome_metadata;'
-          mysql -h 127.0.0.1 -u root -ppassword ensembl_genome_metadata < tests/testdata/ensembl_genome_metadata.dump
-          mysql -h 127.0.0.1 -u root -ppassword -e 'CREATE DATABASE homo_sapiens_core_110_38;'
-          mysql -h 127.0.0.1 -u root -ppassword homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
+          mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE ensembl_genome_metadata;'
+          mysql -h 127.0.0.1 -u root ensembl_genome_metadata < tests/testdata/ensembl_genome_metadata.dump
+          mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
+          mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
 
       - name: setup nf-test
         run: |

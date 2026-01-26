@@ -153,8 +153,6 @@ jobs:
           rsync -r lib/Bio ${LIB_DIR}/
           rsync blib/arch/auto/Bio/DB/HTS/Faidx/Faidx.so ${LIB_DIR}/
 
-          tree ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
-
           # add PERL5LIB to env variable
           echo "PERL5LIB=$PERL5LIB" >> $GITHUB_ENV
 
@@ -162,4 +160,6 @@ jobs:
         run: |
           export FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
           export OLD_FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
+          
+          sed -i -e "s/\${BASE_DIR}/${GITHUB_WORKSPACE}/" ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata/input_config.json
           nf-test test tests --ci --profile github

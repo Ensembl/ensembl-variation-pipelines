@@ -1,0 +1,12 @@
+{
+  "homo_sapiens_grch38": [
+    {
+      "genome_uuid": "a7335667-93e7-11ec-a39d-005056b38ce3",
+      "species": "homo_sapiens",
+      "assembly": "GRCh38",
+      "source_name": "dbSNP",
+      "file_type": "local",
+      "file_location": "${BASE_DIR}/nextflow/vcf_prepper/tests/testdata/test.vcf.gz"
+    }
+  ]
+}

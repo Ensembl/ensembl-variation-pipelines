@@ -74,9 +74,9 @@ jobs:
       - name: load databases
         run: |
           mysql -h 127.0.0.1 -u root -ppassword -e 'CREATE DATABASE ensembl_genome_metadata;'
-          mysql -h 127.0.0.1 -u root -ppassword test_db < tests/testdata/ensembl_genome_metadata.dump
+          mysql -h 127.0.0.1 -u root -ppassword ensembl_genome_metadata < tests/testdata/ensembl_genome_metadata.dump
           mysql -h 127.0.0.1 -u root -ppassword -e 'CREATE DATABASE homo_sapiens_core_110_38;'
-          mysql -h 127.0.0.1 -u root -ppassword test_db < tests/testdata/homo_sapiens_core_110_38.dump
+          mysql -h 127.0.0.1 -u root -ppassword homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
 
       - name: setup nf-test and python dependencies
         run: |

@@ -87,6 +87,7 @@ jobs:
         run: |
           HTSLIB_VERSION=1.19
 
+          # install pre-requisites
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
@@ -96,14 +97,17 @@ jobs:
             libcurl4-openssl-dev \
             libssl-dev
           
+          # download
           wget -q https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2
           tar -xjf htslib-${HTSLIB_VERSION}.tar.bz2
           cd htslib-${HTSLIB_VERSION}
           
+          # install
           ./configure --prefix=/usr/local
           make -j$(nproc)
           sudo make install
 
+          # add to path
           echo "PATH=/usr/local/bin:$PATH" >> $GITHUB_ENV
 
       - name: setup nf-test
@@ -122,20 +126,23 @@ jobs:
           HTSLIB_VERSION=1.19
           BIOHTS_VERSION=2.11
 
+          # install Module::Build - needed for Bio::DB::HTS
           sudo apt-get update
           sudo apt-get install -y cpanminus
           cpanm Module::Build
 
+          # install Bioperl - needed for Bio::DB::HTS
           wget https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERSION.zip
           unzip $BIOPERL_VERSION.zip
-          mv bioperl-live-$BIOPERL_VERSION/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
+          rsync -r bioperl-live-$BIOPERL_VERSION/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 
+          # install Bio::DB::HTS
           wget https://github.com/Ensembl/Bio-DB-HTS/archive/$BIOHTS_VERSION.zip
           unzip $BIOHTS_VERSION.zip
           cd Bio-DB-HTS-$BIOHTS_VERSION
           perl Build.PL --htslib ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/htslib-${HTSLIB_VERSION}
           ./Build
-          mv lib/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
+          rsync -r lib/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 
           for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules 
           do

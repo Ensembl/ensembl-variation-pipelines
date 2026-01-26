@@ -51,6 +51,11 @@ jobs:
           path: 'nextflow/vcf_prepper/repos/ensembl-vep'
       - uses: actions/checkout@v4
         with:
+          repository: Ensembl/ensembl
+          ref: main
+          path: 'nextflow/vcf_prepper/repos/ensembl'
+      - uses: actions/checkout@v4
+        with:
           repository: Ensembl/ensembl-variation
           ref: main
           path: 'nextflow/vcf_prepper/repos/ensembl-variation'

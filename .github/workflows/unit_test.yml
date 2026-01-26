@@ -57,8 +57,7 @@ jobs:
         run: |
           wget -qO- https://get.nf-test.com | bash
           sudo mv nf-test /usr/local/bin/
-          python3 -m pip install --upgrade pip build
-          python3 -m build ../../${{ env.PYTHON_SRC_DIR }}
+          python3 -m pip install ../../${{ env.PYTHON_SRC_DIR }}
           python3 -m pip install -r requirements.txt
 
       - name: test

@@ -118,6 +118,15 @@ jobs:
 
       - name: setup Perl dependencies
         run: |
+          BIOHTS_VERSION=2.11
+
+          wget https://github.com/Ensembl/Bio-DB-HTS/archive/$BIOHTS_VERSION.zip
+          unzip $BIOHTS_VERSION.zip
+          cd $BIOHTS_VERSION
+          perl Build.PL --htslib $htslib_location
+          ./Build
+          mv lib/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
+
           for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules 
           do
             PERL5LIB=${lib_path}:$PERL5LIB

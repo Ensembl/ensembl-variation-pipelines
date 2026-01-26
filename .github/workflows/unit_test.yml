@@ -17,7 +17,7 @@ name: unit-test
 on: [push, pull_request]
 
 env:
-  PYTHON_SRC_DIR: src/python/ensembl
+  PYTHON_SRC_DIR: src/python
   FTP_NFS_DIR:
   OLD_FTP_NFS_DIR:
 

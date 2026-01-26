@@ -123,8 +123,7 @@ jobs:
           wget https://github.com/Ensembl/Bio-DB-HTS/archive/$BIOHTS_VERSION.zip
           unzip $BIOHTS_VERSION.zip
           cd Bio-DB-HTS-$BIOHTS_VERSION
-          perl Build.PL --htslib $htslib_location
-          ./Build
+          perl INSTALL.pl
           mv lib/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 
           for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules 

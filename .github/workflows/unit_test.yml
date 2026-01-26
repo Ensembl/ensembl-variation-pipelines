@@ -120,6 +120,9 @@ jobs:
         run: |
           BIOHTS_VERSION=2.11
 
+          sudo apt-get update
+          apt-get install -y bioperl
+
           wget https://github.com/Ensembl/Bio-DB-HTS/archive/$BIOHTS_VERSION.zip
           unzip $BIOHTS_VERSION.zip
           cd Bio-DB-HTS-$BIOHTS_VERSION

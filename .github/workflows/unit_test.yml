@@ -92,8 +92,8 @@ jobs:
 
       - name: setup Perl dependencies
         run: |
-          ensembl_libs=( ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper/repos/ensembl*/lib )
-          ensembl_mods=( ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper/repos/ensembl*/modules )
+          ensembl_libs=( ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/lib )
+          ensembl_mods=( ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules )
  
           for lib_path in "${ensembl_mods[@]}" "${ensembl_libs[@]}"
           do

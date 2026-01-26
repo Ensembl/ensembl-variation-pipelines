@@ -151,6 +151,8 @@ jobs:
           ./Build
           rsync -r lib/Bio ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
 
+          tree ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
+
           # add PERL5LIB to env variable
           echo "PERL5LIB=$PERL5LIB" >> $GITHUB_ENV
 

@@ -16,6 +16,7 @@
 name: unit-test
 on: [push, pull_request]
 
+# relative to job working directory ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper
 env:
   PYTHON_SRC_DIR: ../../src/python
   ENSEMBL_ROOT_DIR: repos
@@ -79,12 +80,26 @@ jobs:
           mysql -h 127.0.0.1 -u root -ppassword -e 'CREATE DATABASE homo_sapiens_core_110_38;'
           mysql -h 127.0.0.1 -u root -ppassword homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
 
-      - name: setup nf-test and python dependencies
+      - name: setup nf-test
         run: |
           wget -qO- https://get.nf-test.com | bash
           sudo mv nf-test /usr/local/bin/
+
+      - name: setup Python dependencies
+        run: |
           python3 -m pip install ${{ env.PYTHON_SRC_DIR }}
           python3 -m pip install -r requirements.txt
+
+      - name: setup Perl dependencies
+        run: |
+          ensembl_libs=( repos/ensembl*/lib )
+          ensembl_mods=( repos/ensembl*/modules )
+ 
+          for lib_path in "${ensembl_mods[@]}" "${ensembl_libs[@]}"
+          do
+            PERL5LIB=${lib_path}:$PERL5LIB
+          done
+          echo "PERL5LIB=$PERL5LIB" >> $GITHUB_ENV
 
       - name: test
         run: nf-test test tests --ci --profile github

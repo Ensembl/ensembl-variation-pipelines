@@ -45,7 +45,7 @@
                         {
                             "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
                         },
-                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,3f0c6815f7ac60684d6b4f11ceb67633"
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,a79e811652ce10783cec9ea15d1fcae8"
                     ]
                 ]
             }
@@ -54,7 +54,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-09T18:37:54.016165"
+        "timestamp": "2026-01-27T19:25:48.319328"
     },
     "fasta_dir - old factory": {
         "content": [
@@ -66,7 +66,7 @@
                             "species": "homo_sapiens",
                             "assembly": "GRCh38"
                         },
-                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,0ae926d296714cbced39a91e55303d33"
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,089f3386cf12cb897511a9b8bcd70a89"
                     ]
                 ]
             }
@@ -75,7 +75,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-09T18:38:06.28555"
+        "timestamp": "2026-01-27T19:25:58.558627"
     },
     "fasta_dir - current factory": {
         "content": [
@@ -85,7 +85,7 @@
                         {
                             "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
                         },
-                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,3f0c6815f7ac60684d6b4f11ceb67633"
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,a79e811652ce10783cec9ea15d1fcae8"
                     ]
                 ]
             }
@@ -94,6 +94,6 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-09T18:38:02.272624"
+        "timestamp": "2026-01-27T19:25:55.153164"
     }
 }

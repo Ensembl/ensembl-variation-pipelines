@@ -83,11 +83,8 @@ jobs:
           mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
           mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
 
-      - name: setup htslib and bcftools
+      - name: setup tools
         run: |
-          HTSLIB_VERSION=1.19
-          BCFTOOLS_VERSION=1.19
-
           # install pre-requisites
           sudo apt-get update
           sudo apt-get install -y \
@@ -97,18 +94,19 @@ jobs:
             liblzma-dev \
             libcurl4-openssl-dev \
             libssl-dev
-          
-          # download
+
+          # install htslib
+          HTSLIB_VERSION=1.19
           wget -q https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2
           tar -xjf htslib-${HTSLIB_VERSION}.tar.bz2
           cd htslib-${HTSLIB_VERSION}
           
-          # install
           ./configure --prefix=/usr/local
           make -j$(nproc)
           sudo make install
 
           # install bcftools
+          BCFTOOLS_VERSION=1.19
           wget https://github.com/samtools/bcftools/releases/download/${BCFTOOLS_VERSION}/bcftools-${BCFTOOLS_VERSION}.tar.bz2
           tar -xjf bcftools-${BCFTOOLS_VERSION}.tar.bz2
           cd bcftools-${BCFTOOLS_VERSION}
@@ -116,6 +114,14 @@ jobs:
           ./configure --prefix=/usr/local
           make -j$(nproc)
           sudo make install
+
+          # install ucsc tools
+          wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bigBedToBed
+          chmod +x bigBedToBed
+          mv bigBedToBed /usr/local/bin
+          wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig
+          chmod +x bigBedToBed
+          mv bigBedToBed /usr/local/bin
 
           # add to path
           echo "PATH=/usr/local/bin:$PATH" >> $GITHUB_ENV

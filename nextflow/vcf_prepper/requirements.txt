@@ -1,5 +1,4 @@
 cyvcf2==0.31.1
-wrapt==1.16.0
 Deprecated==1.2.18
 pylint==2.9.6
 biopython==1.81

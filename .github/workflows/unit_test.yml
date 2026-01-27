@@ -83,9 +83,10 @@ jobs:
           mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
           mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
 
-      - name: setup htslib
+      - name: setup htslib and bcftools
         run: |
           HTSLIB_VERSION=1.19
+          BCFTOOLS_VERSION=1.19
 
           # install pre-requisites
           sudo apt-get update
@@ -103,6 +104,15 @@ jobs:
           cd htslib-${HTSLIB_VERSION}
           
           # install
+          ./configure --prefix=/usr/local
+          make -j$(nproc)
+          sudo make install
+
+          # install bcftools
+          wget https://github.com/samtools/bcftools/releases/download/${BCFTOOLS_VERSION}/bcftools-${BCFTOOLS_VERSION}.tar.bz2
+          tar -xjf bcftools-${BCFTOOLS_VERSION}.tar.bz2
+          cd bcftools-${BCFTOOLS_VERSION}
+
           ./configure --prefix=/usr/local
           make -j$(nproc)
           sudo make install

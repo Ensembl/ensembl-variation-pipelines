@@ -116,12 +116,12 @@ jobs:
           sudo make install
 
           # install ucsc tools
-          wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bigBedToBed
-          chmod +x bigBedToBed
-          mv bigBedToBed /usr/local/bin
+          wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed
+          chmod +x bedToBigBed
+          mv bedToBigBed /usr/local/bin
           wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig
-          chmod +x bigBedToBed
-          mv bigBedToBed /usr/local/bin
+          chmod +x wigToBigWig
+          mv wigToBigWig /usr/local/bin
 
           # add to path
           echo "PATH=/usr/local/bin:$PATH" >> $GITHUB_ENV

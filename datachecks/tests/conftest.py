@@ -34,6 +34,7 @@ def pytest_addoption(parser):
     parser.addoption("--source_vcf", type=str, default=None)
     parser.addoption("--species", type=str, default=None)
     parser.addoption("--skip_xfail", action="store_true", default=None)
+    parser.addoption("--no_rvariants", type=int, default=1000)
 
 
 def pytest_generate_tests(metafunc):
@@ -53,6 +54,8 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("species", [metafunc.config.getoption("species")], ids=[metafunc.config.getoption("species")], scope="session")
     if "skip_xfail" in metafunc.fixturenames:
         metafunc.parametrize("skip_xfail", [metafunc.config.getoption("skip_xfail")], ids=[f"skip_xfail={metafunc.config.getoption('skip_xfail')}"], scope="session")
+    if "no_rvariants" in metafunc.fixturenames:
+        metafunc.parametrize("no_rvariants", [metafunc.config.getoption("no_rvariants")], ids=[f"no_variants={metafunc.config.getoption('no_rvariants')}"], scope="session")
 
 
 @pytest.fixture(scope="session")
@@ -77,7 +80,7 @@ def bw_reader(bigwig):
 
 
 @pytest.fixture(scope="session")
-def variant_list(vcf_reader):
+def variant_list(vcf_reader, no_rvariants):
     test = {}
     csq_info_description = vcf_reader.get_header_type("CSQ")["Description"]
     csq_list = [
@@ -122,7 +125,7 @@ def variant_list(vcf_reader):
 
         # break the infinite loop - we can sometimes may not be able to gather required number of variant
         iteration += 1
-        if iteration > 100:
+        if iteration > no_rvariants:
             break
  
     return variant_list

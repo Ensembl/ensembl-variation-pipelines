@@ -115,6 +115,12 @@ jobs:
           wget -qO- https://get.nf-test.com | bash
           sudo mv nf-test /usr/local/bin/
 
+      - name: setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.7'
+          cache: 'pip'
+
       - name: setup Python dependencies
         run: |
           python3 -m pip install ${GITHUB_WORKSPACE}/src/python

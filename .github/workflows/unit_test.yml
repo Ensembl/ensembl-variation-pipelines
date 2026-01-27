@@ -172,4 +172,4 @@ jobs:
           export OLD_FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
           
           sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata/input_config.json
-          nf-test test tests --ci --profile github
+          nf-test test tests modules --ci --profile github

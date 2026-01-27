@@ -83,10 +83,9 @@ jobs:
           mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
           mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
 
-      - name: setup htslib and bcftools
+      - name: setup htslib
         run: |
           HTSLIB_VERSION=1.19
-          BCFTOOLS_VERSION=1.19
 
           # install pre-requisites
           sudo apt-get update
@@ -104,15 +103,6 @@ jobs:
           cd htslib-${HTSLIB_VERSION}
           
           # install
-          ./configure --prefix=/usr/local
-          make -j$(nproc)
-          sudo make install
-
-          # install bcftools
-          wget https://github.com/samtools/bcftools/releases/download/${BCFTOOLS_VERSION}/bcftools-${BCFTOOLS_VERSION}.tar.bz2
-          tar -xjf bcftools-${BCFTOOLS_VERSION}.tar.bz2
-          cd bcftools-${BCFTOOLS_VERSION}
-
           ./configure --prefix=/usr/local
           make -j$(nproc)
           sudo make install
@@ -165,7 +155,6 @@ jobs:
 
           # add PERL5LIB to env variable
           echo "PERL5LIB=$PERL5LIB" >> $GITHUB_ENV
-          echo "PATH=$PATH:${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep" >> $GITHUB_ENV
 
       - name: test
         run: |

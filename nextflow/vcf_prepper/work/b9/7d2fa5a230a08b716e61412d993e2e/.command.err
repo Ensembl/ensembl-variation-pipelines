@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/nextflow/vcf_prepper/bin/update_fields.py", line 23, in <module>
-    from helper import *
-  File "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/nextflow/vcf_prepper/bin/helper.py", line 21, in <module>
-    from deprecated import deprecated
-ModuleNotFoundError: No module named 'deprecated'

@@ -16,24 +16,5 @@
         "protein": 1,
         "transcript_version": 1,
         "gencode_promoter": 1
-    },
-    "plugins": {
-        "conf": [
-            {
-                "name": "CADD",
-                "keyed": true
-            },
-            {
-                "name": "SpliceAI",
-                "keyed": true
-            }
-        ]
-    },
-    "custom_annotaions": {
-        "conf": [
-            {
-                "name": "frequency"
-            }
-        ]
     }
 }

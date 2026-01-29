@@ -25,12 +25,12 @@ include { CREATE_VEP_CONFIG } from "../../../modules/local/vep_config/create"
 workflow GENERATE_VEP_CONFIG {
   take:
     genome_meta                     // channel: [ val(genome_meta) ]
-    fasta                           //     map: fasta meta map 
-    gff                             //     map: gff meta map
-    vep_cache                       //     map: cache meta map
-    default_options                 //     map: fasta meta map
-    vep_plugins                     //     map: fasta meta map
-    custom_annotations              //     map: fasta meta map
+    fasta                           //     map: fasta conf 
+    gff                             //     map: gff conf
+    vep_cache                       //     map: cache conf
+    default_options                 //     map: default options conf
+    vep_plugins                     //     map: VEP plugins conf
+    custom_annotations              //     map: custom annotations conf
     ini_file                        //     str: INI file with database connection info
     version                         //     int: Ensembl (old) release version / schema version
     release_id                      //     int: Ensembl release id

@@ -22,7 +22,6 @@ nextflow_workflow {
     workflow "RUN_VEP"
 
     test("run_vep") {
-        config "${projectDir}/subworkflows/local/run_vep/tests/nextflow.config"
 
         when {
             workflow {

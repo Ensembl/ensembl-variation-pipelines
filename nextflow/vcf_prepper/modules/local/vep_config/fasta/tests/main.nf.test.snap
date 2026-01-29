@@ -95,5 +95,55 @@
             "nextflow": "23.10.1"
         },
         "timestamp": "2026-01-27T19:25:55.153164"
+    },
+    "factory - new ftp": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                            "genome_temp_dir": [
+                                "unmasked.fa.gz:md5,b0c0af579d2a96eb52c6d65af752b9a9",
+                                "unmasked.fa.gz.fai:md5,1a0354ba8e313bcb44903bef2773ec7f",
+                                "unmasked.fa.gz.gzi:md5,4afb4b10477690eb456df9fa25305b92"
+                            ]
+                        },
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,48f7509006aa0ceff97fa15273686e91"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-01-29T16:38:48.991099"
+    },
+    "factory - old ftp": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                            "species": "homo_sapiens",
+                            "assembly": "GRCh38",
+                            "genome_temp_dir": [
+                                "unmasked.fa.gz:md5,b0c0af579d2a96eb52c6d65af752b9a9",
+                                "unmasked.fa.gz.fai:md5,1a0354ba8e313bcb44903bef2773ec7f",
+                                "unmasked.fa.gz.gzi:md5,4afb4b10477690eb456df9fa25305b92"
+                            ]
+                        },
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.fasta.txt:md5,48f7509006aa0ceff97fa15273686e91"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-01-29T16:44:22.509512"
     }
 }

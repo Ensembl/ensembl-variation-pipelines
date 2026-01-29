@@ -83,6 +83,69 @@ nextflow_function {
 					'transcript_version':1, 
 					'gencode_promoter':1
 				], 
+				'plugins':[
+                    'conf':[
+                        [
+                            'name':'CADD', 
+                            'keyed':true
+                        ],
+                        [
+                            'name':'SpliceAI', 
+                            'keyed':true
+                        ]
+                    ]
+                ], 
+				'custom_annotaions':[
+                    'conf':[
+                        [
+                            'name':'frequency'
+                        ]
+                    ]
+                ]
+			]
+        }
+    }
+
+    test("function - process_vep_config - missing confs") {
+
+        function "process_vep_config"
+
+        when {
+            params {
+                vep_config = "${projectDir}/tests/testdata/vep_config_missing_confs.json"
+                skip_vep = 0
+            }
+            function {
+                """
+                input[0] = params
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert function.result == [
+				'annotation_source':[
+					'gff':[
+						'active':true
+					], 
+					'fasta':[
+						'active':true
+					], 
+					'cache':[
+						'active':false
+					]
+				], 
+				'default_options':[
+					'force_overwrite':1, 
+					'fork':1, 
+					'vcf':1, 
+					'spdi':1, 
+					'variant_class':1, 
+					'protein':1, 
+					'transcript_version':1, 
+					'gencode_promoter':1
+				], 
 				'plugins':[:], 
 				'custom_annotaions':[:]
 			]

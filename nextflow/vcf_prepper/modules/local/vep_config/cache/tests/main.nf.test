@@ -20,7 +20,6 @@ nextflow_process {
     name "Test process PROCESS_CACHE_CONFIG"
     script "../main.nf"
     process "PROCESS_CACHE_CONFIG"
-    config "modules/local/vep_config/cache/tests/nextflow.config"
 
     test("cache_dir - inactive") {
 

@@ -20,7 +20,6 @@ nextflow_workflow {
     name "Test workflow GENERATE_VEP_CONFIG"
     script "../main.nf"
     workflow "GENERATE_VEP_CONFIG"
-    config "subworkflows/local/generate_vep_config/tests/nextflow.config"
 
     test("generate_vep_config") {
 
@@ -34,8 +33,8 @@ nextflow_workflow {
                 input[2] = ['file':"${projectDir}/modules/local/vep_config/gff/tests/testdata/genes.gff3.gz"]
                 input[3] = ['active':false]
                 input[4] = [force_overwrite:1, fork:2, vcf:1, spdi:1, variant_class:1, protein:1, transcript_version:1, gencode_promoter:1, offline:1]
-                input[5] = ['conf':"${projectDir}/modules/local/vep_config/plugins/tests/testdata/test_conf.json"]
-                input[6] = ['conf':"${moduleDir}/tests/testdata/test_conf.json"]
+                input[5] = [conf:[[name:'CADD', keyed:true], [name:'SpliceAI', keyed:true]]]
+                input[6] = [:]
                 input[7] = "${projectDir}/tests/testdata/test_db.ini"
                 input[8] = 110
                 input[9] = 'NONE'

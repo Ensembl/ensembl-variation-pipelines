@@ -5,6 +5,9 @@
                 "0": [
                     [
                         {
+                            
+                        },
+                        {
                             "file_type": "remote",
                             "index_type": "csi"
                         },
@@ -18,7 +21,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-08T22:22:53.961028"
+        "timestamp": "2026-01-29T17:02:58.634386"
     },
     "remote file - tbi index": {
         "content": [
@@ -47,6 +50,9 @@
                 "0": [
                     [
                         {
+                            
+                        },
+                        {
                             "file_type": "local",
                             "index_type": "tbi"
                         },
@@ -60,6 +66,6 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-09-08T22:40:15.944679"
+        "timestamp": "2026-01-29T17:03:02.185657"
     }
 }

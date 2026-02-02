@@ -26,10 +26,12 @@ nextflow_process {
         when {
             process {
                 """
-                meta = [:]
-                meta["file_type"] = "remote"
+                genome_meta = [:]
+                file_meta = [:]
+                file_meta["file_type"] = "remote"
                 file = "https://ftp.ncbi.nlm.nih.gov/pub/dbVar/data/Homo_sapiens/by_study/vcf/nstd14.GRCh38.variant_call.vcf.gz"
-                input[0] = tuple(meta, file)
+
+                input[0] = tuple(genome_meta, file_meta, file)
                 """
             }
         }

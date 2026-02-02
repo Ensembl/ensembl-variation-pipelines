@@ -22,7 +22,6 @@ nextflow_workflow {
     workflow "SPLIT_VCF"
 
 	test("split_vcf") {
-        config "${projectDir}/modules/local/split_vcf_chr/tests/nextflow.config"
 
         when {
             workflow {

@@ -20,7 +20,6 @@ nextflow_process {
     name "Test process CREATE_VEP_CONFIG"
     script "../main.nf"
     process "CREATE_VEP_CONFIG"
-    config "modules/local/vep_config/create/tests/nextflow.config"
 
     test("cache inactive") {
         setup {
@@ -80,9 +79,9 @@ nextflow_process {
                 process {
                     """
                     input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
-                    input[1] = ['conf':"${projectDir}/modules/local/vep_config/plugins/tests/testdata/test_conf.json"]
+                    input[1] = [conf:[[name:'CADD', keyed:true], [name:'SpliceAI', keyed:true]]]
                     input[2] = 110
-                    input[3] = 'NONE'
+                    input[3] = "${projectDir}"
                     """
                 }
             }
@@ -93,7 +92,7 @@ nextflow_process {
                 process {
                     """
                     input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
-                    input[1] = ['conf':"${projectDir}/modules/local/vep_config/custom_annotations/tests/testdata/test_conf.json"]
+                    input[1] = [:]
                     input[2] = 110
                     input[3] = "${projectDir}/assets/population_data.json"
                     input[4] = true

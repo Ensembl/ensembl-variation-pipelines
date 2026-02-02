@@ -172,6 +172,16 @@ jobs:
           # add PERL5LIB to env variable
           echo "PERL5LIB=$PERL5LIB" >> $GITHUB_ENV
 
+      - name: setup Rust dependencies
+        run: |
+          cargo build --manifest-path ${GITHUB_WORKSPACE}/src/rust/ensembl/vcf_to_bed/Cargo.toml
+          cp ${GITHUB_WORKSPACE}/src/rust/ensembl/vcf_to_bed/target/debug/vcf_to_bed \
+            ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/bin/vcf_to_bed
+
+          cargo build --manifest-path ${GITHUB_WORKSPACE}/src/rust/ensembl/bed_to_wig/Cargo.toml
+          cp ${GITHUB_WORKSPACE}/src/rust/ensembl/bed_to_wig/target/debug/bed_to_wig \
+            ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/bin/bed_to_wig
+
       - name: test
         run: |
           export FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata

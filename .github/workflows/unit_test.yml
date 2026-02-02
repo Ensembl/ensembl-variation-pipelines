@@ -183,7 +183,7 @@ jobs:
 
       - name: test
         run: |
-          export ENSEMBL_ROOT_DIR=${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper/repos
+          export ENSEMBL_ROOT_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos
           export FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
           export OLD_FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
           export PLUGIN_DATA_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/modules/local/vep_config/plugins/tests/testdata

@@ -27,7 +27,7 @@ nextflow_workflow {
             workflow {
                 """
                 input[0] = Channel.fromList([
-                        ['genome_uuid':'a7335667-93e7-11ec-a39d-005056b38ce3', 'species':'homo_sapiens', 'assembly':'GRCh38']
+                        ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
                     ])
                 input[1] = ['file':"${projectDir}/modules/local/vep_config/fasta/tests/testdata/unmasked.fa.gz"]
                 input[2] = ['file':"${projectDir}/modules/local/vep_config/gff/tests/testdata/genes.gff3.gz"]
@@ -49,7 +49,7 @@ nextflow_workflow {
             assert snapshot(workflow.out).match()
 
             // genome_meta does not change
-            assert workflow.out.get(0).get(0).get(0) == ['genome_uuid':'a7335667-93e7-11ec-a39d-005056b38ce3', 'species':'homo_sapiens', 'assembly':'GRCh38']
+            assert workflow.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
         }
     }
 }

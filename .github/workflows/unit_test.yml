@@ -16,9 +16,8 @@
 name: unit-test
 on: [pull_request]
 
-# relative to job working directory ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper
 env:
-  ENSEMBL_ROOT_DIR: repos
+  ENSEMBL_ROOT_DIR: ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper/repos
 
 jobs:
   vcf_prepper:
@@ -188,7 +187,7 @@ jobs:
           export OLD_FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
           export PLUGIN_DATA_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/modules/local/vep_config/plugins/tests/testdata
           
-          sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata/input_config.json
-          nf-test test modules/local/concat_beds --verbose --debug --ci --profile github
-          cat 
-          #nf-test test . --ci --profile github
+          sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|g' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata/input_config.json
+          sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|g' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/subworkflows/local/run_vep/tests/testdata/test_vep_config.ini
+          
+          nf-test test . --ci --profile github

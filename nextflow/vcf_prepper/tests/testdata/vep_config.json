@@ -31,9 +31,6 @@
     },
     "custom_annotaions": {
         "conf": [
-            {
-                "name": "frequency"
-            }
         ]
     }
 }

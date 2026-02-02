@@ -260,12 +260,15 @@ class RepoPluginConfigMatcher():
 
         plugin_config = json.loads(process.stdout)
 
-        for plugin in plugin_config["plugins"]:
-            if plugin["key"] == plugin_name:
-                if "species" not in plugin:
-                    return True
-                else:
-                    return species in plugin["species"]
+        if "plugins" in plugin_config:
+            for plugin in plugin_config["plugins"]:
+                if plugin["key"] == plugin_name:
+                    if "species" not in plugin:
+                        return True
+                    else:
+                        return species in plugin["species"]
+        else:
+            print(f"[WARNING] No plugin could be found in config {self.config_file}")
         
         print(f"[WARNING] Could not find {plugin_name} in config {self.config_file}")
         return False

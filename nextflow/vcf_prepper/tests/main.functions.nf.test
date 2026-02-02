@@ -174,16 +174,16 @@ nextflow_function {
         then {
             assert function.success
             assert function.result == [
-                    'a7335667-93e7-11ec-a39d-005056b38ce3':[
-                        'genome_uuid':'a7335667-93e7-11ec-a39d-005056b38ce3',
+                    '2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb':[
+                        'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb',
                         'genome':'homo_sapiens_grch38', 
                         'species':'homo_sapiens', 
                         'assembly':'GRCh38',
-                        'genome_temp_dir':"${projectDir}/tmp/a7335667-93e7-11ec-a39d-005056b38ce3",
-                        'genome_api_outdir':"${projectDir}/api/a7335667-93e7-11ec-a39d-005056b38ce3",
-                        'genome_tracks_outdir':"${projectDir}/tracks/a7335667-93e7-11ec-a39d-005056b38ce3",
-                        'synonym_file':"${projectDir}/tmp/a7335667-93e7-11ec-a39d-005056b38ce3/homo_sapiens_grch38.synonyms",
-                        'chrom_sizes_file':"${projectDir}/tmp/a7335667-93e7-11ec-a39d-005056b38ce3/homo_sapiens_grch38.chrom.sizes"
+                        'genome_temp_dir':"${projectDir}/tmp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'genome_api_outdir':"${projectDir}/api/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'genome_tracks_outdir':"${projectDir}/tracks/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'synonym_file':"${projectDir}/tmp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.synonyms",
+                        'chrom_sizes_file':"${projectDir}/tmp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.chrom.sizes"
                     ], 
                     '3704ceb1-948d-11ec-a39d-005056b38ce3':[
                         'genome_uuid':'3704ceb1-948d-11ec-a39d-005056b38ce3',
@@ -221,7 +221,7 @@ nextflow_function {
                 example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
                 def input_config = new groovy.json.JsonSlurper().parse(file(example_input_config))
                 def genome_map = [
-                    'a7335667-93e7-11ec-a39d-005056b38ce3':
+                    '2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb':
                         ['genome':'homo_sapiens_grch38', 'species':'homo_sapiens', 'assembly':'GRCh38'], 
                     '3704ceb1-948d-11ec-a39d-005056b38ce3':
                         ['genome':'homo_sapiens_grch37', 'species':'homo_sapiens_37', 'assembly':'GRCh37'], 

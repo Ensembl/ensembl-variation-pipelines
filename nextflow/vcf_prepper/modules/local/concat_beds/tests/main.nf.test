@@ -35,7 +35,15 @@ nextflow_process {
         }
 
         then {
-            assert process.success 
+            assert process.success
+
+            def filePath = process.out.get(0).get(0).get(1)
+            println "File path: ${filePath}"
+            def content = path(process.out.get(0).get(0).get(1)).readLines()
+            println "File content:"
+            content.each { line ->
+                println line
+            }
             assert snapshot(process.out).match()
             
             // assert the content of the output file

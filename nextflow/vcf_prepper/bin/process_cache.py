@@ -128,8 +128,8 @@ def main(args=None):
         )
         if os.path.exists(genome_cache_dir):
             with open(cache_vep_config_file, "w") as f:
-                f.write(f"cache {cache_dir}\n")
-                f.write(f"cache_version {rl_version}")
+                f.write(f"cache\t{cache_dir}\n")
+                f.write(f"cache_version\t{rl_version}")
         else:
             rel_genome_cache_dir = os.path.join(
                 cachedir_species_name, f"{rl_version}_{assembly}"
@@ -153,8 +153,8 @@ def main(args=None):
             uncompress_cache(out_dir, source_cache_file)
 
             with open(cache_vep_config_file, "w") as f:
-                f.write(f"cache {out_dir}\n")
-                f.write(f"cache_version {rl_version}")
+                f.write(f"cache\t{out_dir}\n")
+                f.write(f"cache_version\t{rl_version}")
 
 if __name__ == "__main__":
     sys.exit(main())

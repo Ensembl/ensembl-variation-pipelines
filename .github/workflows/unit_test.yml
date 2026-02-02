@@ -189,4 +189,6 @@ jobs:
           export PLUGIN_DATA_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/modules/local/vep_config/plugins/tests/testdata
           
           sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata/input_config.json
-          nf-test test . --ci --profile github
+          nf-test test nextflow/vcf_prepper/modules/local/concat_beds --verbose --debug --ci --profile github
+          cat 
+          #nf-test test . --ci --profile github

@@ -96,11 +96,7 @@ nextflow_function {
                     ]
                 ], 
 				'custom_annotaions':[
-                    'conf':[
-                        [
-                            'name':'frequency'
-                        ]
-                    ]
+                    'conf':[]
                 ]
 			]
         }

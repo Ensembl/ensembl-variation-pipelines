@@ -57,7 +57,7 @@ nextflow_pipeline {
         }
 
         then {
-            assert workflow.failed // unexpected: summary_stats missing gnomAD_genomes_AF [fixed @dev_v1.0]
+            assert workflow.success // unexpected: summary_stats missing gnomAD_genomes_AF [fixed @dev_v1.0]
         }
     }
 
@@ -78,7 +78,7 @@ nextflow_pipeline {
         }
 
         then {
-            assert workflow.failed // unexpected: summary_stats missing gnomAD_genomes_AF [fixed @dev_v1.0]
+            assert workflow.success // unexpected: summary_stats missing gnomAD_genomes_AF [fixed @dev_v1.0]
         }
     }
 }

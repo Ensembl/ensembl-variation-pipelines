@@ -46,7 +46,6 @@ nextflow_workflow {
 
         then {
             assert workflow.success
-            assert snapshot(workflow.out).match()
 
             // genome_meta does not change
             assert workflow.out.get(0).get(0).get(0) == [

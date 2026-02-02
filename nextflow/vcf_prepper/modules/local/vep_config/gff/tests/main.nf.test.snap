@@ -1,66 +1,4 @@
 {
-    "gff_file - proper": {
-        "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-                        },
-                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.gff.txt:md5,f8b4cdc15afca33437765b81deb1ebcc"
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "23.10.1"
-        },
-        "timestamp": "2025-10-09T18:21:35.745259"
-    },
-    "factory - new_ftp": {
-        "content": [
-            {
-                "0": [
-                    {
-                        "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-                    }
-                ],
-                "1": [
-                    "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.gff.txt:md5,74c5f3d846d6c3701a0003b7b6b84c35"
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "23.10.1"
-        },
-        "timestamp": "2025-09-23T21:46:07.993836"
-    },
-    "factory - new ftp": {
-        "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
-                            "genome_temp_dir": [
-                                "genes.gff3:md5,cd88ed770c39ee707bc6d818989e2ea0",
-                                "sorted_genes.gff3.gz:md5,994e5898282942a54ad20837bbd51d77",
-                                "sorted_genes.gff3.gz.csi:md5,f8ef4386fa8c0111f57b0a589ab07eba"
-                            ]
-                        },
-                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.gff.txt:md5,e0ccf5e66641e49fc7943b4ae31ecfa8"
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "23.10.1"
-        },
-        "timestamp": "2025-10-10T10:48:19.591359"
-    },
     "gff_file - inactive": {
         "content": [
             {
@@ -79,24 +17,5 @@
             "nextflow": "23.10.1"
         },
         "timestamp": "2025-10-10T10:39:21.548777"
-    },
-    "gff_dir - proper": {
-        "content": [
-            {
-                "0": [
-                    [
-                        {
-                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-                        },
-                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.gff.txt:md5,f8b4cdc15afca33437765b81deb1ebcc"
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "23.10.1"
-        },
-        "timestamp": "2025-10-09T18:21:44.015638"
     }
 }

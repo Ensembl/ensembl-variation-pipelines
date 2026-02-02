@@ -20,7 +20,6 @@ nextflow_process {
     name "Test process PROCESS_CACHE_CONFIG"
     script "../main.nf"
     process "PROCESS_CACHE_CONFIG"
-    config "modules/local/vep_config/cache/tests/nextflow.config"
 
     test("cache_dir - inactive") {
 
@@ -75,10 +74,18 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
 
             // genome_meta does not change
-            assert process.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
+            assert process.out.get(0).get(0).get(0) == [
+                'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 
+                'species':'homo_sapiens', 
+                'assembly':'GRCh38'
+            ]
+
+            // cannot do snapshot match as cache dir path may vary 
+            def file_content = path(process.out.get(0).get(0).get(1)).text
+            assert file_content.contains("cache\t${moduleDir}/tests/testdata")
+            assert file_content.contains("cache_version\t110")
         }
     }
 
@@ -125,7 +132,20 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
+            
+            // genome_meta does not change
+            def tmp_dir = "${moduleDir}/tests/temp"
+            assert process.out.get(0).get(0).get(0) == [
+                'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 
+                'species':'homo_sapiens', 
+                'assembly':'GRCh38',
+                'genome_temp_dir':tmp_dir
+            ]
+
+            // cannot do snapshot match as cache dir path may vary 
+            def file_content = path(process.out.get(0).get(0).get(1)).text
+            assert file_content.contains("cache\t${tmp_dir}")
+            assert file_content.contains("cache_version\t110")
         }
     }
 }

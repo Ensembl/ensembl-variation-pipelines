@@ -9,4 +9,8 @@
 **/.python-version
 **/venv
 **/tests/temp
+**/temp
+**/tracks
 **/reports
+**/work
+**/dist

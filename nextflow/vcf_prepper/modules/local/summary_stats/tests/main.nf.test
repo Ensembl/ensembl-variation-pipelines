@@ -21,9 +21,6 @@ nextflow_process {
     script "../main.nf"
     process "SUMMARY_STATS"
 
-    test("summary_stats - population.json is 'NONE'") {
-        test for variant which utikises minimise allele function
-
 	test("summary_stats - population.json is 'NONE'") {
 
         when {

@@ -14,14 +14,10 @@
 
 
 name: unit-test
-on: [push, pull_request]
+on: [pull_request]
 
-# relative to job working directory ${{ GITHUB_WORKSPACE }}/nextflow/vcf_prepper
 env:
-  PYTHON_SRC_DIR: ../../src/python
   ENSEMBL_ROOT_DIR: repos
-  FTP_NFS_DIR: tests/testdata
-  OLD_FTP_NFS_DIR: tests/testdata
 
 jobs:
   vcf_prepper:
@@ -34,7 +30,8 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
         ports:
           - 3306:3306
         options: >-
@@ -80,10 +77,53 @@ jobs:
 
       - name: load databases
         run: |
-          mysql -h 127.0.0.1 -u root -ppassword -e 'CREATE DATABASE ensembl_genome_metadata;'
-          mysql -h 127.0.0.1 -u root -ppassword ensembl_genome_metadata < tests/testdata/ensembl_genome_metadata.dump
-          mysql -h 127.0.0.1 -u root -ppassword -e 'CREATE DATABASE homo_sapiens_core_110_38;'
-          mysql -h 127.0.0.1 -u root -ppassword homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
+          mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE ensembl_genome_metadata;'
+          mysql -h 127.0.0.1 -u root ensembl_genome_metadata < tests/testdata/ensembl_genome_metadata.dump
+          mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
+          mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < tests/testdata/homo_sapiens_core_110_38.dump
+
+      - name: setup tools
+        run: |
+          # install pre-requisites
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            zlib1g-dev \
+            libbz2-dev \
+            liblzma-dev \
+            libcurl4-openssl-dev \
+            libssl-dev
+
+          # install htslib
+          HTSLIB_VERSION=1.19
+          wget -q https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2
+          tar -xjf htslib-${HTSLIB_VERSION}.tar.bz2
+          cd htslib-${HTSLIB_VERSION}
+          
+          ./configure --prefix=/usr/local
+          make -j$(nproc)
+          sudo make install
+
+          # install bcftools
+          BCFTOOLS_VERSION=1.19
+          wget https://github.com/samtools/bcftools/releases/download/${BCFTOOLS_VERSION}/bcftools-${BCFTOOLS_VERSION}.tar.bz2
+          tar -xjf bcftools-${BCFTOOLS_VERSION}.tar.bz2
+          cd bcftools-${BCFTOOLS_VERSION}
+
+          ./configure --prefix=/usr/local
+          make -j$(nproc)
+          sudo make install
+
+          # install ucsc tools
+          wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed
+          chmod +x bedToBigBed
+          mv bedToBigBed /usr/local/bin
+          wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig
+          chmod +x wigToBigWig
+          mv wigToBigWig /usr/local/bin
+
+          # add to path
+          echo "PATH=/usr/local/bin:$PATH" >> $GITHUB_ENV
 
       - name: setup nf-test
         run: |
@@ -92,16 +132,63 @@ jobs:
 
       - name: setup Python dependencies
         run: |
-          python3 -m pip install ${{ env.PYTHON_SRC_DIR }}
+          python3 -m pip install ${GITHUB_WORKSPACE}/src/python
           python3 -m pip install -r requirements.txt
 
       - name: setup Perl dependencies
         run: |
+          BIOPERL_VERSION=release-1-6-924
+          HTSLIB_VERSION=1.19
+          BIOHTS_VERSION=2.11
+          LIB_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl-vep/modules/
+
+          # add module path to PERL5LIB
           for lib_path in ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos/ensembl*/modules 
           do
             PERL5LIB=${lib_path}:$PERL5LIB
           done
+          export PERL5LIB
+
+          # install Module::Build - needed for Bio::DB::HTS
+          sudo apt-get update
+          sudo apt-get install -y cpanminus
+          cpanm Module::Build
+
+          # install Bioperl - needed for Bio::DB::HTS
+          wget https://github.com/bioperl/bioperl-live/archive/$BIOPERL_VERSION.zip
+          unzip $BIOPERL_VERSION.zip
+          rsync -r bioperl-live-$BIOPERL_VERSION/Bio ${LIB_DIR}/
+
+          # install Bio::DB::HTS
+          wget https://github.com/Ensembl/Bio-DB-HTS/archive/$BIOHTS_VERSION.zip
+          unzip $BIOHTS_VERSION.zip
+          cd Bio-DB-HTS-$BIOHTS_VERSION
+          perl Build.PL --htslib ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/htslib-${HTSLIB_VERSION}
+          ./Build
+          rsync -r lib/Bio ${LIB_DIR}/
+          rsync blib/arch/auto/Bio/DB/HTS/Faidx/Faidx.so ${LIB_DIR}/
+
+          # add PERL5LIB to env variable
           echo "PERL5LIB=$PERL5LIB" >> $GITHUB_ENV
 
+      - name: setup Rust dependencies
+        run: |
+          cargo build --manifest-path ${GITHUB_WORKSPACE}/src/rust/ensembl/vcf_to_bed/Cargo.toml
+          cp ${GITHUB_WORKSPACE}/src/rust/ensembl/vcf_to_bed/target/debug/vcf_to_bed \
+            ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/bin/vcf_to_bed
+
+          cargo build --manifest-path ${GITHUB_WORKSPACE}/src/rust/ensembl/bed_to_wig/Cargo.toml
+          cp ${GITHUB_WORKSPACE}/src/rust/ensembl/bed_to_wig/target/debug/bed_to_wig \
+            ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/bin/bed_to_wig
+
       - name: test
-        run: nf-test test tests --ci --profile github
+        run: |
+          export ENSEMBL_ROOT_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/repos
+          export FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
+          export OLD_FTP_NFS_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata
+          export PLUGIN_DATA_DIR=${GITHUB_WORKSPACE}/nextflow/vcf_prepper/modules/local/vep_config/plugins/tests/testdata
+          
+          sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|g' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata/input_config.json
+          sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|g' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/subworkflows/local/run_vep/tests/testdata/test_vep_config.ini
+          
+          nf-test test . --ci --profile github

@@ -22,7 +22,6 @@ nextflow_process {
     process "SPLIT_VCF_CHR"
 
 	test("split_vcf_chr") {
-        config "${projectDir}/modules/local/split_vcf_chr/tests/nextflow.config"
 
         when {
             process {

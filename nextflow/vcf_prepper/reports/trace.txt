@@ -1,3 +1,0 @@
-task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
-1	ec/7c2975	55684	PROCESS_INPUT:DOWNLOAD_WITH_INDEX (1)	COMPLETED	0	2025-09-09 10:59:44.760	30ms	0ms	-	-	-	-	-
-2	c5/195836	55703	PROCESS_INPUT:UPDATE_FIELDS (1)	FAILED	1	2025-09-09 10:59:44.841	166ms	118ms	-	-	-	-	-

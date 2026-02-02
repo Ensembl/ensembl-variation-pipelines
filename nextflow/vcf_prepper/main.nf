@@ -137,6 +137,19 @@ def process_vep_config(params) {
 		error("Both VEP cache and GFF cannot be disabled when --skip_vep is not set")
 	}
 
+    if (! vep_config.default_options) {
+		log.warn("No default option set for VEP config, VEP job might fail...")
+        vep_config.default_options = [:]
+    }
+
+    if (! vep_config.plugins) {
+        vep_config.plugins = [:]
+    }
+
+    if (! vep_config.custom_annotaions) {
+        vep_config.custom_annotaions = [:]
+    }
+
 	return vep_config
 }
 

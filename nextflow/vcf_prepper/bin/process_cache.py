@@ -131,7 +131,10 @@ def main(args=None):
                 f.write(f"cache\t{cache_dir}\n")
                 f.write(f"cache_version\t{rl_version}")
         else:
-            raise FileNotFoundError(f"[ERROR] {cache_dir} does not exist in {genome_cache_dir}")
+            rel_genome_cache_dir = os.path.join(
+                cachedir_species_name, f"{rl_version}_{assembly}"
+            )
+            raise FileNotFoundError(f"[ERROR] {rel_genome_cache_dir} not found in {cache_dir}")
 
     else:
         cache_locator_factory = vep_cache.VEPCacheLocatorFactory()

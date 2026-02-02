@@ -7,7 +7,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED_test_multiple_source.vcf.gz:md5,b3f2fab1478211bc65b69ed3da22144b"
+                        "FORMATTED-null-test_multiple_source.vcf.vcf.gz:md5,b3f2fab1478211bc65b69ed3da22144b",
+                        "FORMATTED-null-test_multiple_source.vcf.vcf.gz.csi:md5,f3376d27a1fc90e133db17167181215d"
                     ]
                 ]
             }
@@ -16,7 +17,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-11T23:02:11.174716"
+        "timestamp": "2026-01-27T19:24:15.095477"
     },
     "remove criteria - none": {
         "content": [
@@ -26,7 +27,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED_test_format_vcf.vcf.gz:md5,01efbdf3a0bee8bd81111aec7df8bf58"
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,01efbdf3a0bee8bd81111aec7df8bf58",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,868a511edbb9e695fcd318ac24543258"
                     ]
                 ]
             }
@@ -35,7 +37,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-11T22:59:26.764917"
+        "timestamp": "2026-01-27T19:24:11.268901"
     },
     "remove criteria - patch regions": {
         "content": [
@@ -45,7 +47,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED_test_format_vcf.vcf.gz:md5,7966b0a654b4cf9357335a61ef5b9be7"
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,7966b0a654b4cf9357335a61ef5b9be7",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,7f49777ef12a667f13b4a78158438c0e"
                     ]
                 ]
             }
@@ -54,7 +57,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-11T22:59:23.116575"
+        "timestamp": "2026-01-27T19:24:07.157633"
     },
     "SV fields - SVLEN and END": {
         "content": [
@@ -64,7 +67,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED_test_structural_variant.vcf.gz:md5,92d8d0cceda013c4bbce9a0a0962085b"
+                        "FORMATTED-null-test_structural_variant.vcf.vcf.gz:md5,92d8d0cceda013c4bbce9a0a0962085b",
+                        "FORMATTED-null-test_structural_variant.vcf.vcf.gz.csi:md5,8d56adb0c8942aa12b43d6d1c6c2da90"
                     ]
                 ]
             }
@@ -73,7 +77,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-11T22:59:33.396683"
+        "timestamp": "2026-01-27T19:24:18.850377"
     },
     "remove criteria - non-unique ids": {
         "content": [
@@ -83,7 +87,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED_test_format_vcf.vcf.gz:md5,d2e97ad07af9dd834dcb696f3cac7769"
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,d2e97ad07af9dd834dcb696f3cac7769",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,9d4dbdc9c4ebe591886763ed2175c592"
                     ]
                 ]
             }
@@ -92,7 +97,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-11T22:59:19.79906"
+        "timestamp": "2026-01-27T19:24:02.637733"
     },
     "remove criteria - all": {
         "content": [
@@ -102,7 +107,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED_test_format_vcf.vcf.gz:md5,f96e5f994a88ca71d42cd9a704bbf9d2"
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,f96e5f994a88ca71d42cd9a704bbf9d2",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,9a0da28a4ce1686a1e5f09c5b46c2c96"
                     ]
                 ]
             }
@@ -111,6 +117,6 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-11T22:59:16.438894"
+        "timestamp": "2026-01-27T19:23:58.665575"
     }
 }

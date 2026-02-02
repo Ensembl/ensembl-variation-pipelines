@@ -100,7 +100,7 @@ def main(args=None):
     plugin_builder.version = version
 
     with open(plugin_vep_config_file, "w") as f:
-        f.write(f"dir_plugins {repo_dir}/VEP_plugins\n")
+        f.write(f"dir_plugins\t{repo_dir}/VEP_plugins\n")
         for plugin_config in config_json:
             plugin_name = plugin_config["name"]
             keyed = plugin_config.get("keyed", False)
@@ -114,12 +114,12 @@ def main(args=None):
                 plugin_args[arg] = plugin_config["args"].get(arg, plugin_args[arg])
 
             if keyed:
-                f.write(f"plugin {plugin_name}," 
+                f.write(f"plugin\t{plugin_name}," 
                         + ",".join([f"{k}={v}" for k, v in plugin_args.items()]) 
                         + "\n"
                     )
             else:    
-                f.write(f"plugin {plugin_name}," 
+                f.write(f"plugin\t{plugin_name}," 
                         + ",".join(plugin_args.values()) 
                         + "\n"
                     )

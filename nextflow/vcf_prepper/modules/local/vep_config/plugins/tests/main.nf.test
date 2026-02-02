@@ -20,9 +20,8 @@ nextflow_process {
     name "Test process PROCESS_PLUGINS_CONFIG"
     script "../main.nf"
     process "PROCESS_PLUGINS_CONFIG"
-    config "modules/local/vep_config/plugins/tests/nextflow.config"
 
-    test("no conf") {
+    test("conf - empty") {
 
         when {
             process {
@@ -36,18 +35,19 @@ nextflow_process {
         }
 
         then {
-            assert process.failed
-            assert process.errorReport.contains("FileNotFoundError")
+            assert process.success
+
+            assert path(process.out.get(0).get(0).get(1)).text == ''
         }
     }
 
-    test("conf - invalid") {
+    test("conf - empty 2") {
 
         when {
             process {
                 """
                 input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
-                input[1] = ['conf':"${moduleDir}/tests/testdata/non_existing.json"]
+                input[1] = [conf:[:]]
                 input[2] = 110
                 input[3] = 'NONE'
                 """
@@ -55,8 +55,9 @@ nextflow_process {
         }
 
         then {
-            assert process.failed
-            assert process.errorReport.contains("FileNotFoundError")
+            assert process.success
+
+            assert path(process.out.get(0).get(0).get(1)).text == ''
         }
     }
 
@@ -66,7 +67,7 @@ nextflow_process {
             process {
                 """
                 input[0] = ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
-                input[1] = ['conf':"${moduleDir}/tests/testdata/test_conf.json"]
+                input[1] = [conf:[[name:'CADD', keyed:true], [name:'SpliceAI', keyed:true]]]
                 input[2] = 110
                 input[3] = 'NONE'
                 """
@@ -75,14 +76,14 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
 
             // genome_meta does not change
             assert process.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
-
-            // contains plugins
-            assert path(process.out.get(0).get(0).get(1)).getText().contains("CADD")
-            assert path(process.out.get(0).get(0).get(1)).getText().contains("SpliceAI")
+            
+            // cannot do snapshot match as cache dir path may vary 
+            def file_content = path(process.out.get(0).get(0).get(1)).text    
+            assert file_content.contains("plugin\tCADD,snv=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/CADD_GRCh38_1.7_whole_genome_SNVs.tsv.gz,indels=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/CADD_GRCh38_1.7_InDels.tsv.gz")
+            assert file_content.contains("plugin\tSpliceAI,snv=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/spliceai_scores.masked.snv.hg38.vcf.gz,indel=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/spliceai_scores.masked.indel.hg38.vcf.gz")
         }
     }
 }

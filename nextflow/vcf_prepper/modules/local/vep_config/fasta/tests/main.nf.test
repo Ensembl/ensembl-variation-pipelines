@@ -221,7 +221,6 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
 
             // genome_meta does not change
             def tmp_dir = "${moduleDir}/tests/temp"
@@ -229,6 +228,10 @@ nextflow_process {
                         'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb',
                         'genome_temp_dir':tmp_dir
                     ]
+
+            // cannot do snapshot match as cache dir path may vary 
+            def file_content = path(process.out.get(0).get(0).get(1)).text
+            assert file_content.contains("fasta\t${tmp_dir}/unmasked.fa.gz")
         }
     }
 
@@ -268,7 +271,7 @@ nextflow_process {
 
             // cannot do snapshot match as cache dir path may vary 
             def file_content = path(process.out.get(0).get(0).get(1)).text
-            assert file_content.contains("fasta\t${tmp_dir}/unmasked.fa.gz")
+            assert file_content.contains("fasta\t${tmp_dir}/Homo_sapiens.GRCh38.dna.toplevel.fa.gz")
         }
     }
 }

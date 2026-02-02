@@ -49,7 +49,27 @@ nextflow_workflow {
             assert snapshot(workflow.out).match()
 
             // genome_meta does not change
-            assert workflow.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
+            assert workflow.out.get(0).get(0).get(0) == [
+                'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 
+                'species':'homo_sapiens', 
+                'assembly':'GRCh38'
+            ]
+
+            // cannot do snapshot match as cache dir path may vary 
+            def file_content = path(workflow.out.get(0).get(0).get(1)).text
+            assert file_content.contains("force_overwrite\t1")
+            assert file_content.contains("fork\t2")
+            assert file_content.contains("vcf\t1")
+            assert file_content.contains("spdi\t1")
+            assert file_content.contains("variant_class\t1")
+            assert file_content.contains("protein\t1")
+            assert file_content.contains("transcript_version\t1")
+            assert file_content.contains("gencode_promoter\t1")
+            assert file_content.contains("offline\t1")
+            assert file_content.contains("fasta\t${projectDir}/modules/local/vep_config/fasta/tests/testdata/unmasked.fa.gz")
+            assert file_content.contains("gff\t${projectDir}/modules/local/vep_config/gff/tests/testdata/genes.gff3.gz")
+            assert file_content.contains("plugin\tCADD,snv=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/CADD_GRCh38_1.7_whole_genome_SNVs.tsv.gz,indels=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/CADD_GRCh38_1.7_InDels.tsv.gz")
+            assert file_content.contains("plugin\tSpliceAI,snv=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/spliceai_scores.masked.snv.hg38.vcf.gz,indel=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/spliceai_scores.masked.indel.hg38.vcf.gz")
         }
     }
 }

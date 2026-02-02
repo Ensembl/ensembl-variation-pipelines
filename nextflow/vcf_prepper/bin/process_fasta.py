@@ -193,7 +193,8 @@ def main(args=None):
         if not source_fasta_file or (source_fasta_file and not os.path.isfile(source_fasta_file)):
             raise FileNotFoundError(f"Could not find - {source_fasta_file}")
         else:
-            compressed_fasta = os.path.join(out_dir, FASTA_FILE_NAME)
+            filename = os.path.basename(source_fasta_file)
+            compressed_fasta = os.path.join(out_dir, filename)
             copied = locator.copy_file(compressed_fasta)
             if not copied:
                 raise Exception("[ERROR] Copy failed.")

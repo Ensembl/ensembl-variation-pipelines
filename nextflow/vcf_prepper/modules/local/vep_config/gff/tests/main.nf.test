@@ -88,12 +88,16 @@ nextflow_process {
         }
 
         then {
-            assert process.success
-            assert snapshot(process.out).match()    
+            assert process.success   
             
             // genome_meta does not change
-            assert process.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb']
-        
+            assert process.out.get(0).get(0).get(0) == [
+                'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb'
+            ]
+
+            // cannot do snapshot match as cache dir path may vary 
+            def file_content = path(process.out.get(0).get(0).get(1)).text
+            assert file_content.contains("gff\t${moduleDir}/tests/testdata/genes.gff3.gz")        
         }
     }
 
@@ -180,7 +184,17 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
+
+            // genome_meta does not change
+            def tmp_dir = "${moduleDir}/tests/temp"
+            assert process.out.get(0).get(0).get(0) == [
+                'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb',
+                'genome_temp_dir':tmp_dir
+            ]
+
+            // cannot do snapshot match as cache dir path may vary 
+            def file_content = path(process.out.get(0).get(0).get(1)).text
+            assert file_content.contains("gff\t${tmp_dir}/sorted_genes.gff3.gz")
         }
     }
 }

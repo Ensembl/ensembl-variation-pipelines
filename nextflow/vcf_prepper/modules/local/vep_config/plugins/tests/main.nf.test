@@ -76,14 +76,14 @@ nextflow_process {
 
         then {
             assert process.success
-            assert snapshot(process.out).match()
 
             // genome_meta does not change
             assert process.out.get(0).get(0).get(0) == ['genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb', 'species':'homo_sapiens', 'assembly':'GRCh38']
-
-            // contains plugins
-            assert path(process.out.get(0).get(0).get(1)).getText().contains("CADD")
-            assert path(process.out.get(0).get(0).get(1)).getText().contains("SpliceAI")
+            
+            // cannot do snapshot match as cache dir path may vary 
+            def file_content = path(process.out.get(0).get(0).get(1)).text    
+            assert file_content.contains("plugin\tCADD,snv=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/CADD_GRCh38_1.7_whole_genome_SNVs.tsv.gz,indels=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/CADD_GRCh38_1.7_InDels.tsv.gz")
+            assert file_content.contains("plugin\tSpliceAI,snv=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/spliceai_scores.masked.snv.hg38.vcf.gz,indel=${projectDir}/modules/local/vep_config/plugins/tests/testdata/grch38/e113/vep/plugin_data/spliceai_scores.masked.indel.hg38.vcf.gz")
         }
     }
 }

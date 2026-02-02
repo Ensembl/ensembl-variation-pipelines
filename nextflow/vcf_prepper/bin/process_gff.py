@@ -176,7 +176,8 @@ def main(args=None):
         if not source_gff_file or (source_gff_file and not os.path.isfile(source_gff_file)):
             raise FileNotFoundError(f"Could not find - {source_gff_file}")
         else:
-            compressed_gff = os.path.join(out_dir, GFF_FILE_NAME)
+            filename = os.path.basename(source_gff_file)
+            compressed_gff = os.path.join(out_dir, filename)
             copied = locator.copy_file(compressed_gff)
             if not copied:
                 raise Exception("[ERROR] Copy failed.")

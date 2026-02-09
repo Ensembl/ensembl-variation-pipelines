@@ -129,10 +129,10 @@
 		"name": "Watkins_collection",
 		"description": "Variants from the the Watkins Collection which is a diverse assortment of heritage wheat varieties from the 1930s, preserved for its unique genetic potential in modern breeding"
 	},
-  {
-    "name": "MAGIC-16-Diversity",
-    "description": "Variants from the wheat MAGIC-16-diversity"
-  },
+	{
+		"name": "ENA",
+		"description": "Variants from the European Nucleotide Archive (ENA)"
+	},
 	{
 		"name": "CNR-ITB",
 		"description": "Markers from Axiom 820K, 35K and iSelect 90K SNP Infinium are provided by <a href='http://www.cerealsdb.uk.net'>CerealsDB</a>. Markers from TaBW280K Affymetrix arrary refer to <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5749704/#!po=58.6957'>Rimbert, H. et al.</a>"

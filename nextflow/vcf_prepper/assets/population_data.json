@@ -1270,14 +1270,14 @@
    ],
    "triticum_aestivum": [
       {
-         "name": "MAGIC-16-Diversity",
+         "name": "ENA",
          "files": [
             {
                "file_location": "/nfs/production/flicek/ensembl/variation/new_website/vep/custom_data/frequency_projects/triticum_aestivum/IWGSC/MAGIC.vcf.gz",
-               "short_name": "MAGIC-16-Diversity",
+               "short_name": "ENA",
                "include_fields": [
                   {
-                     "name": "MAGIC-16-Diversity",
+                     "name": "ENA",
                      "fields": {
                         "af": "AF",
                         "ac": "AC",

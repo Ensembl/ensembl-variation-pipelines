@@ -269,10 +269,10 @@ fn main() -> Result<(), VCFError> {
     // generate Hashmap of INFO/CSQ header indexes and retrieve relavant header indexes
     let header = reader.header();
     let csq_header_idx: HashMap<&str, usize> = gen_csq_info_idx(&header);
-    let &csqh_allele_idx = match csq_header_idx.get("Allele") {
+    let &csqh_conseq_idx = match csq_header_idx.get("Consequence") {
         Some(idx) => idx,
         None => {
-            println!("[ERROR] could not determine index of 'Allele' field from INFO/CSQ");
+            println!("[ERROR] could not determine index of 'Consequence' field from INFO/CSQ");
             exit(1);
         }
     };
@@ -368,7 +368,7 @@ fn main() -> Result<(), VCFError> {
         let csq = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
-                s.split("|").nth(csqh_allele_idx).unwrap_or("").to_string()
+                s.split("|").nth(csqh_conseq_idx).unwrap_or("").to_string()
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         // SKIP if csq is empty

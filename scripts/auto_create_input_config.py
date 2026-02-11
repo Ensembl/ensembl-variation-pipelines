@@ -489,48 +489,37 @@ def _header_contigs(path: str) -> List[str]:
         ]
 
 
-def seq_region_matches(eva_file: str, ensembl_file: str, tmp_dir: Path) -> bool:
+def seq_region_matches(
+    eva_file: str, server: dict, core_db: str, tmp_dir: Path
+) -> bool:
     """
-    Determine whether a remote EVA VCF and a local Ensembl VCF
-    reference at least one common sequence region.
-
-    The function attempts `tabix -l` on both files, builds a
-    temporary index for the local VCF when necessary, and finally
-    falls back to a header parse if indexing fails.
-
-    Raises:
-        ValueError:  When *tmp_dir* does not exist.
-        Subprocess errors that are thrown while
-            copying or indexing files.
-
-    Returns:
-        bool:  *True* if a shared contig is found, *False* otherwise.
+    Return *True* if the remote EVA VCF and the Ensembl core DB
+    reference at least one common seq-region.
     """
 
-    # Set up temp_dir/work to hold tmp files
     if not tmp_dir.is_dir():
         raise ValueError(f"--tmp_dir must exist: {tmp_dir}")
 
-    work = tmp_dir / f"work"
+    work = tmp_dir / "work"
     if work.exists():
         print(f"[INFO] Removing stale work directory {work}", file=sys.stderr)
         rmtree(work)
     work.mkdir()
 
     try:
-        # --- EVA (remote) -------------------------------
-        max_retries, retry_delay = 4, 60
+        # ---------- EVA VCF -------------------------------------------------
+        max_retries, delay = 4, 60
         eva_seq = None
         for attempt in range(1, max_retries + 1):
             eva_seq = _tabix_list(eva_file, work)
             if eva_seq:
                 break
             sys.stderr.write(
-                f"[WARN] tabix -l attempt {attempt}/{max_retries} failed "
-                f"for {eva_file}\n"
+                f"[WARN] tabix -l attempt {attempt}/{max_retries} failed for "
+                f"{eva_file}\n"
             )
             if attempt < max_retries:
-                time.sleep(retry_delay)
+                time.sleep(delay)
 
         if not eva_seq:
             sys.stderr.write(
@@ -539,48 +528,42 @@ def seq_region_matches(eva_file: str, ensembl_file: str, tmp_dir: Path) -> bool:
             )
             return False
 
-        # --- Ensembl local ------------------------------
-        ens_seq = _tabix_list(ensembl_file, work)
-        if not ens_seq:
-            tmp_copy = work / Path(ensembl_file).name
-            copy2(ensembl_file, tmp_copy)
+        # ---------- Ensembl core DB ----------------------------------------
+        query = (
+            "SELECT name FROM seq_region UNION SELECT synonym FROM seq_region_synonym;"
+        )
+        proc = subprocess.run(
+            [
+                "mysql",
+                "--host",
+                server["host"],
+                "--port",
+                server["port"],
+                "--user",
+                server["user"],
+                "--database",
+                core_db,
+                "-N",
+                "--execute",
+                query,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
 
-            sys.stderr.write(f"[INFO] Building index for {tmp_copy}\n")
-            build = subprocess.run(
-                ["tabix", "-p", "vcf", "-C", str(tmp_copy)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                cwd=work,
+        if proc.returncode != 0:
+            print(
+                f"[ERROR] Failed to retrieve seq regions from {core_db}\n"
+                f"{proc.stderr.strip()}\nExiting..."
             )
+            exit(1)
 
-            if build.returncode == 0:
-                sys.stderr.write(f"[INFO] Building index successful\n")
-                ens_seq = _tabix_list(tmp_copy, work) or []
-            else:  # tabix failed – fall back to header parse
-                sys.stderr.write(
-                    f"[ERROR] Index build failed for {tmp_copy}:\n"
-                    f"{build.stderr.strip()}\n"
-                )
-                try:
-                    sys.stderr.write(
-                        f"[INFO] Fall-back: attempting header-parse to retrieve contigs\n"
-                    )
-                    ens_seq = _header_contigs(tmp_copy)
-                    sys.stderr.write(
-                        f"[INFO] Contigs parsed from header successfully"
-                        f"(e.g. {ens_seq[:1]}) ...\n"
-                    )
-                except Exception as exc:
-                    sys.stderr.write(
-                        f"[ERROR] Cannot read header of {tmp_copy}: {exc}\n"
-                    )
-                    return False
+        ens_seq = proc.stdout.strip().splitlines()
 
-        # --- Compare ------------------------------------
+        # ---------- Compare -------------------------------------------------
         return any(contig in ens_seq for contig in eva_seq)
 
-    # Clean up tmp files
     finally:
         rmtree(work, ignore_errors=True)
 
@@ -825,7 +808,19 @@ def main(args=None):
                             f"[INFO] For {sp} EVA variant count has not increased - {ensembl_variant_count} =< {eva_meta['variant_count']}, skipping..."
                         )
 
-                if update:
+                # Check to see whether EVA and Ensembl have matching seq region names, warn if not
+                any_seq_matches = seq_region_matches(
+                    eva_file=file_loc,
+                    server=parse_ini(args.ini_file, "core"),
+                    core_db="homo_sapiens_core_115_38",
+                    tmp_dir=Path(args.tmp_dir),
+                )
+                if not any_seq_matches:
+                    print(
+                        f"[WARN] No seq matches found between EVA file and Ensembl core db look-up for species."
+                    )
+
+                if update and any_seq_matches:
                     genome_key = f"{meta['species']}_{meta['assembly_name']}"
                     ensembl_released.setdefault(genome_key, []).append(record)
 

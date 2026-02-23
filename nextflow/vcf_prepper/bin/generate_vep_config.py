@@ -636,8 +636,10 @@ def main(args=None):
         file.write("variant_class 1\n")
         file.write("protein 1\n")
         file.write("transcript_version 1\n")
-        file.write("gencode_primary 1\n")
         file.write("allele_number 1\n")
+
+        if species == "homo_sapiens" and assembly == "GRCh38":
+            file.write("gencode_primary 1\n")
 
         if args.cache_dir:
             file.write(f"cache_version {cache_version}\n")

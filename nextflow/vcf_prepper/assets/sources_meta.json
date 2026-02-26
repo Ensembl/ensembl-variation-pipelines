@@ -15,7 +15,7 @@
 	},
 	{
 		"name": "EVA",
-		"version": "7",
+		"version": "8",
 		"description": "European Variation Archive",
 		"url": "https://www.ebi.ac.uk/eva",
 		"accession_url": "https://www.ebi.ac.uk/eva/?variant&accessionID="

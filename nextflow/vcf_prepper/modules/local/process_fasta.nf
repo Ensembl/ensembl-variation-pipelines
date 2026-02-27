@@ -35,7 +35,7 @@ process PROCESS_FASTA {
   out_dir = meta.genome_temp_dir
   ini_file = params.ini_file
   fasta_dir = meta.fasta_dir
-  force_create_config = params.force_create_config ? "--force" : ""
+  overwrite_fasta = params.overwrite_fasta ? "--force" : ""
   use_old_infra = params.use_old_infra ? "--use_old_infra" : ""
   
   '''
@@ -47,7 +47,7 @@ process PROCESS_FASTA {
     --out_dir !{out_dir} \
     --ini_file !{ini_file} \
     --fasta_dir !{fasta_dir} \
-    !{force_create_config} \
+    !{overwrite_fasta} \
     !{use_old_infra}
   '''
 }

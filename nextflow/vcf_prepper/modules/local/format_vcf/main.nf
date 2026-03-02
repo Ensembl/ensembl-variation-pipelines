@@ -62,6 +62,6 @@ process FORMAT_VCF {
         ${remove_patch_regions} \
         -O ${output_file}
 
-    bcftools index -c ${output_file}
+    bcftools index -f -c ${output_file}
     """
 }

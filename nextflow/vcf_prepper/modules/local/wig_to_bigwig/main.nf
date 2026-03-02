@@ -17,8 +17,8 @@
  */
 
 process WIG_TO_BIGWIG {
-	memory { (wig.size() * 10.B + 1.GB) * task.attempt }
-	time { 48.hour * task.attempt }
+	memory { (wig.size() * 7.B + 1.GB) * task.attempt }
+	time { 2.hour * task.attempt }
 
 	input:
 	tuple val(genome_meta), path(wig)

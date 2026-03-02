@@ -7,8 +7,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED-null-test_multiple_source.vcf.vcf.gz:md5,b3f2fab1478211bc65b69ed3da22144b",
-                        "FORMATTED-null-test_multiple_source.vcf.vcf.gz.csi:md5,f3376d27a1fc90e133db17167181215d"
+                        "FORMATTED-null-test_multiple_source.vcf.vcf.gz:md5,7504f6bc5166128f3a00b1c70bb7bc29",
+                        "FORMATTED-null-test_multiple_source.vcf.vcf.gz.csi:md5,6567ac6c2a02c024bb21842e136358d6"
                     ]
                 ]
             }
@@ -17,7 +17,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2026-01-27T19:24:15.095477"
+        "timestamp": "2026-03-02T11:04:56.356414"
     },
     "remove criteria - none": {
         "content": [
@@ -27,8 +27,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,01efbdf3a0bee8bd81111aec7df8bf58",
-                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,868a511edbb9e695fcd318ac24543258"
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,10ad7d4d592009aaef2882f5fcbfe52e",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,7eb5ca06dd9bd2e568ee485db450e4d3"
                     ]
                 ]
             }
@@ -37,7 +37,27 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2026-01-27T19:24:11.268901"
+        "timestamp": "2026-03-02T11:04:52.341458"
+    },
+    "HGSVC field - NODEID": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
+                        },
+                        "FORMATTED-null-test_hgsvc_variant.vcf.vcf.gz:md5,cda77facc1e41675a7491b8d9601a041",
+                        "FORMATTED-null-test_hgsvc_variant.vcf.vcf.gz.csi:md5,be4839a47f476253b129a373f2d29dbe"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-03-02T11:05:04.392972"
     },
     "remove criteria - patch regions": {
         "content": [
@@ -47,8 +67,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,7966b0a654b4cf9357335a61ef5b9be7",
-                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,7f49777ef12a667f13b4a78158438c0e"
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,269c2f7dbfed51d9ee1f3f2f57d34de0",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,5ab66b0228dfde96be8679765562545f"
                     ]
                 ]
             }
@@ -57,7 +77,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2026-01-27T19:24:07.157633"
+        "timestamp": "2026-03-02T11:04:47.997806"
     },
     "SV fields - SVLEN and END": {
         "content": [
@@ -67,8 +87,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED-null-test_structural_variant.vcf.vcf.gz:md5,92d8d0cceda013c4bbce9a0a0962085b",
-                        "FORMATTED-null-test_structural_variant.vcf.vcf.gz.csi:md5,8d56adb0c8942aa12b43d6d1c6c2da90"
+                        "FORMATTED-null-test_structural_variant.vcf.vcf.gz:md5,fe344e7c0d5e4a72cd6f3f7e840c564d",
+                        "FORMATTED-null-test_structural_variant.vcf.vcf.gz.csi:md5,478352a43d80b1977fa48a3153e83cd3"
                     ]
                 ]
             }
@@ -77,7 +97,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2026-01-27T19:24:18.850377"
+        "timestamp": "2026-03-02T11:05:00.496468"
     },
     "remove criteria - non-unique ids": {
         "content": [
@@ -87,8 +107,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,d2e97ad07af9dd834dcb696f3cac7769",
-                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,9d4dbdc9c4ebe591886763ed2175c592"
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,25b1cd4d5bc145b575e7917b87883629",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,99c4da11f672d9f256ba136c094054f1"
                     ]
                 ]
             }
@@ -97,7 +117,7 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2026-01-27T19:24:02.637733"
+        "timestamp": "2026-03-02T11:04:44.023005"
     },
     "remove criteria - all": {
         "content": [
@@ -107,8 +127,8 @@
                         {
                             "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
                         },
-                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,f96e5f994a88ca71d42cd9a704bbf9d2",
-                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,9a0da28a4ce1686a1e5f09c5b46c2c96"
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,bf6cddf17db928022285bb8931e5e4d5",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,55203fd680ed9f9bf934300230926e3e"
                     ]
                 ]
             }
@@ -117,6 +137,6 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2026-01-27T19:23:58.665575"
+        "timestamp": "2026-03-02T11:04:40.187219"
     }
 }

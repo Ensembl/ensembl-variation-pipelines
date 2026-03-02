@@ -156,5 +156,11 @@
         "description": "ClinVar is a free public archive of reports of the relationships between human variations and phenotypes.",
         "url": "https://www.ncbi.nlm.nih.gov/clinvar/",
         "accession_url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/"
+    },
+    {
+        "name": "HGSVC3",
+        "version": "2025-03-01",
+        "description": "The Human Genome Structural Variation Consortium (HGSVC, Phase 3) focus on developing resources and computational approaches to fully characterize and integrate structural variants into their haplotypic context in order to understand their mutational mechanisms and functional consequences",
+        "url": "https://www.hgsvc.org/about"
     }
 ]

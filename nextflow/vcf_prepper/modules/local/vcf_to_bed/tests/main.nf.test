@@ -111,7 +111,7 @@ nextflow_process {
                 """
                 input[0] = tuple([:], file("${moduleDir}/tests/testdata/test_symbolic.vcf.gz"))
                 input[1] = "${projectDir}/assets/variation_consequnce_rank.json"
-                input[2] = "${projectDir}/assets/short_variant_bedfields.json"
+                input[2] = "${projectDir}/assets/structural_variant_bedfields.json"
                 input[3] = true
                 """
             }
@@ -126,7 +126,7 @@ nextflow_process {
             def lines = output_file.readLines()
             assert lines.size() == 1
 
-			assert lines[0] == "7 147730664 147738995 esv275461 HGNC G <CN=2> 0 intron_variant"
+			assert lines[0] == "7 147730664 147738995 esv275461 duplication G <CN=2> 13 intron_variant 8331"
 		}
 	}
 

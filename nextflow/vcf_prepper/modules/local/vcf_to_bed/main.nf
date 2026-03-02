@@ -17,27 +17,27 @@
  */
 
 process VCF_TO_BED {
-	input:
-	tuple val(genome_meta), path(vcf)
-	path rank_file
-	val bed_fields
-	val structural_variant
+    input:
+    tuple val(genome_meta), path(vcf)
+    path rank_file
+    val bed_fields
+    val structural_variant
 
-	output:
-	tuple val(genome_meta), path(output_file)
+    output:
+    tuple val(genome_meta), path(output_file)
 
-	script:
-	output_file = vcf.getName().replace(".vcf.gz", ".bed")
-	structural_variant_param = structural_variant ? "--structural-variant" : ""
+    script:
+    output_file = vcf.getName().replace(".vcf.gz", ".bed")
+    structural_variant_param = structural_variant ? "--structural-variant" : ""
 
-	"""
-	vcf_to_bed \
-		--vcf ${vcf} \
-		--output ${output_file} \
-		--rank ${rank_file} \
-		--bed-fields ${bed_fields} \
-		${structural_variant_param}
-		
-	rm ${vcf}
-	"""
+    """
+    vcf_to_bed \
+        --vcf ${vcf} \
+        --output ${output_file} \
+        --rank ${rank_file} \
+        --bed-fields ${bed_fields} \
+        ${structural_variant_param}
+    
+    rm ${vcf}
+    """
 }

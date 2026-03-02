@@ -554,6 +554,7 @@ def main(args=None):
             "[ERROR] Cannot use both cache and gff at the same time, but both given."
         )
 
+    cache_version = version
     if args.cache_dir:
         cache_dir = args.cache_dir
         cache_version = get_relative_version(version, division)
@@ -635,10 +636,13 @@ def main(args=None):
         file.write("variant_class 1\n")
         file.write("protein 1\n")
         file.write("transcript_version 1\n")
-        file.write("gencode_primary 1\n")
+        file.write("allele_number 1\n")
+
+        if species == "homo_sapiens" and assembly == "GRCh38":
+            file.write("gencode_primary 1\n")
 
         if args.cache_dir:
-            file.write(f"cache_version {version}\n")
+            file.write(f"cache_version {cache_version}\n")
             file.write(f"cache {args.cache_dir}\n")
             file.write("offline 1\n")
         elif args.gff_dir:

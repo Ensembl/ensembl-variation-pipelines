@@ -14,9 +14,25 @@
  * limitations under the License.
  */
  
-use std::{io::{BufReader,Write}, fs::File, env, process::exit, collections::HashMap, collections::HashSet};
-use vcf::{VCFError, VCFReader};
+use std::{io::{BufReader,Write}, fs::File, process::exit, collections::HashMap, collections::HashSet};
+use vcf::{VCFError, VCFReader, VCFHeader};
 use flate2::read::MultiGzDecoder;
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(version)]
+struct Args {
+    #[arg(short, long, help="VCF file to convert")]
+    vcf: String,
+    #[arg(short, long, help="Output bed file")]
+    output: String,
+    #[arg(short, long, help="JSON file with consequence ranks")]
+    rank: String,
+    #[arg(short, long, help="JSON file specifying required bed fields with metadata")]
+    bed_fields: String,
+    #[arg(short, long, help="VCF contains structural variant")]
+    structural_variant: bool
+}
 
 const VARIANTGROUP : [(&str, u8); 45] = [
     ("frameshift_variant", 1),
@@ -101,6 +117,21 @@ const SV_VARIANTGROUP : [(&str, u8); 32] = [
     ("insertion", 13)
 ];
 
+struct WritableFields {
+    chromosome: bool,
+    start: bool,
+    end: bool,
+    id: bool,
+    variety: bool,
+    reference: bool,
+    alts: bool,
+    group: bool,
+    severity: bool,
+    severity_rank: bool,
+    extent: bool,
+    short_alt: bool
+}
+
 struct Line {
     chromosome: String,
     start: u64,
@@ -112,7 +143,8 @@ struct Line {
     group: u8,
     severity: String,
     severity_rank: u8,
-    extent: u64
+    extent: u64,
+    short_alt: bool
 }
 
 impl Line {
@@ -129,7 +161,7 @@ impl Line {
         self.variety != other.variety 
     }
     
-    fn merge(&mut self, mut more: Option<Line>, out: &mut File) {
+    fn merge(&mut self, mut more: Option<Line>, out: &mut File, wfields: &WritableFields) {
         // merge new line if not empty (and a Line instance)
         if let Some(ref mut more) = more {
             if self.compatible(more) {
@@ -156,18 +188,28 @@ impl Line {
         // print out the current line
         if self.alts.len() > 0 {
             let alts = Vec::from_iter(self.alts.clone());
-            write!(out, "{} {} {} {} {} {} {} {} {}",
-                self.chromosome, self.start, self.end,
-                self.id, self.variety, self.reference,
-                alts.join(","), self.group, self.severity
+            write!(out, "{} {} {} {} {} {} {} {}",
+                self.chromosome, 
+                self.start, 
+                self.end,
+                self.id, 
+                self.variety, 
+                self.reference,
+                alts.join(","), 
+                self.group
             ).unwrap();
-            
-            if self.extent != 0 {
-                write!(out, " {}\n", self.extent).unwrap();
+            // allowing only 3 configurable fields as I don't wanna write lot
+            // of if's - need an efficient way of doing it
+            if wfields.severity { 
+                write!(out, " {}", self.severity).unwrap();
             }
-            else {
-                write!(out, "\n").unwrap();
+            if wfields.extent {
+                write!(out, " {}", self.extent).unwrap();
             }
+            if wfields.short_alt {
+                write!(out, " {}", self.short_alt).unwrap();
+            }
+            write!(out, "\n").unwrap();
         }
         
         // make the new Line as the current one
@@ -177,25 +219,95 @@ impl Line {
     }
 }
 
+fn gen_csq_info_idx(header: &VCFHeader) -> HashMap<&str, usize> {
+    let csq_info_desc = match header.info("CSQ".as_bytes()) {
+        Some(csq_info) => {
+            match str::from_utf8(csq_info.description) {
+                Ok(desc) => desc,
+                Err(_) => {
+                    println!("[ERROR] cannot parse header to get INFO/CSQ");
+                    exit(1);
+                }
+            }
+        },
+        None => {
+            println!("[ERROR] cannot parse header to get INFO/CSQ");
+            exit(1);
+        }
+    };
+    let csq_header_idx: HashMap<&str, usize> = match csq_info_desc.split("Format: ").nth(1) {
+        Some(csq_headers) => {
+            let mut i: usize = 0;
+            let mut tmp_csq_header_idx = HashMap::new();
+            for header in csq_headers.split("|") {
+                tmp_csq_header_idx.insert(header, i);
+                i += 1;
+            }
+
+            tmp_csq_header_idx
+        },
+        None => {
+            println!("[ERROR] cannot parse header to get INFO/CSQ");
+            exit(1);
+        }
+    };
+
+    return csq_header_idx;
+}
+
 fn main() -> Result<(), VCFError> {
     // read cli arguments
-    let args = env::args().collect::<Vec<_>>();
+    let args = Args::parse();
     let mut reader = VCFReader::new(BufReader::new(MultiGzDecoder::new(File::open(
-        &args[1]
+        args.vcf
     )?)))?;
-    let mut out = File::create(&args[2]).unwrap();
-    let json = std::fs::read_to_string(&args[3]).unwrap();
+    let mut out = File::create(args.output).unwrap();
+    let rank = std::fs::read_to_string(args.rank).unwrap();
+    let bed_fields = std::fs::read_to_string(args.bed_fields).unwrap();
+    let is_sv = args.structural_variant;
 
-    let mut is_sv = false;
-    if args.len() == 5 && String::from(&args[4]) == "1" {
-        is_sv = true;
-    }
-        
-    let severity = {
-        serde_json::from_str::<HashMap<String, String>>(&json).unwrap()
+    // generate Hashmap of INFO/CSQ header indexes and retrieve relavant header indexes
+    let header = reader.header();
+    let csq_header_idx: HashMap<&str, usize> = gen_csq_info_idx(&header);
+    let &csqh_conseq_idx = match csq_header_idx.get("Consequence") {
+        Some(idx) => idx,
+        None => {
+            println!("[ERROR] could not determine index of 'Consequence' field from INFO/CSQ");
+            exit(1);
+        }
+    };
+    let &csqh_variant_class_idx = match csq_header_idx.get("VARIANT_CLASS") {
+        Some(idx) => idx,
+        None => {
+            println!("[ERROR] could not determine index of 'VARIANT_CLASS' field from INFO/CSQ");
+            exit(1);
+        }
     };
     
-    // create the severity hash
+    // load bed fields json and map it to writable fields
+    let bfields = serde_json::from_str::<serde_json::Value>(&bed_fields).unwrap();
+    let fields = bfields.get("fields").unwrap();
+    let wfields = WritableFields {
+        chromosome: fields.get("chromosome").is_some(),
+        start: fields.get("start").is_some(),
+        end: fields.get("end").is_some(),
+        id: fields.get("id").is_some(),
+        variety: fields.get("variety").is_some(),
+        reference: fields.get("reference").is_some(),
+        alts: fields.get("alts").is_some(),
+        group: fields.get("group").is_some(),
+        severity: fields.get("severity").is_some(),
+        severity_rank: fields.get("severity_rank").is_some(),
+        extent: fields.get("extent").is_some(),
+        short_alt: fields.get("short_alt").is_some()        
+    };
+
+    // load consequence ranks hash
+    let csq_ranks = {
+        serde_json::from_str::<HashMap<String, String>>(&rank).unwrap()
+    };
+    
+    // load variant group hash
     let mut variant_groups = HashMap::new();
     if is_sv {
         for (csq, value) in &SV_VARIANTGROUP {
@@ -222,12 +334,11 @@ fn main() -> Result<(), VCFError> {
         group: 0,
         severity: "".to_string(),
         severity_rank: 255,
-        extent: 0
+        extent: 0,
+        short_alt: false
     };
     while reader.next_record(&mut record)? {
-        let reference = String::from_utf8(record.reference.clone()).unwrap();
-        let ref_len = reference.len() as u64;
-        
+        // read id:
         let mut multiple_ids = false;
         let ids = record.id.iter().map(|b| {
             String::from_utf8(b.clone())
@@ -243,19 +354,24 @@ fn main() -> Result<(), VCFError> {
             );
             continue; 
         }
+
+        // read ref allele:
+        let reference = String::from_utf8(record.reference.clone()).unwrap();
+        let ref_len = reference.len() as u64;
         
+        // read alt alleles:
         let alts = record.alternative.iter().map(|a| {
             String::from_utf8(a.clone())
         }).collect::<Result<HashSet<_>,_>>().unwrap();
         
-        // TBD: replace hardcoded index value - .nth(1)
+        // read INFO/CSQ/Consequence:
         let csq = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
-                s.split("|").nth(1).unwrap_or("").to_string()
+                s.split("|").nth(csqh_conseq_idx).unwrap_or("").to_string()
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
-        // if csq is empty we won't have most severe consequence
+        // SKIP if csq is empty
         if csq.is_empty(){  
             println!("[WARNING] INFO/CSQ empty - {0}:{1}, skipping",
                 String::from_utf8(record.chromosome.to_vec()).unwrap(), 
@@ -264,27 +380,33 @@ fn main() -> Result<(), VCFError> {
             continue; 
         }
         
-        // TBD: replace hardcoded index value - .nth(21)
+        // INFO/CSQ/VARIANT_CLASS
         let class = record.info(b"CSQ").map(|csqs| {
             csqs.iter().map(|csq| {
                 let s = String::from_utf8_lossy(csq);
-                s.split("|").nth(21).unwrap_or("").to_string()
+                s.split("|").nth(csqh_variant_class_idx).unwrap_or("").to_string()
             }).collect::<Vec<String>>()
         }).unwrap_or(vec![]);
         
-        // check for SV
+        // check for symbolic alt
         let mut symbolic_alts = false;
+        let mut max_alt_len = 0;
         for alt in alts.iter() {
-            if alt.chars().any(|c| (
-                    c != 'A' && c != 'T' && c != 'C' && c != 'G' && c != 'N'
-                    && c != 'a' && c != 't' && c != 'c' && c != 'g' && c != 'n'
-                )) {
+            if alt.chars().any(|c| 
+                    c != 'A' && c != 'T' && c != 'C' && c != 'G' && c != 'N' &&
+                    c != 'a' && c != 't' && c != 'c' && c != 'g' && c != 'n'
+                ) {
                 symbolic_alts = true;
             }
             if !is_sv && symbolic_alts {
                 println!("[ERROR] structural variant detected, but not running in structural variant mode. 
                     If you are running this script for structural variant please re-run setting the 4th argument field to 1.");
                 exit(1)
+            }
+
+            let alt_len = alt.len();
+            if alt_len > max_alt_len {
+                max_alt_len = alt_len;
             }
         }
 
@@ -293,10 +415,12 @@ fn main() -> Result<(), VCFError> {
             let mut most_severe_csq = "";
             let mut most_severe_csq_rank = 255;
             
-            // calculate most severe consequence and variant group of that consequence
+            /* 
+             * calculate most severe consequence and variant group of that consequence
+             */
             for csq_str in csq.iter() {
                 for csq_here in csq_str.split("&") {
-                    let csq_rank_here = (*severity.get(csq_here).unwrap_or(&String::from("0"))).parse::<u8>().unwrap();
+                    let csq_rank_here = (*csq_ranks.get(csq_here).unwrap_or(&String::from("0"))).parse::<u8>().unwrap();
                     if csq_rank_here < most_severe_csq_rank {
                         variant_group = *variant_groups.get(csq_here).unwrap_or(&0);
                         most_severe_csq = csq_here;
@@ -305,7 +429,9 @@ fn main() -> Result<(), VCFError> {
                 }
             }
             
-            // calcualte variant class - we store it as variety
+            /* 
+             * calculate variant class - we store it as variety
+             */
             // variety should always be same for each variant allele - VEP puts variant class at variant level (using Bio::EnsEMBL::Variation::Utils::Sequence::SO_variation_class)
             // if cannot be deduced the default value is - sequence_alteration
             let mut variety = class[0].to_string();
@@ -344,6 +470,9 @@ fn main() -> Result<(), VCFError> {
                 }
             }
 
+            /*
+             * calculate positions
+             */
             // start position in bed is 0-indexed
             let mut start = record.position - 1;
         
@@ -354,12 +483,22 @@ fn main() -> Result<(), VCFError> {
                 end = start;
             }
 
-            // for short variants we do not use extent
+            /*
+             * particular calculation for SV
+             *  - update variant group and position for SVs
+             *  - if non-symbolic set is_sv = false for alt bp < 50
+             *  - calculate extent 
+             */
             let mut extent = 0;
-            
+            let mut short_alt = false;
+         
             if is_sv {
                 // overwrite variant group to come from variant class instead of consequence
                 variant_group = *variant_groups.get(&variety).unwrap_or(&0);
+
+                if !symbolic_alts && max_alt_len < 50 {
+                    short_alt = true;
+                }
                 
                 // check INFO/SVLEN or INFO/END to get the end position
                 let svlens = record.info(b"SVLEN").map(|svlen| {
@@ -429,13 +568,14 @@ fn main() -> Result<(), VCFError> {
                 group: variant_group,
                 severity: most_severe_csq.to_string(),
                 severity_rank: most_severe_csq_rank,
-                extent: extent
+                extent: extent,
+                short_alt: short_alt
             };
             
-            lines.merge(Some(more), &mut out);
+            lines.merge(Some(more), &mut out, &wfields);
         }
     }
     
-    lines.merge(None, &mut out);
+    lines.merge(None, &mut out, &wfields);
     Ok(())
 }

@@ -150,7 +150,7 @@ def get_source_desc_prefix(source: str, source_version: str) -> str:
     else:
         desc_prefix = f" from {source}"
         if source_version is not None:
-            desc_prefix += f"- {source_version}"
+            desc_prefix += f" - {source_version}"
         return desc_prefix
 
 

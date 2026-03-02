@@ -23,8 +23,8 @@ process WIG_TO_BIGWIG {
   output:
   path "variant-${source}-summary.bw"
   
-  memory  { (wig.size() * 10.B + 1.GB) * task.attempt }
-  time    { 48.hour * task.attempt }
+  memory  { (wig.size() * 7.B + 1.GB) * task.attempt }
+  time    { 2.hour * task.attempt }
   
   shell:
   source = meta.source.toLowerCase()
@@ -40,7 +40,7 @@ process WIG_TO_BIGWIG {
   ln -sf !{output_bw} "variant-!{source}-summary.bw"
   
   # temp: for one source we create symlink for focus if only one source present
-  if [[ ! !{meta.multiple_source} ]]
+  if [[ "!{meta.multiple_source}" == "false" ]]
   then
     cd !{meta.genome_tracks_outdir}
     ln -sf variant-!{source}-summary.bw variant-summary.bw

@@ -15,6 +15,7 @@
 **/.python-version
 **/venv
 **/dist
+**/.pytest_cache
 
 # folder generated running nf-test
 **/tests/temp
@@ -22,3 +23,5 @@
 **/tracks
 **/reports
 **/work
+
+**/.ruff_cache

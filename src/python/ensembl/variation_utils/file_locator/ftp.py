@@ -17,7 +17,6 @@ class StorageMediaType(Enum):
 
 class FTPFileLocator(file_locator.FileLocator):
     BASE_PATH = {
-        # REMOVE THIS!!: "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
         StorageMediaType.DISK: os.environ["FTP_NFS_DIR"],
         StorageMediaType.SERVER: "https://ftp.ebi.ac.uk/pub/ensemblorganisms"
     }

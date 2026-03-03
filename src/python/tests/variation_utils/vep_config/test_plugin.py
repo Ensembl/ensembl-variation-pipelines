@@ -27,13 +27,6 @@ class TestPluginBuilderFactory():
         )
 
 class TestPluginBuilder():
-    # @pytest.fixture()
-    # def set_env(self, monkeypatch, plugin_data_dir, repo_dir):
-    #     with mock.patch.dict(os.environ, clear=True):
-    #         monkeypatch.setenv("PLUGIN_DATA_DIR", plugin_data_dir)
-    #         monkeypatch.setenv("ENSEMBL_ROOT_DIR", repo_dir)
-    #         yield
-
     @pytest.fixture()
     def plugin_builder(self):
         return plugin.CurrentPluginArgsBuilder()
@@ -66,14 +59,7 @@ class TestPluginBuilder():
 
 class TestRepoPluginConfigMatcher():
     @pytest.fixture()
-    def set_env(self, monkeypatch, repo_dir):
-        with mock.patch.dict(os.environ, clear=True):
-            monkeypatch.setenv("ENSEMBL_ROOT_DIR", repo_dir)
-            yield
-
-    @pytest.fixture()
-    def matcher(self, set_env):
-        print("DEBUG", os.environ["ENSEMBL_ROOT_DIR"])
+    def matcher(self):
         return plugin.RepoPluginConfigMatcher()
     
     def test_defaults(self, matcher, repo_dir):

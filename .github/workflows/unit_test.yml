@@ -20,6 +20,45 @@ env:
   ENSEMBL_ROOT_DIR: repos
 
 jobs:
+  ensembl_variation_utils:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: wait for MySQL
+        run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P3306 --silent; do
+            sleep 1
+          done
+      
+      - name: load databases
+        run: |
+          mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE ensembl_genome_metadata;'
+          mysql -h 127.0.0.1 -u root ensembl_genome_metadata < src/python/tests/variation_utils/data/ensembl_genome_metadata.dump
+          mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
+          mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < src/python/tests/variation_utils/data/homo_sapiens_core_110_38.dump
+
+      - name: pytest
+        run: |
+          pytest --tap src/python
+
+
   vcf_prepper:
     runs-on: ubuntu-latest
     defaults:

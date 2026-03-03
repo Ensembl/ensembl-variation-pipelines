@@ -191,4 +191,27 @@ jobs:
           sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|g' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/tests/testdata/input_config.json
           sed -i -e 's|\${BASE_DIR}|'"$GITHUB_WORKSPACE"'|g' ${GITHUB_WORKSPACE}/nextflow/vcf_prepper/subworkflows/local/run_vep/tests/testdata/test_vep_config.ini
           
-          nf-test test . --ci --profile github
+          nf-test test . \
+            --coverage \
+            --coverage-report cobertura \
+            --ci \
+            --profile github
+
+      - name: Post coverage comment on PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO:  ${{ github.repository }}
+          GITHUB_SHA:   ${{ github.sha }}
+          PR_NUMBER:    ${{ github.event.pull_request.number }}
+          COVERAGE_FILE: .nf-test/coverage/cobertura.xml
+        run: |
+          chmod +x scripts/post_coverage_comment.sh
+          scripts/post_coverage_comment.sh
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nf-test-coverage-${{ github.run_id }}
+          path: .nf-test/coverage/
+          retention-days: 14

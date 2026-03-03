@@ -193,25 +193,5 @@ jobs:
           
           nf-test test . \
             --coverage \
-            --coverage-report cobertura \
             --ci \
             --profile github
-
-      - name: Post coverage comment on PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPO:  ${{ github.repository }}
-          GITHUB_SHA:   ${{ github.sha }}
-          PR_NUMBER:    ${{ github.event.pull_request.number }}
-          COVERAGE_FILE: .nf-test/coverage/cobertura.xml
-        run: |
-          chmod +x scripts/post_coverage_comment.sh
-          scripts/post_coverage_comment.sh
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: nf-test-coverage-${{ github.run_id }}
-          path: .nf-test/coverage/
-          retention-days: 14

@@ -96,7 +96,7 @@ def generate_output(region_vcf, region_calls, out_vcf_path, header) -> None:
             new_rec.alts = tuple([call["ALT"] for call in calls])
             new_rec.info["SVLEN"] = ",".join(call["SVLEN"][0] if call["SVLEN"] is not None else "." for call in calls)
             if any(call.get("COPY_NUMBER") is not None for call in calls):
-                new_rec.info["CN"] = ",".join(call.get("COPY_NUMBER", "NA") for call in calls)
+                new_rec.info["CN"] = ",".join(str(call.get("COPY_NUMBER") or "NA") for call in calls)
             calls_max_stop = max(call["END"] for call in calls)
             if rec.stop != calls_max_stop:
                  logging.warning(f"END of calls does not match with region ({rec.stop} vs. {calls_max_stop}) for variant region - {rec.id}:{rec.contig}:{rec.start}") 

@@ -22,10 +22,14 @@ process SPLIT_VCF_CHR {
     memory { 32.GB * task.attempt }
 
     input:
-    tuple val(genome_meta), path(vcf), path(index_file), path(chr_file)
+    tuple val(genome_meta), 
+		val(file_meta),
+		path(vcf), 
+		path(index_file), 
+		path(chr_file)
 
     output:
-    tuple val(genome_meta), path("split.*.vcf.gz")
+    tuple val(genome_meta), val(file_meta), path("split.*.vcf.gz")
 
     script:
     """

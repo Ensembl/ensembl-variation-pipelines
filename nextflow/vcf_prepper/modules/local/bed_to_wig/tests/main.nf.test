@@ -26,10 +26,11 @@ nextflow_process {
         when {
             process {
                 """
-				meta = [:]
-                meta["source"] = "test"
+				genome_meta = [:]
+				file_meta = [:]
+                file_meta["source"] = "test"
 
-				input[0] = tuple(meta, file("${moduleDir}/tests/testdata/short_variants.bed"))
+				input[0] = tuple(genome_meta, file_meta, file("${moduleDir}/tests/testdata/short_variants.bed"))
                 """
             }
         }

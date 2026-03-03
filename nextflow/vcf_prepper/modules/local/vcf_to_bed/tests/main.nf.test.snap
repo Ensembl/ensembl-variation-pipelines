@@ -1,42 +1,4 @@
 {
-    "vcf_to_bed": {
-        "content": [
-            {
-                "0": [
-                    [
-                        {
-                            
-                        },
-                        "test_vcftobed.bed:md5,d90070c91c737c330311884ec60b7e8d"
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "23.10.1"
-        },
-        "timestamp": "2025-10-19T23:18:04.090451"
-    },
-    "vcf_to_bed - short_variants": {
-        "content": [
-            {
-                "0": [
-                    [
-                        {
-                            
-                        },
-                        "test_vcftobed.bed:md5,c860c6349840456f0defe0e81bdd814e"
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.9.2",
-            "nextflow": "23.10.1"
-        },
-        "timestamp": "2025-10-19T23:40:18.329091"
-    },
     "vcf_to_bed - --structural_variant for symbolic alts": {
         "content": [
             {
@@ -45,7 +7,10 @@
                         {
                             
                         },
-                        "test_symbolic.bed:md5,5808da7e1b2607a4abb7083775ce1bde"
+                        {
+                            
+                        },
+                        "test_symbolic.bed:md5,a4eb183fdc83377081994fb8f43374c5"
                     ]
                 ]
             }
@@ -54,6 +19,6 @@
             "nf-test": "0.9.2",
             "nextflow": "23.10.1"
         },
-        "timestamp": "2025-10-19T23:36:15.296801"
+        "timestamp": "2026-03-03T10:37:19.99035"
     }
 }

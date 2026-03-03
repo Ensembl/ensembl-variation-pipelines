@@ -18,10 +18,17 @@
 
 process READ_VCF_CHR {
     input:
-    tuple val(genome_meta), path(vcf), path(vcf_index)
+    tuple val(genome_meta), 
+		val(file_meta),
+		path(vcf), 
+		path(vcf_index)
 
     output:
-    tuple val(genome_meta), path(vcf), path(vcf_index), path("*.chrom")
+    tuple val(genome_meta), 
+		val(file_meta),
+		path(vcf), 
+		path(vcf_index), 
+		path("*.chrom")
 
     script:
     """

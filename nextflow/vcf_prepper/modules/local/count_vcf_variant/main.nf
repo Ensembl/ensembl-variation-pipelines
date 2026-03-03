@@ -20,10 +20,17 @@ process COUNT_VCF_VARIANT {
 	label 'bcftools'
 
 	input:
-	tuple val(meta), val(vcf), val(vcf_index)
+	tuple val(genome_meta), 
+		val(file_meta),
+		val(vcf), 
+		val(vcf_index)
 
 	output:
-	tuple val(meta), val(vcf), val(vcf_index), env(count)
+	tuple val(genome_meta), 
+		val(file_meta),
+		val(vcf), 
+		val(vcf_index), 
+		env(count)
 
 	script:
 	"""

@@ -17,17 +17,17 @@
  */
 
 process WIG_TO_BIGWIG {
-	memory { (wig.size() * 10.B + 1.GB) * task.attempt }
-	time { 48.hour * task.attempt }
+	memory { (wig.size() * 7.B + 1.GB) * task.attempt }
+	time { 2.hour * task.attempt }
 
 	input:
-	tuple val(genome_meta), path(wig)
+	tuple val(genome_meta), val(file_meta), path(wig)
 
 	output:
 	path "variant-${source}-summary.bw"
 
 	script:
-	source = genome_meta.source.toLowerCase()
+	source = file_meta.source.toLowerCase()
 	output_bw = "${genome_meta.genome_tracks_outdir}/variant-${source}-summary.bw"
 	chrom_sizes = genome_meta.chrom_sizes_file
 
@@ -41,7 +41,7 @@ process WIG_TO_BIGWIG {
 	ln -sf ${output_bw} "variant-${source}-summary.bw"
 	
 	# temp: for one source we create symlink for focus if only one source present
-	if [[ "${genome_meta.multiple_source}" == "false" ]]
+	if [[ "${file_meta.multiple_source}" == "false" ]]
 	then
 		cd ${genome_meta.genome_tracks_outdir}
 		ln -sf variant-${source}-summary.bw variant-summary.bw

@@ -21,13 +21,13 @@ process BED_TO_WIG {
 	time { 48.hour * task.attempt }
 
 	input:
-	tuple val(genome_meta), path(bed)
+	tuple val(genome_meta), val(file_meta), path(bed)
 
 	output:
-	tuple val(genome_meta), path(output_wig)
+	tuple val(genome_meta), val(file_meta), path(output_wig)
 
 	script:
-	source = genome_meta.source.toLowerCase()
+	source = file_meta.source.toLowerCase()
 	output_wig = "variant-${source}-summary.wig"
 
 	"""

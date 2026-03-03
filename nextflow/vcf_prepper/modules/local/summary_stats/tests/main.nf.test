@@ -30,10 +30,11 @@ nextflow_process {
                         'species':'homo_sapiens',
                         'assembly':'GRCh38'
                     ]
+				file_meta = [:]
                 vcf = file("${moduleDir}/tests/testdata/test.vcf_VEP.vcf.gz")
                 vcf_index = file("${moduleDir}/tests/testdata/test.vcf_VEP.vcf.gz.csi")
 
-                input[0] = tuple(genome_meta, vcf, vcf_index)
+                input[0] = tuple(genome_meta, file_meta, vcf, vcf_index)
 				input[1] = "NONE"
                 """
             }
@@ -43,11 +44,11 @@ nextflow_process {
             assert process.success
 			assert snapshot(process.out).match()
 
-            def out_vcf = path(process.out.get(0).get(0).get(1)).vcf
+            def out_vcf = path(process.out.get(0).get(0).get(2)).vcf
 
             // file content ok
             assert out_vcf.variants.size() == 1
-            assert out_vcf.variantsMD5 == '571d5cbe0956c8cc6867735345fb4f38'
+            assert out_vcf.variantsMD5 == 'd02d526bfcb5ffeae9f836987211fd6a'
 
             // header has summary stats tag
             assert out_vcf.header.hasInfoLine('NTCSQ')
@@ -73,10 +74,11 @@ nextflow_process {
                         'species':'homo_sapiens',
                         'assembly':'GRCh38'
                     ]
+				file_meta = [:]
                 vcf = file("${moduleDir}/tests/testdata/test.vcf_VEP.vcf.gz")
                 vcf_index = file("${moduleDir}/tests/testdata/test.vcf_VEP.vcf.gz.csi")
 
-                input[0] = tuple(genome_meta, vcf, vcf_index)
+                input[0] = tuple(genome_meta, file_meta, vcf, vcf_index)
 				input[1] = "${projectDir}/assets/population_data.json"
                 """
             }

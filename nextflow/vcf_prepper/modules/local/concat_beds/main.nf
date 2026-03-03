@@ -20,13 +20,13 @@ process CONCAT_BEDS {
 	label 'process_high'
 
 	input:
-	tuple val(genome_meta), path(bed_files)
+	tuple val(genome_meta), val(file_meta), path(bed_files)
 
 	output:
-	tuple val(genome_meta), path(output_bed)
+	tuple val(genome_meta), val(file_meta), path(output_bed)
 
 	script:
-	source = genome_meta.source
+	source = file_meta.source
 	output_bed = "variant-${source}.bed"
 	temp_dir = "tmp"
 

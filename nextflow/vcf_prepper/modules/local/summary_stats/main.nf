@@ -20,11 +20,17 @@ process SUMMARY_STATS {
 	memory { ((vcf.size() * 1.25 * 1.B) + 2.GB) * task.attempt }
 
 	input:
-	tuple val(genome_meta), path(vcf), path(vcf_index)
+	tuple val(genome_meta), 
+		val(file_meta),
+		path(vcf), 
+		path(vcf_index)
 	val population_data_file
 
 	output:
-	tuple val(genome_meta), path(output_file), path(vcf_index)
+	tuple val(genome_meta), 
+		val(file_meta),
+		path(output_file), 
+		path(vcf_index)
 
 	script:
 	species = genome_meta.species

@@ -26,10 +26,11 @@ nextflow_process {
         when {
             process {
                 """
-                meta = [:]
-                meta["source"] = "test"
+                genoem_meta = [:]
+                file_meta = [:]
+				file_meta["source"] = "test"
                 
-				input[0] = tuple(meta, file("${moduleDir}/tests/testdata/test_bed*.bed"))
+				input[0] = tuple(genoem_meta, file_meta, file("${moduleDir}/tests/testdata/test_bed*.bed"))
                 """
             }
         }
@@ -39,7 +40,7 @@ nextflow_process {
             assert snapshot(process.out).match()
             
             // assert the content of the output file
-            def output_file = file(process.out.get(0).get(0).get(1))
+            def output_file = file(process.out.get(0).get(0).get(2))
             def lines = output_file.readLines()
             assert lines.size() == 5
 

@@ -27,7 +27,10 @@ process FORMAT_VCF {
         path(vcf_index)
 
     output:
-    tuple val(genome_meta), path(output_file), path("${output_file}.csi")
+    tuple val(genome_meta), 
+		val(file_meta),
+		path(output_file), 
+		path("${output_file}.csi")
 
     script:
     output_file =  "FORMATTED-" + genome_meta.genome + "-" + vcf.baseName + ".vcf.gz"
@@ -62,6 +65,6 @@ process FORMAT_VCF {
         ${remove_patch_regions} \
         -O ${output_file}
 
-    bcftools index -c ${output_file}
+    bcftools index -f -c ${output_file}
     """
 }

@@ -13,7 +13,7 @@ class TestMetadataDBClient():
 
         assert metadata_db_client.host == "127.0.0.1"
         assert metadata_db_client.port == "3306"
-        assert metadata_db_client.user == "test"
+        assert metadata_db_client.user == "root"
 
     def test_scientific_name(self, metadata_db_client, setup_metadata_db):
         assert metadata_db_client.get_scientific_name("2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb") == "Homo sapiens"

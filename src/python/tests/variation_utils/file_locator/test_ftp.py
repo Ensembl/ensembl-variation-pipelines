@@ -15,7 +15,7 @@ class TestFTPFileLocator():
     def test_defaults(self, ftp_file_locator):
         # default storage media - disk
         assert ftp_file_locator._storage_media == ftp.StorageMediaType.DISK
-        assert ftp_file_locator.base_path == "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
+        assert ftp_file_locator.base_path == "/path/to/ftp/dir"
 
     def test_storage_media_update(self, ftp_file_locator):
         ftp_file_locator.storage_media = ftp.StorageMediaType.SERVER
@@ -55,7 +55,7 @@ class TestOldFTPFileLocator():
         assert old_ftp_file_locator._division == "EnsemblVertebrates" 
         assert old_ftp_file_locator._assembly == "GRCh38"
 
-        assert old_ftp_file_locator.base_path == "/nfs/production/flicek/ensembl/production/ensemblftp"
+        assert old_ftp_file_locator.base_path == "/path/to/old/ftp/dir"
 
     def test_change_storage_media(self, old_ftp_file_locator):
         old_ftp_file_locator.storage_media = ftp.StorageMediaType.SERVER
@@ -65,14 +65,14 @@ class TestOldFTPFileLocator():
 
     def test_change_division(self, old_ftp_file_locator):
         old_ftp_file_locator.division = "EnsemblPlants"
-        assert old_ftp_file_locator.base_path == "/nfs/production/flicek/ensembl/production/ensemblftp"
+        assert old_ftp_file_locator.base_path == "/path/to/old/ftp/dir"
 
         old_ftp_file_locator.storage_media = ftp.StorageMediaType.SERVER
         assert old_ftp_file_locator.base_path == "https://ftp.ensemblgenomes.org/pub"
 
     def test_change_assembly(self, old_ftp_file_locator):
         old_ftp_file_locator.assembly = "GRCh37"
-        assert old_ftp_file_locator.base_path == "/nfs/production/flicek/ensembl/production/ensemblftp"
+        assert old_ftp_file_locator.base_path == "/path/to/old/ftp/dir"
 
         old_ftp_file_locator.storage_media = ftp.StorageMediaType.SERVER
         assert old_ftp_file_locator.base_path == "https://ftp.ensembl.org/pub/grch37"

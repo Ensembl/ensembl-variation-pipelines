@@ -13,7 +13,7 @@ class TestCoreDBClient():
 
         assert core_db_client.host == "127.0.0.1"
         assert core_db_client.port == "3306"
-        assert core_db_client.user == "test"
+        assert core_db_client.user == "root"
 
     def test_update_db(self, core_db_client, setup_core_db):
         core_db_client.update_db(species = "homo_sapiens", version = "110")

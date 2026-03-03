@@ -33,11 +33,11 @@ class TestFTPFASTALocator():
     def test_defaults(self, ftp_fasta_locator):
         # default storage media - disk
         assert ftp_fasta_locator._storage_media == ftp.StorageMediaType.DISK
-        assert ftp_fasta_locator.base_path == "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
+        assert ftp_fasta_locator.base_path == "/path/to/ftp/dir"
 
     def test_locate_file(self, ftp_fasta_locator, metadata_client):
         ftp_fasta_locator.metadata_client = metadata_client
-        assert ftp_fasta_locator.locate_file("2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb") == "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms/Homo_sapiens/GCA_000001405.29/genome/unmasked.fa.gz"
+        assert ftp_fasta_locator.locate_file("2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb") == "/path/to/ftp/dir/Homo_sapiens/GCA_000001405.29/genome/unmasked.fa.gz"
 
 class TestOldFTPFASTALocator():
     @pytest.fixture()
@@ -53,8 +53,8 @@ class TestOldFTPFASTALocator():
         assert old_ftp_fasta_locator._division == "EnsemblVertebrates" 
         assert old_ftp_fasta_locator._assembly == "GRCh38"
 
-        assert old_ftp_fasta_locator.base_path == "/nfs/production/flicek/ensembl/production/ensemblftp"
+        assert old_ftp_fasta_locator.base_path == "/path/to/old/ftp/dir"
 
     def test_locate_file(self, old_ftp_fasta_locator, core_db_client):
         old_ftp_fasta_locator.core_db_client = core_db_client
-        assert old_ftp_fasta_locator.locate_file() == "/nfs/production/flicek/ensembl/production/ensemblftp/release-110/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz"
+        assert old_ftp_fasta_locator.locate_file() == "/path/to/old/ftp/dir/release-110/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz"

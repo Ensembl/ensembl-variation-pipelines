@@ -35,8 +35,7 @@ class TestPluginBuilder():
     #         yield
 
     @pytest.fixture()
-    def plugin_builder(self, setenv):
-        # monkeypatch.setenv("ENSEMBL_ROOT_DIR", "hulala")
+    def plugin_builder(self):
         return plugin.CurrentPluginArgsBuilder()
 
     def test_default(self, plugin_builder, plugin_data_dir):

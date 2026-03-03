@@ -32,8 +32,8 @@ class TestOldFTPVEPCahceLocator():
         assert old_vep_cache_locator._division == "EnsemblVertebrates" 
         assert old_vep_cache_locator._assembly == "GRCh38"
 
-        assert old_vep_cache_locator.base_path == "/nfs/production/flicek/ensembl/production/ensemblftp"
+        assert old_vep_cache_locator.base_path == "/path/to/old/ftp/dir"
 
     def test_locate_file(self, old_vep_cache_locator, core_db_client):
         old_vep_cache_locator.core_db_client = core_db_client
-        assert old_vep_cache_locator.locate_file() == "/nfs/production/flicek/ensembl/production/ensemblftp/release-110/variation/indexed_vep_cache/homo_sapiens_vep_110_GRCh38.tar.gz"
+        assert old_vep_cache_locator.locate_file() == "/path/to/old/ftp/dir/release-110/variation/indexed_vep_cache/homo_sapiens_vep_110_GRCh38.tar.gz"

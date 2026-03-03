@@ -30,8 +30,8 @@ class TestFTPGFFLocator():
     def test_defaults(self, ftp_gff_locator):
         # default storage media - disk
         assert ftp_gff_locator._storage_media == ftp.StorageMediaType.DISK
-        assert ftp_gff_locator.base_path == "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
+        assert ftp_gff_locator.base_path == "/path/to/ftp/dir"
 
     def test_locate_file(self, ftp_gff_locator, metadata_client):
         ftp_gff_locator.metadata_client = metadata_client
-        assert ftp_gff_locator.locate_file("2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb") == "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms/Homo_sapiens/GCA_000001405.29/ensembl/geneset/2024_11/genes.gff3.gz"
+        assert ftp_gff_locator.locate_file("2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb") == "/path/to/ftp/dir/Homo_sapiens/GCA_000001405.29/ensembl/geneset/2024_11/genes.gff3.gz"

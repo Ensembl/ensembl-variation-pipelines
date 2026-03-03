@@ -18,7 +18,7 @@ class TestDBClient():
         db_client.section = "core"
         assert db_client.host == "127.0.0.1"
         assert db_client.port == "3306"
-        assert db_client.user == "test"
+        assert db_client.user == "root"
 
     def test_invalid_section(self, db_client):
         with pytest.raises(Exception):

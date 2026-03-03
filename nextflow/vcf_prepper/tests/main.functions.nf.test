@@ -159,7 +159,7 @@ nextflow_function {
             }
             function {
                 """
-                example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
+                def example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
                 def input_config = new groovy.json.JsonSlurper().parse(file(example_input_config))
 
                 input[0] = input_config
@@ -214,7 +214,7 @@ nextflow_function {
         when {
             function {
                 """
-                example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
+                def example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
                 def input_config = new groovy.json.JsonSlurper().parse(file(example_input_config))
                 def genome_map = [
                     '2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb':

@@ -56,7 +56,7 @@ nextflow_process {
 
             // following is duplicate of snapshot match but for readability purpose
             // should be used to check if snapshot is invalid
-            def lines = path(process.out.get("0").get(0).get(1)).linesGzip[0..-1]
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 13
             assert lines[0].equals('##fileformat=VCFv4.2')
             assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
@@ -109,7 +109,7 @@ nextflow_process {
 
             // following is duplicate of snapshot match but for readability purpose
             // should be used to check if snapshot is invalid
-            def lines = path(process.out.get("0").get(0).get(1)).linesGzip[0..-1]
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 14
             assert lines[0].equals('##fileformat=VCFv4.2')
             assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
@@ -163,7 +163,7 @@ nextflow_process {
 
             // following is duplicate of snapshot match but for readability purpose
             // should be used to check if snapshot is invalid
-            def lines = path(process.out.get("0").get(0).get(1)).linesGzip[0..-1]
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 14
             assert lines[0].equals('##fileformat=VCFv4.2')
             assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
@@ -217,7 +217,7 @@ nextflow_process {
 
             // following is duplicate of snapshot match but for readability purpose
             // should be used to check if snapshot is invalid
-            def lines = path(process.out.get("0").get(0).get(1)).linesGzip[0..-1]
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 16
             assert lines[0].equals('##fileformat=VCFv4.2')
             assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
@@ -274,7 +274,7 @@ nextflow_process {
 
             // following is duplicate of snapshot match but for readability purpose
             // should be used to check if snapshot is invalid
-            def lines = path(process.out.get("0").get(0).get(1)).linesGzip[0..-1]
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 12
             assert lines[7].equals('##source="CerealsDB" description="Markers from Axiom 820K and 35K SNP Array  provided by <a href=\'http://www.cerealsdb.uk.net/cerealgenomics/CerealsDB/indexNEW.php\'>CerealsDB<a/>n"')
             assert lines[8].equals('##source="Watkins-exome-capture" description="103 accessions of the Watkins landrace collection"')
@@ -318,7 +318,7 @@ nextflow_process {
 
             // following is duplicate of snapshot match but for readability purpose
             // should be used to check if snapshot is invalid
-            def lines = path(process.out.get("0").get(0).get(1)).linesGzip[0..-1]
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 11
             assert lines[8].equals('1\t46000\tnsv4514092\tT\t<CNV>\t.\t.\tSOURCE=dbVar;END=111250')
             assert lines[9].equals('1\t54665\tnsv4536437\tA\t<INS>\t.\t.\tSOURCE=dbVar;SVLEN=.')
@@ -361,7 +361,7 @@ nextflow_process {
 
             // following is duplicate of snapshot match but for readability purpose
             // should be used to check if snapshot is invalid
-            def lines = path(process.out.get("0").get(0).get(1)).linesGzip[0..-1]
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 12
             assert lines[5].equals('##INFO=<ID=NODEID,Number=1,Type=String,Description="Identifier of the nodes this variant belong to">')
             assert lines[7].equals('##source="HGSVC3" description="The Human Genome Structural Variation Consortium (HGSVC, Phase 3) focus on developing resources and computational approaches to fully characterize and integrate structural variants into their haplotypic context in order to understand their mutational mechanisms and functional consequences" url="https://www.hgsvc.org/about" version="2025-03-01"')

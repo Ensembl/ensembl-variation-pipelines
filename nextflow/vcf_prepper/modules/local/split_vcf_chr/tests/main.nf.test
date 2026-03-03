@@ -31,7 +31,7 @@ nextflow_process {
 				chr_file = "1.chrom"
 				file(chr_file).mkdirs()
 
-                input[0] = tuple([:], vcf, vcf_index, file(chr_file))
+                input[0] = tuple([:], [:], vcf, vcf_index, file(chr_file))
                 """
             }
         }
@@ -39,8 +39,8 @@ nextflow_process {
         then {
             assert process.success
 
-            assert file(process.out.get(0).get(0).get(1)).name == "split.1.vcf.gz"
-            assert path(process.out.get(0).get(0).get(1)).vcf.chromosomes == ['1'] as Set
+            assert file(process.out.get(0).get(0).get(2)).name == "split.1.vcf.gz"
+            assert path(process.out.get(0).get(0).get(2)).vcf.chromosomes == ['1'] as Set
         }
     }
 }

@@ -29,7 +29,7 @@ nextflow_workflow {
                 vcf = file("${moduleDir}/tests/testdata/test.vcf.gz")
                 vcf_index = file("${moduleDir}/tests/testdata/test.vcf.gz.csi")
 
-                input[0] = tuple([:], vcf, vcf_index)
+                input[0] = tuple([:], [:], vcf, vcf_index)
                 """
             }
         }
@@ -38,10 +38,10 @@ nextflow_workflow {
             assert workflow.success
 
 			// can we assume channel spitting fixed data here?
-            assert file(workflow.out.get(0).get(0).get(1)).name == "split.1.vcf.gz"
-            assert path(workflow.out.get(0).get(0).get(1)).vcf.chromosomes == ['1'] as Set
-            assert file(workflow.out.get(0).get(1).get(1)).name == "split.8.vcf.gz"
-            assert path(workflow.out.get(0).get(1).get(1)).vcf.chromosomes == ['8'] as Set
+            assert file(workflow.out.get(0).get(0).get(2)).name == "split.1.vcf.gz"
+            assert path(workflow.out.get(0).get(0).get(2)).vcf.chromosomes == ['1'] as Set
+            assert file(workflow.out.get(0).get(1).get(2)).name == "split.8.vcf.gz"
+            assert path(workflow.out.get(0).get(1).get(2)).vcf.chromosomes == ['8'] as Set
         }
     }
 }

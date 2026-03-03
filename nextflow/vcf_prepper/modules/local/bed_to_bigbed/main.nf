@@ -19,21 +19,21 @@
 
 process BED_TO_BIGBED {
 	input:
-	tuple val(genome_meta), path(bed)
+	tuple val(genome_meta), val(file_meta), path(bed)
 	path bed_fields
 
 	output:
 	path "variant-${source}-details.bb"
 
 	script:
-	source = genome_meta.source.toLowerCase()
+	source = file_meta.source.toLowerCase()
 	output_bb = "${genome_meta.genome_tracks_outdir}/variant-${source}-details.bb"
 	chrom_sizes = genome_meta.chrom_sizes_file
 	bed_fields = bed_fields
 
 	"""
-	total_fields=$(cat ${bed_fields} | jq .fields | jq length)
-	extra_fields=$((total_fields-3))
+	total_fields=\$(cat ${bed_fields} | jq .fields | jq length)
+	extra_fields=\$((total_fields-3))
 	if [ "\${extra_fields}" -lt "0" ]
 	then
 		echo "Extra fields cannot be less than 0"
@@ -45,7 +45,7 @@ process BED_TO_BIGBED {
 	ln -sf ${output_bb} "variant-${source}-details.bb"
 	
 	# temp: for one source we create symlink for focus if only one source present
-	if [[ "${genome_meta.multiple_source}" == "false" ]]
+	if [[ "${file_meta.multiple_source}" == "false" ]]
 	then
 		cd ${genome_meta.genome_tracks_outdir}
 		ln -sf variant-${source}-details.bb variant-details.bb

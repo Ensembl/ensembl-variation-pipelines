@@ -28,14 +28,14 @@ nextflow_process {
                 """
 				vcf = file("${moduleDir}/tests/testdata/test.vcf.gz")
 				vcf_index = file("${moduleDir}/tests/testdata/test.vcf.gz.csi")
-                input[0] = tuple([:], vcf, vcf_index)
+                input[0] = tuple([:], [:], vcf, vcf_index)
                 """
             }
         }
 
         then {
             assert process.success
-            assert process.out.get(0).get(0).get(3) == '1'
+            assert process.out.get(0).get(0).get(4) == '1'
         }
     }
 }

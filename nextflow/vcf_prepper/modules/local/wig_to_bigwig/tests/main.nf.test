@@ -30,13 +30,16 @@ nextflow_process {
                 tmp_dir = "${moduleDir}/tests/temp"
                 file(tmp_dir).mkdirs()
                 
-				meta = [:]
-                meta["source"] = "test"
-				meta["chrom_sizes_file"] = file("${moduleDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes")
-                meta["multiple_source"] = false
-				meta["genome_tracks_outdir"] = tmp_dir
+				genome_meta = [:]
+                genome_meta["source"] = "test"
+				genome_meta["chrom_sizes_file"] = file("${moduleDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes")
+				genome_meta["genome_tracks_outdir"] = tmp_dir
 
-				input[0] = tuple(meta, file("${moduleDir}/tests/testdata/short_variants.wig"))
+				file_meta = [:]
+                file_meta["source"] = "test"
+                file_meta["multiple_source"] = false
+
+				input[0] = tuple(genome_meta, file_meta, file("${moduleDir}/tests/testdata/short_variants.wig"))
                 """
             }
         }

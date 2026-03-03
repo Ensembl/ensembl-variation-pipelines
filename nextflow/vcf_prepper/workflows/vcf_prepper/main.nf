@@ -96,10 +96,6 @@ workflow VCF_PREPPER {
 	}
     else {
         ch_post_vep = STAGE_VCF.out
-			.map {
-				genome_meta, _file_meta, vcf, vcf_index ->
-					[genome_meta, vcf, vcf_index ]
-			}
     }
         
 	// filter if no variant annotated from VEP
@@ -107,16 +103,16 @@ workflow VCF_PREPPER {
 	COUNT_VCF_VARIANT( ch_post_vep )
 	COUNT_VCF_VARIANT.out
 	.map {
-		meta, vcf, vcf_index, variant_count ->
+		genome_meta, file_meta, vcf, vcf_index, variant_count ->
 			// if vcf has no variant - remove output directories and filter channel 
 			if ( variant_count.equals("0") ) {
-				file(meta.genome_api_outdir).delete()
-				file(meta.genome_tracks_outdir).delete()
+				file(genome_meta.genome_api_outdir).delete()
+				file(genome_meta.genome_tracks_outdir).delete()
 
 				"NO_VARIANT"
 			}
 			else {
-				[meta, vcf, vcf_index]
+				[genome_meta, file_meta, vcf, vcf_index]
 			}
 	}
 	.filter { ! it.equals("NO_VARIANT") }
@@ -168,8 +164,8 @@ workflow VCF_PREPPER {
       ch_split_finish
       .join ( ch_post_stats )
       .map {
-        meta, vcf, vcf_index ->
-          [meta, vcf, vcf_index]
+        genome_meta, file_meta, vcf, vcf_index ->
+          [genome_meta, file_meta, vcf, vcf_index]
       }
       .set { ch_post_process }
     }
@@ -188,12 +184,12 @@ workflow VCF_PREPPER {
 
     ch_post_process
     .map {
-      meta, vcf, vcf_index ->
+      genome_meta, file_meta, vcf, vcf_index ->
         // TODO: when we have multiple source per genome we need to delete source specific files
-        def new_vcf = meta.multiple_source ? 
-          "${meta.genome_api_outdir}/variation_${meta.source}.vcf.gz"
-          : "${meta.genome_api_outdir}/variation.vcf.gz"
-        def new_vcf_index = "${new_vcf}.${meta.index_type}"
+        def new_vcf = file_meta.multiple_source ? 
+          "${genome_meta.genome_api_outdir}/variation_${file_meta.source}.vcf.gz"
+          : "${genome_meta.genome_api_outdir}/variation.vcf.gz"
+        def new_vcf_index = "${new_vcf}.${genome_meta.index_type}"
         
         // in -resume vcf and vcf_index may not exists as already renamed
         // moveTo instead of renameTo - in -resume dest file may exists from previous run
@@ -202,7 +198,7 @@ workflow VCF_PREPPER {
           file(vcf_index).moveTo(new_vcf_index)
         }
 
-        [meta, new_vcf, new_vcf_index]
+        [genome_meta, file_meta, new_vcf, new_vcf_index]
     }
   }
 }

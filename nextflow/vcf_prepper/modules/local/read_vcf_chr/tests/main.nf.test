@@ -29,7 +29,7 @@ nextflow_process {
                 vcf = file("${moduleDir}/tests/testdata/test.vcf.gz")
                 vcf_index = file("${moduleDir}/tests/testdata/test.vcf.gz.csi")
 
-                input[0] = tuple([:], vcf, vcf_index)
+                input[0] = tuple([:], [:], vcf, vcf_index)
                 """
             }
         }
@@ -38,7 +38,7 @@ nextflow_process {
             assert process.success
             assert snapshot(process.out).match()
 
-            assert file(process.out.get(0).get(0).get(3)).name == "1.chrom"
+            assert file(process.out.get(0).get(0).get(4)).name == "1.chrom"
         }
     }
 }

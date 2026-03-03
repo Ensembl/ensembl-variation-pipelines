@@ -18,13 +18,13 @@
 
 process VCF_TO_BED {
     input:
-    tuple val(genome_meta), path(vcf)
+    tuple val(genome_meta), val(file_meta), path(vcf)
     path rank_file
     val bed_fields
     val structural_variant
 
     output:
-    tuple val(genome_meta), path(output_file)
+    tuple val(genome_meta), val(file_meta), path(output_file)
 
     script:
     output_file = vcf.getName().replace(".vcf.gz", ".bed")

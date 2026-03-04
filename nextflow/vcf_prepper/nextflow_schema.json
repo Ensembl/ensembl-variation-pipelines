@@ -34,63 +34,39 @@
     },
     "repo_dir": {
       "type": "string",
-      "default": "/hps/software/users/ensembl/variation/snhossain"
+      "default": "None"
     },
     "input_config": {
       "type": "string",
-      "default": "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/nextflow/vcf_prepper/assets/input_sources.json"
+      "default": "${projectDir}/assets/input_sources.json"
     },
     "ini_file": {
       "type": "string",
-      "default": "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/nextflow/vcf_prepper/assets/DEFAULT.ini"
+      "default": "${projectDir}/assets/DEFAULT.ini"
     },
     "rank_file": {
       "type": "string",
-      "default": "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/nextflow/vcf_prepper/assets/variation_consequnce_rank.json"
+      "default": "${projectDir}/assets/variation_consequnce_rank.json"
     },
     "population_data_file": {
       "type": "string",
-      "default": null
+      "default": "None"
     },
     "sources_meta_file": {
       "type": "string",
-      "default": "/Users/snhossain/ensembl-repos/ensembl-variation-pipelines/nextflow/vcf_prepper/assets/sources_meta.json"
-    },
-    "cache_dir": {
-      "type": "string",
-      "default": null
-    },
-    "gff_dir": {
-      "type": "string",
-      "default": null
-    },
-    "fasta_dir": {
-      "type": "string",
-      "default": null
-    },
-    "conservation_data_dir": {
-      "type": "string",
-      "default": null
+      "default": "${projectDir}/assets/sources_meta.json"
     },
     "output_dir": {
       "type": "string",
-      "default": "/nfs/production/flicek/ensembl/variation/new_website"
+      "default": "${launchDir}"
     },
     "temp_dir": {
       "type": "string",
-      "default": "/nfs/production/flicek/ensembl/variation/new_website/tmp"
+      "default": "${launchDir}/tmp"
     },
     "structural_variant": {
       "type": "integer",
       "default": 0
-    },
-    "use_old_infra": {
-      "type": "integer",
-      "default": 1
-    },
-    "use_vep_cache": {
-      "type": "integer",
-      "default": 1
     },
     "bin_size": {
       "type": "integer",
@@ -131,6 +107,23 @@
     "queue": {
       "type": "string",
       "default": "production"
+    },
+    "vep_config": {
+      "type": "string",
+      "default": "${projectDir}/assets/vep_config.json"
+    },
+    "synonym_file": {
+      "type": "string",
+      "default": "None"
+    },
+    "chrom_sizes_file": {
+      "type": "string",
+      "default": "None"
+    },
+    "bed_fields": {
+      "type": "string",
+      "default": "${projectDir}/assets/short_variant_bedfields.json"
     }
-  }
+  },
+  "required": ["repo_dir"]
 }

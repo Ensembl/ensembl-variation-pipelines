@@ -57,7 +57,6 @@ jobs:
       - name: setup Python dependencies
         run: |
           python3 -m pip install ${GITHUB_WORKSPACE}/src/python
-          python3 -m pip install -r requirements.txt
 
       - name: pytest
         run: |
@@ -189,6 +188,7 @@ jobs:
       - name: setup Python dependencies
         run: |
           python3 -m pip install ${GITHUB_WORKSPACE}/src/python
+          python3 -m pip install -r requirements.txt
 
       - name: setup Perl dependencies
         run: |

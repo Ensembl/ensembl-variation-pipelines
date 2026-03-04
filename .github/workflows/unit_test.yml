@@ -61,7 +61,7 @@ jobs:
       - name: pytest
         run: |
           pip install pytest coverage
-          coverage run -m pytest
+          coverage run -m pytest ${GITHUB_WORKSPACE}/src/python
           coverage lcov -o coverage.lcov
 
       - name: Add coverage reports

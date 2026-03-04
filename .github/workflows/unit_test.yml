@@ -56,7 +56,17 @@ jobs:
 
       - name: pytest
         run: |
-          pytest --tap src/python
+          pip install coverage
+          coverage run -m pytest
+          coverage lcov -o coverage.lcov
+
+      - name: Add coverage reports
+        if: ${{ github.event_name == 'pull_request' }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash .github/scripts/py_coverage_comment.sh coverage.lcov
 
 
   vcf_prepper:
@@ -80,6 +90,8 @@ jobs:
           --health-retries=3
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/checkout@v4
         with:
           repository: Ensembl/ensembl-vep
@@ -233,4 +245,13 @@ jobs:
           nf-test test . \
             --coverage \
             --ci \
-            --profile github
+            --profile github \
+            --changed-since HEAD^ | tee nf-test.txt
+
+      - name: Add coverage reports
+        if: ${{ github.event_name == 'pull_request' }}
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          bash .github/scripts/nftest_coverage_comment.sh nf-test.txt

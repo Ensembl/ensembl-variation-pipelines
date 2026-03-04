@@ -23,5 +23,6 @@
 **/tracks
 **/reports
 **/work
+report.tap
 
 **/.ruff_cache

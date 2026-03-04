@@ -1,0 +1,21 @@
+{
+    "default_options": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+                        },
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.default_options.txt:md5,a88593258ac2af4d24832fff8824e7a9"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-01-27T19:25:34.710224"
+    }
+}

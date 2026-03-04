@@ -1,0 +1,292 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "annotation_source": {
+      "type": "object",
+      "properties": {
+        "cache": {
+          "type": "object",
+          "properties": {
+            "active": {
+              "type": "boolean"
+            },
+            "dir": {
+              "type": "string"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "factory": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "active",
+            "dir",
+            "version",
+            "factory"
+          ]
+        },
+        "fasta": {
+          "type": "object",
+          "properties": {
+            "active": {
+              "type": "boolean"
+            },
+            "dir": {
+              "type": "string"
+            },
+            "file": {
+              "type": "string"
+            },
+            "factory": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "active",
+            "dir",
+            "file",
+            "factory"
+          ]
+        },
+        "gff": {
+          "type": "object",
+          "properties": {
+            "active": {
+              "type": "boolean"
+            },
+            "dir": {
+              "type": "string"
+            },
+            "file": {
+              "type": "string"
+            },
+            "factory": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "active",
+            "dir",
+            "file",
+            "factory"
+          ]
+        }
+      },
+      "required": [
+        "cache",
+        "fasta",
+        "gff"
+      ]
+    },
+    "default_options": {
+      "type": "object",
+      "properties": {
+        "force_overwrite": {
+          "type": "integer"
+        },
+        "fork": {
+          "type": "integer"
+        },
+        "buffer_size": {
+          "type": "integer"
+        },
+        "vcf": {
+          "type": "integer"
+        },
+        "spdi": {
+          "type": "integer"
+        },
+        "variant_class": {
+          "type": "integer"
+        },
+        "protein": {
+          "type": "integer"
+        },
+        "transcript_version": {
+          "type": "integer"
+        },
+        "gencode_promoter": {
+          "type": "integer"
+        },
+        "offline": {
+          "type": "integer"
+        },
+        "sift": {
+          "type": "integer"
+        },
+        "polyphen": {
+          "type": "integer"
+        },
+        "af_1kg": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "force_overwrite",
+        "fork",
+        "buffer_size",
+        "vcf",
+        "spdi",
+        "variant_class",
+        "protein",
+        "transcript_version",
+        "gencode_promoter",
+        "offline",
+        "sift",
+        "polyphen"
+      ]
+    },
+    "plugins": {
+      "type": "object",
+      "properties": {
+        "genome_matcher": {
+          "type": "string"
+        },
+        "confs": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "requires_file": {
+                  "type": "boolean"
+                },
+                "keyed": {
+                  "type": "boolean"
+                },
+                "files": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "snv": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "snv"
+                      ]
+                    }
+                  ]
+                },
+                "file_factory": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "key"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "requires_file",
+                "keyed",
+                "files",
+                "file_factory",
+                "params"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "genome_matcher",
+        "confs"
+      ]
+    },
+    "custom_annotaions": {
+      "type": "object",
+      "properties": {
+        "genome_matcher": {
+          "type": "string"
+        },
+        "confs": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "genome_matcher": {
+                  "type": "string"
+                },
+                "file_factory": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "short_name": {
+                          "type": "string"
+                        },
+                        "file": {
+                          "type": "string"
+                        },
+                        "format": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "coord": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "short_name",
+                        "file",
+                        "format",
+                        "type",
+                        "coord"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "genome_matcher",
+                "file_factory",
+                "params"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "genome_matcher",
+        "confs"
+      ]
+    }
+  },
+  "required": [
+    "annotation_source",
+    "default_options",
+    "plugins",
+    "custom_annotaions"
+  ]
+}

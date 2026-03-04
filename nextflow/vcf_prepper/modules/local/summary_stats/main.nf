@@ -1,0 +1,58 @@
+#!/usr/bin/env nextflow
+
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+process SUMMARY_STATS {
+	memory { ((vcf.size() * 1.25 * 1.B) + 2.GB) * task.attempt }
+
+	input:
+	tuple val(genome_meta), 
+		val(file_meta),
+		path(vcf), 
+		path(vcf_index)
+	val population_data_file
+
+	output:
+	tuple val(genome_meta), 
+		val(file_meta),
+		path(output_file), 
+		path(vcf_index)
+
+	script:
+	species = genome_meta.species
+	assembly = genome_meta.assembly
+	output_file = "POST_FORMATTED_" + file(vcf).getName()
+
+	index_type = "csi"
+	flag_index = (index_type == "tbi" ? "-t" : "-c")
+	vcf_index = output_file + ".${index_type}"
+
+	population_data_file_param = population_data_file != "NONE"
+		? "--population_data_file " + params.population_data_file
+		: ""
+
+	"""
+	summary_stats.py \
+		${species} \
+		${assembly} \
+		${vcf} \
+		-O ${output_file} \
+		${population_data_file_param}
+	
+	bcftools index ${flag_index} ${output_file}
+	"""
+}

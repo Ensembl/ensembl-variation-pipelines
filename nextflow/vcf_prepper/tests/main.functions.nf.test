@@ -1,0 +1,255 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_function {
+
+    name "Test functions"
+    script "../main.nf"
+
+    test("function - initialise") {
+
+        function "initialise"
+
+        when {
+            params {
+                output_dir = "path/to/output"
+                temp_dir = "path/to/temp"
+            }
+            function {
+                """
+                input[0] = params
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert file(workDir + "/../" + params.output_dir + "/api").exists()
+            assert file(workDir + "/../" + params.output_dir + "/tracks").exists()
+        }
+    }
+
+	test("function - process_vep_config") {
+
+        function "process_vep_config"
+
+        when {
+            params {
+                vep_config = "${projectDir}/tests/testdata/vep_config.json"
+                skip_vep = 0
+            }
+            function {
+                """
+                input[0] = params
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert function.result == [
+				'annotation_source':[
+					'gff':[
+						'active':true
+					], 
+					'fasta':[
+						'active':true
+					], 
+					'cache':[
+						'active':false
+					]
+				], 
+				'default_options':[
+					'force_overwrite':1, 
+					'fork':1, 
+					'vcf':1, 
+					'spdi':1, 
+					'variant_class':1, 
+					'protein':1, 
+					'transcript_version':1, 
+					'gencode_promoter':1
+				], 
+				'plugins':[
+                    'conf':[
+                        [
+                            'name':'CADD', 
+                            'keyed':true
+                        ],
+                        [
+                            'name':'SpliceAI', 
+                            'keyed':true
+                        ]
+                    ]
+                ], 
+				'custom_annotaions':[
+                    'conf':[]
+                ]
+			]
+        }
+    }
+
+    test("function - process_vep_config - missing confs") {
+
+        function "process_vep_config"
+
+        when {
+            params {
+                vep_config = "${projectDir}/tests/testdata/vep_config_missing_confs.json"
+                skip_vep = 0
+            }
+            function {
+                """
+                input[0] = params
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert function.result == [
+				'annotation_source':[
+					'gff':[
+						'active':true
+					], 
+					'fasta':[
+						'active':true
+					], 
+					'cache':[
+						'active':false
+					]
+				], 
+				'default_options':[
+					'force_overwrite':1, 
+					'fork':1, 
+					'vcf':1, 
+					'spdi':1, 
+					'variant_class':1, 
+					'protein':1, 
+					'transcript_version':1, 
+					'gencode_promoter':1
+				], 
+				'plugins':[:], 
+				'custom_annotaions':[:]
+			]
+        }
+    }
+
+    test("function - genome_map_from_input_config") {
+
+        function "genome_map_from_input_config"
+
+        when {
+            params {
+                output_dir = "${projectDir}"
+                temp_dir = "${projectDir}/tmp"
+            }
+            function {
+                """
+                def example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
+                def input_config = new groovy.json.JsonSlurper().parse(file(example_input_config))
+
+                input[0] = input_config
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert function.result == [
+                    '2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb':[
+                        'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb',
+                        'genome':'homo_sapiens_grch38', 
+                        'species':'homo_sapiens', 
+                        'assembly':'GRCh38',
+                        'genome_temp_dir':"${projectDir}/tmp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'genome_api_outdir':"${projectDir}/api/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'genome_tracks_outdir':"${projectDir}/tracks/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'synonym_file':"${projectDir}/tmp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.synonyms",
+                        'chrom_sizes_file':"${projectDir}/tmp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.chrom.sizes"
+                    ], 
+                    '3704ceb1-948d-11ec-a39d-005056b38ce3':[
+                        'genome_uuid':'3704ceb1-948d-11ec-a39d-005056b38ce3',
+                        'genome':'homo_sapiens_grch37', 
+                        'species':'homo_sapiens_37', 
+                        'assembly':'GRCh37',
+                        'genome_temp_dir':"${projectDir}/tmp/3704ceb1-948d-11ec-a39d-005056b38ce3",
+                        'genome_api_outdir':"${projectDir}/api/3704ceb1-948d-11ec-a39d-005056b38ce3",
+                        'genome_tracks_outdir':"${projectDir}/tracks/3704ceb1-948d-11ec-a39d-005056b38ce3",
+                        'synonym_file':"${projectDir}/tmp/3704ceb1-948d-11ec-a39d-005056b38ce3/homo_sapiens_grch37.synonyms",
+                        'chrom_sizes_file':"${projectDir}/tmp/3704ceb1-948d-11ec-a39d-005056b38ce3/homo_sapiens_grch37.chrom.sizes"
+                    ], 
+                    'a73357ab-93e7-11ec-a39d-005056b38ce3':[
+                        'genome_uuid':'a73357ab-93e7-11ec-a39d-005056b38ce3',
+                        'genome':'triticum_aestivum_IWGSC', 
+                        'species':'triticum_aestivum', 
+                        'assembly':'IWGSC',
+                        'genome_temp_dir':"${projectDir}/tmp/a73357ab-93e7-11ec-a39d-005056b38ce3",
+                        'genome_api_outdir':"${projectDir}/api/a73357ab-93e7-11ec-a39d-005056b38ce3",
+                        'genome_tracks_outdir':"${projectDir}/tracks/a73357ab-93e7-11ec-a39d-005056b38ce3",
+                        'synonym_file':"${projectDir}/tmp/a73357ab-93e7-11ec-a39d-005056b38ce3/triticum_aestivum_IWGSC.synonyms",
+                        'chrom_sizes_file':"${projectDir}/tmp/a73357ab-93e7-11ec-a39d-005056b38ce3/triticum_aestivum_IWGSC.chrom.sizes"
+                    ]
+                ]
+        }
+    }
+
+    test("function - get_vcf_channel_list") {
+
+        function "get_vcf_channel_list"
+
+        when {
+            function {
+                """
+                def example_input_config = "${moduleDir}/assets/examples/example_input_config.json"
+                def input_config = new groovy.json.JsonSlurper().parse(file(example_input_config))
+                def genome_map = [
+                    '2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb':
+                        ['genome':'homo_sapiens_grch38', 'species':'homo_sapiens', 'assembly':'GRCh38'], 
+                    '3704ceb1-948d-11ec-a39d-005056b38ce3':
+                        ['genome':'homo_sapiens_grch37', 'species':'homo_sapiens_37', 'assembly':'GRCh37'], 
+                    'a73357ab-93e7-11ec-a39d-005056b38ce3':
+                        ['genome':'triticum_aestivum_IWGSC', 'species':'triticum_aestivum', 'assembly':'IWGSC']
+                    ]
+
+                input[0] = input_config
+                input[1] = genome_map
+                """
+            }
+        }
+
+        then {
+            assert function.success
+            assert function.result == [
+                [
+                    ['genome':'homo_sapiens_grch38', 'species':'homo_sapiens', 'assembly':'GRCh38'], 
+                    ['source':'dbSNP', 'file_type':'local', 'multiple_source':false], 
+                    '/nfs/production/flicek/ensembl/variation/data/dbSNP/latest/GCF_000001405.40.gz'
+                ], 
+                [
+                    ['genome':'homo_sapiens_grch37', 'species':'homo_sapiens_37', 'assembly':'GRCh37'], 
+                    ['source':'dbSNP', 'file_type':'local', 'multiple_source':false], 
+                    '/nfs/production/flicek/ensembl/variation/data/dbSNP/latest/GCF_000001405.25.gz'
+                ],
+                [
+                    ['genome':'triticum_aestivum_IWGSC', 'species':'triticum_aestivum', 'assembly':'IWGSC'],
+                    ['source':'MULTIPLE', 'file_type':'remote', 'multiple_source':false, 'sources':'[CerealsDB,%20EMS-induced%20mutation,%20Inter-homoeologous,%20Nottingham_WRC,%20Watkins-exome-capture,%20Exome_Capture_Diversity,%20Watkins_collection]'], 
+                    'https://ftp.ebi.ac.uk/ensemblgenomes/pub/release-57/plants/variation/vcf/triticum_aestivum/triticum_aestivum.vcf.gz'
+                ]
+            ]
+        }
+    }
+}

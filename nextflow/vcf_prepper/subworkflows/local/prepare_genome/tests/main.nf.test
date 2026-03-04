@@ -1,0 +1,75 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_workflow {
+
+    name "Test workflow PREPARE_GENOME"
+    script "../main.nf"
+    workflow "PREPARE_GENOME"
+
+    test("prepare_genome") {
+
+        when {
+            workflow {
+                """
+                genome_meta = [
+                    [
+                        'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb',
+                        'genome':'homo_sapiens_grch38', 
+                        'species':'homo_sapiens', 
+                        'assembly':'GRCh38',
+                        'genome_temp_dir':"${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'genome_api_outdir':"${workDir}/path/to/output/api/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'genome_tracks_outdir':"${workDir}/path/to/output/tracks/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'synonym_file':"${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.synonyms",
+                        'chrom_sizes_file':"${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.chrom.sizes",
+                    ]
+                ]
+
+                input[0] = Channel.fromList(genome_meta)
+                input[1] = 110
+                input[2] = "${projectDir}/tests/testdata/test_db.ini"
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            // genome specific directories created
+            assert file("${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb").exists()
+            assert file("${workDir}/path/to/output/api/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb").exists()
+            assert file("${workDir}/path/to/output/tracks/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb").exists()
+
+            // genome_meta does not change
+            assert workflow.out.get(0).get(0).get(0) == [
+                        'genome_uuid':'2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb',
+                        'genome':'homo_sapiens_grch38', 
+                        'species':'homo_sapiens', 
+                        'assembly':'GRCh38',
+                        'genome_temp_dir':"${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'genome_api_outdir':"${workDir}/path/to/output/api/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'genome_tracks_outdir':"${workDir}/path/to/output/tracks/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                        'synonym_file':"${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.synonyms",
+                        'chrom_sizes_file':"${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.chrom.sizes",
+                    ]
+
+            assert file("${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.synonyms").exists()
+            assert file("${workDir}/path/to/temp/2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb/homo_sapiens_grch38.chrom.sizes").exists()
+        }
+    }
+}

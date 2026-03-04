@@ -1,0 +1,23 @@
+{
+    "conf - proper": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                            "species": "homo_sapiens",
+                            "assembly": "GRCh38"
+                        },
+                        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb.custom_annotations.txt:md5,193c1fd9f8b84ba83372ec0c4b76b446"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2025-10-10T00:30:53.076579"
+    }
+}

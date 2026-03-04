@@ -1,0 +1,46 @@
+{
+    "name": "structural_variant",
+    "description": "BED fields for structural variant track in genome browser",
+    "fields": {
+        "chromosome": {
+            "type": "string",
+            "pos": 1
+        },
+        "start": {
+            "type": "uint",
+            "pos": 2
+        },
+        "end": {
+            "type": "uint",
+            "pos": 3
+        },
+        "id": {
+            "type": "string",
+            "pos": 4
+        },
+        "variety": {
+            "type": "lstring",
+            "pos": 5
+        },
+        "reference": {
+            "type": "lstring",
+            "pos": 6
+        },
+        "alts": {
+            "type": "lstring",
+            "pos": 7
+        },
+        "group": {
+            "type": "ubyte",
+            "pos": 8
+        },
+        "severity": {
+            "type": "lstring",
+            "pos": 9
+        },
+        "extent": {
+            "type": "int",
+            "pos": 10
+        }
+    }
+}

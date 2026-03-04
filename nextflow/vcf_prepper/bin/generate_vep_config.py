@@ -70,6 +70,9 @@ PLUGINS = [
     "Downstream",
     "ClinPred",
 ]
+SV_PLUGINS = [
+    "CADD"
+]
 
 
 def parse_args(args=None):
@@ -293,6 +296,7 @@ def get_plugin_args(
     species: str,
     assembly: str,
     conservation_data_dir: str = CONSERVATION_DATA_DIR,
+    structural_variant: bool = False
 ) -> str:
     """Return plugin configuration line(s) for the requested plugin.
 
@@ -305,6 +309,7 @@ def get_plugin_args(
         species (str): Species production name.
         assembly (str): Assembly name.
         conservation_data_dir (str): Directory containing conservation plugin data.
+        structural_variant (str): Structural variant or not.
 
     Returns:
         str|None: Plugin argument string for inclusion in VEP config, or None to skip plugin.
@@ -317,6 +322,11 @@ def get_plugin_args(
         # CADD have data v1.7 data file from e113
         if version < 113:
             plugin_data_dir = plugin_data_dir.replace(f"{version}", "113")
+        
+        if structural_variant:
+            sv = os.path.join(plugin_data_dir, f"CADD_prescored_variants.tsv.gz")
+            check_plugin_files(plugin, [sv])
+            return f"CADD,{sv}"
 
         if species == "sus_scrofa":
             snv = os.path.join(plugin_data_dir, f"ALL_pCADD-PHRED-scores.tsv.gz")
@@ -492,6 +502,7 @@ def get_plugins(
     assembly: str,
     repo_dir: str = REPO_DIR,
     conservation_data_dir: str = CONSERVATION_DATA_DIR,
+    structural_variant: bool = False
 ) -> list:
     """Assemble plugin argument strings for the species and version.
 
@@ -501,17 +512,21 @@ def get_plugins(
         assembly (str): Assembly name.
         repo_dir (str): Repository directory.
         conservation_data_dir (str): Conservation plugin data directory.
+        structural_variant (str): Structural variant or not.
 
     Returns:
         list: List of plugin argument strings to include in the VEP config.
     """
+    plugin_list = PLUGINS
+    if structural_variant:
+        plugin_list = SV_PLUGINS
     plugins = []
 
-    for plugin in PLUGINS:
+    for plugin in plugin_list:
         plugin_species = get_plugin_species(plugin, repo_dir)
         if len(plugin_species) == 0 or species in plugin_species:
             plugin_args = get_plugin_args(
-                plugin, version, species, assembly, conservation_data_dir
+                plugin, version, species, assembly, conservation_data_dir, structural_variant
             )
             if plugin_args is not None:
                 plugins.append(plugin_args)
@@ -619,7 +634,7 @@ def main(args=None):
     else:
         print(f"[WARNING] Invalid population config file - {population_data_file}")
 
-    plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir)
+    plugins = get_plugins(species, version, assembly, repo_dir, conservation_data_dir, structural_variant)
 
     # write the VEP config file
     with open(vep_config, "w") as file:

@@ -32,7 +32,7 @@ process PROCESS_CACHE {
   version = params.version
   ini_file = params.ini_file
   cache_dir = meta.cache_dir
-  force_create_config = params.force_create_config ? "--force" : ""
+  overwrite_cache = params.overwrite_cache ? "--force" : ""
   
   '''
   process_cache.py \
@@ -41,6 +41,6 @@ process PROCESS_CACHE {
     !{version} \
     --ini_file !{ini_file} \
     --cache_dir !{cache_dir} \
-    !{force_create_config}
+    !{overwrite_cache}
   '''
 }

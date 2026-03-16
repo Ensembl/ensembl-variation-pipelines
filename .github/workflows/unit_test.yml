@@ -58,6 +58,12 @@ jobs:
         run: |
           python3 -m pip install ${GITHUB_WORKSPACE}/src/python
 
+      - name: Install tree
+        run: sudo apt-get update && sudo apt-get install -y tree
+
+      - name: Show directory tree for test data
+        run: tree -a ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/data
+
       - name: pytest
         run: |
           pip install pytest coverage

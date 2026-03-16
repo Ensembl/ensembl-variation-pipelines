@@ -37,13 +37,23 @@ if [[ -z "$PR_NUMBER" || "$PR_NUMBER" == "null" ]]; then
 fi
 
 # ---- Parse LCOV totals ----
-COVERAGE_LINE=$(grep 'COVERAGE:' "$FILE")
-TOTAL_COVERAGE=$(echo $COVERAGE_LINE | grep -oE '[0-9]+(\.[0-9]+)?%' | tr -d '%')
-HIT_FILES=$(echo $COVERAGE_LINE | grep -oE '[0-9]+ of' | grep -oE '[0-9]+')
-TOTAL_FILES=$(echo $COVERAGE_LINE | grep -oE 'of [0-9]+' | grep -oE '[0-9]+')
+COVERAGE_LINE=$(grep 'COVERAGE:' "$FILE" || true)
+if [[ -z "$COVERAGE_LINE" ]]; then
+  echo "No 'COVERAGE:' line found in $FILE"
+  echo "File contents:"
+  cat "$FILE"
+  exit 1
+fi
 
-if [[ -z "$TOTAL_FILES" || "$TOTAL_FILES" -eq 0 ]]; then
-  echo "Failed to parse nf-test coverage line"
+TOTAL_COVERAGE=$(echo $COVERAGE_LINE | grep -oE '[0-9]+(\.[0-9]+)?%' | tr -d '%' || true)
+HIT_FILES=$(echo $COVERAGE_LINE | grep -oE '[0-9]+ of' | grep -oE '[0-9]+' || true)
+TOTAL_FILES=$(echo $COVERAGE_LINE | grep -oE 'of [0-9]+' | grep -oE '[0-9]+' || true)
+
+if [[ -z "$TOTAL_COVERAGE" || \
+    -z "$HIT_FILES" || \
+    -z "$TOTAL_FILES" || "$TOTAL_FILES" -eq 0 ]];
+then
+  echo "Could not parse coverage percentage from: $COVERAGE_LINE"
   exit 1
 fi
 

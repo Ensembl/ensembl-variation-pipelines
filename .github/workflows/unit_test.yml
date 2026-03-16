@@ -249,8 +249,7 @@ jobs:
           nf-test test . \
             --coverage \
             --ci \
-            --profile github \
-            --changed-since HEAD^ | tee nf-test.txt
+            --profile github  | tee nf-test.txt
 
       - name: Add coverage reports
         if: ${{ github.event_name == 'pull_request' }}
@@ -258,5 +257,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ls $PWD
           bash ${GITHUB_WORKSPACE}/.github/scripts/nftest_coverage_comment.sh nf-test.txt

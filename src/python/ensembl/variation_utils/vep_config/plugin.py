@@ -222,9 +222,10 @@ class CurrentPluginArgsBuilder(PluginArgsBuilder):
         return True
 
 class RepoPluginConfigMatcher():
+    REPO_DIR = os.environ["ENSEMBL_ROOT_DIR"]
     def __init__(
                 self,
-                repo_dir: str = os.environ["ENSEMBL_ROOT_DIR"],
+                repo_dir: str = REPO_DIR,
                 config_filename: str = "plugin_config.txt"
             ):
 

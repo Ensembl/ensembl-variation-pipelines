@@ -4,9 +4,6 @@ from unittest import mock
 
 from ensembl.variation_utils.clients import clients
 
-# def pytest_sessionstart(session, monkeypatch):
-#     print("pytest_sessionstart has been called")
-#     monkeypatch.setenv("ENSEMBL_ROOT_DIR", "fdfd")
 def pytest_generate_tests(metafunc):
     os.environ['FTP_NFS_DIR'] = "/path/to/ftp/dir"
     os.environ['OLD_FTP_NFS_DIR'] = "/path/to/old/ftp/dir"
@@ -37,13 +34,6 @@ def repo_dir(data_dir):
 @pytest.fixture(scope="session")
 def plugin_data_dir(data_dir):
     return os.path.join(data_dir, "enseweb-data_tools")
-
-@pytest.fixture(scope="session")
-def set_env(monkeypatch, plugin_data_dir, repo_dir):
-    with mock.patch.dict(os.environ, clear=True):
-        monkeypatch.setenv("PLUGIN_DATA_DIR", plugin_data_dir)
-        monkeypatch.setenv("ENSEMBL_ROOT_DIR", repo_dir)
-        yield
 
 def create_core_db(ini_file, data_dir, dbname):
     db_client = clients.DBClient(ini_file=ini_file, section="core")

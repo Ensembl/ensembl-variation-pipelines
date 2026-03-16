@@ -60,9 +60,9 @@ jobs:
 
       - name: Show file permissions and ownership
         run: |
-          ls -l src/python/tests/variation_utils/data/enseweb-data_tools/grch38/e114/vep/plugin_data/CADD_GRCh38_1.7_whole_genome_SNVs.tsv.gz
-          stat src/python/tests/variation_utils/data/enseweb-data_tools/grch38/e114/vep/plugin_data/CADD_GRCh38_1.7_whole_genome_SNVs.tsv.gz- name: Show directory permissions and ownership
-          ls -ld src/python/tests/variation_utils/data/enseweb-data_tools/grch38/e114/vep/plugin_data
+          ls -l ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/data/enseweb-data_tools/grch38/e114/vep/plugin_data/CADD_GRCh38_1.7_whole_genome_SNVs.tsv.gz
+          stat ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/data/enseweb-data_tools/grch38/e114/vep/plugin_data/CADD_GRCh38_1.7_whole_genome_SNVs.tsv.gz- name: Show directory permissions and ownership
+          ls -ld ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/data/enseweb-data_tools/grch38/e114/vep/plugin_data
 
       - name: pytest
         run: |

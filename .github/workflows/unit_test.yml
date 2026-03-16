@@ -58,18 +58,6 @@ jobs:
         run: |
           python3 -m pip install ${GITHUB_WORKSPACE}/src/python
 
-      - name: Install tree
-        run: sudo apt-get update && sudo apt-get install -y tree
-
-      - name: Show directory tree for test data
-        run: tree -a ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/data
-
-      - name: Show file permissions and ownership
-        run: |
-          ls -ld ${GITHUB_WORKSPACE}/src/python/tests/variation_utils
-          ls -l ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/data/enseweb-data_tools/grch38/e114/vep/plugin_data/
-          stat ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/data/enseweb-data_tools/grch38/e114/vep/plugin_data/CADD_GRCh38_1.7_whole_genome_SNVs.tsv.gz
-
       - name: pytest
         run: |
           pip install pytest coverage
@@ -266,7 +254,6 @@ jobs:
 
       - name: Add coverage reports
         if: ${{ github.event_name == 'pull_request' }}
-        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

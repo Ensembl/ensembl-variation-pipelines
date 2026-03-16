@@ -63,8 +63,6 @@ class TestRepoPluginConfigMatcher():
         return plugin.RepoPluginConfigMatcher()
     
     def test_defaults(self, matcher, repo_dir):
-        print("DEBUG 2", repo_dir)
-        print("DEBUG 3", matcher.repo_dir)
         assert matcher.repo_dir == repo_dir
         assert matcher.config_file == os.path.join(repo_dir, "VEP_plugins", "plugin_config.txt")
 

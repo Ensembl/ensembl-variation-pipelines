@@ -17,6 +17,10 @@
 set -euo pipefail
 
 LCOV_FILE=$1
+if [[ ! -s "$LCOV_FILE" ]]; then
+  echo "Coverage file $LCOV_FILE is empty. Exiting."
+  exit 1
+fi
 COVERAGE_THRESHOLD=${COVERAGE_THRESHOLD:-90}
 MARKER="<!-- python-lcov-coverage-report -->"
 

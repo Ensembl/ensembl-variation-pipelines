@@ -54,3 +54,11 @@ class WorkflowMain {
         Nextflow.file("${params.output_dir}/tracks").mkdirs()
     }
 }
+
+class RemoteURL {
+    RemoteURL(String url){
+        this.url = url
+    }
+
+    
+}

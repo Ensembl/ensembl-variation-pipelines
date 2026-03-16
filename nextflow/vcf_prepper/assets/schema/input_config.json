@@ -1,0 +1,79 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "genome_uuid": {
+            "type": "object",
+            "description": "genome_uuid of the genome",
+            "properties": {
+                "species": {
+                    "type": "string"
+                },
+                "assembly": {
+                    "type": "string"
+                },
+                "files": {
+                    "type": "array",
+                    "items": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "file_type": {
+                                    "type": "string"
+                                },
+                                "file_location": {
+                                    "type": "string"
+                                },
+                                "sources": {
+                                    "type": "array",
+                                    "items": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "version": {
+                                                    "type": "string"
+                                                },
+                                                "description": {
+                                                    "type": "string"
+                                                },
+                                                "url": {
+                                                    "type": "string"
+                                                },
+                                                "accession_url": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "name",
+                                                "version",
+                                                "description",
+                                                "url",
+                                                "accession_url"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "file_type",
+                                "file_location",
+                                "sources"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "species",
+                "assembly",
+                "files"
+            ]
+        }
+    },
+    "required": [
+        "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+    ]
+}

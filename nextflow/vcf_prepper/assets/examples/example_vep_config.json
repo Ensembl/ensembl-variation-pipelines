@@ -1,0 +1,49 @@
+{
+  "annotation_source": {
+    "cache": {
+      "active": true
+    },
+    "fasta": {
+      "active": true
+    },
+    "gff": {
+      "active": false
+    }
+  },
+  "default_options": {
+    "force_overwrite": 1,
+    "fork": 2,
+    "vcf": 1,
+    "spdi": 1,
+    "variant_class": 1,
+    "protein": 1,
+    "transcript_version": 1,
+    "gencode_promoter": 1,
+    "offline": 1
+  },
+  "plugins": {
+    "factory": "ABCDEFGHIJKLMNOP",
+    "confs": [
+      {
+        "name": "CADD",
+        "requires_file": true,
+        "keyed": true
+      },
+      {
+        "name": "Phenotypes",
+        "requires_file": true,
+        "keyed": true,
+        "params": [
+            {"id_match": 1}
+        ]
+      }
+    ]
+  },
+  "custom_annotaions": {
+    "confs": [
+      {
+        "name": "frequency"
+      }
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_process {
+
+    name "Test process GENERATE_CHROM_SIZES"
+    script "../main.nf"
+    process "GENERATE_CHROM_SIZES"
+
+    test("chrom_sizes") {
+
+        when {
+            process {
+                """
+
+                input[0] = [
+                    'genome':'homo_sapiens_grch38', 
+                    'species':'homo_sapiens', 
+                    'assembly':'GRCh38',
+                    'chrom_sizes_file':"${workDir}/homo_sapiens_grch38.chrom.sizes"
+                ]
+                input[1] = 110
+                input[2] = "${projectDir}/tests/testdata/test_db.ini"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            // genome_meta should be same as input
+            assert process.out.get(0).get(0).get(0) == [
+                    'genome':'homo_sapiens_grch38', 
+                    'species':'homo_sapiens', 
+                    'assembly':'GRCh38',
+                    'chrom_sizes_file':"${workDir}/homo_sapiens_grch38.chrom.sizes"
+                ]
+            assert path("${workDir}/homo_sapiens_grch38.chrom.sizes").md5 == "77e059be395da32b566fe37a13439427"
+        }
+    }
+}

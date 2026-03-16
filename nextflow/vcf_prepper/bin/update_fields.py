@@ -22,10 +22,11 @@ import gc
 
 from helper import *
 
-META = """##fileformat=VCFv4.2
+META = """##fileformat=VCFv4.4
 ##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
 ##INFO=<ID=SVLEN,Number=.,Type=String,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=NODEID,Number=1,Type=String,Description="Identifier of the nodes this variant belong to">
 """
 HEADER = """#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO
 """
@@ -234,11 +235,10 @@ def main(args=None):
                         break
             info_fields = f"SOURCE={variant_source}"
 
-            if variant.INFO.get("SVLEN"):
-                info_fields += f";SVLEN={variant.INFO['SVLEN']}"
-
-            if variant.INFO.get("END"):
-                info_fields += f";END={variant.INFO['END']}"
+            retainable_info = ["SVLEN", "END", "NODEID"]
+            for info_field in retainable_info:
+                if variant.INFO.get(info_field):
+                    info_fields += f";{info_field}={variant.INFO[info_field]}"
 
             o_file.write(
                 "\t".join(

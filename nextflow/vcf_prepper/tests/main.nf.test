@@ -1,0 +1,85 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_pipeline {
+
+    name "Test workflow VCF_PREPPER"
+    script "../main.nf"
+    tag "pipeline"
+
+    test("skips - all") {
+
+        when {
+            params {
+				input_config = "${projectDir}/tests/testdata/input_config.json"
+				vep_config = "${projectDir}/tests/testdata/vep_config.json"
+				ini_file = "${projectDir}/tests/testdata/test_db.ini"
+                skip_vep = 1
+                skip_tracks = 1
+                skip_stats = 1
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert workflow.stdout.contains("Nothing to do...")
+        }
+    }
+
+    test("skips - none") {
+
+        when {
+            params {
+                // create temp dir for output
+                tmp_dir = "${projectDir}/temp"
+                file(tmp_dir).mkdirs()
+
+				output_dir = tmp_dir
+				input_config = "${projectDir}/tests/testdata/input_config.json"
+				vep_config = "${projectDir}/tests/testdata/vep_config.json"
+				ini_file = "${projectDir}/tests/testdata/test_db.ini"
+                bin_size = 10
+                version = 110
+            }
+        }
+
+        then {
+            assert workflow.success // unexpected: summary_stats missing gnomAD_genomes_AF [fixed @dev_v1.0]
+        }
+    }
+
+    test("vep_config - missing confs") {
+
+        when {
+            params {
+                // create temp dir for output
+                tmp_dir = "${projectDir}/temp"
+                file(tmp_dir).mkdirs()
+
+				output_dir = tmp_dir
+				input_config = "${projectDir}/tests/testdata/input_config.json"
+				vep_config = "${projectDir}/tests/testdata/vep_config_missing_confs.json"
+				ini_file = "${projectDir}/tests/testdata/test_db.ini"
+                bin_size = 10
+            }
+        }
+
+        then {
+            assert workflow.success // unexpected: summary_stats missing gnomAD_genomes_AF [fixed @dev_v1.0]
+        }
+    }
+}

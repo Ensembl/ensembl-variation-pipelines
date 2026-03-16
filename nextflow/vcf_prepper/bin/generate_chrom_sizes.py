@@ -15,12 +15,10 @@
 # limitations under the License.
 
 import sys
-import configparser
 import argparse
-import subprocess
 import os
 
-from helper import parse_ini, get_db_name
+from ensembl.variation_utils.clients import core
 
 
 def parse_args(args=None):
@@ -52,125 +50,8 @@ def parse_args(args=None):
         required=False,
         help="file with chromomsome sizes, default - <species>_<assembly>.chrom.sizes in the same directory.",
     )
-    parser.add_argument(
-        "--force",
-        dest="force",
-        action="store_true",
-        help="forcefully create config even if already exists",
-    )
 
     return parser.parse_args(args)
-
-
-def generate_chrom_sizes(
-    server: dict,
-    core_db: str,
-    chrom_sizes: str,
-    assembly: str = "grch38",
-    force: bool = False,
-) -> None:
-    """Generate a chromosome sizes file from the core database.
-
-    Writes seq_region lengths and synonym lengths with deduplication.
-
-    Args:
-        server (dict): Server connection mapping.
-        core_db (str): Core database name.
-        chrom_sizes (str): Output chrom sizes filename.
-        assembly (str): Assembly identifier used to filter coord_system.
-        force (bool): If True overwrite existing file.
-
-    Returns:
-        None
-    """
-    if os.path.exists(chrom_sizes) and not force:
-        print(f"[INFO] {chrom_sizes} file already exists, skipping ...")
-        return
-
-    query = f"SELECT coord_system_id FROM coord_system WHERE version = '{assembly}';"
-    process = subprocess.run(
-        [
-            "mysql",
-            "--host",
-            server["host"],
-            "--port",
-            server["port"],
-            "--user",
-            server["user"],
-            "--database",
-            core_db,
-            "-N",
-            "--execute",
-            query,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    coord_ids = (
-        "(" + ",".join([id for id in process.stdout.decode().strip().split("\n")]) + ")"
-    )
-
-    query = f"SELECT name, length FROM seq_region WHERE coord_system_id IN {coord_ids};"
-    process = subprocess.run(
-        [
-            "mysql",
-            "--host",
-            server["host"],
-            "--port",
-            server["port"],
-            "--user",
-            server["user"],
-            "--database",
-            core_db,
-            "-N",
-            "--execute",
-            query,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-
-    with open(chrom_sizes, "w") as file:
-        file.write(process.stdout.decode())
-
-    query = f"SELECT ss.synonym, s.length FROM seq_region AS s, seq_region_synonym AS ss WHERE s.seq_region_id = ss.seq_region_id AND s.coord_system_id IN {coord_ids};"
-    process = subprocess.run(
-        [
-            "mysql",
-            "--host",
-            server["host"],
-            "--port",
-            server["port"],
-            "--user",
-            server["user"],
-            "--database",
-            core_db,
-            "-N",
-            "--execute",
-            query,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-
-    with open(chrom_sizes, "a") as file:
-        file.write(process.stdout.decode().strip())
-
-    # remove duplicates
-    with open(chrom_sizes, "r") as file:
-        lines = file.readlines()
-
-    lengths = {}
-    for line in lines:
-        name, length = [col.strip() for col in line.split("\t")]
-        if name not in lengths or int(lengths[name]) < int(length):
-            lengths[name] = length
-
-    with open(chrom_sizes, "w") as file:
-        for name in lengths:
-            # we will keep length + 1 because bedToBigBed fails if it finds variant at boundary
-            length = int(lengths[name]) + 1
-            file.write(f"{name}\t{str(length)}\n")
 
 
 def main(args=None):
@@ -188,13 +69,49 @@ def main(args=None):
 
     species = args.species
     assembly = args.assembly
+    version = args.version
     chrom_sizes = args.chrom_sizes or f"{species}_{assembly}.chrom.sizes"
     ini_file = args.ini_file or "DEFAULT.ini"
-    core_server = parse_ini(ini_file, "core")
-    core_db = get_db_name(core_server, args.version, species, type="core")
+    
+    if os.path.exists(chrom_sizes):
+        print(f"[INFO] {chrom_sizes} file already exists, skipping ...")
+        return
+    
+    core_client = core.CoreDBClient(ini_file=ini_file)
+    core_client.species = species
+    core_client.version = version
 
-    generate_chrom_sizes(core_server, core_db, chrom_sizes, assembly, args.force)
+    query = f"SELECT coord_system_id FROM coord_system WHERE version = '{assembly}';"
+    query_output = core_client.run_query(query)
+    coord_ids = (
+        "(" + ",".join([id for id in query_output.split("\n")]) + ")"
+    )
 
+    query = f"SELECT name, length FROM seq_region WHERE coord_system_id IN {coord_ids};"
+    query_output = core_client.run_query(query)
+    with open(chrom_sizes, "w") as file:
+        file.write(query_output + "\n")
+
+    query = f"SELECT ss.synonym, s.length FROM seq_region AS s, seq_region_synonym AS ss WHERE s.seq_region_id = ss.seq_region_id AND s.coord_system_id IN {coord_ids};"
+    query_output = core_client.run_query(query)
+    with open(chrom_sizes, "a") as file:
+        file.write(query_output)
+
+    # remove duplicates
+    with open(chrom_sizes, "r") as file:
+        lines = file.readlines()
+
+    lengths = {}
+    for line in lines:
+        name, length = [col.strip() for col in line.split("\t")]
+        if name not in lengths or int(lengths[name]) < int(length):
+            lengths[name] = length
+
+    with open(chrom_sizes, "w") as file:
+        for name in lengths:
+            # we will keep length + 1 because bedToBigBed fails if it finds variant at boundary
+            length = int(lengths[name]) + 1
+            file.write(f"{name}\t{str(length)}\n")
 
 if __name__ == "__main__":
     sys.exit(main())

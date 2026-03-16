@@ -1,5 +1,5 @@
 // params used to crawl ftp directory to form input
-params.base_dir = "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp/organisms"
+params.base_dir = null // needs to be path to FTP base directory in /nfs
 params.fasta = "unmasked.fa.gz"
 params.gff = "genes.gff3.gz"
 
@@ -11,7 +11,7 @@ params.gff_file = ""
 params.fasta_file = ""
 
 // outdir_suffix can be used to create subdir under outdir for different genomes
-params.outdir = "/hps/nobackup/flicek/ensembl/variation/snhossain/website/vep_prepper/output"
+params.outdir = null
 params.outdir_suffix = ""
 
 // create payload? [TBD]

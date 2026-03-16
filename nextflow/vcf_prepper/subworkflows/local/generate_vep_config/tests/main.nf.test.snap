@@ -1,0 +1,23 @@
+{
+    "generate_vep_config": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "genome_uuid": "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb",
+                            "species": "homo_sapiens",
+                            "assembly": "GRCh38"
+                        },
+                        "homo_sapiens_GRCh38.ini:md5,d5a37bae4f24a697940c8d4efe9e7e0a"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-02-02T20:41:08.6921"
+    }
+}

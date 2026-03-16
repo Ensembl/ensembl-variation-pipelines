@@ -36,18 +36,24 @@ if [[ -z "$PR_NUMBER" || "$PR_NUMBER" == "null" ]]; then
   exit 0
 fi
 
-# ---- Parse LCOV totals ----
-COVERAGE_LINE=$(grep 'COVERAGE:' "$FILE" || true)
+# ---- Parse nf-test coverage totals ----
+COVERAGE_LINE=$(grep -E '(COVERAGE:|Status:)' "$FILE" | tail -1 || true)
 if [[ -z "$COVERAGE_LINE" ]]; then
-  echo "No 'COVERAGE:' line found in $FILE"
-  echo "File contents:"
+  echo "ERROR: Could not find coverage line in $FILE"
   cat "$FILE"
   exit 1
 fi
 
-TOTAL_COVERAGE=$(echo $COVERAGE_LINE | grep -oE '[0-9]+(\.[0-9]+)?%' | tr -d '%' || true)
-HIT_FILES=$(echo $COVERAGE_LINE | grep -oE '[0-9]+ of' | grep -oE '[0-9]+' || true)
-TOTAL_FILES=$(echo $COVERAGE_LINE | grep -oE 'of [0-9]+' | grep -oE '[0-9]+' || true)
+if echo "$COVERAGE_LINE" | grep -q 'COVERAGE:'; then
+  TOTAL_COVERAGE=$(echo "$COVERAGE_LINE" | grep -oE '[0-9]+(\.[0-9]+)?%' | tr -d '%' || true)
+  HIT_FILES=$(echo "$COVERAGE_LINE" | grep -oE '[0-9]+ of' | grep -oE '[0-9]+' || true)
+  TOTAL_FILES=$(echo "$COVERAGE_LINE" | grep -oE 'of [0-9]+' | grep -oE '[0-9]+' || true)
+else
+  # New format: "Status: 26 of 64 modules and workflows are covered ... (40.62%)"
+  TOTAL_COVERAGE=$(echo "$COVERAGE_LINE" | grep -oE '\([0-9]+(\.[0-9]+)?%\)' | tr -d '()%' || true)
+  HIT_FILES=$(echo "$COVERAGE_LINE" | grep -oE '[0-9]+ of' | grep -oE '[0-9]+' || true)
+  TOTAL_FILES=$(echo "$COVERAGE_LINE" | grep -oE 'of [0-9]+' | grep -oE '[0-9]+' || true)
+fi
 
 if [[ -z "$TOTAL_COVERAGE" || \
     -z "$HIT_FILES" || \

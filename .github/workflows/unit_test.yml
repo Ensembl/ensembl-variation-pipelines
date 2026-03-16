@@ -271,7 +271,8 @@ jobs:
           nf-test test . \
             --coverage \
             --ci \
-            --profile github | tee nf-test.txt
+            --profile github \
+            --changed-since HEAD^ | tee nf-test.txt
 
       - name: Add coverage reports
         if: ${{ github.event_name == 'pull_request' }}

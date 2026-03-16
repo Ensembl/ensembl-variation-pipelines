@@ -27,7 +27,39 @@ See the [vcf_prepper pipeline](../../nextflow/vcf_prepper) for integration detai
 
 ## Testing
 
-Unit tests are available in `src/python/tests/variation_utils/`.
+Unit tests are available in `tests/variation_utils/`.
+
+### Running tests locally
+
+#### 1. Install the package and test dependencies
+
+```bash
+pip install .
+pip install pytest coverage
+```
+
+#### 2. Set up test databases (optional)
+
+Some tests (e.g., `clients/`) require a local MySQL instance with test databases:
+
+```bash
+mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE ensembl_genome_metadata;'
+mysql -h 127.0.0.1 -u root ensembl_genome_metadata < tests/variation_utils/data/ensembl_genome_metadata.dump
+
+mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
+mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < tests/variation_utils/data/homo_sapiens_core_110_38.dump
+```
+
+#### 3. Run pytest
+
+```bash
+# Run all tests
+pytest .
+
+# Run with coverage
+coverage run -m pytest .
+coverage report
+```
 
 ## License
 

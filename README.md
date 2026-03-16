@@ -1,6 +1,5 @@
 # ensembl-variation-pipelines
 
-scripts
 ## Nextflow Pipelines
 
 - [vcf_prepper](nextflow/vcf_prepper/README.md): Main pipeline for preparing VCF and track data for Ensembl.
@@ -19,4 +18,4 @@ The `scripts/` directory contains various utility scripts:
 
 ## Python Utilities
 
-- [ensembl-variation-utils](src/python/README.md): Python package for pipeline logic, file location, database access, and VEP config generation. See the [ensembl-variation-utils README](src/python/README.md) for details.
+- [ensembl-variation-utils](src/python/README.md): Python package for pipeline logic, file location, database access, and VEP config generation.

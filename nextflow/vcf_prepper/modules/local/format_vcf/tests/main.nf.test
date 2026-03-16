@@ -58,7 +58,7 @@ nextflow_process {
             // should be used to check if snapshot is invalid
             def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 13
-            assert lines[0].equals('##fileformat=VCFv4.2')
+            assert lines[0].equals('##fileformat=VCFv4.4')
             assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
             assert lines[2].equals('##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">')
             assert lines[3].equals('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">')
@@ -111,7 +111,7 @@ nextflow_process {
             // should be used to check if snapshot is invalid
             def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 14
-            assert lines[0].equals('##fileformat=VCFv4.2')
+            assert lines[0].equals('##fileformat=VCFv4.4')
             assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
             assert lines[2].equals('##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">')
             assert lines[3].equals('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">')
@@ -165,7 +165,7 @@ nextflow_process {
             // should be used to check if snapshot is invalid
             def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 14
-            assert lines[0].equals('##fileformat=VCFv4.2')
+            assert lines[0].equals('##fileformat=VCFv4.4')
             assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
             assert lines[2].equals('##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">')
             assert lines[3].equals('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">')
@@ -219,7 +219,7 @@ nextflow_process {
             // should be used to check if snapshot is invalid
             def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
             assert lines.size() == 16
-            assert lines[0].equals('##fileformat=VCFv4.2')
+            assert lines[0].equals('##fileformat=VCFv4.4')
             assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
             assert lines[2].equals('##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">')
             assert lines[3].equals('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">')

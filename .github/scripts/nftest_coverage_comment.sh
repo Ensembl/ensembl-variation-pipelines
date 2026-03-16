@@ -17,6 +17,10 @@
 set -euo pipefail
 
 FILE=$1
+if [[ ! -s "$FILE" ]]; then
+  echo "Coverage file $FILE is empty. Exiting."
+  exit 1
+fi
 COVERAGE_THRESHOLD=${COVERAGE_THRESHOLD:-90}
 MARKER="<!-- nf-test-coverage-report -->"
 

@@ -20,8 +20,28 @@ env:
   ENSEMBL_ROOT_DIR: repos
 
 jobs:
-  ensembl_variation_utils:
+  check-changes:
     runs-on: ubuntu-latest
+    outputs:
+      python: ${{ steps.filter.outputs.python }}
+      vcf_prepper: ${{ steps.filter.outputs.vcf_prepper }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            python:
+              - 'src/python/**'
+              - '.github/**'
+            vcf_prepper:
+              - 'nextflow/vcf_prepper/**'
+              - '.github/**'
+
+  python:
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: needs.check-changes.outputs.python == 'true'
     defaults:
       run:
         shell: bash
@@ -75,6 +95,8 @@ jobs:
 
   vcf_prepper:
     runs-on: ubuntu-latest
+    needs: check-changes
+    if: needs.check-changes.outputs.vcf_prepper == 'true'
     defaults:
       run:
         shell: bash

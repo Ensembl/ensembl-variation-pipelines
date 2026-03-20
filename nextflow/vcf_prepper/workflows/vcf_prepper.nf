@@ -91,6 +91,9 @@ workflow VCF_PREPPER {
     if (params.overwrite_cache == null) {
       params.overwrite_cache = 1
     }
+    if (params.overwrite_conservation == null) {
+      params.overwrite_conservation = 1
+    }
     if (params.overwrite_fasta == null) {
       params.overwrite_fasta = 1
     }
@@ -101,6 +104,9 @@ workflow VCF_PREPPER {
   else{
     if (params.overwrite_cache == null) {
       params.overwrite_cache = 0
+    }
+    if (params.overwrite_conservation == null) {
+      params.overwrite_conservation = 0
     }
     if (params.overwrite_fasta == null) {
       params.overwrite_fasta = 0

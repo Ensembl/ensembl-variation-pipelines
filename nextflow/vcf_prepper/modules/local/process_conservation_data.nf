@@ -25,7 +25,7 @@ process PROCESS_CONSERVATION_DATA {
   output:
   val genome
   
-  shell:
+  script:
   genome = meta.genome
   species = meta.species
   assembly = meta.assembly

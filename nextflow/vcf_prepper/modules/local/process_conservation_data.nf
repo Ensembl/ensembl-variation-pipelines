@@ -34,14 +34,13 @@ process PROCESS_CONSERVATION_DATA {
   conservation_data_dir = meta.conservation_data_dir
   overwrite_conservation = params.overwrite_conservation ? "--force" : ""
   
-  '''
+  """
   process_conservation_data.py \
-    !{species} \
-    !{assembly} \
-    !{version} \
-    --ini_file !{ini_file} \
-    --conservation_data_dir !{conservation_data_dir} \
-    !{force_create_config}
-    !{overwrite_conservation}
-  '''
+    ${species} \
+    ${assembly} \
+    ${version} \
+    --ini_file ${ini_file} \
+    --conservation_data_dir ${conservation_data_dir} \
+    ${overwrite_conservation}
+  """
 }

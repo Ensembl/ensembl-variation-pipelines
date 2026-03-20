@@ -34,7 +34,7 @@ process PROCESS_GFF {
   out_dir = meta.genome_temp_dir
   ini_file = params.ini_file
   gff_dir = meta.gff_dir
-  force_create_config = params.force_create_config ? "--force" : ""
+  overwrite_gff = params.overwrite_gff ? "--force" : ""
   
   '''
   process_gff.py \
@@ -43,6 +43,6 @@ process PROCESS_GFF {
     --out_dir !{out_dir} \
     --ini_file !{ini_file} \
     --gff_dir !{gff_dir} \
-    !{force_create_config}
+    !{overwrite_gff}
   '''
 }

@@ -25,22 +25,22 @@ process PROCESS_CONSERVATION_DATA {
   output:
   val genome
   
-  shell:
+  script:
   genome = meta.genome
   species = meta.species
   assembly = meta.assembly
   version = params.version
   ini_file = params.ini_file
   conservation_data_dir = meta.conservation_data_dir
-  force_create_config = params.force_create_config ? "--force" : ""
+  overwrite_conservation = params.overwrite_conservation ? "--force" : ""
   
-  '''
+  """
   process_conservation_data.py \
-    !{species} \
-    !{assembly} \
-    !{version} \
-    --ini_file !{ini_file} \
-    --conservation_data_dir !{conservation_data_dir} \
-    !{force_create_config}
-  '''
+    ${species} \
+    ${assembly} \
+    ${version} \
+    --ini_file ${ini_file} \
+    --conservation_data_dir ${conservation_data_dir} \
+    ${overwrite_conservation}
+  """
 }

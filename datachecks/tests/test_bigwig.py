@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import os
 import subprocess
-import random
+import numpy as np
+import logging
+from cyvcf2 import VCF
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class TestFile:
     def test_exist(self, bigwig):
@@ -29,32 +32,17 @@ class TestFile:
 
 
 class TestSrcExistence:
-    def test_variant_exist_from_source(self, bw_reader, vcf_reader):
+    def test_variant_exist_from_source(self, bw_reader, variant_list):
         """Sample variants from VCF and ensure BigWig has non-zero scores at those positions."""
-        NO_VARIANTS = 100
-        NO_ITER = 100000
 
-        chrs = vcf_reader.seqnames
-
-        variants = []
-        iter = 0
-        while len(variants) < NO_VARIANTS and iter <= NO_ITER:
-            chr = random.choice(chrs)
-            start = random.choice(range(10000, 1000000))
-
-            for variant in vcf_reader(f"{chr}:{start}"):
-                variants.append(variant)
-                break
-
-            iter += 1
-
-        for variant in variants:
-            chr = variant.CHROM
-            start = int(variant.POS) - 1
+        for variant_id in variant_list:
+            chr = variant_list[variant_id]["chrom"]
+            start = variant_list[variant_id]["pos"] - 1
             end = start + 2
 
             bw_state = bw_reader.stats(chr, start, end)[0]
-            assert bw_state > 0.0
+            if bw_state is None or not bw_state > 0.0:
+                raise AssertionError(f"bigWig value does exist or match with source - {chr}:{start}-{end}") 
 
 
 class TestSrcCount:
@@ -83,7 +71,7 @@ class TestSrcCount:
 
         return int(process.stdout.decode().strip())
 
-    def get_total_variant_count_from_bw(self, bw_reader) -> int:
+    def get_total_variant_count_from_bw(self, bw_reader, chroms = None) -> int:
         """Count non-zero value positions across all chromosomes in a BigWig.
 
         Args:
@@ -93,18 +81,31 @@ class TestSrcCount:
             int: Count of positions with value > 0.0.
         """
         variant_counts = 0
-        for chr in bw_reader.chroms():
-            non_zero_vals = [
-                val
-                for val in bw_reader.values(chr, 0, bw_reader.chroms(chr))
-                if val > 0.0
-            ]
-            variant_counts += len(non_zero_vals)
+
+        if chroms is None:
+            chroms = bw_reader.chroms()
+
+        for chr in chroms:
+            end = bw_reader.chroms(chr)
+
+            window = 10000000
+            for s_i in range(0, end, window):
+                e_i = min(s_i+window, end)
+                values = np.array(bw_reader.values(chr, s_i, e_i))
+                variant_counts += np.count_nonzero(values)
         return variant_counts
 
     def test_compare_count_with_source(self, vcf, bw_reader):
         """Compare approximate variant counts between source VCF and BigWig-derived counts."""
         variant_count_vcf = self.get_total_variant_count_from_vcf(vcf)
-        variant_count_bw = self.get_total_variant_count_from_bw(bw_reader)
+
+        variant_count_bw = 0
+        try:
+            vcf_reader = VCF(vcf)
+            chroms = vcf_reader.seqnames
+            vcf_reader.close()
+            variant_count_bw = self.get_total_variant_count_from_bw(bw_reader, chroms)
+        except:
+            variant_count_bw = self.get_total_variant_count_from_bw(bw_reader)
 
         assert variant_count_bw > variant_count_vcf * 0.95

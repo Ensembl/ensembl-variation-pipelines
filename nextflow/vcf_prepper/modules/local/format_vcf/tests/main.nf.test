@@ -1,0 +1,373 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_process {
+
+    name "Test process FORMAT_VCF"
+    script "../main.nf"
+    process "FORMAT_VCF"
+
+    test("remove criteria - all") {
+
+        when {
+            params {
+                remove_nonunique_ids = 1
+                remove_patch_regions = 1
+            }
+            process {
+                """
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbSNP',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
+                vcf = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz"
+                vcf_index = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz.tbi"
+
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            // following is duplicate of snapshot match but for readability purpose
+            // should be used to check if snapshot is invalid
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
+            assert lines.size() == 13
+            assert lines[0].equals('##fileformat=VCFv4.4')
+            assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
+            assert lines[2].equals('##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">')
+            assert lines[3].equals('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">')
+            assert lines[4].equals('##INFO=<ID=SVLEN,Number=.,Type=String,Description="Difference in length between REF and ALT alleles">')
+            assert lines[5].equals('##INFO=<ID=NODEID,Number=1,Type=String,Description="Identifier of the nodes this variant belong to">')
+            assert lines[6].equals('##contig=<ID=1>')
+            assert lines[7].equals('##contig=<ID=CHR_HSCHR1_3_CTG31>')
+            assert lines[8].equals('##contig=<ID=Y>')
+            assert lines[9].equals('##source="dbSNP" description="NCBI db of human variants" url="https://www.ncbi.nlm.nih.gov/snp/" version="157" accession_url="https://www.ncbi.nlm.nih.gov/snp/"')
+            assert lines[10].equals('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO')
+            assert lines[11].equals('1\t925952\t1019397\tG\tA\t.\t.\tSOURCE=dbSNP')
+            assert lines[12].equals('Y\t2787033\t652674\tAG\tA\t.\t.\tSOURCE=dbSNP')
+        }
+    }
+
+    test("remove criteria - non-unique ids") {
+
+        when {
+            params {
+                remove_nonunique_ids = 1
+                remove_patch_regions = 0
+            }
+            process {
+                """
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbSNP',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
+                vcf = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz"
+                vcf_index = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz.tbi"
+
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            // following is duplicate of snapshot match but for readability purpose
+            // should be used to check if snapshot is invalid
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
+            assert lines.size() == 14
+            assert lines[0].equals('##fileformat=VCFv4.4')
+            assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
+            assert lines[2].equals('##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">')
+            assert lines[3].equals('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">')
+            assert lines[4].equals('##INFO=<ID=SVLEN,Number=.,Type=String,Description="Difference in length between REF and ALT alleles">')
+            assert lines[5].equals('##INFO=<ID=NODEID,Number=1,Type=String,Description="Identifier of the nodes this variant belong to">')
+            assert lines[6].equals('##contig=<ID=1>')
+            assert lines[7].equals('##contig=<ID=CHR_HSCHR1_3_CTG31>')
+            assert lines[8].equals('##contig=<ID=Y>')
+            assert lines[9].equals('##source="dbSNP" description="NCBI db of human variants" url="https://www.ncbi.nlm.nih.gov/snp/" version="157" accession_url="https://www.ncbi.nlm.nih.gov/snp/"')
+            assert lines[10].equals('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO')
+            assert lines[11].equals('1\t925952\t1019397\tG\tA\t.\t.\tSOURCE=dbSNP')
+            assert lines[12].equals('CHR_HSCHR1_3_CTG31\t42\trs1656322366\tT\tG\t.\t.\tSOURCE=dbSNP')
+            assert lines[13].equals('Y\t2787033\t652674\tAG\tA\t.\t.\tSOURCE=dbSNP')
+        }
+    }
+
+    test("remove criteria - patch regions") {
+
+        when {
+            params {
+                remove_nonunique_ids = 0
+                remove_patch_regions = 1
+            }
+            process {
+                """
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbSNP',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
+                vcf = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz"
+                vcf_index = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz.tbi"
+
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            // following is duplicate of snapshot match but for readability purpose
+            // should be used to check if snapshot is invalid
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
+            assert lines.size() == 14
+            assert lines[0].equals('##fileformat=VCFv4.4')
+            assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
+            assert lines[2].equals('##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">')
+            assert lines[3].equals('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">')
+            assert lines[4].equals('##INFO=<ID=SVLEN,Number=.,Type=String,Description="Difference in length between REF and ALT alleles">')
+            assert lines[5].equals('##INFO=<ID=NODEID,Number=1,Type=String,Description="Identifier of the nodes this variant belong to">')
+            assert lines[6].equals('##contig=<ID=1>')
+            assert lines[7].equals('##contig=<ID=CHR_HSCHR1_3_CTG31>')
+            assert lines[8].equals('##contig=<ID=Y>')
+            assert lines[9].equals('##source="dbSNP" description="NCBI db of human variants" url="https://www.ncbi.nlm.nih.gov/snp/" version="157" accession_url="https://www.ncbi.nlm.nih.gov/snp/"')
+            assert lines[10].equals('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO')
+            assert lines[11].equals('1\t925952\t1019397\tG\tA\t.\t.\tSOURCE=dbSNP')
+            assert lines[12].equals('1\t198725174\trs1438337621\tT\tC,G\t.\t.\tSOURCE=dbSNP')
+            assert lines[13].equals('Y\t2787033\t652674\tAG\tA\t.\t.\tSOURCE=dbSNP')
+        }
+    }
+
+    test("remove criteria - none") {
+
+        when {
+            params {
+                remove_nonunique_ids = 0
+                remove_patch_regions = 0
+            }
+            process {
+                """
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbSNP',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
+                vcf = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz"
+                vcf_index = "${moduleTestDir}/testdata/test_format_vcf.vcf.gz.tbi"
+
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            // following is duplicate of snapshot match but for readability purpose
+            // should be used to check if snapshot is invalid
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
+            assert lines.size() == 16
+            assert lines[0].equals('##fileformat=VCFv4.4')
+            assert lines[1].equals('##FILTER=<ID=PASS,Description="All filters passed">')
+            assert lines[2].equals('##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">')
+            assert lines[3].equals('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">')
+            assert lines[4].equals('##INFO=<ID=SVLEN,Number=.,Type=String,Description="Difference in length between REF and ALT alleles">')
+            assert lines[5].equals('##INFO=<ID=NODEID,Number=1,Type=String,Description="Identifier of the nodes this variant belong to">')
+            assert lines[6].equals('##contig=<ID=1>')
+            assert lines[7].equals('##contig=<ID=CHR_HSCHR1_3_CTG31>')
+            assert lines[8].equals('##contig=<ID=Y>')
+            assert lines[9].equals('##source="dbSNP" description="NCBI db of human variants" url="https://www.ncbi.nlm.nih.gov/snp/" version="157" accession_url="https://www.ncbi.nlm.nih.gov/snp/"')
+            assert lines[10].equals('#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO')
+            assert lines[11].equals('1\t925952\t1019397\tG\tA\t.\t.\tSOURCE=dbSNP')
+            assert lines[12].equals('1\t198725174\trs1438337621\tT\tC,G\t.\t.\tSOURCE=dbSNP')
+            assert lines[13].equals('CHR_HSCHR1_3_CTG31\t42\trs1656322366\tT\tG\t.\t.\tSOURCE=dbSNP')
+            assert lines[14].equals('CHR_HSCHR1_3_CTG31\t366579\trs1438337621\tT\tC,G\t.\t.\tSOURCE=dbSNP')
+            assert lines[15].equals('Y\t2787033\t652674\tAG\tA\t.\t.\tSOURCE=dbSNP')
+        }
+    }
+
+    test("multiple source") {
+
+        when {
+            params {
+                remove_nonunique_ids = 0
+                remove_patch_regions = 0
+            }
+            process {
+                """
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'MULTIPLE',
+                        'sources':'CerealsDB,Watkins-exome-capture',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
+                vcf = "${moduleTestDir}/testdata/test_multiple_source.vcf.gz"
+                vcf_index = "${moduleTestDir}/testdata/test_multiple_source.vcf.gz.tbi"
+
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            // following is duplicate of snapshot match but for readability purpose
+            // should be used to check if snapshot is invalid
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
+            assert lines.size() == 12
+            assert lines[7].equals('##source="CerealsDB" description="Markers from Axiom 820K and 35K SNP Array  provided by <a href=\'http://www.cerealsdb.uk.net/cerealgenomics/CerealsDB/indexNEW.php\'>CerealsDB<a/>n"')
+            assert lines[8].equals('##source="Watkins-exome-capture" description="103 accessions of the Watkins landrace collection"')
+            assert lines[10].equals('1A\t539\t1A_539\tACGGGA\tGCGGGA,GCGGAG\t.\t.\tSOURCE=Watkins-exome-capture')
+            assert lines[11].equals('1A\t1145499\tBA00441553\tC\tT\t.\t.\tSOURCE=CerealsDB')
+        }
+    }
+
+    test("SV fields - SVLEN and END") {
+
+        when {
+            params {
+                remove_nonunique_ids = 0
+                remove_patch_regions = 0
+            }
+            process {
+                """
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'dbVar',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
+                vcf = "${moduleTestDir}/testdata/test_structural_variant.vcf.gz"
+                vcf_index = "${moduleTestDir}/testdata/test_structural_variant.vcf.gz.tbi"
+
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            // following is duplicate of snapshot match but for readability purpose
+            // should be used to check if snapshot is invalid
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
+            assert lines.size() == 11
+            assert lines[8].equals('1\t46000\tnsv4514092\tT\t<CNV>\t.\t.\tSOURCE=dbVar;END=111250')
+            assert lines[9].equals('1\t54665\tnsv4536437\tA\t<INS>\t.\t.\tSOURCE=dbVar;SVLEN=.')
+            assert lines[10].equals('1\t62399\tnsv4036772\tT\t<DEL>\t.\t.\tSOURCE=dbVar;SVLEN=-90;END=62489')
+        }
+    }
+
+    test("HGSVC field - NODEID") {
+
+        when {
+            params {
+                remove_nonunique_ids = 0
+                remove_patch_regions = 0
+            }
+            process {
+                """
+                genome_meta = [
+                        'synonym_file':"${projectDir}/tests/testdata/homo_sapiens_grch38.synonyms"
+                    ]
+                file_meta = [
+                        'source':'HGSVC3',
+                        'sources_meta_file':"${projectDir}/assets/sources_meta.json"
+                    ]
+                vcf = "${moduleTestDir}/testdata/test_hgsvc_variant.vcf.gz"
+                vcf_index = "${moduleTestDir}/testdata/test_hgsvc_variant.vcf.gz.tbi"
+
+                input[0] = tuple(
+                        genome_meta, 
+                        file_meta,
+                        file(vcf),
+                        file(vcf_index)
+                    )
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert snapshot(process.out).match()
+
+            // following is duplicate of snapshot match but for readability purpose
+            // should be used to check if snapshot is invalid
+            def lines = path(process.out.get(0).get(0).get(2)).linesGzip[0..-1]
+            assert lines.size() == 12
+            assert lines[5].equals('##INFO=<ID=NODEID,Number=1,Type=String,Description="Identifier of the nodes this variant belong to">')
+            assert lines[7].equals('##source="HGSVC3" description="The Human Genome Structural Variation Consortium (HGSVC, Phase 3) focus on developing resources and computational approaches to fully characterize and integrate structural variants into their haplotypic context in order to understand their mutational mechanisms and functional consequences" url="https://www.hgsvc.org/about" version="2025-03-01"')
+            assert lines[9].equals('1\t15938\t1:15938::\tC\tT\t.\t.\tSOURCE=HGSVC3;NODEID=>50021761>50021764')
+            assert lines[10].equals('1\t15967\t1:15967::5\tG\tCTGCCC\t.\t.\tSOURCE=HGSVC3;NODEID=>50021764>50021767')
+            assert lines[11].equals('1\t16182\t1:16182:12:\ttaTCAGCCTGGTa\tt\t.\t.\tSOURCE=HGSVC3;NODEID=>50021779>50021781')
+        }
+    }
+}

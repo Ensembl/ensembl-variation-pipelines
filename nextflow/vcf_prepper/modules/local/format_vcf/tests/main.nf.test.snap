@@ -1,0 +1,171 @@
+{
+    "multiple source": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
+                        },
+                        {
+                            "source": "MULTIPLE",
+                            "sources": "CerealsDB,Watkins-exome-capture",
+                            "sources_meta_file": "sources_meta.json:md5,6c76f0f380b0b0f3a6a73678de54a531"
+                        },
+                        "FORMATTED-null-test_multiple_source.vcf.vcf.gz:md5,d6b39975b118ff024dab0ce1fc04a992",
+                        "FORMATTED-null-test_multiple_source.vcf.vcf.gz.csi:md5,6567ac6c2a02c024bb21842e136358d6"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-03-24T11:04:26.913998"
+    },
+    "remove criteria - none": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
+                        },
+                        {
+                            "source": "dbSNP",
+                            "sources_meta_file": "sources_meta.json:md5,6c76f0f380b0b0f3a6a73678de54a531"
+                        },
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,ab2b6cd7de2c7193c4597db7b6a6c156",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,7fd004a9dc44474719245af94bef0c3a"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-03-24T11:04:22.980019"
+    },
+    "HGSVC field - NODEID": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
+                        },
+                        {
+                            "source": "HGSVC3",
+                            "sources_meta_file": "sources_meta.json:md5,6c76f0f380b0b0f3a6a73678de54a531"
+                        },
+                        "FORMATTED-null-test_hgsvc_variant.vcf.vcf.gz:md5,994f7153ef154e45d93af6b4e8e06106",
+                        "FORMATTED-null-test_hgsvc_variant.vcf.vcf.gz.csi:md5,be4839a47f476253b129a373f2d29dbe"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-03-24T11:04:34.695215"
+    },
+    "remove criteria - patch regions": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
+                        },
+                        {
+                            "source": "dbSNP",
+                            "sources_meta_file": "sources_meta.json:md5,6c76f0f380b0b0f3a6a73678de54a531"
+                        },
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,e5454063e398e4514dea8ceffc7624ea",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,e3679835e0b3b67bd24e22666693385d"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-03-24T11:04:19.12673"
+    },
+    "SV fields - SVLEN and END": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
+                        },
+                        {
+                            "source": "dbVar",
+                            "sources_meta_file": "sources_meta.json:md5,6c76f0f380b0b0f3a6a73678de54a531"
+                        },
+                        "FORMATTED-null-test_structural_variant.vcf.vcf.gz:md5,142aa8e8158090e72d8f262a9b4bd6fe",
+                        "FORMATTED-null-test_structural_variant.vcf.vcf.gz.csi:md5,478352a43d80b1977fa48a3153e83cd3"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-03-24T11:04:30.642572"
+    },
+    "remove criteria - non-unique ids": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
+                        },
+                        {
+                            "source": "dbSNP",
+                            "sources_meta_file": "sources_meta.json:md5,6c76f0f380b0b0f3a6a73678de54a531"
+                        },
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,63b3e60ffb6b468e4d05b816d98c507e",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,c575f44acc057dab03569206216469bc"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-03-24T11:04:15.419204"
+    },
+    "remove criteria - all": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "synonym_file": "homo_sapiens_grch38.synonyms:md5,4d2076f947bfda03b7644988ae595950"
+                        },
+                        {
+                            "source": "dbSNP",
+                            "sources_meta_file": "sources_meta.json:md5,6c76f0f380b0b0f3a6a73678de54a531"
+                        },
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz:md5,95f9d4a073936c159a6e903f0b420d73",
+                        "FORMATTED-null-test_format_vcf.vcf.vcf.gz.csi:md5,d785d67afd1a83b4be340f5e88a8cb0d"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2026-03-24T11:04:11.664331"
+    }
+}

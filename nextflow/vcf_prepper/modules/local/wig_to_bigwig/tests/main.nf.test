@@ -1,0 +1,60 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_process {
+
+    name "Test Process WIG_TO_BIGWIG"
+    script "../main.nf"
+    process "WIG_TO_BIGWIG"
+
+    test("wig_to_bigwig") {
+
+        when {
+            process {
+                """
+				// use moduleDir for consistent snapshot
+                tmp_dir = "${moduleDir}/tests/temp"
+                file(tmp_dir).mkdirs()
+                
+				genome_meta = [:]
+                genome_meta["source"] = "test"
+				genome_meta["chrom_sizes_file"] = file("${moduleDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes")
+				genome_meta["genome_tracks_outdir"] = tmp_dir
+
+				file_meta = [:]
+                file_meta["source"] = "test"
+                file_meta["multiple_source"] = false
+
+				input[0] = tuple(genome_meta, file_meta, file("${moduleDir}/tests/testdata/short_variants.wig"))
+                """
+            }
+        }
+
+        then {
+            assert process.success 
+            assert snapshot(process.out).match()
+            
+            // the output is generated at the genome tracks dir
+			// assert for single source we symlink the focus track
+            def tmp_dir = "${moduleDir}/tests/temp"
+			assert file(tmp_dir + "/variant-test-summary.bw").exists()
+			assert file(tmp_dir + "/variant-summary.bw").exists()
+			assert file(tmp_dir + "/variant-summary.bw").getCanonicalPath() == 
+				(projectDir + "/modules/local/wig_to_bigwig/tests/temp/variant-test-summary.bw")
+		}
+    }
+}

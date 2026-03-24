@@ -18,15 +18,12 @@ import sys
 import argparse
 import subprocess
 import os
-import re
 
-from helper import *
+from ensembl.variation_utils.file_utils import is_bgzip, bgzip_file, ungzip_file
+from ensembl.variation_utils.file_locator import gff
+from ensembl.variation_utils.clients import metadata
 
-GFF_FASTA_BASE_DIR = (
-    "/hps/nobackup/flicek/ensembl/production/ensembl_dumps/ftp_mvp/organisms"
-)
-GFF_FILE_NAME = "sorted_genes.gff3.gz"
-
+GFF_FILE_NAME = "genes.gff3.gz"
 
 def parse_args(args=None):
     """Parse command-line arguments for processing a GFF.
@@ -39,14 +36,18 @@ def parse_args(args=None):
             ini_file, gff_dir and force flag.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument(dest="genome_uuid", type=str, help="Genome uuid")
+    parser.add_argument("--genome_uuid", dest="genome_uuid", type=str, help="Genome uuid")
     parser.add_argument(
-        dest="release_id", type=str, help="Ensembl release id from metadata database"
+        "--gff_file", dest="gff_file", nargs="?", default=None, required=False, help="GFF file"
     )
+    parser.add_argument(
+        "--gff_dir", dest="gff_dir", nargs="?", default=None, help="GFF directory"
+    )
+    parser.add_argument("--factory", dest="factory", type=str, help="GFF factory")
     parser.add_argument(
         "--out_dir",
         dest="out_dir",
-        type=str,
+        nargs="?",
         help="Out directory where processed GFF file will be created",
     )
     parser.add_argument(
@@ -57,20 +58,16 @@ def parse_args(args=None):
         required=False,
         help="Full path database configuration file, default - DEFAULT.ini in the same directory.",
     )
-    parser.add_argument(
-        "--gff_dir", dest="gff_dir", type=str, required=False, help="GFF directory"
-    )
-    parser.add_argument("--force", dest="force", action="store_true")
+    
 
     return parser.parse_args(args)
 
 
-def index_gff(bgzipped_gff: str, force: str = False) -> None:
+def index_gff(bgzipped_gff: str) -> None:
     """Create a CSI index for a bgzipped GFF file using tabix.
 
     Args:
         bgzipped_gff (str): Path to the bgzipped GFF file.
-        force (bool): If False and a .csi exists, skip indexing.
 
     Raises:
         FileNotFoundError: If the GFF file does not exist.
@@ -80,12 +77,6 @@ def index_gff(bgzipped_gff: str, force: str = False) -> None:
         raise FileNotFoundError(
             f"Could not run tabix index. File does not exist - {bgzipped_gff}"
         )
-
-    csi = bgzipped_gff + ".csi"
-
-    if os.path.isfile(csi) and not force:
-        print(f"[INFO] {csi} file exist. Skipping ...")
-        return
 
     process = subprocess.run(
         ["tabix", "-f", "-C", bgzipped_gff],
@@ -142,86 +133,62 @@ def main(args=None):
     args = parse_args(args)
 
     genome_uuid = args.genome_uuid
-    release_id = args.release_id
+    gff_file = args.gff_file
+    gff_dir = args.gff_dir
     out_dir = args.out_dir or os.getcwd()
+    factory = args.factory
     ini_file = args.ini_file or "DEFAULT.ini"
-    gff_dir = args.gff_dir or os.getcwd()
-    metadb_server = parse_ini(ini_file, "metadata")
 
-    source_gff = os.path.join(gff_dir, GFF_FILE_NAME)
+    gff_vep_config_file = genome_uuid + ".gff.txt"
 
-    if (
-        not os.path.isfile(source_gff)
-        or not os.path.isfile(source_gff + ".csi")
-        or args.force
-    ):
-        scientific_name = get_scientific_name(
-            metadb_server, "ensembl_genome_metadata", genome_uuid
-        ).replace(" ", "_")
-        if scientific_name == "" or scientific_name is None:
-            raise Exception(
-                f"[ERROR] Could not retrieve scientific name for genome uuid - {genome_uuid}"
-            )
-        scientific_name = re.sub("[^a-zA-Z0-9]+", " ", scientific_name)
-        scientific_name = re.sub(" +", "_", scientific_name)
-        scientific_name = re.sub("^_+|_+$", "", scientific_name)
-        assembly_accession = get_assembly_accession(
-            metadb_server, "ensembl_genome_metadata", genome_uuid
-        )
-        if assembly_accession == "" or assembly_accession is None:
-            raise Exception(
-                f"[ERROR] Could not retrieve assembly accession for genome uuid - {genome_uuid}"
-            )
-        annotation_source = get_dataset_attribute_value(
-            metadb_server,
-            "ensembl_genome_metadata",
-            genome_uuid,
-            release_id,
-            "genebuild.annotation_source",
-        )
-        if annotation_source == "" or annotation_source is None:
-            raise Exception(
-                f"[ERROR] Could not retrieve genebuild annotation source for genome uuid - {genome_uuid} and release id - {release_id}"
-            )
-        annotation_source = annotation_source.lower()
-        last_geneset_update = get_dataset_attribute_value(
-            metadb_server,
-            "ensembl_genome_metadata",
-            genome_uuid,
-            release_id,
-            "genebuild.last_geneset_update",
-        )
-        if last_geneset_update == "" or last_geneset_update is None:
-            raise Exception(
-                f"[ERROR] Could not retrieve last genebuild udpate date for genome uuid - {genome_uuid} and release id - {release_id}"
-            )
-        last_geneset_update = last_geneset_update.replace("-", "_")
-        last_geneset_update = re.sub("[\-\s]", "_", last_geneset_update)
-
-        source_gff = os.path.join(
-            GFF_FASTA_BASE_DIR,
-            scientific_name,
-            assembly_accession,
-            annotation_source,
-            "geneset",
-            last_geneset_update,
-            "genes.gff3.gz",
-        )
-
-        if not os.path.isfile(source_gff):
-            raise FileNotFoundError(f"Could not find - {source_gff}")
+    if gff_file:
+        if is_bgzip(gff_file) and (os.path.isfile(gff_file + ".tbi") or os.path.isfile(gff_file + ".csi")):
+            with open(gff_vep_config_file, "w") as f:
+                f.write(f"gff\t{gff_file}")
         else:
-            compressed_gff = os.path.join(out_dir, "genes.gff3.gz")
-            returncode = copyto(source_gff, compressed_gff)
-            if returncode != 0:
-                raise Exception(
-                    f"Failed to copy.\n\tSource - {source_gff}\n\tTarget - {compressed_gff}"
-                )
+            print(f"[ERROR] {gff_file} either not bgzipped or missing tabix index")
+            exit(1)
+
+    elif gff_dir:
+        gff_file = os.path.join(gff_dir, GFF_FILE_NAME)
+        if not os.path.isfile(gff_file):
+            raise FileNotFoundError(f"[ERROR] {GFF_FILE_NAME} not found in {gff_dir}")
+
+        if is_bgzip(gff_file) and (os.path.isfile(gff_file + ".tbi") or os.path.isfile(gff_file + ".csi")):
+            with open(gff_vep_config_file, "w") as f:
+                f.write(f"gff\t{gff_file}")
+        else:
+            print(f"[ERROR] {gff_file} either not bgzipped or missing tabix index")
+            exit(1)
+
+    else:
+        if not os.path.isfile(ini_file):
+            raise FileNotFoundError(f"[ERROR] INI file not found - {ini_file}")
+
+        gff_locator_factory = gff.GFFLocatorFactory()
+        locator = gff_locator_factory.set_locator(factory)
+        
+        metadata_client = metadata.MetadataDBClient(ini_file=ini_file)
+        locator.metadata_client = metadata_client
+
+        source_gff_file = locator.locate_file(genome_uuid)
+            
+        if not source_gff_file or (source_gff_file and not os.path.isfile(source_gff_file)):
+            raise FileNotFoundError(f"Could not find - {source_gff_file}")
+        else:
+            filename = os.path.basename(source_gff_file)
+            compressed_gff = os.path.join(out_dir, filename)
+            copied = locator.copy_file(compressed_gff)
+            if not copied:
+                raise Exception("[ERROR] Copy failed.")
 
             unzipped_gff = ungzip_file(compressed_gff)
             sorted_gff = sort_gff(unzipped_gff)
             bgzipped_gff = bgzip_file(sorted_gff)
-            index_gff(bgzipped_gff, force=args.force)
+            index_gff(bgzipped_gff)
+
+            with open(gff_vep_config_file, "w") as f:
+                f.write(f"gff\t{bgzipped_gff}")
 
 
 if __name__ == "__main__":

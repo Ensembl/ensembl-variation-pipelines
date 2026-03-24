@@ -1,6 +1,28 @@
-**/target
+**/.DS_Store
 **/DEFAULT.ini
+
+# rust target folder
+**/target
+
+# nextflow logs
 **/.nextflow
+**/.nextflow.log*
 **/.nf-test
+**/.nf-test.log*
+
+# python cache, venv, dist
 **/__pycache__
 **/.python-version
+**/venv
+**/dist
+**/.pytest_cache
+
+# folder generated running nf-test
+**/tests/temp
+**/temp
+**/tracks
+**/reports
+**/work
+report.tap
+
+**/.ruff_cache

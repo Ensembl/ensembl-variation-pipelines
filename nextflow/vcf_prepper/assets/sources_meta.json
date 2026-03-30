@@ -15,7 +15,7 @@
 	},
 	{
 		"name": "EVA",
-		"version": "7",
+		"version": "8",
 		"description": "European Variation Archive",
 		"url": "https://www.ebi.ac.uk/eva",
 		"accession_url": "https://www.ebi.ac.uk/eva/?variant&accessionID="
@@ -156,5 +156,19 @@
 		"description": "ClinVar is a free public archive of reports of the relationships between human variations and phenotypes.",
 		"url": "https://www.ncbi.nlm.nih.gov/clinvar/",
 		"accession_url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/"
+	},
+	{
+		"name": "nstd166",
+		"version": "2021-08-30",
+		"description": "(dbVar study) The v2.1 release of gnomAD-SV represents a catalogue of structural variants (SVs) discovered from whole-genome sequencing of 14,891 individuals at 32X mean coverage with 2x150bp Illumina reads. From this dataset, site-level SV data was able to be released for 10,847 unrelated individuals with appropriate consent for broad data sharing",
+		"url": "https://www.ncbi.nlm.nih.gov/dbvar/studies/nstd166",
+		"accession_url": "https://www.ncbi.nlm.nih.gov/dbvar/variants/"
+	},
+	{
+		"name": "nstd102",
+		"version": "2026-01-13",
+		"description": "(dbVar Study) Structural Variants with clinical assertions, submitted to ClinVar by external labs. dbVar now imports all placements from ClinVar as \"submitted\" and only remaps what is missing in order to place all variants on both GRCh37 and GRCh38.",
+		"url": "https://www.ncbi.nlm.nih.gov/dbvar/studies/nstd102",
+		"accession_url": "https://www.ncbi.nlm.nih.gov/dbvar/variants/"
 	}
 ]

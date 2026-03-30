@@ -22,7 +22,7 @@ import gc
 
 from helper import *
 
-META = """##fileformat=VCFv4.2
+META = """##fileformat=VCFv4.4
 ##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
 ##INFO=<ID=SVLEN,Number=.,Type=String,Description="Difference in length between REF and ALT alleles">

@@ -85,6 +85,36 @@ workflow VCF_PREPPER {
   if (params.use_old_infra && !params.use_vep_cache) {
     exit 0, "Cannot use old infrastructure without VEP cache, please re-run with --use_vep_cache 1."
   }
+
+  // Default params dependent on other args
+  if (params.force_create_config) {
+    if (params.overwrite_cache == null) {
+      params.overwrite_cache = 1
+    }
+    if (params.overwrite_conservation == null) {
+      params.overwrite_conservation = 1
+    }
+    if (params.overwrite_fasta == null) {
+      params.overwrite_fasta = 1
+    }
+    if (params.overwrite_gff == null) {
+      params.overwrite_gff = 1
+    }
+  }
+  else{
+    if (params.overwrite_cache == null) {
+      params.overwrite_cache = 0
+    }
+    if (params.overwrite_conservation == null) {
+      params.overwrite_conservation = 0
+    }
+    if (params.overwrite_fasta == null) {
+      params.overwrite_fasta = 0
+    }
+    if (params.overwrite_gff == null) {
+      params.overwrite_gff = 0
+    }
+  }
   
   input_set = parse_config(params.config)
   ch_input = Channel.fromList( input_set )

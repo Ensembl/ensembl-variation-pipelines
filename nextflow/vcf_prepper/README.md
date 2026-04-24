@@ -160,7 +160,12 @@ If `nextflow-vep` is skipped, the VCF file provided in the `input_config.json` s
 
 - `skip_stats` : (optional) If value is 1, the pipeline will skip updatin api files with stats. 
 
-- `force_create_config` : (optional) If value is 1, the pipeline will forcefully create/process the config files even if they exist, default: `0`.
+- `force_create_config` : (optional) If value is 1, the pipeline will forcefully create/process the config files even if they exist. Enabling this option will also set the `overwrite_cache`, `overwrite_conservation`, `overwrite_fasta` and `overwrite_gff` arguments to 1 if they are not defined as input arguments. Default: `0`.
+
+- `overwrite_cache` : (optional) If value is 1, the pipeline will forcefully overwrite existing caches in the `cache_dir` if they exist, default: `0`.
+- `overwrite_conservation` : (optional) If value is 1, the pipeline will forcefully overwrite existing conservation files in the `conservation_data_dir` if they exist, default: `0`.
+- `overwrite_fasta` : (optional) If value is 1, the pipeline will forcefully overwrite existing fasta files in the `fasta_dir` if they exist, default: `0`.
+- `overwrite_gff` : (optional) If value is 1, the pipeline will forcefully overwrite existing gff files in the `gff_dir` if they exist, default: `0`.
 
 Config files include - FASTA, Ensembl VEP cache files, Conservation plugin data files, VEP config files, chromosome synonym file, and chromosome size files.
 

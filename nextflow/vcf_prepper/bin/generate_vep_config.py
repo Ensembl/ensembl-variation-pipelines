@@ -614,7 +614,7 @@ def main(args=None):
     structural_variant = args.structural_variant
 
     sift = False
-    if species in SIFT_SPECIES and not structural_variant:
+    if (species in SIFT_SPECIES or division == "EnsemblPlants") and not structural_variant:
         sift = True
 
     polyphen = False

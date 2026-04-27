@@ -52,6 +52,7 @@ SIFT_SPECIES = [
     "ovis_aries",
     "ovis_aries_rambouillet",
     "danio_rerio",
+    "triticum_aestivum"
 ]
 POLYPHEN_SPECIES = [
     "homo_sapiens",

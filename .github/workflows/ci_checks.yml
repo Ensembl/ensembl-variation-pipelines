@@ -84,8 +84,7 @@ jobs:
           python-version-file: src/python/.python-version
       - name: setup Python dependencies
         run: |
-          python3 -m pip install -e .
-          python3 -m pip install pytest coverage
+          python3 -m pip install -e .[test]
       - name: pytest
         run: |
           python3 -m coverage run -m pytest \

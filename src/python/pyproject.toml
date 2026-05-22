@@ -42,6 +42,12 @@ dependencies = [
     "mkdocs >= 1.6.1"
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest ~= 9.0.3",
+    "coverage ~= 7.14.0"
+]
+
 [build-system]
 requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"

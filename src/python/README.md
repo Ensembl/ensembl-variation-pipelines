@@ -34,8 +34,7 @@ Unit tests are available in `tests/variation_utils/`.
 #### 1. Install the package and test dependencies
 
 ```bash
-pip install .
-pip install pytest coverage
+pip install .[test]
 ```
 
 #### 2. Set up test databases (optional)

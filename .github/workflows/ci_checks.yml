@@ -79,7 +79,8 @@ jobs:
 
       - name: setup Python
         uses: actions/setup-python@v6
-
+        with:
+          python-version-file: src/python/.python-version
       - name: setup Python dependencies
         run: |
           python3 -m pip install -e ${GITHUB_WORKSPACE}/src/python

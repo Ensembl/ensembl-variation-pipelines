@@ -97,7 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python3 -m coverage lcov -o coverage.lcov
-          bash .github/scripts/py_coverage_comment.sh coverage.lcov
+          bash ${GITHUB_WORKSPACE}/.github/scripts/py_coverage_comment.sh coverage.lcov
 
   nf-test:
     runs-on: ubuntu-latest

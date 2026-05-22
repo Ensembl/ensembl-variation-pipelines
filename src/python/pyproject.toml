@@ -52,6 +52,12 @@ test = [
 requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
+[tool.coverage.run]
+omit = [
+    # omit all tests
+    "tests/*"
+]
+
 [tool.hatch.build.targets.wheel]
 ignore-vcs = true
 include = [

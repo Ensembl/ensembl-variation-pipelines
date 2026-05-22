@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-name: unit-test
+name: CI checks
 on: [pull_request]
 
 permissions:
@@ -94,3 +94,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           bash .github/scripts/py_coverage_comment.sh coverage.lcov
+
+  nf-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup nf-test
+        run: curl -fsSL https://code.askimed.com/install/nf-test | bash
+      - name: Run the tests
+        run: ${GITHUB_WORKSPACE}/nf-test test nextflow/vcf_prepper/tests

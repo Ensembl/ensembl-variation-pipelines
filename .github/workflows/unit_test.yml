@@ -16,6 +16,9 @@
 name: unit-test
 on: [pull_request]
 
+permissions:
+  contents: read
+
 env:
   ENSEMBL_ROOT_DIR: repos
 

@@ -48,6 +48,7 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: src/python
     services:
       mysql:
         image: mysql:8.0
@@ -73,9 +74,9 @@ jobs:
       - name: load databases
         run: |
           mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE ensembl_genome_metadata;'
-          mysql -h 127.0.0.1 -u root ensembl_genome_metadata < src/python/tests/variation_utils/data/ensembl_genome_metadata.dump
+          mysql -h 127.0.0.1 -u root ensembl_genome_metadata < tests/variation_utils/data/ensembl_genome_metadata.dump
           mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
-          mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < src/python/tests/variation_utils/data/homo_sapiens_core_110_38.dump
+          mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < tests/variation_utils/data/homo_sapiens_core_110_38.dump
 
       - name: setup Python
         uses: actions/setup-python@v6
@@ -83,14 +84,14 @@ jobs:
           python-version-file: src/python/.python-version
       - name: setup Python dependencies
         run: |
-          python3 -m pip install -e ${GITHUB_WORKSPACE}/src/python
+          python3 -m pip install -e .
           python3 -m pip install pytest coverage
       - name: pytest
         run: |
           python3 -m coverage run -m pytest \
-            ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/clients \
-            ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/file_locator \
-            ${GITHUB_WORKSPACE}/src/python/tests/variation_utils/test_file_utils.py
+            tests/variation_utils/clients \
+            tests/variation_utils/file_locator \
+            tests/variation_utils/test_file_utils.py
       - name: Add coverage reports
         if: ${{ github.event_name == 'pull_request' }}
         continue-on-error: true
@@ -101,9 +102,12 @@ jobs:
 
   nf-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nextflow/
     steps:
       - uses: actions/checkout@v6
       - name: setup nf-test
         run: curl -fsSL https://code.askimed.com/install/nf-test | bash
       - name: Run the tests
-        run: ${GITHUB_WORKSPACE}/nf-test test nextflow/vcf_prepper/tests
+        run: ./nf-test test vcf_prepper/tests

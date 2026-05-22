@@ -77,6 +77,9 @@ jobs:
           mysql -h 127.0.0.1 -u root -e 'CREATE DATABASE homo_sapiens_core_110_38;'
           mysql -h 127.0.0.1 -u root homo_sapiens_core_110_38 < src/python/tests/variation_utils/data/homo_sapiens_core_110_38.dump
 
+      - name: setup Python
+        uses: actions/setup-python@v6
+
       - name: setup Python dependencies
         run: |
           python3 -m pip install -e ${GITHUB_WORKSPACE}/src/python

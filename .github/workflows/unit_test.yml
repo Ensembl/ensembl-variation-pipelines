@@ -18,6 +18,7 @@ on: [pull_request]
 
 permissions:
   contents: read
+  pull-requests: read
 
 env:
   ENSEMBL_ROOT_DIR: repos

@@ -16,14 +16,11 @@
  * limitations under the License.
  */
  
-import java.net.*
-import java.io.*
 
 def remote_exists(url){
     try {
       HttpURLConnection.setFollowRedirects(false);
-      HttpURLConnection connection =
-         (HttpURLConnection) new URL(url).openConnection();
+      HttpURLConnection connection = new URL(url).openConnection();
       connection.setRequestMethod("HEAD");
       return (connection.getResponseCode() == HttpURLConnection.HTTP_OK);
     }

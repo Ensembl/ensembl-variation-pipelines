@@ -46,7 +46,7 @@ process PROCESS_INPUT {
   
   script:
   def file_type = meta.file_type
-  output_vcf = file_type == "remote" ? meta.genome_temp_dir + "/" + file(vcf).getName() : vcf
+  output_vcf = file_type == "remote" ? meta.genome_temp_dir + "/" + meta.file_base_name + meta.file_extensions : vcf
   if(file_type == "remote") {
     index_type = remote_exists(vcf + ".tbi") ? "tbi" : "csi"
   }

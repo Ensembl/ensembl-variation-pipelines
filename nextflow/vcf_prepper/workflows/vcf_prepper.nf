@@ -63,6 +63,9 @@ def parse_config (config) {
 
       meta.release_id = source_data.release_id ?: params.release_id
       
+      meta.file_base_name = file(vcf).simpleName
+      meta.file_extensions = file(vcf).name.substring(file(vcf).simpleName.length())
+
       input_set.add([meta, vcf])
     }  
   }

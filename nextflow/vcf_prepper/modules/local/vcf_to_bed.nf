@@ -24,19 +24,19 @@ process VCF_TO_BED {
   output:
   tuple val(meta), path(output_file)
   
-  shell:
+  script:
   output_file = vcf.getName().replace(".vcf.gz", ".bed")
-  bed_fields = params.bed_fields
-  structural_variant = params.structural_variant ? "--structural-variant" : ""
-  
-  '''
+  def bed_fields = params.bed_fields
+  def structural_variant = params.structural_variant ? "--structural-variant" : ""
+
+  """
   vcf_to_bed \
-    --vcf !{vcf} \
-    --output !{output_file} \
-    --rank !{rank_file} \
-    --bed-fields !{bed_fields} \
-    !{structural_variant}
-    
-  rm !{vcf}
-  '''
+    --vcf ${vcf} \
+    --output ${output_file} \
+    --rank ${rank_file} \
+    --bed-fields ${bed_fields} \
+    ${structural_variant}
+
+  rm ${vcf}
+  """
 }

@@ -23,10 +23,11 @@ process COUNT_VCF_VARIANT {
     tuple val(meta), val(vcf), val(vcf_index)
 
     output:
-    tuple val(meta), val(vcf), val(vcf_index), env(count)
+    tuple val(meta), val(vcf), val(vcf_index), env('count')
 
-    shell:
-    '''
-    count=$(bcftools index --nrecords !{vcf})
-    '''
+    script:
+    """
+    #!/bin/bash
+    count=\$(bcftools index --nrecords ${vcf})
+    """
 }

@@ -34,7 +34,7 @@ from helper import (
 
 CACHE_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/tabixconverted"
 FASTA_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/fasta"
-REPO_DIR = os.path.join("/hps/software/users/ensembl/variation", os.environ.get("USER"))
+DEFAULT_REPO_DIR = os.path.join("/hps/software/users/ensembl/variation", os.environ.get("USER"))
 PLUGIN_DATA_DIR = "/nfs/production/flicek/ensembl/variation/enseweb-data_tools/grch38/VERSION/vep/plugin_data"
 CONSERVATION_DATA_DIR = "/nfs/production/flicek/ensembl/variation/data/Conservation"
 SIFT_SPECIES = [
@@ -500,7 +500,7 @@ def get_plugins(
     species: str,
     version: int,
     assembly: str,
-    repo_dir: str = REPO_DIR,
+    repo_dir: str = DEFAULT_REPO_DIR,
     conservation_data_dir: str = CONSERVATION_DATA_DIR,
     structural_variant: bool = False
 ) -> list:
@@ -554,7 +554,7 @@ def main(args=None):
     genome_uuid = args.genome_uuid or None
     vep_config = args.vep_config or f"{species}_{assembly}.ini"
     ini_file = args.ini_file or "DEFAULT.ini"
-    repo_dir = args.repo_dir or REPO_DIR
+    repo_dir = args.repo_dir or DEFAULT_REPO_DIR
 
     # get species division
     core_server = parse_ini(ini_file, "core")

@@ -130,10 +130,10 @@ workflow VCF_PREPPER {
     REMOVE_VARIANTS( UPDATE_FIELDS.out )
     
     // run vep
-    vep = RUN_VEP( REMOVE_VARIANTS.out )
+    RUN_VEP( REMOVE_VARIANTS.out )
 
     // post-process
-    COUNT_VCF_VARIANT( vep )
+    COUNT_VCF_VARIANT( RUN_VEP.out )
 
     COUNT_VCF_VARIANT.out
     .map {

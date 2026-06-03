@@ -19,12 +19,6 @@
 // The Goal of this workflow is to process and annotate VCF files and generate related track files for genome browser
 //
 
-import groovy.json.JsonSlurper
-import java.io.File
-
-def slurper = new JsonSlurper()
-params.config = slurper.parse(new File(params.input_config))
-
 include { CREATE_RANK_FILE } from "../modules/local/create_rank_file.nf"
 include { PREPARE_GENOME } from "../subworkflows/local/prepare_genome.nf"
 include { UPDATE_FIELDS } from "../modules/local/update_fields.nf"
@@ -40,16 +34,15 @@ include { WIG_TO_BIGWIG } from "../modules/local/wig_to_bigwig.nf"
 include { SUMMARY_STATS } from "../modules/local/summary_stats.nf"
 
 def parse_config (config) {
-  input_set = []
+  def input_set = []
   
-  genomes = config.keySet()
-  for (genome in genomes) {
-    source_data = params.config.get(genome)
-    multiple_source = source_data.size() > 1 ? true : false
-    for (source_datum in source_data) {
-      vcf = source_datum.file_location
+  config.keySet().each { genome ->
+    def source_data = params.config.get(genome)
+    def multiple_source = source_data.size() > 1 ? true : false
+    source_data.each { source_datum ->
+      def vcf = source_datum.file_location
       
-      meta = [:]
+      def meta = [:]
       meta.genome = genome
       meta.genome_uuid = source_datum.genome_uuid
       meta.species = source_datum.species
@@ -115,9 +108,12 @@ workflow VCF_PREPPER {
       params.overwrite_gff = 0
     }
   }
-  
+
+  def slurper = new groovy.json.JsonSlurper()
+  params.config = slurper.parse(new java.io.File(params.input_config))
+
   input_set = parse_config(params.config)
-  ch_input = Channel.fromList( input_set )
+  ch_input = channel.fromList( input_set )
   
   // setup
   CREATE_RANK_FILE( params.rank_file )
@@ -149,7 +145,7 @@ workflow VCF_PREPPER {
           [meta, vcf, vcf_index]
         }
     }
-    .filter { ! it.equals("NO_VARIANT") }
+    .filter { val -> ! val.equals("NO_VARIANT") }
     .set { ch_post_api }
   }
   else {
@@ -173,7 +169,7 @@ workflow VCF_PREPPER {
     // if track generation is run vep-ed VCF file move needs to wait for this step to finish
     SPLIT_VCF.out
     .map {
-      meta, splits ->
+      meta, _splits ->
         [meta]
     }
     .set { ch_split_finish }
@@ -216,10 +212,10 @@ workflow VCF_PREPPER {
     .map {
       meta, vcf, vcf_index ->
         // TODO: when we have multiple source per genome we need to delete source specific files
-        new_vcf = meta.multiple_source ? 
+        def new_vcf = meta.multiple_source ?
           "${meta.genome_api_outdir}/variation_${meta.source}.vcf.gz"
           : "${meta.genome_api_outdir}/variation.vcf.gz"
-        new_vcf_index = "${new_vcf}.${meta.index_type}"
+        def new_vcf_index = "${new_vcf}.${meta.index_type}"
         
         // in -resume vcf and vcf_index may not exists as already renamed
         // moveTo instead of renameTo - in -resume dest file may exists from previous run

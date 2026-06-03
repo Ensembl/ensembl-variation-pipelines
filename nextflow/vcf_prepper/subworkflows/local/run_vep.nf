@@ -41,7 +41,7 @@ workflow RUN_VEP {
   INDEX_VCF.out
   .map {
     meta, vcf, vcf_index ->
-      vep_meta = [:]
+      def vep_meta = [:]
       vep_meta.output_dir = meta.genome_temp_dir
       vep_meta.one_to_many = 0
       vep_meta.index_type = meta.index_type
@@ -54,7 +54,7 @@ workflow RUN_VEP {
   
   input
   .map {
-    meta, vcf ->
+    meta, _vcf ->
       // tag here is the output vcf file from nextflow-vep
       filename = file("${meta.genome}-${meta.source}.vcf.gz").getBaseName() + "_VEP.vcf.gz"
       tag = "${meta.genome_temp_dir}/${filename}"

@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 //
 // run VEP annotation
 //
 
-repo_dir = params.repo_dir
-
 include { INDEX_VCF } from "../../modules/local/index_vcf.nf"
-include { vep } from "${repo_dir}/ensembl-vep/nextflow/workflows/run_vep.nf"
+include { vep } from "../../../external-imports/ensembl-vep/nextflow/workflows/run_vep.nf"
 
 workflow RUN_VEP {
   take:
     input
-  
+
   main:
   // create index file at the exact location where input vcf file is as nextflow-vep requires as such
   input

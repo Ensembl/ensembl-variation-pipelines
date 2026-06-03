@@ -37,7 +37,7 @@ workflow RUN_VEP {
   }
   .set { ch_index_vcf }
   INDEX_VCF( ch_index_vcf )
-  
+
   INDEX_VCF.out
   .map {
     meta, vcf, vcf_index ->
@@ -70,7 +70,7 @@ workflow RUN_VEP {
       if (! file(vcf).exists() || ! file(vcf_index).exists()){
         exit 1, "ERROR: Could not find nextflow-vep output files. Check the following - \n\tVCF - ${vcf}\n\tVCF index - ${vcf_index}"
       }
-      
+
       [meta, vcf, vcf_index]
   }.set { ch_post_vep }
   

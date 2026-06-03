@@ -20,10 +20,10 @@ process SUMMARY_STATS {
   memory {((vcf.size() * 1.25 * 1.B) + 2.GB) * task.attempt}
 
   input: 
-  tuple val(meta), path(vcf), path(vcf_index)
+    tuple val(meta), path(vcf), path(vcf_index)
 
   output:
-  tuple val(meta), path(output_file), path(vcf_index)
+    tuple val(meta), path(output_file), path(vcf_index)
 
   script:
   def species = meta.species

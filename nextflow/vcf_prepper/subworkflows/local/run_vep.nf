@@ -67,8 +67,18 @@ workflow RUN_VEP {
       vcf = tag
       vcf_index = "${tag}.${meta.index_type}"
 
-      if (! file(vcf).exists() || ! file(vcf_index).exists()){
-        exit 1, "ERROR: Could not find nextflow-vep output files. Check the following - \n\tVCF - ${vcf}\n\tVCF index - ${vcf_index}"
+      def vcf_file
+      def vcf_index_file
+      def file_error = false
+      try{
+        vcf_file = file(vcf)
+        vcf_index_file = file(vcf_index)
+      }
+      catch( IOException _e ) {
+        file_error = true
+      }
+      if ( file_error || !vcf_file.exists() || !vcf_index_file.exists()){
+        exit 1, "ERROR: Could not find or load nextflow-vep output files. Check the following paths - \n\tVCF - ${vcf}\n\tVCF index - ${vcf_index}"
       }
 
       [meta, vcf, vcf_index]

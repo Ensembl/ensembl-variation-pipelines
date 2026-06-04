@@ -653,8 +653,8 @@ def main(args=None):
         file.write("transcript_version 1\n")
         file.write("allele_number 1\n")
 
-        if structural_variant:
-            file.write("max_sv_size -1\n")
+        # if structural_variant:
+        #     file.write("max_sv_size -1\n")
 
         if species == "homo_sapiens" and assembly == "GRCh38":
             file.write("gencode_primary 1\n")

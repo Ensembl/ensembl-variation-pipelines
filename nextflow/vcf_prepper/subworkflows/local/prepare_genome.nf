@@ -74,6 +74,19 @@ workflow PREPARE_GENOME {
     }
     .set { ch_prepare_genome_meta }
 
+    // Prepare chrom_sizes input channel
+    // (ensure GENERATE_CHROM_SIZES only runs once per output destination)
+    chrom_sizes_groups = ch_prepare_genome_meta
+      .map { meta ->
+        [meta.chrom_sizes, meta]
+      }
+      .groupTuple()
+
+    ch_chrom_sizes = chrom_sizes_groups
+      .map { _chrom_sizes_file, metas ->
+        metas[0]
+      }
+
     // if we skip we only need a channel with tag value
     ch_prepare_genome_meta
     .map { 
@@ -121,7 +134,7 @@ workflow PREPARE_GENOME {
     }
 
     // prepare for tracks files
-    ch_prepared_track = params.skip_tracks ? ch_skip : GENERATE_CHROM_SIZES( ch_prepare_genome_meta )
+    ch_prepared_track = params.skip_tracks ? ch_skip : GENERATE_CHROM_SIZES( ch_chrom_sizes )
 
     // we join channels to only create DAG edges
     ch_prepare_genome
@@ -132,7 +145,7 @@ workflow PREPARE_GENOME {
         [tag, meta, vcf]
     }
     .join ( ch_prepared_api )
-    .join ( ch_prepared_track )
+    .combine ( ch_prepared_track, by: 0 )
     .map {
       tag, meta, vcf ->
         [meta, vcf]

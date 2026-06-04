@@ -39,7 +39,7 @@ process GENERATE_VEP_CONFIG {
   def gff_dir = params.use_vep_cache ? "" : "--gff_dir ${meta.gff_dir}"
   def conservation_data_dir = meta.conservation_data_dir
   def repo_dir = params.repo_dir
-  def structural_variant = params.structural_variant ? "--structural_variant --max_sv_size -1" : ""
+  def structural_variant = params.structural_variant ? "--structural_variant" : ""
 
   if (params.population_data_file) {
     population_data_file = "--population_data_file " + params.population_data_file

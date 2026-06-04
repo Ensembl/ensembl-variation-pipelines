@@ -638,7 +638,8 @@ def main(args=None):
     # write the VEP config file
     with open(vep_config, "w") as file:
         file.write("force_overwrite 1\n")
-        file.write(f"fork 2\n")
+        if not structural_variant:
+            file.write("fork 2\n")
         file.write(f"species {species}\n")
         file.write(f"assembly {assembly}\n")
         file.write(f"fasta {fasta}\n")

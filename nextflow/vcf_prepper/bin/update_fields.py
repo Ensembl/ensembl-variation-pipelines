@@ -15,7 +15,7 @@
 # limitations under the License.
 
 import sys
-from cyvcf2 import VCF, Writer
+from cyvcf2 import VCF
 from Bio import bgzf
 import argparse
 import gc

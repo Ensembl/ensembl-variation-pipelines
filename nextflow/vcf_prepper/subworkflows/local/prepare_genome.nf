@@ -94,8 +94,7 @@ workflow PREPARE_GENOME {
         meta.genome 
     }
     .set { ch_skip }
-    
-    // TODO: run this only once per genome when we have multiple source (not DOWNLOAD_SOURCE)
+
     // prepare for api files
     if (!params.skip_vep) {
       // Prepare synonym-file input channel

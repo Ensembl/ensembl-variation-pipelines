@@ -113,10 +113,34 @@ workflow PREPARE_GENOME {
       ch_synonym_file_done = GENERATE_SYNONYM_FILE( ch_synonym_files )
     
       if(params.use_vep_cache){
-        ch_processed_cache_or_gff = PROCESS_CACHE( ch_prepare_genome_meta )
+        // Prepare cache processing input channel
+        // (ensure PROCESS_CACHE only runs once per cache dir)
+        cache_groups = ch_prepare_genome_meta
+          .map { meta ->
+            [[meta.assembly, meta.species, meta.release_id].join('#'), meta]
+          }
+          .groupTuple()
+
+        ch_cache = cache_groups
+          .map { _cache, metas ->
+            metas[0]
+          }
+        ch_processed_cache_or_gff = PROCESS_CACHE( ch_cache )
       }
       else {
-        ch_processed_cache_or_gff = PROCESS_GFF( ch_prepare_genome_meta )
+        // Prepare GFF processing input channel
+        // (ensure PROCESS_GFF only runs once per output dir)
+        gff_groups = ch_prepare_genome_meta
+          .map { meta ->
+            [meta.genome_temp_dir, meta]
+          }
+          .groupTuple()
+
+        ch_gff = gff_groups
+          .map { _outdir, metas ->
+            metas[0]
+          }
+        ch_processed_cache_or_gff = PROCESS_GFF( ch_gff )
       }
       ch_processed_fasta = PROCESS_FASTA( ch_prepare_genome_meta )
       ch_processed_conservation = PROCESS_CONSERVATION_DATA( ch_prepare_genome_meta )
@@ -126,7 +150,7 @@ workflow PREPARE_GENOME {
         meta -> 
           [meta.genome, meta]
       }
-      .join( ch_processed_cache_or_gff )
+      .combine( ch_processed_cache_or_gff, by: 0 )
       .join( ch_processed_fasta )
       .join( ch_processed_conservation )
       .map {

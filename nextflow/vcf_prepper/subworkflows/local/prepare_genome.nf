@@ -117,7 +117,7 @@ workflow PREPARE_GENOME {
         // (ensure PROCESS_CACHE only runs once per cache dir)
         cache_groups = ch_prepare_genome_meta
           .map { meta ->
-            [[meta.assembly, meta.species, meta.release_id].join('#'), meta]
+            [[meta.cache_dir, meta.assembly, meta.species, meta.release_id].join('#'), meta]
           }
           .groupTuple()
 

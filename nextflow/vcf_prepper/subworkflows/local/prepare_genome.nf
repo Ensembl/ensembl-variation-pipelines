@@ -156,7 +156,20 @@ workflow PREPARE_GENOME {
           metas[0]
         }
       ch_processed_fasta = PROCESS_FASTA( ch_fasta )
-      ch_processed_conservation = PROCESS_CONSERVATION_DATA( ch_prepare_genome_meta )
+
+      // Prepare conservation processing input channel
+      // (ensure PROCESS_CONSERVATION only runs once per output fasta file)
+      conservation_groups = ch_prepare_genome_meta
+        .map { meta ->
+          [[meta.conservation_data_dir, meta.assembly, meta.species].join('#'), meta]
+        }
+        .groupTuple()
+
+      ch_conservation = conservation_groups
+        .map { _conservation_group, metas ->
+          metas[0]
+        }
+      ch_processed_conservation = PROCESS_CONSERVATION_DATA( ch_conservation )
       
       ch_prepare_genome_meta
       .map {
@@ -165,7 +178,7 @@ workflow PREPARE_GENOME {
       }
       .combine( ch_processed_cache_or_gff, by: 0 )
       .combine( ch_processed_fasta, by: 0 )
-      .join( ch_processed_conservation )
+      .combine( ch_processed_conservation, by: 0 )
       .map {
         genome, meta ->
           meta

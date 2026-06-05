@@ -171,19 +171,21 @@ workflow PREPARE_GENOME {
         }
       ch_processed_conservation = PROCESS_CONSERVATION_DATA( ch_conservation )
       
-      ch_prepare_genome_meta
-      .map {
-        meta -> 
-          [meta.genome, meta]
-      }
-      .combine( ch_processed_cache_or_gff, by: 0 )
-      .combine( ch_processed_fasta, by: 0 )
-      .combine( ch_processed_conservation, by: 0 )
-      .map {
-        genome, meta ->
-          meta
-      }
-      .set { ch_generate_vep_config }
+      ch_generate_vep_config = ch_prepare_genome_meta
+        .map {
+          meta ->
+            [meta.genome, meta]
+        }
+        .combine( ch_processed_cache_or_gff, by: 0 )
+        .combine( ch_processed_fasta, by: 0 )
+        .combine( ch_processed_conservation, by: 0 )
+        .map { _genome, meta ->
+          [meta.vep_config, meta]
+        }
+        .groupTuple()
+        .map { _config, metas ->
+          metas[0]
+        }
       
       ch_vep_config_done = GENERATE_VEP_CONFIG( ch_generate_vep_config )
 
@@ -206,7 +208,7 @@ workflow PREPARE_GENOME {
         tag = meta.genome 
         [tag, meta, vcf]
     }
-    .join ( ch_prepared_api )
+    .combine ( ch_prepared_api, by: 0 )
     .combine ( ch_prepared_track, by: 0 )
     .map {
       tag, meta, vcf ->

@@ -98,7 +98,19 @@ workflow PREPARE_GENOME {
     // TODO: run this only once per genome when we have multiple source (not DOWNLOAD_SOURCE)
     // prepare for api files
     if (!params.skip_vep) {
-      ch_synonym_file_done = GENERATE_SYNONYM_FILE( ch_prepare_genome_meta )
+      // Prepare synonym-file input channel
+      // (ensure GENERATE_SYNONYM_FILE only runs once per output destination)
+      synonym_file_groups = ch_prepare_genome_meta
+        .map { meta ->
+          [meta.synonym_file, meta]
+        }
+        .groupTuple()
+
+      ch_synonym_files = synonym_file_groups
+        .map { _synonym_file, metas ->
+          metas[0]
+        }
+      ch_synonym_file_done = GENERATE_SYNONYM_FILE( ch_synonym_files )
     
       if(params.use_vep_cache){
         ch_processed_cache_or_gff = PROCESS_CACHE( ch_prepare_genome_meta )
@@ -126,7 +138,7 @@ workflow PREPARE_GENOME {
       ch_vep_config_done = GENERATE_VEP_CONFIG( ch_generate_vep_config )
 
       ch_synonym_file_done
-      .join( ch_vep_config_done )
+      .combine( ch_vep_config_done, by: 0 )
       .set { ch_prepared_api }
     }
     else {

@@ -341,7 +341,11 @@ def get_eva_version_from_ensembl_vcf(vcf_path: str):
 
     path = Path(vcf_path)
     if not path.exists():
-        raise FileNotFoundError(vcf_path)
+       	new_prefix = "/lts/production/mfreeberg/variation/new_website_production/"
+       	new_path = Path("/".join([new_prefix] + vcf_path.split("/")[7:]))
+       	path = new_path
+       	if not path.exists():
+            raise FileNotFoundError(vcf_path)
 
     opener = gzip.open if path.suffix == ".gz" else open
     src_re = re.compile(r'##source=.*?EVA.*?version="([^"]+)"')

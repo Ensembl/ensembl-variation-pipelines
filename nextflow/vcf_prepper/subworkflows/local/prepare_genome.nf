@@ -74,6 +74,19 @@ workflow PREPARE_GENOME {
     }
     .set { ch_prepare_genome_meta }
 
+    // Prepare chrom_sizes input channel
+    // (ensure GENERATE_CHROM_SIZES only runs once per output destination)
+    chrom_sizes_groups = ch_prepare_genome_meta
+      .map { meta ->
+        [meta.chrom_sizes, meta]
+      }
+      .groupTuple()
+
+    ch_chrom_sizes = chrom_sizes_groups
+      .map { _chrom_sizes_file, metas ->
+        metas[0]
+      }
+
     // if we skip we only need a channel with tag value
     ch_prepare_genome_meta
     .map { 
@@ -81,39 +94,102 @@ workflow PREPARE_GENOME {
         meta.genome 
     }
     .set { ch_skip }
-    
-    // TODO: run this only once per genome when we have multiple source (not DOWNLOAD_SOURCE)
+
     // prepare for api files
     if (!params.skip_vep) {
-      ch_synonym_file_done = GENERATE_SYNONYM_FILE( ch_prepare_genome_meta )
+      // Prepare synonym-file input channel
+      // (ensure GENERATE_SYNONYM_FILE only runs once per output destination)
+      synonym_file_groups = ch_prepare_genome_meta
+        .map { meta ->
+          [meta.synonym_file, meta]
+        }
+        .groupTuple()
+
+      ch_synonym_files = synonym_file_groups
+        .map { _synonym_file, metas ->
+          metas[0]
+        }
+      ch_synonym_file_done = GENERATE_SYNONYM_FILE( ch_synonym_files )
     
       if(params.use_vep_cache){
-        ch_processed_cache_or_gff = PROCESS_CACHE( ch_prepare_genome_meta )
+        // Prepare cache processing input channel
+        // (ensure PROCESS_CACHE only runs once per cache dir)
+        cache_groups = ch_prepare_genome_meta
+          .map { meta ->
+            [[meta.cache_dir, meta.assembly, meta.species, meta.release_id].join('#'), meta]
+          }
+          .groupTuple()
+
+        ch_cache = cache_groups
+          .map { _cache, metas ->
+            metas[0]
+          }
+        ch_processed_cache_or_gff = PROCESS_CACHE( ch_cache )
       }
       else {
-        ch_processed_cache_or_gff = PROCESS_GFF( ch_prepare_genome_meta )
+        // Prepare GFF processing input channel
+        // (ensure PROCESS_GFF only runs once per output dir)
+        gff_groups = ch_prepare_genome_meta
+          .map { meta ->
+            [meta.genome_temp_dir, meta]
+          }
+          .groupTuple()
+
+        ch_gff = gff_groups
+          .map { _outdir, metas ->
+            metas[0]
+          }
+        ch_processed_cache_or_gff = PROCESS_GFF( ch_gff )
       }
-      ch_processed_fasta = PROCESS_FASTA( ch_prepare_genome_meta )
-      ch_processed_conservation = PROCESS_CONSERVATION_DATA( ch_prepare_genome_meta )
+
+      // Prepare fasta processing input channel
+      // (ensure PROCESS_FASTA only runs once per output fasta file)
+      fastas_groups = ch_prepare_genome_meta
+        .map { meta ->
+          [[meta.fasta_dir, meta.assembly, meta.species].join('#'), meta]
+        }
+        .groupTuple()
+
+      ch_fasta = fastas_groups
+        .map { _fasta, metas ->
+          metas[0]
+        }
+      ch_processed_fasta = PROCESS_FASTA( ch_fasta )
+
+      // Prepare conservation processing input channel
+      // (ensure PROCESS_CONSERVATION only runs once per output fasta file)
+      conservation_groups = ch_prepare_genome_meta
+        .map { meta ->
+          [[meta.conservation_data_dir, meta.assembly, meta.species].join('#'), meta]
+        }
+        .groupTuple()
+
+      ch_conservation = conservation_groups
+        .map { _conservation_group, metas ->
+          metas[0]
+        }
+      ch_processed_conservation = PROCESS_CONSERVATION_DATA( ch_conservation )
       
-      ch_prepare_genome_meta
-      .map {
-        meta -> 
-          [meta.genome, meta]
-      }
-      .join( ch_processed_cache_or_gff )
-      .join( ch_processed_fasta )
-      .join( ch_processed_conservation )
-      .map {
-        genome, meta ->
-          meta
-      }
-      .set { ch_generate_vep_config }
+      ch_generate_vep_config = ch_prepare_genome_meta
+        .map {
+          meta ->
+            [meta.genome, meta]
+        }
+        .combine( ch_processed_cache_or_gff, by: 0 )
+        .combine( ch_processed_fasta, by: 0 )
+        .combine( ch_processed_conservation, by: 0 )
+        .map { _genome, meta ->
+          [meta.vep_config, meta]
+        }
+        .groupTuple()
+        .map { _config, metas ->
+          metas[0]
+        }
       
       ch_vep_config_done = GENERATE_VEP_CONFIG( ch_generate_vep_config )
 
       ch_synonym_file_done
-      .join( ch_vep_config_done )
+      .combine( ch_vep_config_done, by: 0 )
       .set { ch_prepared_api }
     }
     else {
@@ -121,7 +197,7 @@ workflow PREPARE_GENOME {
     }
 
     // prepare for tracks files
-    ch_prepared_track = params.skip_tracks ? ch_skip : GENERATE_CHROM_SIZES( ch_prepare_genome_meta )
+    ch_prepared_track = params.skip_tracks ? ch_skip : GENERATE_CHROM_SIZES( ch_chrom_sizes )
 
     // we join channels to only create DAG edges
     ch_prepare_genome
@@ -131,8 +207,8 @@ workflow PREPARE_GENOME {
         tag = meta.genome 
         [tag, meta, vcf]
     }
-    .join ( ch_prepared_api )
-    .join ( ch_prepared_track )
+    .combine ( ch_prepared_api, by: 0 )
+    .combine ( ch_prepared_track, by: 0 )
     .map {
       tag, meta, vcf ->
         [meta, vcf]

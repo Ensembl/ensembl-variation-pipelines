@@ -45,6 +45,7 @@ workflow RUN_VEP {
       vep_meta.output_dir = meta.genome_temp_dir
       vep_meta.one_to_many = 0
       vep_meta.index_type = meta.index_type
+      vep_meta.file_base_name = file(vcf).getBaseName().replace(".vcf", "")
       vep_meta.filters = "amino_acids not match X[A-Za-z*]?\\/"
 
       [meta: vep_meta, file: vcf, index: vcf_index, vep_config: meta.vep_config]

@@ -139,13 +139,13 @@ def get_ensembl_species(server: dict, meta_db: str) -> dict:
     """
 
     query = f"""
-            SELECT 
-                g.genome_uuid, 
-                g.production_name, 
-                a.accession, 
-                a.assembly_default 
-            FROM genome AS g, assembly AS a 
-            WHERE g.assembly_id = a.assembly_id
+            SELECT
+               	g.genome_uuid,
+               	g.production_name,
+               	a.accession,
+               	a.assembly_default
+               	FROM genome AS g, assembly AS a, genome_release AS gr
+                WHERE g.assembly_id = a.assembly_id AND g.genome_id = gr.genome_id AND gr.is_current = 1
             """
 
     process = subprocess.run(
@@ -341,7 +341,11 @@ def get_eva_version_from_ensembl_vcf(vcf_path: str):
 
     path = Path(vcf_path)
     if not path.exists():
-        raise FileNotFoundError(vcf_path)
+       	new_prefix = "/lts/production/mfreeberg/variation/new_website_production/"
+       	new_path = Path("/".join([new_prefix] + vcf_path.split("/")[7:]))
+       	path = new_path
+       	if not path.exists():
+            raise FileNotFoundError(vcf_path)
 
     opener = gzip.open if path.suffix == ".gz" else open
     src_re = re.compile(r'##source=.*?EVA.*?version="([^"]+)"')

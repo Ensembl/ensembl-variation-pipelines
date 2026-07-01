@@ -4,3 +4,6 @@
 **/.nf-test
 **/__pycache__
 **/.python-version
+
+#Path for external nextflow module linkage
+external-imports/

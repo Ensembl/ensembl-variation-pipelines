@@ -35,23 +35,23 @@ workflow PREPARE_GENOME {
     input
     .map {
       meta, vcf ->
-        genome_temp_dir = "${params.temp_dir}/${meta.genome_uuid}"
+        def genome_temp_dir = "${params.temp_dir}/${meta.genome_uuid}"
         file(genome_temp_dir).mkdirs()
-        
-        synonym_file = "${genome_temp_dir}/${meta.genome}.synonyms"
-        vep_config = "${genome_temp_dir}/${meta.genome}.ini"
-        chrom_sizes = "${genome_temp_dir}/${meta.genome}.chrom.sizes"
-        
-        genome_api_outdir = "${params.output_dir}/api/${meta.genome_uuid}"
+
+        def synonym_file = "${genome_temp_dir}/${meta.genome}.synonyms"
+        def vep_config = "${genome_temp_dir}/${meta.genome}.ini"
+        def chrom_sizes = "${genome_temp_dir}/${meta.genome}.chrom.sizes"
+
+        def genome_api_outdir = "${params.output_dir}/api/${meta.genome_uuid}"
         file(genome_api_outdir).mkdirs()
-        genome_tracks_outdir = "${params.output_dir}/tracks/${meta.genome_uuid}"
+        def genome_tracks_outdir = "${params.output_dir}/tracks/${meta.genome_uuid}"
         file(genome_tracks_outdir).mkdirs()
-        
-        cache_dir = params.cache_dir ? params.cache_dir : genome_temp_dir
-        gff_dir = params.gff_dir ? params.gff_dir : genome_temp_dir
-        fasta_dir = params.fasta_dir ? params.fasta_dir : genome_temp_dir
-        conservation_data_dir = params.conservation_data_dir ? params.conservation_data_dir : genome_temp_dir
-        
+
+        def cache_dir = params.cache_dir ? params.cache_dir : genome_temp_dir
+        def gff_dir = params.gff_dir ? params.gff_dir : genome_temp_dir
+        def fasta_dir = params.fasta_dir ? params.fasta_dir : genome_temp_dir
+        def conservation_data_dir = params.conservation_data_dir ? params.conservation_data_dir : genome_temp_dir
+
         [ meta + [
             synonym_file: synonym_file,
             vep_config: vep_config,

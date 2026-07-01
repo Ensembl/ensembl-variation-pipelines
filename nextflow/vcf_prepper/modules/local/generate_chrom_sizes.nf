@@ -26,22 +26,22 @@ process GENERATE_CHROM_SIZES {
   output:
   val genome
   
-  shell:
+  script:
   genome = meta.genome
-  species = meta.species
-  assembly = meta.assembly
-  version = params.version
-  ini_file = params.ini_file
-  chrom_sizes = meta.chrom_sizes
-  force_create_config = params.force_create_config ? "--force" : ""
+  def species = meta.species
+  def assembly = meta.assembly
+  def version = params.version
+  def ini_file = params.ini_file
+  def chrom_sizes = meta.chrom_sizes
+  def force_create_config = params.force_create_config ? "--force" : ""
   
-  '''
+  """
   generate_chrom_sizes.py \
-    !{species} \
-    !{assembly} \
-    !{version} \
-    --ini_file !{ini_file} \
-    --chrom_sizes !{chrom_sizes} \
-    !{force_create_config}
-  '''
+    ${species} \
+    ${assembly} \
+    ${version} \
+    --ini_file ${ini_file} \
+    --chrom_sizes ${chrom_sizes} \
+    ${force_create_config}
+  """
 }

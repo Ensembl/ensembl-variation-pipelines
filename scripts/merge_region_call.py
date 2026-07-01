@@ -1,11 +1,7 @@
 import click
-import gzip
 import pysam
-import re
 from collections import defaultdict
-from uu import Error
 from lxml import etree
-import xml.etree.ElementTree as ET
 import logging
 
 logging.basicConfig(level=logging.INFO)

@@ -17,7 +17,6 @@
 import sys
 import configparser
 import argparse
-import os
 import json
 import subprocess
 import requests

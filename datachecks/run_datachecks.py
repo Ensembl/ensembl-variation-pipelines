@@ -14,16 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import os
 import sys
 import json
 from uuid import UUID
 import argparse
-import configparser
 import subprocess
-import datetime
-import getpass
 import logging
 
 logger = logging.getLogger(__name__)

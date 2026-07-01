@@ -17,7 +17,6 @@
 import sys
 import os
 from cyvcf2 import VCF, Writer
-from Bio import bgzf
 import argparse
 import json
 import re

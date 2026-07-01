@@ -15,12 +15,9 @@
 # limitations under the License.
 
 import sys
-import configparser
 import argparse
 import os
 import json
-import subprocess
-import requests
 from uuid import UUID
 from cyvcf2 import VCF
 import re

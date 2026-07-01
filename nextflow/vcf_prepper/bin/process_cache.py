@@ -15,11 +15,9 @@
 # limitations under the License.
 
 import sys
-import configparser
 import argparse
 import subprocess
 import os
-import requests
 import shutil
 
 from helper import *

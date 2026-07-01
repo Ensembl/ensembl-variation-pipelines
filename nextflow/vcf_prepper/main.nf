@@ -16,14 +16,15 @@
  
 include { VCF_PREPPER } from "./workflows/vcf_prepper.nf"
 
-WorkflowMain.initialise(workflow, params, log)
-
 workflow {
-  VCF_PREPPER()
+  main:
+    WorkflowMain.initialise(workflow, params, log)
+
+    VCF_PREPPER()
 }
 
-// Print summary
 workflow.onComplete {
+  // Print summary
   println ( workflow.success ? """
         Workflow summary
         ----------------

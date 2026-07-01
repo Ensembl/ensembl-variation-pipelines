@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import sys
-import configparser
 import argparse
 import subprocess
 import os
@@ -34,7 +33,7 @@ from helper import (
 
 CACHE_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/tabixconverted"
 FASTA_DIR = "/nfs/production/flicek/ensembl/variation/data/VEP/fasta"
-REPO_DIR = os.path.join("/hps/software/users/ensembl/variation", os.environ.get("USER"))
+DEFAULT_REPO_DIR = os.path.join("/hps/software/users/ensembl/variation", os.environ.get("USER"))
 PLUGIN_DATA_DIR = "/nfs/production/flicek/ensembl/variation/enseweb-data_tools/grch38/VERSION/vep/plugin_data"
 CONSERVATION_DATA_DIR = "/nfs/production/flicek/ensembl/variation/data/Conservation"
 SIFT_SPECIES = [
@@ -319,29 +318,29 @@ def get_plugin_args(
         plugin_data_dir = plugin_data_dir.replace("grch38", "grch37")
 
     if plugin == "CADD":
-        # CADD have data v1.7 data file from e113
-        if version < 113:
-            plugin_data_dir = plugin_data_dir.replace(f"{version}", "113")
+        # CADD data only stored from e114
+        if version < 114:
+            plugin_data_dir = plugin_data_dir.replace(f"{version}", "114")
+
+        if species == "sus_scrofa":
+            snv = os.path.join(plugin_data_dir, "ALL_pCADD-PHRED-scores.tsv.gz")
+            check_plugin_files(plugin, [snv])
+
+            return f"CADD,{snv}"
 
         if structural_variant:
             sv = os.path.join(plugin_data_dir, f"CADD_prescored_variants.tsv.gz")
             check_plugin_files(plugin, [sv])
 
             return f"CADD,{sv}"
-        else:
-            if species == "sus_scrofa":
-                snv = os.path.join(plugin_data_dir, f"ALL_pCADD-PHRED-scores.tsv.gz")
-                check_plugin_files(plugin, [snv])
 
-                return f"CADD,{snv}"
-            else:
-                snv = os.path.join(
-                    plugin_data_dir, f"CADD_{assembly}_1.7_whole_genome_SNVs.tsv.gz"
-                )
-                indels = os.path.join(plugin_data_dir, f"CADD_{assembly}_1.7_InDels.tsv.gz")
-                check_plugin_files(plugin, [snv, indels])
+        snv = os.path.join(
+            plugin_data_dir, f"CADD_{assembly}_1.7_whole_genome_SNVs.tsv.gz"
+        )
+        indels = os.path.join(plugin_data_dir, f"CADD_{assembly}_1.7_InDels.tsv.gz")
+        check_plugin_files(plugin, [snv, indels])
 
-                return f"CADD,{snv},{indels}"
+        return f"CADD,{snv},{indels}"
 
     if plugin == "REVEL":
         data_file = f"/nfs/production/flicek/ensembl/variation/data/REVEL/2021-may/new_tabbed_revel_{assembly.lower()}.tsv.gz"
@@ -500,7 +499,7 @@ def get_plugins(
     species: str,
     version: int,
     assembly: str,
-    repo_dir: str = REPO_DIR,
+    repo_dir: str = DEFAULT_REPO_DIR,
     conservation_data_dir: str = CONSERVATION_DATA_DIR,
     structural_variant: bool = False
 ) -> list:
@@ -554,7 +553,7 @@ def main(args=None):
     genome_uuid = args.genome_uuid or None
     vep_config = args.vep_config or f"{species}_{assembly}.ini"
     ini_file = args.ini_file or "DEFAULT.ini"
-    repo_dir = args.repo_dir or REPO_DIR
+    repo_dir = args.repo_dir or DEFAULT_REPO_DIR
 
     # get species division
     core_server = parse_ini(ini_file, "core")
@@ -639,7 +638,8 @@ def main(args=None):
     # write the VEP config file
     with open(vep_config, "w") as file:
         file.write("force_overwrite 1\n")
-        file.write(f"fork 2\n")
+        if not structural_variant:
+            file.write("fork 2\n")
         file.write(f"species {species}\n")
         file.write(f"assembly {assembly}\n")
         file.write(f"fasta {fasta}\n")
@@ -652,6 +652,9 @@ def main(args=None):
         file.write("protein 1\n")
         file.write("transcript_version 1\n")
         file.write("allele_number 1\n")
+
+        # if structural_variant:
+        #     file.write("max_sv_size -1\n")
 
         if species == "homo_sapiens" and assembly == "GRCh38":
             file.write("gencode_primary 1\n")

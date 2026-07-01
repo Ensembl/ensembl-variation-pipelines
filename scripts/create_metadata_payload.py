@@ -21,6 +21,7 @@ import os
 import json
 import subprocess
 import requests
+import re
 from uuid import UUID
 from cyvcf2 import VCF
 
@@ -38,10 +39,10 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--api_outdir",
-        dest="api_outdir",
+        "--pipeline_outdir",
+        dest="pipeline_outdir",
         type=str,
-        help="path to a vcf prepper api output directory",
+        help="path to a vcf prepper pipeline output directory containing api/ and tracks/ subdirectories",
     )
     parser.add_argument(
         "--input_config",
@@ -57,7 +58,7 @@ def parse_args(args=None):
         dest="dataset_type",
         type=str,
         default="all",
-        help="dataset type, accepted values: 'variation', 'evidence' or 'all'; Default is 'all'",
+        help="dataset type, accepted values: 'short_variants', 'evidence' or 'all'; Default is 'all'",
     )
     parser.add_argument("--debug", dest="debug", action="store_true")
 
@@ -206,6 +207,29 @@ def get_evidence_count(file: str, csq_field: str) -> int:
     return count
 
 
+def get_source_meta_from_vcf(file: str) -> dict:
+    """Extract source metadata from a VCF file's 'source' header.
+
+    Args:
+        file (str): Path to the VCF file.
+
+    Returns:
+        dict: Parsed key/value pairs from the 'source' header entry.
+    """
+    vcf = VCF(file)
+    source_header = vcf.get_header_type("source")
+    vcf.close()
+
+    if not "source" in source_header:
+        return {}
+
+    header_content = source_header["source"]
+    _, source_info_line = header_content.split('" ', 1)
+    source_info = dict(re.findall('(.+?)="(.+?)"\s*', source_info_line))
+
+    return source_info
+
+
 def parse_input_config(input_config: str) -> dict:
     """Parse an input_config JSON to a mapping keyed by genome UUID.
 
@@ -230,6 +254,9 @@ def parse_input_config(input_config: str) -> dict:
 
             species_metadata[genome_uuid]["species"] = genome["species"]
             species_metadata[genome_uuid]["assembly"] = genome["assembly"]
+            species_metadata[genome_uuid]["source_name"] = genome["source_name"]
+            if "sources" in genome:
+                species_metadata[genome_uuid]["sources"] = genome["sources"]
 
     return species_metadata
 
@@ -251,7 +278,7 @@ def main(args=None):
     """Collect statistics from api VCFs and submit or print payloads.
 
     Iterates over genomes in the API output directory, computes counts/attributes for
-    either 'variation' or 'evidence' dataset types, and either prints aggregated payloads
+    either 'short_variants' or 'evidence' dataset types, and either prints aggregated payloads
     (debug mode) or submits them to the provided endpoint.
 
     Args:
@@ -262,13 +289,16 @@ def main(args=None):
     """
     args = parse_args(args)
 
-    api_outdir = args.api_outdir or os.getcwd()
+    pipeline_outdir = args.pipeline_outdir or os.getcwd()
     input_config = args.input_config or None
     endpoint = args.endpoint or None
     debug = args.debug
 
+    api_outdir = os.path.join(pipeline_outdir, "api")
+    tracks_outdir = os.path.join(pipeline_outdir, "tracks")
+
     if args.dataset_type == "all" or args.dataset_type == None:
-        dataset_types = ["variation", "evidence"]
+        dataset_types = ["short_variants", "evidence"]
     else:
         dataset_types = [args.dataset_type]
 
@@ -297,23 +327,41 @@ def main(args=None):
                 print(f"[WARN] {genome_uuid} is not a valid uuid")
                 continue
 
+            # TBD: get this data from thoas if input_config not given
+            species = species_metadata[genome_uuid]["species"]
+            assembly = species_metadata[genome_uuid]["assembly"]
+            source_unparsed = species_metadata[genome_uuid]["source_name"]
+            
+            source = source_unparsed.replace("%20", " ").replace("%2F", "/")
+
             api_vcf = os.path.join(api_outdir, genome_uuid, "variation.vcf.gz")
             if not os.path.isfile(api_vcf):
                 print(f"[WARN] file not found - {api_vcf}")
                 continue
 
-            # TBD: get this data from thoas if input_config not given
-            species = species_metadata[genome_uuid]["species"]
-            assembly = species_metadata[genome_uuid]["assembly"]
+            track_bb = os.path.join(tracks_outdir, genome_uuid, f"variant-{source_unparsed.lower()}-details.bb")
+            if not os.path.isfile(track_bb):
+                print(f"[WARN] file not found - {track_bb}")
+                continue
+            track_bw = os.path.join(tracks_outdir, genome_uuid, f"variant-{source_unparsed.lower()}-summary.bw")
+            if not os.path.isfile(track_bw):
+                print(f"[WARN] file not found - {track_bw}")
+                continue
+            
+            source_meta = get_source_meta_from_vcf(api_vcf)
 
             payload = {}
-            payload["user"] = "nakib"
-            payload["name"] = dataset_type
-            if dataset_type == "variation":
-                payload["description"] = f"Short variant data for {species}"
+            payload["team_responsible"] = "Ensembl Variation"
+
+            payload["name"] = source
+            source_version = source_meta.get("version", "")
+            if source.lower() == "dbsnp" and not source_version.startswith("build"):
+                version = f"build {source_version}"
+            elif source.lower() == "eva" and not source_version.startswith("release"):
+                version = f"release {source_version}"
             else:
-                payload["description"] = f"Short variant evidence data for {species}"
-            payload["label"] = assembly
+                version = source_version
+            payload["label"] = version
             payload["dataset_type"] = dataset_type
 
             dataset_source = {}
@@ -325,7 +373,7 @@ def main(args=None):
 
             dataset_attribute = []
 
-            if dataset_type == "variation":
+            if dataset_type == "short_variants":
                 variant_count = get_variant_count(api_vcf)
                 if variant_count is not None:
                     attribute = {}
@@ -366,6 +414,20 @@ def main(args=None):
                     dataset_attribute.append(attribute)
 
             payload["dataset_attribute"] = dataset_attribute
+
+            payload["track_files"] = {}
+            payload["track_files"]["details"] = track_bb
+            payload["track_files"]["summary"] = track_bw
+
+            payload["track_source"] = {}
+            if source == "MULTIPLE":
+                payload["track_source"]["name"] = ", ".join(
+                    species_metadata[genome_uuid]["sources"]
+                )
+            else:
+                payload["track_source"]["name"] = source
+            payload["track_source"]["url"] = source_meta.get("url", "")
+            payload["track_source"]["details"] = version
 
             if debug:
                 aggregate_payload.append(payload)

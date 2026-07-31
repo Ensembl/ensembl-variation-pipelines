@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: install-%
+.PHONY: clean install-%
+
+clean:
+	rm -rf .venv/
 
 .venv/:
 	python -m venv .venv/
 
-install-deps: .venv
+install-deps: .venv/
 	.venv/bin/python -m pip install .

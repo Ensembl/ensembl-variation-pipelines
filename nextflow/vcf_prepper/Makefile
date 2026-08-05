@@ -14,11 +14,29 @@
 
 .PHONY: clean install-%
 
-clean:
+define target-help
+	$1
+		$2
+
+endef
+
+define print-help
+        $(if $(need-help),$(info $(call target-help,$1,$2)))
+endef
+
+need-help := $(filter help,$(MAKECMDGOALS))
+
+help: ; @echo $(if $(need-help),,\
+	Type \'$(MAKE)$(dash-f) help\' to get help)
+
+clean: \
+	$(call print-help,clean,Delete the local Python virtualenv (.venv/).)
 	rm -rf .venv/
 
-.venv/:
+.venv/: \
+	$(call print-help,.venv/,Create the local Python virtualenv.)
 	python -m venv .venv/
 
-install-deps: .venv/
+install-deps: .venv/ \
+	$(call print-help,install-deps,Install package and all dependencies into the virtualenv.)
 	.venv/bin/python -m pip install .

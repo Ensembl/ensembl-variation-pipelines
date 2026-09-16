@@ -1,0 +1,11 @@
+# Python environment
+.venv/
+
+# Python-generated files
+__pycache__/
+.pytest_cache/
+.ruff_cache
+
+src/phenotypes/__init__.py
+
+.env

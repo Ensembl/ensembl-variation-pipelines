@@ -89,11 +89,7 @@ jobs:
           repository: Ensembl/VEP_plugins
           ref: main
           path: 'nextflow/vcf_prepper/repos/VEP_plugins'
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      - uses: nf-core/setup-nextflow@v1
+      - uses: nf-core/setup-nextflow@v3
         with:
           version: '24.04.3'
 

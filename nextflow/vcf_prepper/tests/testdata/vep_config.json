@@ -1,0 +1,36 @@
+{
+    "annotation_source": {
+        "gff": {
+            "active": true
+        },
+        "fasta": {
+            "active": true
+        }
+    },
+    "default_options": {
+        "force_overwrite": 1,
+        "fork": 1,
+        "vcf": 1,
+        "spdi": 1,
+        "variant_class": 1,
+        "protein": 1,
+        "transcript_version": 1,
+        "gencode_promoter": 1
+    },
+    "plugins": {
+        "conf": [
+            {
+                "name": "CADD",
+                "keyed": true
+            },
+            {
+                "name": "SpliceAI",
+                "keyed": true
+            }
+        ]
+    },
+    "custom_annotaions": {
+        "conf": [
+        ]
+    }
+}

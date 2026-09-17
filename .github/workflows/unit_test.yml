@@ -143,10 +143,10 @@ jobs:
           sudo make install
 
           # install ucsc tools
-          wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed
+          wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bedToBigBed
           chmod +x bedToBigBed
           mv bedToBigBed /usr/local/bin
-          wget https://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig
+          wget https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig
           chmod +x wigToBigWig
           mv wigToBigWig /usr/local/bin
 

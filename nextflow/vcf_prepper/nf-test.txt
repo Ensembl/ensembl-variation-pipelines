@@ -1,0 +1,21 @@
+
+🚀[1m nf-test 0.9.2[0m
+https://www.nf-test.com
+(c) 2021 - 2024 Lukas Forer and Sebastian Schoenherr
+
+Load .nf-test/plugins/nft-vcf/1.0.7/nft-vcf-1.0.7.jar
+nf-test runs in CI mode.
+
+[1mTest process FORMAT_VCF[0m
+
+  [1mTest[0m [5b80a892] 'remove criteria - all' [32mPASSED[0m (4.059s)
+  [1mTest[0m [6f3545b8] 'remove criteria - non-unique ids' [32mPASSED[0m (3.808s)
+  [1mTest[0m [47544e8a] 'remove criteria - patch regions' [32mPASSED[0m (3.765s)
+  [1mTest[0m [6f793deb] 'remove criteria - none' [32mPASSED[0m (3.798s)
+  [1mTest[0m [2a06e1db] 'multiple source' [32mPASSED[0m (3.695s)
+  [1mTest[0m [cf070d74] 'SV fields - SVLEN and END' [32mPASSED[0m (3.696s)
+  [1mTest[0m [b6fe7027] 'HGSVC field - NODEID' [32mPASSED[0m (3.671s)
+
+
+[1m[32mSUCCESS: [0m[0mExecuted 7 tests in 26.529s
+

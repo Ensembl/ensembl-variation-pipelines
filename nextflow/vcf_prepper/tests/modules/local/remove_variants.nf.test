@@ -91,7 +91,7 @@ nextflow_process {
 
     }
     
-    test("Remove none") {
+    test("Only remove position-based") {
 
         when {
             params {

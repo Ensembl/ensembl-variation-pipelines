@@ -13,7 +13,10 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                genome_meta = [
+                        'chrom_sizes':"${baseDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes"
+                    ]
+                input[0] = tuple(genome_meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }
@@ -37,7 +40,10 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                genome_meta = [
+                        'chrom_sizes':"${baseDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes"
+                    ]
+                input[0] = tuple(genome_meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }
@@ -62,7 +68,10 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                genome_meta = [
+                        'chrom_sizes':"${baseDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes"
+                    ]
+                input[0] = tuple(genome_meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }
@@ -87,7 +96,10 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                genome_meta = [
+                        'chrom_sizes':"${baseDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes"
+                    ]
+                input[0] = tuple(genome_meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }

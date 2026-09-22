@@ -18,7 +18,7 @@
 // Prepare genome related files
 //
 
-include { GENERATE_CHROM_SIZES } from "../../modules/local/generate_chrom_sizes.nf"
+include { GENERATE_CHROM_SIZES } from "../../modules/local/generate_chrom_sizes/main.nf"
 include { GENERATE_VEP_CONFIG } from "../../modules/local/generate_vep_config.nf"
 include { GENERATE_SYNONYM_FILE } from "../../modules/local/generate_synonym_file.nf"
 include { PROCESS_CACHE } from "../../modules/local/process_cache.nf"

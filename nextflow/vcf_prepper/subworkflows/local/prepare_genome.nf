@@ -20,7 +20,7 @@
 
 include { GENERATE_CHROM_SIZES } from "../../modules/local/generate_chrom_sizes/main.nf"
 include { GENERATE_VEP_CONFIG } from "../../modules/local/generate_vep_config.nf"
-include { GENERATE_SYNONYM_FILE } from "../../modules/local/generate_synonym_file.nf"
+include { GENERATE_SYNONYM_FILE } from "../../modules/local/generate_synonym_file/main.nf"
 include { PROCESS_CACHE } from "../../modules/local/process_cache.nf"
 include { PROCESS_GFF } from "../../modules/local/process_gff.nf"
 include { PROCESS_FASTA } from "../../modules/local/process_fasta.nf"

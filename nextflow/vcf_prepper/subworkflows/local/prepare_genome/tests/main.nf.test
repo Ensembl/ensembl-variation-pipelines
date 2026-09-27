@@ -1,0 +1,71 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_workflow {
+
+    name "Test workflow PREPARE_GENOME"
+    script "../main.nf"
+    workflow "PREPARE_GENOME"
+
+    test("output path, synonyms and chrom-sizes creation, FTP download") {
+
+        def genome_uuid = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+        def test_meta = [
+            'genome_uuid': genome_uuid,
+            'genome': 'homo_sapiens_grch38',
+            'species': 'homo_sapiens',
+            'assembly': 'GRCh38',
+            'genome_temp_dir': "${workDir}/path/to/temp/${genome_uuid}",
+            'genome_api_outdir': "${workDir}/path/to/output/api/${genome_uuid}",
+            'genome_tracks_outdir': "${workDir}/path/to/output/tracks/${genome_uuid}",
+            'synonym_file': "${workDir}/path/to/temp/${genome_uuid}/${test_meta.genome}.synonyms",
+            'chrom_sizes_file': "${workDir}/path/to/temp/${genome_uuid}/${test_meta.genome}.chrom.sizes",
+        ]
+        def test_meta_json = groovy.json.JsonOutput.toJson(test_meta)
+
+        when {
+            params {
+                version = 110
+                ini_file = "${projectDir}/tests/testdata/test_db.ini"
+                output_dir = "${workDir}/path/to"
+            }
+            workflow {
+                """
+                def meta = new groovy.json.JsonSlurperClassic().parseText('''${test_meta_json}''')
+                def input_set = [[meta, '${baseDir}/tests/testdata/test.vcf.gz']]
+
+                input[0] = Channel.fromList(input_set)
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            // genome specific directories created
+            assert file("${workDir}/path/to/temp/${genome_uuid}").exists()
+            assert file("${workDir}/path/to/output/api/${genome_uuid}").exists()
+            assert file("${workDir}/path/to/output/tracks/${genome_uuid}").exists()
+
+            // genome_meta does not change
+            assert workflow.out.get(0).get(0).get(0) == test_meta: "PREPARE_GENOME workflow modified its input metadata."
+
+            assert file("${workDir}/path/to/temp/${genome_uuid}/${test_meta.genome}.synonyms").exists(): "Synonyms file not found at expected temp output path."
+            assert file("${workDir}/path/to/temp/${genome_uuid}/${test_meta.genome}.chrom.sizes").exists(): "Chromosome sizes file not found at expected temp output path."
+        }
+    }
+}

@@ -20,7 +20,7 @@
 //
 
 include { CREATE_RANK_FILE } from "../modules/local/create_rank_file.nf"
-include { PREPARE_GENOME } from "../subworkflows/local/prepare_genome.nf"
+include { PREPARE_GENOME } from "../subworkflows/local/prepare_genome/main.nf"
 include { UPDATE_FIELDS } from "../modules/local/update_fields.nf"
 include { REMOVE_VARIANTS } from "../modules/local/remove_variants.nf"
 include { RUN_VEP } from "../subworkflows/local/run_vep/main.nf"

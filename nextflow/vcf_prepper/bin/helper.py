@@ -251,10 +251,16 @@ def get_db_name(
     )
 
     results = process.stdout.decode().strip().split("\n")
-    if len(results) > 1:
+    if process.returncode != 0:
+        print(f"[ERROR] No {type} database found for species {species} version {version}")
+        exit(1)
+    elif len(results) > 1:
         print(
             f"[WARNING] Multiple {type} database found - returning the first match only"
         )
+    elif len(results) == 0 or results[0] == "":
+        print(f"[ERROR] No {type} database found for species {species} version {version}")
+        exit(1)
 
     return results[0]
 

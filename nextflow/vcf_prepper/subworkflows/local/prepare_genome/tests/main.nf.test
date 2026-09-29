@@ -41,7 +41,7 @@ nextflow_workflow {
             params {
                 version = 110
                 ini_file = "${projectDir}/tests/testdata/test_db.ini"
-                output_dir = "${workDir}/path/to"
+                output_dir = "${workDir}/path/to/output"
             }
             workflow {
                 """
@@ -57,15 +57,15 @@ nextflow_workflow {
             assert workflow.success
 
             // genome specific directories created
-            assert file("${workDir}/path/to/temp/${genome_uuid}").exists()
+            assert file("${workDir}/path/to/output/tmp/${genome_uuid}").exists()
             assert file("${workDir}/path/to/output/api/${genome_uuid}").exists()
             assert file("${workDir}/path/to/output/tracks/${genome_uuid}").exists()
 
             // genome_meta does not change
             assert workflow.out.get(0).get(0).get(0) == test_meta: "PREPARE_GENOME workflow modified its input metadata."
 
-            assert file("${workDir}/path/to/temp/${genome_uuid}/${test_meta.genome}.synonyms").exists(): "Synonyms file not found at expected temp output path."
-            assert file("${workDir}/path/to/temp/${genome_uuid}/${test_meta.genome}.chrom.sizes").exists(): "Chromosome sizes file not found at expected temp output path."
+            assert file("${workDir}/path/to/output/tmp/${genome_uuid}/${test_meta.genome}.synonyms").exists(): "Synonyms file not found at expected temp output path."
+            assert file("${workDir}/path/to/output/tmp/${genome_uuid}/${test_meta.genome}.chrom.sizes").exists(): "Chromosome sizes file not found at expected temp output path."
         }
     }
 }

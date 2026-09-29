@@ -24,16 +24,19 @@ nextflow_workflow {
     test("output path, synonyms and chrom-sizes creation, FTP download") {
 
         def genome_uuid = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
+        def species = 'homo_sapiens'
+        def assembly = 'GRCh38'
+        def genome = "${species}_${assembly}"
         def test_meta = [
             'genome_uuid': genome_uuid,
-            'genome': 'homo_sapiens_grch38',
-            'species': 'homo_sapiens',
-            'assembly': 'GRCh38',
+            'genome': genome,
+            'species': species,
+            'assembly': assembly,
             'genome_temp_dir': "${workDir}/path/to/temp/${genome_uuid}",
             'genome_api_outdir': "${workDir}/path/to/output/api/${genome_uuid}",
             'genome_tracks_outdir': "${workDir}/path/to/output/tracks/${genome_uuid}",
-            'synonym_file': "${workDir}/path/to/temp/${genome_uuid}/${test_meta.genome}.synonyms",
-            'chrom_sizes_file': "${workDir}/path/to/temp/${genome_uuid}/${test_meta.genome}.chrom.sizes",
+            'synonym_file': "${workDir}/path/to/temp/${genome_uuid}/${genome}.synonyms",
+            'chrom_sizes_file': "${workDir}/path/to/temp/${genome_uuid}/${genome}.chrom.sizes",
         ]
         def test_meta_json = groovy.json.JsonOutput.toJson(test_meta)
 

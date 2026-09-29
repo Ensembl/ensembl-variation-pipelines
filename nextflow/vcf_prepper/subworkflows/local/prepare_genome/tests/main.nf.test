@@ -59,8 +59,14 @@ nextflow_workflow {
             assert file("${workDir}/path/to/output/api/${genome_uuid}").exists()
             assert file("${workDir}/path/to/output/tracks/${genome_uuid}").exists()
 
-            // genome_meta does not change
-            assert workflow.out.get(0).get(0).get(0) == test_meta: "PREPARE_GENOME workflow modified its input metadata."
+            // existing attributes of test_meta should not change (more are added)
+            def workflow_out_meta = workflow.out.get(0).get(0).get(0)
+
+            test_meta.each { key, value ->
+                def value_in = value
+                def value_out = workflow_out_meta.get(key)
+                assert value_in == value_out: "PREPARE_GENOME workflow modified input metadata with key '${key}' (${value_in} -> ${value_out})."
+            }
 
             assert file("${workDir}/path/to/output/tmp/${genome_uuid}/${test_meta.genome}.synonyms").exists(): "Synonyms file not found at expected temp output path."
             assert file("${workDir}/path/to/output/tmp/${genome_uuid}/${test_meta.genome}.chrom.sizes").exists(): "Chromosome sizes file not found at expected temp output path."

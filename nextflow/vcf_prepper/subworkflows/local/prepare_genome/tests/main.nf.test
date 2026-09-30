@@ -23,9 +23,9 @@ nextflow_workflow {
 
     test("output path, synonyms and chrom-sizes creation, FTP download") {
 
-        def genome_uuid = "2b5fb047-5992-4dfb-b2fa-1fb4e18d1abb"
-        def species = 'homo_sapiens'
-        def assembly = 'GRCh38'
+        def genome_uuid = "209b71d3-90a8-4af0-913f-6e154ba14b03"
+        def species = 'oryzias_latipes'
+        def assembly = 'ASM223467v1'
         def genome = "${species}_${assembly}"
         def test_meta = [
             'genome_uuid': genome_uuid,

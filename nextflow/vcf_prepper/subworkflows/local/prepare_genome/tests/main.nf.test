@@ -31,12 +31,7 @@ nextflow_workflow {
             'genome_uuid': genome_uuid,
             'genome': genome,
             'species': species,
-            'assembly': assembly,
-            'genome_temp_dir': "${workDir}/path/to/temp/${genome_uuid}",
-            'genome_api_outdir': "${workDir}/path/to/output/api/${genome_uuid}",
-            'genome_tracks_outdir': "${workDir}/path/to/output/tracks/${genome_uuid}",
-            'synonym_file': "${workDir}/path/to/temp/${genome_uuid}/${genome}.synonyms",
-            'chrom_sizes_file': "${workDir}/path/to/temp/${genome_uuid}/${genome}.chrom.sizes",
+            'assembly': assembly
         ]
         def test_meta_json = groovy.json.JsonOutput.toJson(test_meta)
 

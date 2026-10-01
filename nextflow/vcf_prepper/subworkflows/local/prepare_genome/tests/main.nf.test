@@ -41,6 +41,7 @@ nextflow_workflow {
                 ini_file = "${projectDir}/tests/testdata/test_db.ini"
                 output_dir = "${workDir}/path/to/output"
                 use_vep_cache = 1
+                use_old_infra = 1
             }
             workflow {
                 """

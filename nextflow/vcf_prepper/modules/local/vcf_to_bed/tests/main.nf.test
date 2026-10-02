@@ -1,7 +1,7 @@
 nextflow_process {
 
     name "Test Process VCF_TO_BED"
-    script "modules/local/vcf_to_bed.nf"
+    script "../main.nf"
     process "VCF_TO_BED"
 
     test("Should run without failures") {

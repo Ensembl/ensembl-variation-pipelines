@@ -31,7 +31,7 @@ include { CONCAT_BEDS } from "../modules/local/concat_beds/main.nf"
 include { BED_TO_BIGBED } from "../modules/local/bed_to_bigbed/main.nf"
 include { BED_TO_WIG } from "../modules/local/bed_to_wig/main.nf"
 include { WIG_TO_BIGWIG } from "../modules/local/wig_to_bigwig/main.nf"
-include { SUMMARY_STATS } from "../modules/local/summary_stats.nf"
+include { SUMMARY_STATS } from "../modules/local/summary_stats/main.nf"
 
 def parse_config (config) {
   def input_set = []

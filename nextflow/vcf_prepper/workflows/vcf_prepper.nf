@@ -19,7 +19,7 @@
 // The Goal of this workflow is to process and annotate VCF files and generate related track files for genome browser
 //
 
-include { CREATE_RANK_FILE } from "../modules/local/create_rank_file.nf"
+include { CREATE_RANK_FILE } from "../modules/local/create_rank_file/main.nf"
 include { PREPARE_GENOME } from "../subworkflows/local/prepare_genome/main.nf"
 include { UPDATE_FIELDS } from "../modules/local/update_fields.nf"
 include { REMOVE_VARIANTS } from "../modules/local/remove_variants.nf"

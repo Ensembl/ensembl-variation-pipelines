@@ -1,36 +1,44 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 nextflow_process {
 
     name "Test Process VCF_TO_BED"
-    script "modules/local/vcf_to_bed.nf"
+    script "../main.nf"
     process "VCF_TO_BED"
 
-    test("Should run without failures") {
+    test("vcf_to_bed - short_variants") {
 
         when {
             params {
-                rank_file = "${baseDir}/assets/variation_consequnce_rank.json"
+                bed_fields = "${projectDir}/assets/short_variant_bedfields.json"
+                structural_variant = false
             }
             process {
                 """
-                input[0] = params.rank_file
-                input[1] = tuple("NONE", file("$baseDir/modules/local/vcf_to_bed/tests/testdata/test_vcftobed.vcf.gz"))
+                input[0] = "${projectDir}/assets/variation_consequnce_rank.json"
+                input[1] = tuple([:], file("${moduleDir}/tests/testdata/test_vcftobed.vcf.gz"))
                 """
             }
         }
 
         then {
-            // assert process run correctly
-            assert process.success
-            
-            // assert each output items value
-            // here get(0) gives the first ouput channel - we can use the name if we have used emit
-            with (process.out.get(0)) {
-                // output is a tuple which gives unordered list of ordered list. So we have to delve with two nested loop
-                with (get(0)) {
-                  assert get(0) == "NONE"
-                  assert get(1) ==~ ".*/test_vcftobed.bed"
-                }
-            }  
+			// not checking snapshot - for multi-allelic the alleles can come in any order
+            assert process.success 
             
             // assert the content of the output file
             def output_file = file(process.out.get(0).get(0).get(1))
@@ -38,6 +46,7 @@ nextflow_process {
             assert lines.size() == 14
             
             // vcf file line 2: ignored - rsID equals to "."
+			// so, no line in bed file
             
             // vcf file line 4: bi-allelic SNV
             assert lines[2] == "chr13 32357724 32357725 rs754065641 SNV G C 2 splice_polypyrimidine_tract_variant"
@@ -97,4 +106,53 @@ nextflow_process {
 
     }
 
+	test("vcf_to_bed - --structural_variant for symbolic alts") {
+
+        when {
+            params {
+                bed_fields = "${projectDir}/assets/structural_variant_bedfields.json"
+                structural_variant = true
+            }
+            process {
+                """
+                input[0] = "${projectDir}/assets/variation_consequnce_rank.json"
+                input[1] = tuple([:], file("${moduleDir}/tests/testdata/test_symbolic.vcf.gz"))
+                """
+            }
+        }
+
+		then {
+			assert process.success
+
+            // assert the content of the output file
+            def output_file = process.out.get(0).get(0).get(1)
+            def lines = file(output_file).readLines()
+            assert lines.size() == 1
+
+			assert lines[0] == "7 147730664 147738995 esv275461 duplication G <CN=2> 13 intron_variant 8331"
+
+            assert path(output_file).md5 == "a4eb183fdc83377081994fb8f43374c5"
+		}
+	}
+
+	test("vcf_to_bed - --structural_variant not given for symbolic alts") {
+
+        when {
+            params {
+                bed_fields = "${projectDir}/assets/short_variant_bedfields.json"
+                structural_variant = false
+            }
+            process {
+                """
+                input[0] = "${projectDir}/assets/variation_consequnce_rank.json"
+                input[1] = tuple([:], file("${moduleDir}/tests/testdata/test_symbolic.vcf.gz"))
+                """
+            }
+        }
+
+		then {
+			assert process.failed
+			assert process.errorReport.contains("structural variant detected, but not running in structural variant mode")
+		}
+	}
 }

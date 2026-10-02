@@ -1,0 +1,21 @@
+{
+    "split_vcf_chr": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            
+                        },
+                        "split.1.vcf.gz:md5,a19372541b6b26a1fd320ff098101d81"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "23.10.1"
+        },
+        "timestamp": "2025-10-18T22:42:27.687606"
+    }
+}

@@ -13,7 +13,7 @@ nextflow_process {
             process {
                 """
                 input[0] = params.rank_file
-                input[1] = tuple("NONE", file("$baseDir/tests/data/test_vcftobed.vcf.gz"))
+                input[1] = tuple("NONE", file("$baseDir/modules/local/vcf_to_bed/tests/testdata/test_vcftobed.vcf.gz"))
                 """
             }
         }

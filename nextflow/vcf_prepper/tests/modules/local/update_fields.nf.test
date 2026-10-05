@@ -29,17 +29,22 @@ nextflow_process {
         then {
             assert process.success
 
-            def output_file = file(process.out.get(0).get(0).get(1))
-            def lines = output_file.readLines()
-            assert lines.size() == 7
+            def lines = path(process.out.get(0).get(0).get(1)).linesGzip
+            def headerLines = lines.findAll { it.startsWith('#') }
+            def variantLines = lines.findAll { !it.startsWith('#') }
 
-            assert lines[0].equals("##fileformat=VCFv4.2")
-            assert lines[1].equals("##INFO=<ID=SOURCE,Number=1,Type=String,Description=\"Source of the variation data\">")
-            assert lines[2].equals("##contig=<ID=1>")
-            assert lines[3].equals("##contig=<ID=Y>")
-            assert lines[4].equals("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
-            assert lines[5].equals("1\t925952\t1019397\tG\tA\t.\t.\tSOURCE=test_source")
-            assert lines[6].equals("Y\t2787033\t652674\tAG\tA\t.\t.\tSOURCE=test_source")
+            assert headerLines.size() >= 1 : "Output file is missing its header lines."
+
+            assert headerLines[0].equals("##fileformat=VCFv4.4")
+            assert headerLines.contains("##INFO=<ID=SOURCE,Number=1,Type=String,Description=\"Source of the variation data\">")
+            assert headerLines.contains("##contig=<ID=1>")
+            assert headerLines.contains("##contig=<ID=Y>")
+            assert headerLines[headerLines.size()-1].contains("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
+
+            assert variantLines.size() == 2 : "Output file contains unexpected number of variants."
+
+            assert variantLines[0].equals("1\t925952\t1019397\tG\tA\t.\t.\tSOURCE=test_source")
+            assert variantLines[1].equals("Y\t2787033\t652674\tAG\tA\t.\t.\tSOURCE=test_source")
         }
 
     }
@@ -69,17 +74,22 @@ nextflow_process {
         then {
             assert process.success
 
-            def output_file = file(process.out.get(0).get(0).get(1))
-            def lines = output_file.readLines()
-            assert lines.size() == 7
+            def lines = path(process.out.get(0).get(0).get(1)).linesGzip
+            def headerLines = lines.findAll { it.startsWith('#') }
+            def variantLines = lines.findAll { !it.startsWith('#') }
 
-            assert lines[0].equals("##fileformat=VCFv4.2")
-            assert lines[1].equals("##INFO=<ID=SOURCE,Number=1,Type=String,Description=\"Source of the variation data\">")
-            assert lines[2].equals("##contig=<ID=1>")
-            assert lines[3].equals("##contig=<ID=Y>")
-            assert lines[4].equals("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
-            assert lines[5].equals("1\t925952\tVCV001019397\tG\tA\t.\t.\tSOURCE=ClinVar")
-            assert lines[6].equals("Y\t2787033\tVCV000652674\tAG\tA\t.\t.\tSOURCE=ClinVar")
+            assert headerLines.size() >= 1 : "Output file is missing its header lines."
+
+            assert headerLines[0].equals("##fileformat=VCFv4.4")
+            assert headerLines.contains("##INFO=<ID=SOURCE,Number=1,Type=String,Description=\"Source of the variation data\">")
+            assert headerLines.contains("##contig=<ID=1>")
+            assert headerLines.contains("##contig=<ID=Y>")
+            assert headerLines[headerLines.size()-1].equals("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO")
+
+            assert variantLines.size() == 2 : "Output file contains unexpected number of variants."
+
+            assert variantLines[0].equals("1\t925952\tVCV001019397\tG\tA\t.\t.\tSOURCE=ClinVar")
+            assert variantLines[1].equals("Y\t2787033\tVCV000652674\tAG\tA\t.\t.\tSOURCE=ClinVar")
         }
 
     }

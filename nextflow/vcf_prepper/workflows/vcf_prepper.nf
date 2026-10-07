@@ -19,19 +19,19 @@
 // The Goal of this workflow is to process and annotate VCF files and generate related track files for genome browser
 //
 
-include { CREATE_RANK_FILE } from "../modules/local/create_rank_file.nf"
-include { PREPARE_GENOME } from "../subworkflows/local/prepare_genome.nf"
+include { CREATE_RANK_FILE } from "../modules/local/create_rank_file/main.nf"
+include { PREPARE_GENOME } from "../subworkflows/local/prepare_genome/main.nf"
 include { UPDATE_FIELDS } from "../modules/local/update_fields.nf"
 include { REMOVE_VARIANTS } from "../modules/local/remove_variants.nf"
 include { RUN_VEP } from "../subworkflows/local/run_vep/main.nf"
-include { COUNT_VCF_VARIANT } from "../modules/local/count_vcf_variant.nf"
-include { SPLIT_VCF } from "../subworkflows/local/split_vcf.nf"
-include { VCF_TO_BED } from "../modules/local/vcf_to_bed.nf"
-include { CONCAT_BEDS } from "../modules/local/concat_beds.nf"
-include { BED_TO_BIGBED } from "../modules/local/bed_to_bigbed.nf"
-include { BED_TO_WIG } from "../modules/local/bed_to_wig.nf"
-include { WIG_TO_BIGWIG } from "../modules/local/wig_to_bigwig.nf"
-include { SUMMARY_STATS } from "../modules/local/summary_stats.nf"
+include { COUNT_VCF_VARIANT } from "../modules/local/count_vcf_variant/main.nf"
+include { SPLIT_VCF } from "../subworkflows/local/split_vcf/main.nf"
+include { VCF_TO_BED } from "../modules/local/vcf_to_bed/main.nf"
+include { CONCAT_BEDS } from "../modules/local/concat_beds/main.nf"
+include { BED_TO_BIGBED } from "../modules/local/bed_to_bigbed/main.nf"
+include { BED_TO_WIG } from "../modules/local/bed_to_wig/main.nf"
+include { WIG_TO_BIGWIG } from "../modules/local/wig_to_bigwig/main.nf"
+include { SUMMARY_STATS } from "../modules/local/summary_stats/main.nf"
 
 def parse_config (config) {
   def input_set = []

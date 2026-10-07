@@ -1,0 +1,142 @@
+-- MySQL dump 10.13  Distrib 8.0.46, for Linux (x86_64)
+--
+-- Host: mysql-hlvm-259.ebi.ac.uk    Database: oryzias_latipes_core_110_1
+-- ------------------------------------------------------
+-- Server version	5.7.27-30-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `meta`
+--
+
+DROP TABLE IF EXISTS `meta`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `meta` (
+  `meta_id` int(11) NOT NULL AUTO_INCREMENT,
+  `species_id` int(10) unsigned DEFAULT '1',
+  `meta_key` varchar(40) NOT NULL,
+  `meta_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`meta_id`),
+  UNIQUE KEY `species_key_value_idx` (`species_id`,`meta_key`,`meta_value`),
+  KEY `species_value_idx` (`species_id`,`meta_value`)
+) ENGINE=MyISAM AUTO_INCREMENT=564 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `meta`
+--
+
+LOCK TABLES `meta` WRITE;
+/*!40000 ALTER TABLE `meta` DISABLE KEYS */;
+INSERT INTO `meta` VALUES (1,NULL,'schema_type','core'),(2,NULL,'schema_version','110'),(3,NULL,'patch','patch_92_93_a.sql|schema_version'),(4,NULL,'patch','patch_92_93_b.sql|biotype_table'),(5,NULL,'patch','patch_92_93_c.sql|collate_index_interpro'),(6,1,'genebuild.start_date','2018-05-Ensembl'),(7,1,'assembly.date','2017-07'),(178,1,'species.common_name','Japanese medaka'),(390,1,'species.display_name','Japanese medaka HdrR'),(386,1,'species.scientific_name','Oryzias latipes'),(387,1,'species.taxonomy_id','8090'),(12,1,'assembly.accession','GCA_002234675.1'),(13,1,'assembly.default','ASM223467v1'),(14,1,'assembly.name','ASM223467v1'),(15,1,'assembly.web_accession_source','NCBI'),(16,1,'assembly.web_accession_type','GenBank Assembly ID'),(17,1,'assembly.coverage_depth','high'),(18,1,'genebuild.id','42'),(539,1,'genebuild.method','full_genebuild'),(20,1,'genebuild.projection_source_db','danio_rerio_core_92_11'),(21,1,'annotation.provider_name','Ensembl'),(22,1,'annotation.provider_url','www.ensembl.org'),(388,1,'species.production_name','oryzias_latipes'),(275,1,'repeat.analysis','repeatmask_repbase_teleost'),(274,1,'repeat.analysis','dust'),(382,1,'species.alias','olatipes'),(176,1,'species.stable_id_prefix','ENSORL'),(407,1,'species.classification','Teleostei'),(399,1,'species.classification','Euacanthomorphacea'),(400,1,'species.classification','Acanthomorphata'),(401,1,'species.classification','Ctenosquamata'),(402,1,'species.classification','Eurypterygia'),(403,1,'species.classification','Neoteleostei'),(404,1,'species.classification','Euteleosteomorpha'),(405,1,'species.classification','Clupeocephala'),(406,1,'species.classification','Osteoglossocephalai'),(213,1,'species.division','EnsemblVertebrates'),(389,1,'species.url','Oryzias_latipes'),(93,1,'genebuild.level','toplevel'),(94,1,'transcriptbuild.level','toplevel'),(95,1,'exonbuild.level','toplevel'),(96,1,'repeat_featurebuild.level','toplevel'),(97,1,'dna_align_featurebuild.level','toplevel'),(98,1,'protein_align_featurebuild.level','toplevel'),(99,1,'simple_featurebuild.level','toplevel'),(100,1,'prediction_transcriptbuild.level','toplevel'),(101,1,'prediction_exonbuild.level','toplevel'),(102,1,'genebuild.initial_release_date','2018-07'),(103,1,'genebuild.last_geneset_update','2018-07'),(104,NULL,'patch','patch_93_94_a.sql|schema_version'),(156,NULL,'patch','patch_93_94_c.sql|default_aln_type'),(106,NULL,'patch','patch_93_94_b.sql|nullable_ox_analysis'),(384,1,'species.alias','oryzias latipes'),(383,1,'species.alias','orylat'),(416,1,'species.classification','Chordata'),(395,1,'species.classification','Beloniformes'),(396,1,'species.classification','Atherinomorphae'),(397,1,'species.classification','Ovalentaria'),(398,1,'species.classification','Percomorphaceae'),(448,1,'xref.timestamp','2023-04-04 18:04:27'),(442,1,'sample.location_param','19:15904240-15917393'),(443,1,'sample.location_text','19:15904240-15917393'),(438,1,'sample.gene_param','ENSORLG00000011490'),(439,1,'sample.gene_text','mfsd13a'),(440,1,'sample.transcript_param','ENSORLT00000014393'),(441,1,'sample.transcript_text','mfsd13a-201'),(165,NULL,'patch','patch_94_95_a.sql|schema_version'),(166,NULL,'patch','patch_94_95_b.sql|vertebrate_division_rename'),(381,1,'species.alias','olat'),(394,1,'species.classification','Adrianichthyoidei'),(391,1,'species.classification','Oryzias latipes'),(392,1,'species.classification','Oryziinae'),(393,1,'species.classification','Adrianichthyidae'),(216,NULL,'patch','patch_95_96_a.sql|schema_version'),(218,NULL,'patch','patch_96_97_a.sql|schema_version'),(219,NULL,'patch','patch_96_97_b.sql|biotype_so_term'),(220,NULL,'patch','patch_96_97_c.sql|rnaproduct_tables'),(221,NULL,'patch','patch_96_97_d.sql|add_object_type_rnaproduct'),(222,NULL,'patch','patch_96_97_e.sql|add_stable_id_event_type_rnaproduct'),(385,1,'species.alias','oryzias_latipes'),(413,1,'species.classification','Gnathostomata'),(408,1,'species.classification','Neopterygii'),(409,1,'species.classification','Actinopteri'),(410,1,'species.classification','Actinopterygii'),(411,1,'species.classification','Euteleostomi'),(412,1,'species.classification','Teleostomi'),(269,NULL,'patch','patch_97_98_a.sql|schema_version'),(444,1,'sample.search_text','glycoprotein'),(272,NULL,'patch','patch_98_99_a.sql|schema_version'),(277,1,'repeat.analysis','trf'),(278,NULL,'patch','patch_99_100_a.sql|schema_version'),(279,NULL,'patch','patch_99_100_b.sql|alter_externaldb_type_notnull'),(280,NULL,'patch','patch_99_100_c.sql|alter_mapping_session_assembly_length'),(281,NULL,'patch','patch_100_101_a.sql|schema_version'),(282,1,'assembly.provider_name',''),(283,1,'assembly.provider_url',''),(284,NULL,'patch','patch_101_102_a.sql|schema_version'),(285,NULL,'patch','patch_102_103_a.sql|schema_version'),(286,NULL,'patch','patch_103_104_a.sql|schema_version'),(287,NULL,'patch','patch_104_105_a.sql|schema_version'),(446,1,'sample.vep_hgvs','ENSORLT00000024479.2:c.1790-1038G>T\\nENSORLT00000037316.1:c.119+16A>C\\nENSORLT00000003225.2:c.9del'),(447,1,'sample.vep_vcf','3 991437 . C A . . .\\n1 28650998 . A C . . .\\n7 5968582 . GG G . . .'),(297,1,'sample.vep_spdi','NC_019861.2:991436:C:A\\nNC_019859.2:28650997:A:C\\nNC_019865.2:5968582:G:'),(445,1,'sample.vep_ensembl','3 991437 991437 C/A 1\\n1 28650998 28650998 A/C 1\\n7 5968583 5968583 G/- 1'),(299,NULL,'patch','patch_105_106_a.sql|schema_version'),(380,1,'species.alias','medaka'),(379,1,'species.alias','japanese medaka'),(378,1,'species.alias','8090'),(419,1,'species.classification','Eumetazoa'),(420,1,'species.classification','Metazoa'),(418,1,'species.classification','Bilateria'),(417,1,'species.classification','Deuterostomia'),(414,1,'species.classification','Vertebrata'),(415,1,'species.classification','Craniata'),(355,NULL,'patch','patch_106_107_a.sql|schema_version'),(356,NULL,'patch','patch_106_107_b.sql|Added index for seq_region_mapping'),(367,NULL,'patch','patch_107_108_a.sql|schema_version'),(421,1,'species.classification','Opisthokonta'),(422,1,'species.classification','Eukaryota'),(423,NULL,'patch','patch_108_109_a.sql|schema_version'),(424,NULL,'patch','patch_108_109_b.sql|Added xref source GeneCards into external_db'),(435,NULL,'patch','patch_109_110_a.sql|schema_version'),(436,NULL,'patch','patch_109_110_b.sql|Add IS_PAR relationship to link X- and Y-PAR genes'),(437,NULL,'patch','patch_109_110_c.sql|Allow gene id to belong to multiple alt allele groups'),(449,1,'assembly.tolid','NULL'),(450,1,'assembly.level','chromosome'),(513,1,'species.strain','Hd-rR'),(452,1,'strain.type','strain'),(453,1,'species.strain_group','oryzias_latipes'),(454,1,'species.species_taxonomy_id','8090'),(456,1,'sample.accession','SAMN06689957'),(457,1,'genebuild.version','ENS01'),(458,1,'species.parlance_name','NULL'),(459,1,'genebuild.average_genomic_span','17930.51'),(460,1,'genebuild.total_exons','403860'),(461,1,'genebuild.shortest_gene_length','48'),(462,1,'genebuild.coding_genes','23622'),(463,1,'genebuild.average_cds_length','1810.58'),(464,1,'genebuild.average_intron_length','1942.24'),(465,1,'genebuild.longest_gene_length','524694'),(466,1,'genebuild.average_coding_exon_length','171.51'),(467,1,'genebuild.average_sequence_length','2809.94'),(468,1,'genebuild.coding_transcripts','37468'),(469,1,'genebuild.average_coding_exons_per_codin','10.56'),(470,1,'genebuild.total_transcripts','37468'),(471,1,'genebuild.total_coding_exons','395536'),(472,1,'genebuild.average_coding_exons_per_trans','10.78'),(473,1,'genebuild.total_introns','366392'),(474,1,'genebuild.transcripts_per_gene','1.59'),(475,1,'genebuild.average_exon_length','275.70'),(476,1,'genebuild.coding_transcripts_per_gene','1.59'),(477,1,'genebuild.nc_total_introns','0'),(478,1,'genebuild.nc_average_genomic_span','121.82'),(479,1,'genebuild.nc_total_transcripts','716'),(480,1,'genebuild.nc_small_non_coding_genes','654'),(514,1,'genebuild.nc_average_intron_length',''),(482,1,'genebuild.nc_average_exon_length','121.82'),(483,1,'genenbuild.nc_total_exons','716'),(484,1,'genebuild.nc_longest_gene_length','1674'),(485,1,'genebuild.nc_transcripts_per_gene','1.00'),(486,1,'genebuild.nc_shortest_gene_length','30'),(487,1,'genebuild.nc_non_coding_genes','716'),(488,1,'genebuild.nc_long_non_coding_genes','3'),(489,1,'genebuild.nc_average_exons_per_transcrip','1.00'),(490,1,'genebuild.nc_misc_non_coding_genes','59'),(491,1,'genebuild.nc_average_sequence_length','121.82'),(492,1,'genebuild.ps_shortest_gene_length','222'),(493,1,'genebuild.ps_average_sequence_length','681.11'),(494,1,'genebuild.ps_total_introns','33'),(495,1,'genebuild.ps_average_exons_per_transcrip','2.22'),(496,1,'genebuild.ps_total_transcripts','27'),(497,1,'genebuild.ps_longest_gene_length','5234'),(498,1,'genebuild.ps_total_exons','60'),(499,1,'genebuild.ps_average_genomic_span','1018.63'),(500,1,'genebuild.ps_pseudogenes','27'),(501,1,'genebuild.ps_average_intron_length','276.15'),(502,1,'genebuild.ps_average_exon_length','306.50'),(503,1,'genebuild.ps_transcripts_per_gene','1.00'),(504,1,'assembly.total_coding_sequence_length','39449654'),(505,1,'assembly.total_genome_length','734040372'),(506,1,'assembly.gc_percentage','40.82'),(507,1,'assembly.component_sequences','24'),(508,1,'assembly.chromosomes','24'),(509,1,'assembly.total_gap_length','491000'),(510,1,'assembly.contig_n50','2530934'),(511,1,'assembly.spanned_gaps','491'),(512,1,'assembly.toplevel_sequences','24'),(540,1,'genebuild.method_display','Ensembl Genebuild'),(516,1,'assembly.is_reference','1'),(517,1,'organism.biosample_id','SAMN06689957'),(518,1,'organism.taxonomy_id','8090'),(519,1,'organism.common_name','Japanese medaka'),(520,1,'organism.scientific_name','Oryzias latipes'),(521,1,'organism.species_taxonomy_id','8090'),(522,1,'assembly.ucsc_alias',''),(523,1,'organism.strain','Hd-rR'),(524,1,'organism.strain_type','strain'),(525,1,'assembly.tol_id',''),(526,1,'organism.ensembl_name','oryzias_latipes'),(538,1,'genebuild.annotation_source','ensembl'),(541,1,'genebuild.provider_name','Ensembl'),(542,1,'genebuild.provider_url','https://beta.ensembl.org/help/articles/vertebrate-genome-annotation'),(543,1,'assembly.busco_version','5.3.2'),(530,1,'genebuild.nc_total_introns',''),(531,1,'genebuild.nc_total_exons','716'),(535,1,'genome.genome_uuid','209b71d3-90a8-4af0-913f-6e154ba14b03'),(536,1,'genebuild.sample_gene','ENSORLG00000011490'),(537,1,'genebuild.sample_location','19:15904240-15917393'),(544,1,'assembly.busco_dataset','actinopterygii_odb10'),(545,1,'assembly.busco','C:96.8%[S:96.2%,D:0.6%],F:0.5%,M:2.7%,n:3640'),(546,1,'assembly.busco_mode','genome'),(547,1,'assembly.busco_completeness','3522'),(548,1,'assembly.busco_single_copy','3501'),(549,1,'assembly.busco_duplicated','21'),(550,1,'assembly.busco_fragmented','17'),(551,1,'assembly.busco_missing','101'),(552,1,'assembly.busco_total','3640'),(553,1,'genebuild.busco_version','5.3.2'),(554,1,'genebuild.busco_dataset','actinopterygii_odb10'),(555,1,'genebuild.busco','C:94.0%[S:93.2%,D:0.8%],F:2.3%,M:3.7%,n:3640'),(556,1,'genebuild.busco_mode','protein'),(557,1,'genebuild.busco_completeness','3421'),(558,1,'genebuild.busco_single_copy','3392'),(559,1,'genebuild.busco_duplicated','29'),(560,1,'genebuild.busco_fragmented','85'),(561,1,'genebuild.busco_missing','134'),(562,1,'genebuild.busco_total','3640'),(563,1,'genebuild.team_responsible','Genebuild');
+/*!40000 ALTER TABLE `meta` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `coord_system`
+--
+
+DROP TABLE IF EXISTS `coord_system`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `coord_system` (
+  `coord_system_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `species_id` int(10) unsigned NOT NULL DEFAULT '1',
+  `name` varchar(40) NOT NULL,
+  `version` varchar(255) DEFAULT NULL,
+  `rank` int(11) NOT NULL,
+  `attrib` set('default_version','sequence_level') DEFAULT NULL,
+  PRIMARY KEY (`coord_system_id`),
+  UNIQUE KEY `rank_idx` (`rank`,`species_id`),
+  UNIQUE KEY `name_idx` (`name`,`version`,`species_id`),
+  KEY `species_idx` (`species_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `coord_system`
+--
+
+LOCK TABLES `coord_system` WRITE;
+/*!40000 ALTER TABLE `coord_system` DISABLE KEYS */;
+INSERT INTO `coord_system` VALUES (1,1,'primary_assembly','ASM223467v1',1,'default_version,sequence_level');
+/*!40000 ALTER TABLE `coord_system` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `seq_region`
+--
+
+DROP TABLE IF EXISTS `seq_region`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `seq_region` (
+  `seq_region_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `coord_system_id` int(10) unsigned NOT NULL,
+  `length` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`seq_region_id`),
+  UNIQUE KEY `name_cs_idx` (`name`,`coord_system_id`),
+  KEY `cs_idx` (`coord_system_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `seq_region`
+--
+
+LOCK TABLES `seq_region` WRITE;
+/*!40000 ALTER TABLE `seq_region` DISABLE KEYS */;
+INSERT INTO `seq_region` VALUES (1,'1',1,37713152),(2,'2',1,25379070),(3,'3',1,38248663),(4,'4',1,32868862),(5,'5',1,33205099),(6,'6',1,32246747),(7,'7',1,34573382),(8,'8',1,26239357),(9,'9',1,33399407),(10,'10',1,31218526),(11,'11',1,28210532),(12,'12',1,30543476),(13,'13',1,33825776),(14,'14',1,30598983),(15,'15',1,30476034),(16,'16',1,32958677),(17,'17',1,31792230),(18,'18',1,30918796),(19,'19',1,25472880),(20,'20',1,25942153),(21,'21',1,31148813),(22,'22',1,28976614),(23,'23',1,24400806),(24,'24',1,23682337),(25,'MT',1,16714);
+/*!40000 ALTER TABLE `seq_region` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `seq_region_synonym`
+--
+
+DROP TABLE IF EXISTS `seq_region_synonym`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `seq_region_synonym` (
+  `seq_region_synonym_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `seq_region_id` int(10) unsigned NOT NULL,
+  `synonym` varchar(250) NOT NULL,
+  `external_db_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`seq_region_synonym_id`),
+  UNIQUE KEY `syn_idx` (`synonym`,`seq_region_id`),
+  KEY `seq_region_idx` (`seq_region_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=49 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `seq_region_synonym`
+--
+
+LOCK TABLES `seq_region_synonym` WRITE;
+/*!40000 ALTER TABLE `seq_region_synonym` DISABLE KEYS */;
+INSERT INTO `seq_region_synonym` VALUES (1,1,'CP020665.1',50710),(2,1,'NC_019859.2',1830),(3,2,'CP020666.1',50710),(4,2,'NC_019860.2',1830),(5,3,'CP020667.1',50710),(6,3,'NC_019861.2',1830),(7,4,'CP020668.1',50710),(8,4,'NC_019862.2',1830),(9,5,'CP020669.1',50710),(10,5,'NC_019863.2',1830),(11,6,'CP020670.1',50710),(12,6,'NC_019864.2',1830),(13,7,'CP020671.1',50710),(14,7,'NC_019865.2',1830),(15,8,'CP020672.1',50710),(16,8,'NC_019866.2',1830),(17,9,'CP020673.1',50710),(18,9,'NC_019867.2',1830),(19,10,'CP020674.1',50710),(20,10,'NC_019868.2',1830),(21,11,'CP020675.1',50710),(22,11,'NC_019869.2',1830),(23,12,'CP020676.1',50710),(24,12,'NC_019870.2',1830),(25,13,'CP020677.1',50710),(26,13,'NC_019871.2',1830),(27,14,'CP020678.1',50710),(28,14,'NC_019872.2',1830),(29,15,'CP020679.1',50710),(30,15,'NC_019873.2',1830),(31,16,'CP020680.1',50710),(32,16,'NC_019874.2',1830),(33,17,'CP020681.1',50710),(34,17,'NC_019875.2',1830),(35,18,'CP020682.1',50710),(36,18,'NC_019876.2',1830),(37,19,'CP020683.1',50710),(38,19,'NC_019877.2',1830),(39,20,'CP020684.1',50710),(40,20,'NC_019878.2',1830),(41,21,'CP020685.1',50710),(42,21,'NC_019879.2',1830),(43,22,'CP020686.1',50710),(44,22,'NC_019880.2',1830),(45,23,'CP020687.1',50710),(46,23,'NC_019881.2',1830),(47,24,'CP020688.1',50710),(48,24,'NC_019882.2',1830);
+/*!40000 ALTER TABLE `seq_region_synonym` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-09-29 13:04:02

@@ -1,88 +1,17 @@
-"""Regression checks for local fixes applied during the pipeline transfer."""
+"""ProteinFunction storage regressions using local SQLite and a fake adaptor."""
 
-import ast
-import gzip
-import importlib.util
 import sqlite3
 import subprocess
-import tempfile
 import unittest
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-NEXTFLOW = ROOT / "nextflow"
-
-
-def load_module(path):
-    spec = importlib.util.spec_from_file_location(path.stem, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+from tests.support.pipeline_test_support import (
+    NF,
+    NextflowTestCase,
+    TemporaryDirectoryTestCase,
+)
 
 
-MERGE = load_module(NEXTFLOW / "MaveDB/bin/merge_previous_output.py")
-
-
-class TransferTests(unittest.TestCase):
-    def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.temp.cleanup)
-        self.path = Path(self.temp.name)
-
-    def test_merge_and_reuse_only_filter_previous_rows(self):
-        previous = self.path / "previous.gz"
-        with gzip.open(previous, "wt") as handle:
-            handle.write(
-                "#chr\tstart\tend\turn\tp-value\n1\t1\t1\tA\t0.1\n1\t2\t2\tB\t0.2\n"
-            )
-        urns = self.path / "urns"
-        urns.write_text("A\n")
-        output = self.path / "out.tsv"
-        MERGE.merge(None, previous, urns, output)
-        self.assertEqual(
-            output.read_text().splitlines(),
-            ["chr\tstart\tend\turn\tpvalue", "1\t1\t1\tA\t0.1"],
-        )
-        current = self.path / "current.tsv"
-        current.write_text(
-            "chr\tstart\tend\turn\textra\n1\t3\t3\tC\tx\n1\t3\t3\tC\tx\n"
-        )
-        MERGE.merge(current, previous, urns, output)
-        rows = output.read_text().splitlines()
-        self.assertEqual(len(rows), 3)
-        self.assertEqual(rows[0], "chr\tstart\tend\turn\textra\tpvalue")
-        self.assertEqual(rows[1:], ["1\t3\t3\tC\tx\t", "1\t1\t1\tA\t\t0.1"])
-        current.write_text("")
-        MERGE.merge(current, previous, urns, output)
-        self.assertEqual(len(output.read_text().splitlines()), 2)
-        urns.write_text("missing\n")
-        with self.assertRaisesRegex(ValueError, "missing requested URNs"):
-            MERGE.merge(None, previous, urns, output)
-
-    def test_rounding_preserves_nonnumeric_values(self):
-        # Import only this pure function: the legacy scripts parse argv at import.
-        for name in [
-            "map_scores_to_variants.py",
-            "map_scores_to_variants_fromfiles.py",
-        ]:
-            tree = ast.parse((NEXTFLOW / "MaveDB/bin" / name).read_text())
-            function = next(
-                node
-                for node in tree.body
-                if isinstance(node, ast.FunctionDef)
-                and node.name == "round_float_columns"
-            )
-            namespace = {}
-            exec(
-                compile(ast.Module(body=[function], type_ignores=[]), name, "exec"),
-                namespace,
-            )
-            row = {"score": "0.123456", "urn": "A", "empty": None, "integer": "2"}
-            result = namespace["round_float_columns"](row, 4)
-            self.assertEqual(
-                result, {"score": "0.1235", "urn": "A", "empty": None, "integer": "2"}
-            )
-
+class ProteinFunctionTests(TemporaryDirectoryTestCase):
     def test_sqlite_shards_merge_and_duplicate_failure(self):
         probe = subprocess.run(
             ["perl", "-MDBI", "-MDBD::SQLite", "-e", "1"], capture_output=True
@@ -98,7 +27,7 @@ class TransferTests(unittest.TestCase):
                     "INSERT INTO predictions VALUES (?, ?, ?)",
                     (str(number), 267, b"\x00\xffmatrix"),
                 )
-        script = NEXTFLOW / "ProteinFunction/bin/merge_prediction_databases.pl"
+        script = NF / "ProteinFunction/bin/merge_prediction_databases.pl"
         subprocess.run(["perl", str(script), "merged.db"], cwd=self.path, check=True)
         with sqlite3.connect(self.path / "merged.db") as db:
             rows = db.execute(
@@ -123,7 +52,7 @@ class TransferTests(unittest.TestCase):
         subprocess.run(
             [
                 "perl",
-                str(NEXTFLOW / "ProteinFunction/bin/merge_prediction_databases.pl"),
+                str(NF / "ProteinFunction/bin/merge_prediction_databases.pl"),
                 "empty.db",
             ],
             cwd=self.path,
@@ -171,7 +100,7 @@ die $! unless defined $result;
             command = [
                 "perl",
                 str(wrapper),
-                str(NEXTFLOW / "ProteinFunction/bin" / name),
+                str(NF / "ProteinFunction/bin" / name),
                 "human",
                 "0",
                 "",
@@ -189,6 +118,65 @@ die $! unless defined $result;
             (self.path / "stored").read_text().splitlines(), ["stored", "stored"]
         )
         self.assertFalse(list(self.path.glob("*.db")))
+
+
+class ProteinFunctionNextflowTests(NextflowTestCase):
+    pipeline = "ProteinFunction"
+
+    def test_protein_task_local_sqlite_and_disabled_output(self):
+        probe = subprocess.run(
+            [
+                "perl",
+                "-MDBI",
+                "-MDBD::SQLite",
+                "-MBio::EnsEMBL::Variation::ProteinFunctionPredictionMatrix",
+                "-e",
+                "1",
+            ],
+            capture_output=True,
+        )
+        if probe.returncode:
+            self.skipTest("Ensembl Perl API and SQLite driver required")
+        (self.path / "sift.txt").write_text("A1C TOLERATED 0.5 2.0 20 1\n")
+        (self.path / "pph.txt").write_text(
+            "#o_aa2 prediction pph2_prob o_pos\nC\tbenign\t0.2\t1\n"
+        )
+        source = f"""
+include {{ store_sift_scores }} from '{NF}/ProteinFunction/nf_modules/sift.nf'
+include {{ store_pph2_scores }} from '{NF}/ProteinFunction/nf_modules/polyphen2.nf'
+include {{ postprocess_sqlite_db }} from '{NF}/ProteinFunction/nf_modules/database.nf'
+params.offline = true
+params.sqlite = true
+params.sqlite_db = "${{projectDir}}/nested/output/predictions.db"
+params.port = null
+params.host = null
+params.user = null
+params.pass = null
+params.database = null
+workflow {{
+  def peptide = [id: 'p1', md5: 'unused', seqString: 'A']
+  store_sift_scores('ready', 'human', tuple(peptide, file("${{projectDir}}/sift.txt")))
+  store_pph2_scores('ready', 'human', Channel.of(
+    tuple(peptide, file("${{projectDir}}/pph.txt"), 'humdiv'),
+    tuple(peptide, file("${{projectDir}}/pph.txt"), 'humvar')))
+  if (params.sqlite) {{
+    postprocess_sqlite_db(store_sift_scores.out.sqlite.mix(store_pph2_scores.out.sqlite).toList())
+  }}
+}}
+"""
+        self.run_nf(source)
+        output = self.path / "nested/output/predictions.db"
+        with sqlite3.connect(output) as db:
+            self.assertEqual(
+                db.execute(
+                    "SELECT analysis, typeof(matrix) FROM predictions ORDER BY analysis"
+                ).fetchall(),
+                [(267, "blob"), (268, "blob"), (269, "blob")],
+            )
+        output.unlink()
+        self.run_nf(source, ["--sqlite", "false", "-work-dir", "disabled-work"])
+        self.assertFalse(output.exists())
+        self.assertFalse(list((self.path / "disabled-work").rglob("predictions.db")))
 
 
 if __name__ == "__main__":

@@ -1,12 +1,13 @@
 # clinvar
 
-Builds the enriched ClinVar VCFs that web VEP annotates with, one per assembly.
+Builds the enriched ClinVar VCFs that web VEP annotates with, one per assembly,
+from each monthly ClinVar release.
 
-Each monthly ClinVar release is enriched with submission-level detail from the
-VCV and RCV XML releases (`CLNSUBA`, `CLNPMID`, `CLNSUBN`, `CLNRCV`). Each
-`GENEINFO` gene is resolved to the Ensembl gene IDs of the gene set VEP
-annotates with and written as `GENEENSG`. Web VEP reads the result from
-`<publish_dir>/<grch38|grch37>/clinvar.vcf.gz`.
+- Adds submission-level detail from the VCV and RCV XML releases as `CLNSUBA`,
+  `CLNPMID`, `CLNSUBN` and `CLNRCV`.
+- Resolves each `GENEINFO` gene to the Ensembl gene IDs of the gene set VEP
+  annotates with, written as `GENEENSG`.
+- Web VEP reads the result from `<publish_dir>/<grch38|grch37>/clinvar.vcf.gz`.
 
 ## Flow
 
@@ -25,17 +26,20 @@ cron is safe.
 
 ## GENEENSG
 
-For each `GENEINFO` entry `NAME:NCBIID`:
+Each `GENEINFO` entry `NAME:NCBIID` resolves to Ensembl gene IDs in order.
 
-- if `NAME` is a gene name in the GFF, take those Ensembl IDs
-- otherwise take the Ensembl genes Ensembl xrefs to `NCBIID`, keeping only genes
-  in the GFF that carry exactly one NCBI ID
+1. If `NAME` is a gene name in the GFF, take those Ensembl IDs.
+2. Otherwise take the GFF genes that Ensembl xrefs to `NCBIID`, skipping any
+   gene that carries more than one NCBI ID.
 
-IDs are joined with `+` in `GENEINFO` order. Records with no resolved gene have
-no `GENEENSG`. The field does not depend on the record having an XML row.
+- Unique IDs are joined with `+` in `GENEINFO` order.
+- A record with no resolved gene has no `GENEENSG`.
+- A record gets `GENEENSG` whether or not it has an XML row.
 
-NCBI IDs come from `Homo_sapiens.GRCh38.<release>.entrez.tsv.gz` for GRCh38
-and from the `homo_sapiens_core_<release>_37` dump tables for GRCh37.
+| Assembly | NCBI IDs from |
+|---|---|
+| GRCh38 | `Homo_sapiens.GRCh38.<release>.entrez.tsv.gz` |
+| GRCh37 | `homo_sapiens_core_<release>_37` dump tables |
 
 ## Requirements
 
@@ -49,32 +53,35 @@ python3 -m pip install -r requirements.txt
 
 ## Local run
 
-Copy `assets/local.params.example.yaml`, fill in the paths, then:
+Copy `assets/local.params.example.yaml`, fill in the paths and pass it with
+`-params-file`.
 
 ```bash
 nextflow run main.nf -profile standard -params-file local.params.yaml
 ```
 
-Leave an input unset to fetch it from NCBI or Ensembl. A local ClinVar VCF must
-carry the release date in `##fileDate` unless `allow_date_mismatch` is set.
+- Leave an input unset to fetch it from NCBI or Ensembl.
+- A local ClinVar VCF's `##fileDate` must match the XML release date unless
+  `allow_date_mismatch` is set.
 
-## Codon run (pencilled)
+## Codon run (not live yet)
 
 Copy `assets/codon.params.example.yaml` outside the repo and fill it in. Web VEP
 reads `$VEP_DATA_DIR/vep_plugins_data/grch3x/clinvar.vcf.gz`, so `publish_dir`
 is `<VEP_DATA_DIR>/vep_plugins_data`.
 
-`cron/crontab.example` runs `cron/run_clinvar.sh` daily as `ensvar`. The script
-submits `cron/clinvar_head.sbatch` unless a head job is already queued or
-running. The head job runs Nextflow with `-profile slurm`, with its launch and
-work directories under `CLINVAR_RUN_DIR` on `/hps`, because only SLURM jobs can
-write `/hps`.
+1. `cron/crontab.example` runs `cron/run_clinvar.sh` daily as `ensvar`.
+2. The script submits `cron/clinvar_head.sbatch` unless a head job is already
+   queued or running.
+3. The head job runs Nextflow with `-profile slurm`. It is itself a SLURM job
+   because its launch and work directories are under `CLINVAR_RUN_DIR` on
+   `/hps`, which only SLURM jobs can write.
 
 | Variable | Holds |
 |---|---|
 | `CLINVAR_PARAMS` | Params file |
 | `CLINVAR_RUN_DIR` | Launch and work directory on `/hps` |
-| `CLINVAR_ENV` | Optional file sourced first, for modules and the Python env |
+| `CLINVAR_ENV` | Optional file sourced first, for modules, the Python env and htslib |
 
 ## Params
 
@@ -94,8 +101,8 @@ write `/hps`.
 | `force` | `false` | Rebuild a published release, and replace regular files at the link paths |
 | `cache_dir` | `<publish_dir>/cache` | Gene map cache |
 | `keep_releases` | `3` | Releases kept per assembly |
-| `max_problem_fraction` | `0.01` | Validation gate |
-| `min_clnsuba_fraction` | `0.99` | Validation gate |
+| `max_problem_fraction` | `0.01` | Largest ratio of validation problems to records that `validate.py` accepts |
+| `min_clnsuba_fraction` | `0.99` | Smallest share of records carrying `CLNSUBA` that `validate.py` accepts |
 | `queue`, `fetch_queue` | `production`, `datamover` | SLURM partitions; downloads use `fetch_queue` |
 
 The gene map cache is keyed by assembly and Ensembl release only. Delete the
@@ -118,14 +125,17 @@ cached map after changing a GFF within a release.
   cache/gene_maps/<assembly>_<release>/gene_map.json
 ```
 
-`CURRENT` holds the published release date. The provenance file records the
-input sources and md5s, the gene map provenance, annotation stats, gate
-results, pipeline commit, Nextflow version and start time.
-
-Links are relative. Each link is replaced atomically, the data file first and
-then the index. Between the two swaps a reader can briefly see the new VCF with
-the old index. The publish step refuses to replace a regular file at a link
-path unless `force` is set, and never deletes the release a link points to.
+- `CURRENT` holds the published release date.
+- The provenance file records the input sources and md5s, the gene map
+  provenance, annotation stats, gate and validation results, pipeline commit,
+  Nextflow version and start time.
+- Links are relative.
+- Each link is replaced atomically, the VCF link first and then the index link.
+  Between the two swaps a reader can briefly see the new VCF with the old index.
+- `PUBLISH` refuses to replace a regular file at a link path unless `force` is
+  set.
+- `PUBLISH` keeps the newest `keep_releases` releases and never deletes the one
+  the links point to.
 
 ## Gates
 
@@ -134,13 +144,13 @@ A release is published only if every gate passes for that assembly.
 | Script | Fails when |
 |---|---|
 | `check_vep_safe.py` | A field no longer parses to the same structure after VEP's value rewrite, or `##source=ClinVar` is missing |
-| `validate.py` | Problem records exceed `max_problem_fraction`, or records with `CLNSUBA` fall below `min_clnsuba_fraction` |
-| `check_outputs.py` | Record counts differ, a `GENEENSG` ID is not a GFF gene, or the tabix index does not query |
+| `validate.py` | Validation problems exceed `max_problem_fraction` of the records, or records with `CLNSUBA` fall below `min_clnsuba_fraction` |
+| `check_outputs.py` | Record counts differ, a `GENEENSG` ID is not a GFF gene, or the tabix index is missing or fails a query |
 
 ## Resources
 
-Measured on the 2026-10 release (dated 2026-09-28, 4.56M records) with the
-standard profile on a 10-core, 16 GB laptop:
+Times and sizes are from the 2026-10 release (dated 2026-09-28, 4.56M records),
+run with the standard profile on a 10-core, 16 GB laptop.
 
 | Step | Time | Memory requested |
 |---|---|---|
@@ -149,8 +159,12 @@ standard profile on a 10-core, 16 GB laptop:
 | `CHECK` | 3.7 min per assembly | 4 GB |
 | Whole run, both assemblies | 52 min | |
 
-The work directory holds the 11.8 GB database. With the XML releases fetched by
-the pipeline it reaches about 24 GB. Each published assembly is about 470 MB.
+| Disk | Size |
+|---|---|
+| Database in the work directory | 11.8 GB |
+| Work directory, with the XML releases fetched by the pipeline | about 24 GB |
+| Each published assembly | about 470 MB |
+
 Remove old work directories after a successful run.
 
 ## Tests

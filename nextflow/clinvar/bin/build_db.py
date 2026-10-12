@@ -16,11 +16,9 @@
 
 """Parse a ClinVar VCV XML release into a SQLite database of submission-level facts.
 
-The VCF release carries only aggregate values (CLNSIG, CLNDN, CLNREVSTAT) plus a
-bare list of SCV accessions.  Everything that makes those aggregates
-interpretable -- who submitted, what each submitter actually asserted, against
-which condition, and citing which literature -- lives only in the XML.  This
-script pulls out that per-submission layer.
+The VCF release carries only aggregate values (CLNSIG, CLNDN, CLNREVSTAT) and a
+bare list of SCV accessions. Only the XML says who submitted, what each
+submitter asserted against which condition, and which literature they cited.
 
 Usage:
     build_db.py <records.xml|release.xml.gz> <out.sqlite> [--limit N]
@@ -147,10 +145,10 @@ def pmids(citation):
 
 
 def attr(elem, name):
-    """Attribute value, with ClinVar's placeholders normalised to None.
+    """Return a stripped attribute value, or None if it is missing, empty or "None".
 
-    ClinVar writes the literal string CUI="None" when a trait has no MedGen
-    concept; passed through verbatim it would look like a real identifier.
+    ClinVar writes CUI="None" for a trait with no MedGen concept, which would
+    otherwise read as a real identifier.
     """
     if elem is None:
         return None
@@ -162,7 +160,7 @@ def attr(elem, name):
 
 
 def trait_mappings(rec):
-    """ClinicalAssertion@ID -> list of mapping dicts from TraitMappingList."""
+    """Map each ClinicalAssertion ID to its TraitMappingList entries as dicts."""
     out = {}
     for tm in rec.findall("TraitMappingList/TraitMapping"):
         mg = tm.find("MedGen")
@@ -196,7 +194,7 @@ def resolve_condition(trait, maps):
         for m in maps:
             if m["type"] == "XRef" and m["ref"] == db and m["value"] == did:
                 return m["name"], m["cui"], name or did, db, did
-    # Unambiguous single-trait assertion: accept the lone mapping.
+    # A lone mapping for a trait with no name is unambiguous, so accept it.
     if len(maps) == 1 and not name:
         m = maps[0]
         db, did = xrefs[0] if xrefs else (None, None)
@@ -252,7 +250,8 @@ def parse_record(va, rows):
         for c in cls.findall("Citation"):
             for p in pmids(c):
                 rows["citation"].append((vid, None, p, "aggregate"))
-        # GeneReviews-style chapters attached to the disease, not the variant.
+        # Trait citations are disease reviews, such as GeneReviews chapters, and
+        # describe the disease rather than the variant.
         for t in cls.findall("ConditionList/TraitSet/Trait"):
             for c in t.findall("Citation"):
                 for p in pmids(c):
@@ -262,14 +261,12 @@ def parse_record(va, rows):
     for rcv in rec.findall("RCVList/RCVAccession"):
         conds = []
         for cc in rcv.findall("ClassifiedConditionList/ClassifiedCondition"):
-            # ~17% of these carry no DB/ID at all -- emit just the name rather
-            # than stringifying the missing attributes into "None:None:".
+            # About 17% carry no DB or ID and are written as the bare name.
             label = (cc.text or "").strip()
             db, cid = attr(cc, "DB"), attr(cc, "ID")
             conds.append(f"{db}:{cid}:{label}" if db and cid else label)
-        # Emit a row even when no classification of a recognised type is
-        # present -- ~380k RCVs are in that state (their submissions assert
-        # nothing), and skipping them leaves the table incomplete.
+        # Write a row even for an RCV with no recognised classification. About
+        # 380k RCVs have none, because their submissions assert nothing.
         emitted = False
         for cls in rcv.findall("RCVClassifications/*"):
             if cls.tag not in STMT_TYPES:
@@ -360,7 +357,6 @@ def parse_record(va, rows):
             if name or submitted or cui:
                 rows["scv_condition"].append((vid, scv, name, cui, submitted, db, did))
 
-        # Citations, tagged by provenance.
         for c in cls.findall("Citation") if cls is not None else []:
             for p in pmids(c):
                 rows["citation"].append((vid, scv, p, "classification"))

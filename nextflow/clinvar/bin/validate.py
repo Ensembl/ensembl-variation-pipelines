@@ -16,11 +16,12 @@
 
 """Cross-check XML-derived annotations against facts the VCF already carries.
 
-The VCF states independently which SCVs contribute to the aggregate germline
-classification (CLNSIGSCV) and what that aggregate says (CLNSIG). If the XML
-join is correct, the annotations agree with both. Exits 1 when the share of
-records with a problem exceeds --max-problem-fraction, or the share with
-CLNSUBA falls below --min-clnsuba-fraction.
+The VCF itself names the SCVs that contribute to the aggregate germline
+classification (CLNSIGSCV) and gives that classification (CLNSIG). A correct
+XML join puts every one of those SCVs in CLNSUBA, and at least one germline
+entry there when CLNSIG is set. Exits 1 when problems exceed
+--max-problem-fraction of the records, or the share of records with CLNSUBA
+falls below --min-clnsuba-fraction.
 
 Usage:
     validate.py <annotated.vcf.gz> [--max-problem-fraction 0.01]
@@ -60,7 +61,7 @@ def collect(path):
                     examples.append(("field count", f[2], suba[:200]))
                 continue
 
-            # Every SCV the VCF credits must be present in the per-SCV detail.
+            # Every SCV in CLNSIGSCV needs a CLNSUBA entry.
             ours = {e[0].split(".")[0] for e in entries}
             vcf_scvs = set(info.get("CLNSIGSCV", "").split("|")) - {""}
             missing = vcf_scvs - ours

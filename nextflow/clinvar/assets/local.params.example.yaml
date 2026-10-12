@@ -1,5 +1,5 @@
-# Local run: copy, fill in the placeholders and pass with -params-file.
-# Leave an input unset to fetch it from NCBI or Ensembl.
+# Params for a local run. Copy this file, fill in the placeholders and pass it
+# with -params-file. Leave an input unset to fetch it from NCBI or Ensembl.
 
 assemblies: GRCh38,GRCh37
 ensembl_release: 116
@@ -8,7 +8,7 @@ ensembl_release: 116
 gff_grch38: <DATA_DIR>/Homo_sapiens.GRCh38.116.chr.gff.gz
 gff_grch37: <DATA_DIR>/genes.gff3.bgz
 
-# Optional local inputs; ClinVar files must share one release date
+# Each of these is optional. Local ClinVar files must share one release date.
 # month: 2026-08
 # vcv_xml: <DATA_DIR>/ClinVarVCVRelease_2026-08.xml.gz
 # rcv_xml: <DATA_DIR>/ClinVarRCVRelease_2026-08.xml.gz

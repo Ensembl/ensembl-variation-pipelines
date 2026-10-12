@@ -1,5 +1,6 @@
-# Codon run: copy outside the repo, fill in the placeholders and point the
-# cron job at it. Web VEP reads $VEP_DATA_DIR/vep_plugins_data/grch3x/clinvar.vcf.gz.
+# Params for the Codon run. Copy this file outside the repo, fill in the
+# placeholders and point the cron job at it. Web VEP reads
+# $VEP_DATA_DIR/vep_plugins_data/grch3x/clinvar.vcf.gz.
 
 assemblies: GRCh38,GRCh37
 ensembl_release: 116

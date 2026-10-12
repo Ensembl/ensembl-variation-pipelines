@@ -16,9 +16,9 @@
 
 """Download a file with resume and retries, then verify its checksum.
 
-The checksum is an NCBI md5 file (`<md5>  <name>`) or an Ensembl CHECKSUMS
-entry, which is BSD `sum` output: a 16-bit rotating checksum and the number of
-1 KiB blocks.
+The checksum comes from an NCBI md5 file (`<md5>  <name>`) or an Ensembl
+CHECKSUMS entry. A CHECKSUMS entry is BSD `sum` output, which gives a 16-bit
+rotating checksum and the number of 1 KiB blocks.
 
 Usage:
     fetch_file.py URL --out PATH [--md5-url URL | --bsd-sum "SUM BLOCKS"]

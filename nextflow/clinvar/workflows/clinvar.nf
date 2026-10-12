@@ -156,7 +156,7 @@ workflow CLINVAR {
     release_json = ready.map { json, _info -> json }
     release = ready.map { _json, info -> info }
 
-    // ClinVar inputs: remote ones are fetched, local ones are used as is
+    // Split the ClinVar inputs into remote ones to fetch and local ones to use as they are
     release
       .flatMap { info ->
         def items = [['vcv_xml', info.inputs.vcv_xml], ['rcv_xml', info.inputs.rcv_xml]]
@@ -201,7 +201,7 @@ workflow CLINVAR {
     inputs = FETCH_FILE.out.file
       .mix(clinvar_inputs.local.map { key, input -> [key, file(input.path, checkIfExists: true)] })
 
-    // Gene maps
+    // Build the missing gene maps and add the cached ones
     local_mappings = release.flatMap { _info ->
       build_asms.findResults { asm ->
         def mapping = localMapping(asm)
@@ -227,7 +227,7 @@ workflow CLINVAR {
     gene_maps = BUILD_GENE_MAP.out.gene_map
       .mix(release.flatMap { _info -> cached_asms.collect { asm -> [asm, cachedGeneMap(cache_dir, asm)] } })
 
-    // SQLite DB from the VCV and RCV XML
+    // Build the SQLite DB from the VCV and RCV XML
     date = release.map { info -> info.date.replace('-', '') }
 
     BUILD_DB(

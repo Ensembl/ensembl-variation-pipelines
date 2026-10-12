@@ -1,4 +1,4 @@
-# ClinVar pipeline, installed in the ensvar crontab. Pencilled; not yet live.
+# Add this to the ensvar crontab to run the ClinVar pipeline. It is not live yet.
 # The script submits a SLURM head job and exits; a day with no new release is a no-op.
 #
 # CLINVAR_PARAMS   codon params file, see assets/codon.params.example.yaml

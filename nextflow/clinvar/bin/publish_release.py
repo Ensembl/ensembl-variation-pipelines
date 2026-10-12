@@ -18,10 +18,11 @@
 
 Copies the VCF, its index and its provenance into
 DIR/<asm>/releases/clinvar_<YYYYMMDD>.vcf.gz{,.tbi,.provenance.json}, then
-repoints DIR/<asm>/clinvar.vcf.gz and clinvar.vcf.gz.tbi as relative symlinks.
-Each link is swapped atomically, data file first, so readers see the new VCF
-with the old index only between the two swaps. Keeps the newest --keep
-releases and never deletes the one the links point to.
+repoints DIR/<asm>/clinvar.vcf.gz and clinvar.vcf.gz.tbi as relative symlinks
+and writes the date to DIR/<asm>/CURRENT. Each link is swapped atomically,
+data file first, so readers see the new VCF with the old index only between
+the two swaps. Keeps the newest --keep releases and never deletes the one the
+links point to.
 
 Usage:
     publish_release.py --assembly ASM --date YYYY-MM-DD --vcf X --tbi X

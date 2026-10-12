@@ -48,9 +48,10 @@ def grouped(con, sql):
 
 def build_annotations(con):
     """Materialise one row of ready-to-write INFO strings per variation_id."""
-    # The four streams below are merged in variation_id order.  scv is already
-    # clustered that way by its primary key; give the others matching indexes so
-    # the merge is an index scan rather than a sort of tens of millions of rows.
+    # The five streams below are merged in variation_id order. The scv primary
+    # key and the rcv_scv index from build_rcv_db.py already give that order.
+    # The indexes below give it for the other three, so the merge scans indexes
+    # instead of sorting tens of millions of rows.
     con.execute("PRAGMA cache_size=-1000000")
     con.execute(
         "CREATE INDEX IF NOT EXISTS ix_scvcond_merge"
@@ -98,8 +99,8 @@ def build_annotations(con):
                description, conditions
         FROM rcv ORDER BY variation_id, rcv_accession""",
     )
-    # SCV -> RCV membership, from the RCV release (build_rcv_db.py).  The VCV
-    # release does not state it, and matching on condition is unreliable.
+    # SCV -> RCV membership comes from the RCV release (build_rcv_db.py), because
+    # the VCV release does not state it and matching on condition is unreliable.
     member_rows = grouped(
         con,
         """
@@ -126,7 +127,6 @@ def build_annotations(con):
         for scv_acc, rcv_acc in members:
             rcv_by_scv.setdefault(scv_acc, []).append(rcv_acc)
 
-        # condition + citation lookups keyed by SCV
         cond_by_scv = {}
         for scv_acc, name, cui in conds:
             d = cond_by_scv.setdefault(scv_acc, ([], []))
@@ -193,8 +193,8 @@ def build_annotations(con):
             if submitter and submitter not in submitters:
                 submitters.append(submitter)
 
-        # An RCV may cover several conditions; join them with '+' like every
-        # other repeated subfield rather than leaving an escaped pipe inline.
+        # An RCV may cover several conditions. Join them with '+', like every
+        # other repeated subfield.
         rcv_entries = [
             "~".join(
                 (

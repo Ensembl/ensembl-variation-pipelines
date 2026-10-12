@@ -24,8 +24,7 @@ import sys
 import urllib.error
 import urllib.request
 
-# CLNSUBA subfields, in order. Contributes and RCV come last so that readers
-# indexing subfields 0-14 keep working.
+# Readers index CLNSUBA subfields by position, so add new ones at the end.
 SUBA_FIELDS = (
     "SCV",
     "Submitter",
@@ -54,8 +53,8 @@ RCV_FIELDS = (
     "Condition",
 )
 
-# Appended to the header description of every ClinVar field annotate_vcf.py
-# re-delimits. check_vep_safe.py finds those fields by it.
+# annotate_vcf.py appends this note to the header description of each ClinVar
+# field it re-delimits. check_vep_safe.py finds those fields by the note.
 REDELIMIT_NOTE = (
     " Values are separated by + and percent-encoded, so that they"
     " survive ingestion as a VEP custom annotation."
@@ -65,7 +64,6 @@ USER_AGENT = "ensembl-variation-pipelines/clinvar"
 
 
 def die(message):
-    """Print a one-line error and exit 1."""
     print(f"error: {message}", file=sys.stderr)
     sys.exit(1)
 
@@ -111,7 +109,6 @@ def close_xml(proc, complete=True):
 
 
 def md5sum(path):
-    """Return the hex md5 of a file."""
     digest = hashlib.md5()
     with open(path, "rb") as handle:
         for block in iter(lambda: handle.read(1 << 20), b""):
@@ -133,8 +130,9 @@ def vep(value):
 def esc(value):
     """Make a value safe inside a VCF INFO field and through VEP.
 
-    Spaces become '_'. The INFO delimiters, the '~' and '+' sub-delimiters and
-    the characters VEP rewrites to '&' are percent-encoded, '%' first.
+    Percent-encodes '%' first, then the INFO delimiters ',', ';' and '=', VEP's
+    separators '|' and '&', and the sub-delimiters '~' and '+'. Strips leading
+    and trailing whitespace and turns each inner whitespace run into '_'.
     """
     if value is None:
         return ""
@@ -146,7 +144,7 @@ def esc(value):
 
 
 def esc_join(values):
-    """Escape each value, drop repeats and join with '+'."""
+    """Escape the non-empty values, drop repeats and join with '+'."""
     return "+".join(dict.fromkeys(esc(v) for v in values if v))
 
 
@@ -159,7 +157,7 @@ def redelimit(value):
 
 
 def info_dict(info):
-    """Parse a VCF INFO column into a dict of key to raw value."""
+    """Parse a VCF INFO column into {key: raw value}, skipping flags."""
     out = {}
     for kv in info.split(";"):
         if "=" in kv:

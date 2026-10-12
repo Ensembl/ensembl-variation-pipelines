@@ -25,10 +25,10 @@ Adds, per variant:
   CLNRCV    per-condition (RCV) classifications, which CLNSIG merges
   GENEENSG  Ensembl gene IDs for the GENEINFO genes, in the gene set VEP uses
 
-It also re-delimits ClinVar's own multi-value fields. VEP rewrites both ',' and
-'|' to '&' in a custom annotation, so '|'-separated values holding literal
-commas would shatter. Three separator levels survive VEP once values are
-escaped:
+The script also re-delimits ClinVar's own multi-value fields. VEP rewrites both
+',' and '|' to '&' in a custom annotation, so a literal comma inside a
+'|'-separated value would read as a separator. Three separator levels survive
+VEP once values are escaped:
 
     ','  between entries      (VEP renders this as '&')
     '~'  between subfields    (unchanged by VEP)
@@ -37,8 +37,8 @@ escaped:
 GENEENSG follows rule G5. For each GENEINFO entry NAME:NCBIID, a NAME that is a
 gene Name in the GFF gives those genes' IDs; any other NAME falls back to the
 Ensembl genes xref'd to NCBIID that carry no other NCBI ID. IDs are unique, in
-GENEINFO order, and joined with '+'. It is written for every record with a
-resolvable GENEINFO, whether or not the XML has a row for it.
+GENEINFO order, and joined with '+'. GENEENSG is written for every record with a
+resolvable GENEINFO, whether or not the XML has a row for that record.
 
 Usage:
     annotate_vcf.py <db.sqlite> <in.vcf[.gz]> <out.vcf|-> --gene-map gene_map.json
@@ -64,8 +64,8 @@ from clinvar_common import (
     redelimit,
 )
 
-# Descriptions must contain no double quotes: the VCF header wraps them in
-# quotes and bcftools rejects the line if any appear inside.
+# Descriptions must not contain double quotes, because the VCF header wraps
+# them in quotes and bcftools rejects a line with quotes inside.
 ENCODING_NOTE = (
     "Spaces are rendered as underscores and the characters "
     "comma, semicolon, equals, pipe, ampersand, tilde, plus and "
@@ -114,10 +114,12 @@ INFO_HEADERS = [
 
 XML_FIELDS = ("CLNSUBA", "CLNPMID", "CLNSUBN", "CLNRCV")
 
-# ClinVar's own '|'-separated fields. The germline (CLN*) and oncogenicity
-# (ONC*) fields are the ones the VEP config pulls. The somatic (SCI*) fields
-# carry the same hazard and are rewritten too. CLNSIGSCV is not a VEP field
-# and validate.py reads it on '|', so it is left alone.
+# These ClinVar fields hold '|'-separated values or literal commas. VEP turns
+# both '|' and ',' into '&', so they are rewritten to use '+'.
+# The VEP config pulls the germline (CLN*) and oncogenicity (ONC*) fields. The
+# somatic (SCI*) fields break the same way under VEP, so they are rewritten too.
+# CLNSIGSCV keeps '|', because validate.py splits it on '|' and the VEP config
+# does not pull it.
 CLINVAR_REDELIMIT = (
     "CLNDN",
     "CLNDNINCL",

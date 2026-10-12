@@ -18,8 +18,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Nextflow head job. It runs on SLURM because only SLURM jobs can write /hps,
-# where the launch and work directories live.
+# This SLURM job runs the Nextflow head process, and run_clinvar.sh submits it.
+# It runs on SLURM because only SLURM jobs can write /hps, where the launch and
+# work directories live.
 
 set -euo pipefail
 

@@ -100,7 +100,7 @@ nextflow_process {
 
                 assert records.collectEntries { id, fields -> [(id): fields.GENEENSG] } == genes
 
-                // no XML row: GENEENSG without the XML fields
+                // Records with no XML row get GENEENSG but no CLNSUBA
                 assert records["9000004"].CLNSUBA == null
                 assert records["626313"].CLNSUBA == null
                 assert records["66881"].CLNSUBA != null

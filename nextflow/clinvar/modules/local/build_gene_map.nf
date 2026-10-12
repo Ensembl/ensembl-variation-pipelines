@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-// The map depends only on the assembly and the Ensembl release, so it is built
-// once into the cache and reused by later ClinVar releases.
+// storeDir caches the map by assembly and Ensembl release, so later ClinVar
+// releases reuse it. Delete the cached map after changing a GFF within a release.
 
 process BUILD_GENE_MAP {
   tag "${asm}"

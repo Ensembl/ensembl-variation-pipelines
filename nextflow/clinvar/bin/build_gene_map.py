@@ -16,11 +16,11 @@
 
 """Build the gene map annotate_vcf.py uses to resolve GENEINFO to Ensembl IDs.
 
-Reads the genes of the GFF VEP annotates with, and Ensembl's NCBI gene xrefs:
-the per-release entrez.tsv for GRCh38, or a join over core database dumps for
-GRCh37, which has no entrez.tsv. `by_ncbi` keeps only GFF genes that carry
-exactly one NCBI gene ID, which drops readthrough and antisense NCBI IDs that
-Ensembl xrefs to a component gene.
+Reads the genes of the GFF VEP annotates with and Ensembl's NCBI gene xrefs.
+The xrefs come from the per-release entrez.tsv for GRCh38 and from a join over
+core database dumps for GRCh37, which has no entrez.tsv. `by_ncbi` keeps only
+GFF genes that carry exactly one NCBI gene ID, which drops readthrough and
+antisense NCBI IDs that Ensembl xrefs to a component gene.
 
 Usage:
     build_gene_map.py --assembly ASM --gff GFF
@@ -87,8 +87,8 @@ def core_rows(dump_dir, table):
 def core_pairs(dump_dir):
     """Yield (gene stable ID, NCBI gene ID) joined from core database dumps.
 
-    gene -> object_xref (Gene) -> xref -> external_db (EntrezGene), current
-    genes only.
+    Joins gene -> object_xref (Gene) -> xref -> external_db (EntrezGene) and
+    keeps current genes only.
     """
     entrez_dbs = {
         r[0] for r in core_rows(dump_dir, "external_db") if r[1] == "EntrezGene"
@@ -103,7 +103,7 @@ def core_pairs(dump_dir):
 
 
 def build(gff_ids, by_name, pairs):
-    """Return (by_name, by_ncbi) as sorted lists, applying the single-NCBI guard."""
+    """Return sorted (by_name, by_ncbi) maps, applying the single-NCBI guard."""
     genes_by_ncbi = collections.defaultdict(set)
     ncbi_by_gene = collections.defaultdict(set)
     for gene_id, ncbi_id in pairs:

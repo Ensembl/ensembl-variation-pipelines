@@ -34,7 +34,8 @@ nextflow_process {
             assert !map.by_name.containsKey("BVES")
             assert map.by_ncbi["11149"] == ["ENSG00000112276"]
 
-            // readthrough NCBI ID on a component gene with two NCBI IDs
+            // POC1B carries its own NCBI ID and the readthrough ID 133039968, so
+            // neither maps. 130008987 has no Ensembl xref.
             assert !map.by_ncbi.containsKey("133039968")
             assert !map.by_ncbi.containsKey("130008987")
 

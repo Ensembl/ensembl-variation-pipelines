@@ -16,14 +16,16 @@
 
 """Work out which ClinVar release to build and where its inputs are.
 
-Picks the newest monthly VCV XML release, or --month, reads its ReleaseDate
-from the first bytes of the file, and checks that the matching RCV release and
-the per-assembly VCFs of that date exist. Local paths replace the remote files.
+Picks the newest monthly VCV XML release, or --month, and reads its
+ReleaseDate from the first bytes of the file. Checks that the RCV XML and each
+assembly's VCF exist for that date. --vcv-xml, --rcv-xml and --vcf take local
+files in place of the remote ones.
 
 Writes release.json with status `ready`, `incomplete` (a remote input does not
 exist yet) or `published` (every assembly already has this release in
---published-dir). All three exit 0, so a scheduled rerun is a no-op. Network
-errors and date mismatches exit 1.
+--published-dir; --force skips this check). All three exit 0, so a scheduled
+run with nothing to build ends cleanly. Network errors and date mismatches
+exit 1.
 
 Usage:
     resolve_release.py --assemblies GRCh38,GRCh37 --out release.json
@@ -94,7 +96,6 @@ def remote(url):
 
 
 def require(url):
-    """Raise Incomplete unless url exists."""
     try:
         read_url(url, max_bytes=1)
     except NotFound as exc:
@@ -116,7 +117,7 @@ def vcf_date(path):
 
 
 def resolve(args, assemblies, local_vcfs, release):
-    """Fill the release.json dict, or raise Incomplete once part-filled."""
+    """Fill release in place, so the month and date it finds survive an Incomplete."""
     base = args.base_url.rstrip("/")
     inputs = {}
     release["month"] = args.month or ""

@@ -17,10 +17,12 @@
 """Verify an annotated ClinVar VCF survives ingestion as a VEP custom annotation.
 
 Applies the substitutions VEP makes to every custom annotation value
-(ensembl-vep OutputFactory/VCF.pm, output_hash_to_line) and checks that every
-field the pipeline writes or re-delimits still parses to the same structure.
-The re-delimited ClinVar fields are found from the header, by the note
-annotate_vcf.py appends to their descriptions. Exits 1 on any failure.
+(ensembl-vep OutputFactory/VCF.pm, output_hash_to_line) and checks that
+GENEINFO and every field the pipeline adds or re-delimits still parse to the
+same structure. Finds the re-delimited ClinVar fields by the note that
+annotate_vcf.py appends to their header descriptions. Also checks that the
+header has ##source=ClinVar and declares GENEINFO and each added field.
+Exits 1 on any failure.
 
 Usage:
     check_vep_safe.py <annotated.vcf.gz>
@@ -56,10 +58,11 @@ def read_header(handle):
 
 
 def entries_survive(value, sep, width=None):
-    """Check that a sep-separated value splits the same way after VEP.
+    """Return whether a sep-separated value splits the same way after VEP.
 
     VEP turns ',' and '|' into '&', so the value must hold no literal '&' and
-    no separator other than sep that VEP would also rewrite.
+    no ',' or '|' except sep. With width, every entry must also have width
+    '~'-separated subfields.
     """
     if "&" in value or (sep == "," and "|" in value) or (sep == "|" and "," in value):
         return False

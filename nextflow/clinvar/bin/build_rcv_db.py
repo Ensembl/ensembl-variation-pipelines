@@ -16,17 +16,18 @@
 
 """Extract the SCV -> RCV membership from a ClinVar RCV (full) XML release.
 
-The VCV release does not state which submissions back which RCV: a
-ClinicalAssertion carries no RCV accession and no TraitSetID, and TraitMappingList
-only reaches a MedGen concept.  Matching on condition instead is unreliable --
-ClinVar's RCV-level ClassifiedCondition and its per-assertion TraitMapping can
-land on different concepts for the same trait (VariationID 18068 resolves to
-C0266313 at RCV level but C5681536 per submission, and 2.5% of submission
-conditions have a CUI that appears in no RCV for that variant).
+The VCV release does not say which submissions back which RCV. A
+ClinicalAssertion carries no RCV accession and no TraitSetID, and
+TraitMappingList only reaches a MedGen concept. Matching on condition is
+unreliable, because the RCV-level ClassifiedCondition and the per-assertion
+TraitMapping can land on different concepts for the same trait. VariationID
+18068 resolves to C0266313 at RCV level but C5681536 per submission, and 2.5%
+of submission conditions have a CUI that appears in no RCV for that variant.
 
-The RCV release states the grouping explicitly: each <ClinVarSet> holds one
-ReferenceClinVarAssertion (the RCV) together with the ClinVarAssertion elements
-(the SCVs) that belong to it.  That is what this script harvests.
+In the RCV release each <ClinVarSet> holds one ReferenceClinVarAssertion (the
+RCV) and the ClinVarAssertion elements (the SCVs) that belong to it. The script
+also copies the RCV-level classifications into rcv_stage for comparison with
+`rcv`. Nothing in the pipeline reads rcv_stage.
 
 Usage:
     build_rcv_db.py <ClinVarRCVRelease.xml.gz> <existing.sqlite> [--limit N]
@@ -93,10 +94,10 @@ def text(elem, path):
 
 
 def conditions_of(ref):
-    """Render the RCV's TraitSet the same way the VCV's ClassifiedCondition is.
+    """Render the RCV's TraitSet like build_db.py renders ClassifiedCondition.
 
-    'MedGen:CUI:Name' per trait, or the bare name where no MedGen concept
-    exists, joined with ' | '.
+    Each trait becomes 'MedGen:CUI:Name', the bare name when there is no CUI, or
+    'MedGen:CUI' when there is no name. Traits are joined with ' | '.
     """
     ts = ref.find("TraitSet")
     if ts is None:
@@ -108,8 +109,7 @@ def conditions_of(ref):
             for nm in t.findall("Name/ElementValue")
             if (nm.text or "").strip()
         ]
-        # Prefer the Preferred name, but fall back to any name rather than
-        # dropping the trait -- some carry only an Alternate.
+        # Some traits carry only an Alternate name, so fall back to the first name.
         name = next(
             (n for n, ty in names if ty == "Preferred"), names[0][0] if names else None
         )
@@ -165,8 +165,8 @@ def parse_set(cs, rows, cls_rows):
                 )
             )
 
-    # Emit a row per RCV even when no classification of a recognised type is
-    # present; ~380k RCVs are in that state. stmt_type stays NULL for those.
+    # Write a row for every RCV. About 380k have no recognised classification
+    # and get a NULL stmt_type.
     conds = conditions_of(ref)
     emitted = False
     for cls in ref.findall("Classifications/*"):

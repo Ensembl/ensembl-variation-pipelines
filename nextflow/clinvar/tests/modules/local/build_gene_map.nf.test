@@ -13,7 +13,7 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     "GRCh38",
                     file("$baseDir/tests/data/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"),
                     [file("$baseDir/tests/data/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz")]
@@ -53,7 +53,7 @@ nextflow_process {
             process {
                 """
                 def dir = "$baseDir/tests/data/ensembl/homo_sapiens_core_116_37"
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     "GRCh37",
                     file("$baseDir/tests/data/gff/genes.gff3.bgz"),
                     ["gene", "object_xref", "xref", "external_db"].collect { name -> file("\${dir}/\${name}.txt.gz") }

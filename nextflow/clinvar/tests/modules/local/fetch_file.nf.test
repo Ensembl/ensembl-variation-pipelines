@@ -10,7 +10,7 @@ nextflow_process {
             process {
                 """
                 def xml = "file://$baseDir/tests/data/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
-                input[0] = Channel.of(["vcv_xml", xml, xml + ".md5", ""])
+                input[0] = channel.of(["vcv_xml", xml, xml + ".md5", ""])
                 """
             }
         }
@@ -31,7 +31,7 @@ nextflow_process {
             process {
                 """
                 def dir = "file://$baseDir/tests/data/ensembl/homo_sapiens_core_116_37"
-                input[0] = Channel.of(["mapping_GRCh37", dir + "/xref.txt.gz", "", "15853 1"])
+                input[0] = channel.of(["mapping_GRCh37", dir + "/xref.txt.gz", "", "15853 1"])
                 """
             }
         }

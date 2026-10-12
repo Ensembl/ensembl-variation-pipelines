@@ -31,8 +31,8 @@ nextflow_process {
 
             def md5 = path(process.out.md5.get(0)).json
             def xml = "$baseDir/tests/data/clinvar_ftp/xml"
-            assert md5.vcv_xml == path("${xml}/ClinVarVCVRelease_2026-08.xml.gz").md5
-            assert md5.rcv_xml == path("${xml}/RCV_release/ClinVarRCVRelease_2026-08.xml.gz").md5
+            assert md5.vcv_xml == new File("${xml}/ClinVarVCVRelease_2026-08.xml.gz").bytes.md5()
+            assert md5.rcv_xml == new File("${xml}/RCV_release/ClinVarRCVRelease_2026-08.xml.gz").bytes.md5()
         }
     }
 }

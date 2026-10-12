@@ -16,7 +16,7 @@ nextflow_process {
                 def data = "$baseDir/tests/data"
                 def vcf = "\${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
                 def json = "\${data}/publish"
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     "GRCh38",
                     file(vcf),
                     file("\${vcf}.tbi"),
@@ -78,7 +78,7 @@ nextflow_process {
                 def data = "$baseDir/tests/data"
                 def vcf = "\${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
                 def json = "\${data}/publish"
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     "GRCh38",
                     file(vcf),
                     file("\${vcf}.tbi"),
@@ -103,6 +103,7 @@ nextflow_process {
 
         then {
             assert process.failed
+            assert process.errorMessage.contains("grch38/clinvar.vcf.gz is a regular file, not a symlink")
 
             def dir = new File("$outputDir/pub/grch38")
             assert !java.nio.file.Files.isSymbolicLink(dir.toPath().resolve("clinvar.vcf.gz"))
@@ -126,7 +127,7 @@ nextflow_process {
                 def data = "$baseDir/tests/data"
                 def vcf = "\${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
                 def json = "\${data}/publish"
-                input[0] = Channel.of([
+                input[0] = channel.of([
                     "GRCh38",
                     file(vcf),
                     file("\${vcf}.tbi"),

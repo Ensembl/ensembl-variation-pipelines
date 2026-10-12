@@ -105,7 +105,7 @@ nextflow_pipeline {
         then {
             assert workflow.success
             assert workflow.trace.tasks().size() == 1
-            assert workflow.stdout.any { line -> line.contains("published, nothing to do") }
+            assert new File("$launchDir/meta/nextflow.log").text.contains("ClinVar 2026-08: published, nothing to do")
             assert !new File("$outputDir/pub/grch38/clinvar.vcf.gz").exists()
         }
     }
@@ -135,7 +135,7 @@ nextflow_pipeline {
         then {
             assert workflow.success
             assert workflow.trace.tasks().size() == 1
-            assert workflow.stdout.any { line -> line.contains("incomplete, nothing to do") }
+            assert new File("$launchDir/meta/nextflow.log").text.contains("ClinVar 2026-09: incomplete, nothing to do")
             assert !new File("$outputDir/pub/grch38").exists()
         }
     }
@@ -166,6 +166,7 @@ nextflow_pipeline {
 
         then {
             assert workflow.failed
+            assert new File("$launchDir/meta/nextflow.log").text.contains("validate failed: CLNSUBA fraction 0.4615 < 0.99")
             assert !new File("$outputDir/pub/grch38/releases").exists()
             assert !new File("$outputDir/pub/grch37/releases").exists()
         }
@@ -198,6 +199,7 @@ nextflow_pipeline {
 
         then {
             assert workflow.failed
+            assert new File("$launchDir/meta/nextflow.log").text.contains("grch38/clinvar.vcf.gz is a regular file, not a symlink")
 
             def link = new File("$outputDir/pub/grch38/clinvar.vcf.gz")
             assert !java.nio.file.Files.isSymbolicLink(link.toPath())

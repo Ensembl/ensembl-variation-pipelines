@@ -23,7 +23,7 @@ nextflow_process {
                 """
                 def data = "$baseDir/tests/data"
                 def core = "\${data}/ensembl/homo_sapiens_core_116_37"
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     [
                         "GRCh38",
                         file("\${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"),
@@ -44,13 +44,13 @@ nextflow_process {
             process {
                 """
                 def annotate_vcfs = "$baseDir/tests/data/clinvar_ftp"
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     ["GRCh38", file("\${annotate_vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
                     ["GRCh37", file("\${annotate_vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
                 )
                     .join(BUILD_GENE_MAP.out.gene_map)
                     .combine(BUILD_DB.out.db)
-                    .combine(Channel.of("20260804"))
+                    .combine(channel.of("20260804"))
                 """
             }
         }
@@ -68,7 +68,7 @@ nextflow_process {
             process {
                 """
                 def vcfs = "$baseDir/tests/data/clinvar_ftp"
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     ["GRCh38", file("\${vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
                     ["GRCh37", file("\${vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
                 )
@@ -106,7 +106,7 @@ nextflow_process {
             process {
                 """
                 def vcfs = "$baseDir/tests/data/clinvar_ftp"
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     ["GRCh38", file("\${vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
                     ["GRCh37", file("\${vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
                 )
@@ -118,6 +118,7 @@ nextflow_process {
 
         then {
             assert process.failed
+            assert process.errorMessage.contains("validate failed: CLNSUBA fraction 0.4615 < 0.99")
         }
     }
 
@@ -133,7 +134,7 @@ nextflow_process {
             process {
                 """
                 def vcfs = "$baseDir/tests/data/clinvar_ftp"
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     ["GRCh38", file("\${vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
                     ["GRCh37", file("\${vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
                 )
@@ -146,6 +147,7 @@ nextflow_process {
 
         then {
             assert process.failed
+            assert process.errorMessage.contains("output gates failed: geneensg_in_gff")
         }
     }
 }

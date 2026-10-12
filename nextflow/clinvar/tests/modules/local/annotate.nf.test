@@ -23,7 +23,7 @@ nextflow_process {
                 """
                 def data = "$baseDir/tests/data"
                 def core = "\${data}/ensembl/homo_sapiens_core_116_37"
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     [
                         "GRCh38",
                         file("\${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"),
@@ -50,13 +50,13 @@ nextflow_process {
             process {
                 """
                 def vcfs = "$baseDir/tests/data/clinvar_ftp"
-                input[0] = Channel.of(
+                input[0] = channel.of(
                     ["GRCh38", file("\${vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
                     ["GRCh37", file("\${vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
                 )
                     .join(BUILD_GENE_MAP.out.gene_map)
                     .combine(BUILD_DB.out.db)
-                    .combine(Channel.of("20260804"))
+                    .combine(channel.of("20260804"))
                 """
             }
         }
@@ -114,8 +114,8 @@ nextflow_process {
                 assert counts.with_geneensg == 9
                 assert counts.top_unresolved*.get(0).contains("LOC130008987:130008987")
 
-                def input = path("$baseDir/tests/data/clinvar_ftp/vcf_${asm}/archive_2.0/2026/clinvar_20260804.vcf.gz")
-                assert new File(md5.toString()).text.trim() == input.md5
+                def input = new File("$baseDir/tests/data/clinvar_ftp/vcf_${asm}/archive_2.0/2026/clinvar_20260804.vcf.gz")
+                assert new File(md5.toString()).text.trim() == input.bytes.md5()
             }
         }
     }

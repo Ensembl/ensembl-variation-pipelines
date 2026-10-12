@@ -1,0 +1,96 @@
+# VCF prepper remains owned by unit_test.yml and its nf-test coverage work.
+name: pipeline-tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pipeline-tests-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Select pipeline tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      python_pipelines: ${{ steps.select.outputs.python_pipelines }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check test selection behavior
+        run: python3 -m unittest discover -s tests/ci -v
+      - name: Select suites from the complete change
+        id: select
+        run: >-
+          python3 scripts/ci/select_pipeline_tests.py
+          --event-path "$GITHUB_EVENT_PATH"
+          --event-name "$GITHUB_EVENT_NAME"
+          --output "$GITHUB_OUTPUT"
+
+  python-tests:
+    name: Tests / ${{ matrix.pipeline }}
+    needs: changes
+    if: needs.changes.outputs.python_pipelines != '[]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        pipeline: ${{ fromJSON(needs.changes.outputs.python_pipelines) }}
+    env:
+      NXF_SYNTAX_PARSER: v1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: nf-core/setup-nextflow@v2
+        with:
+          version: '26.04.4'
+      - name: Install selected pipeline dependencies
+        env:
+          PIPELINE: ${{ matrix.pipeline }}
+        run: |
+          setup="nextflow/$PIPELINE/tests/setup.sh"
+          if [ -f "$setup" ]; then
+            bash "$setup"
+          fi
+      - name: Run the selected suite (skips fail CI)
+        env:
+          PIPELINE: ${{ matrix.pipeline }}
+        run: python3 tests/run_pipeline_tests.py "$PIPELINE" --strict
+
+  pipeline-tests:
+    needs: [changes, python-tests]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every selected suite to pass
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          PYTHON_PIPELINES: ${{ needs.changes.outputs.python_pipelines }}
+          PYTHON_RESULT: ${{ needs.python-tests.result }}
+        run: |
+          test "$CHANGES_RESULT" = success
+          test -n "$PYTHON_PIPELINES"
+          if [ "$PYTHON_PIPELINES" = '[]' ]; then
+            test "$PYTHON_RESULT" = skipped
+          else
+            test "$PYTHON_RESULT" = success
+          fi

@@ -1,0 +1,34 @@
+{
+  "pipelines": {
+    "vcf_prepper": {
+      "runner": "external",
+      "workflow": ".github/workflows/unit_test.yml",
+      "paths": [
+        "nextflow/vcf_prepper/"
+      ]
+    }
+  },
+  "shared_paths": [
+    {
+      "paths": [
+        "nextflow/utils/"
+      ],
+      "pipelines": [
+        "MaveDB",
+        "ProteinFunction",
+        "liftover",
+        "Remapping",
+        "pangenomes"
+      ]
+    }
+  ],
+  "all_suite_paths": [
+    ".github/workflows/pipeline_tests.yml",
+    ".github/pipeline-tests.json",
+    "scripts/ci/",
+    "tests/ci/",
+    "tests/support/",
+    "tests/__init__.py",
+    "tests/run_pipeline_tests.py"
+  ]
+}

@@ -1,0 +1,4 @@
+.nextflow*
+.nf-test*
+reports/
+nf-test.txt

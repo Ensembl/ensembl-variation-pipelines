@@ -1,0 +1,106 @@
+nextflow_process {
+
+    name "Test Process RESOLVE_RELEASE"
+    script "modules/local/resolve_release.nf"
+    process "RESOLVE_RELEASE"
+
+    test("Local inputs give a ready release") {
+
+        when {
+            process {
+                """
+                def data = "$baseDir/tests/data/clinvar_ftp"
+                input[0] = "--assemblies GRCh38,GRCh37" +
+                    " --vcv-xml \${data}/xml/ClinVarVCVRelease_2026-08.xml.gz" +
+                    " --rcv-xml \${data}/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz" +
+                    " --vcf GRCh38=\${data}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz" +
+                    " --vcf GRCh37=\${data}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz" +
+                    " --published-dir $outputDir/pub"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def release = path(process.out.release.get(0)).json
+            assert release.status == "ready"
+            assert release.date == "2026-08-04"
+            assert release.month == "2026-08"
+            assert release.inputs.vcv_xml.path.endsWith("ClinVarVCVRelease_2026-08.xml.gz")
+            assert release.inputs.vcf.keySet() == ["GRCh38", "GRCh37"] as Set
+        }
+    }
+
+    test("Remote mirror gives a ready release with md5 URLs") {
+
+        when {
+            process {
+                """
+                input[0] = "--assemblies GRCh38,GRCh37" +
+                    " --base-url file://$baseDir/tests/data/clinvar_ftp" +
+                    " --published-dir $outputDir/pub"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def release = path(process.out.release.get(0)).json
+            assert release.status == "ready"
+            assert release.date == "2026-08-04"
+            assert release.inputs.vcv_xml.url.endsWith("xml/ClinVarVCVRelease_2026-08.xml.gz")
+            assert release.inputs.vcv_xml.md5_url.endsWith("ClinVarVCVRelease_2026-08.xml.gz.md5")
+            assert release.inputs.vcf.GRCh37.url.endsWith("vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")
+        }
+    }
+
+    test("A month not yet on the mirror is incomplete") {
+
+        when {
+            process {
+                """
+                input[0] = "--assemblies GRCh38" +
+                    " --base-url file://$baseDir/tests/data/clinvar_ftp" +
+                    " --month 2026-09" +
+                    " --published-dir $outputDir/pub"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def release = path(process.out.release.get(0)).json
+            assert release.status == "incomplete"
+            assert release.reason
+        }
+    }
+
+    test("A release already published for every assembly is published") {
+
+        when {
+            params {
+                def releases = new File("$outputDir/pub/grch38/releases")
+                releases.mkdirs()
+                new File(releases, "clinvar_20260804.vcf.gz").text = ""
+            }
+            process {
+                """
+                input[0] = "--assemblies GRCh38" +
+                    " --base-url file://$baseDir/tests/data/clinvar_ftp" +
+                    " --published-dir $outputDir/pub"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def release = path(process.out.release.get(0)).json
+            assert release.status == "published"
+            assert release.date == "2026-08-04"
+        }
+    }
+}

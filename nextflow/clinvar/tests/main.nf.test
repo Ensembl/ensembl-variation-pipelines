@@ -1,0 +1,208 @@
+nextflow_pipeline {
+
+    name "Test the ClinVar pipeline end to end"
+    script "main.nf"
+
+    test("Builds, checks and publishes both assemblies") {
+
+        when {
+            params {
+                def data = "$baseDir/tests/data"
+                def pub = new File("$outputDir/pub")
+
+                assemblies = "GRCh38,GRCh37"
+                ensembl_release = 116
+                gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
+                gff_grch37 = "${data}/gff/genes.gff3.bgz"
+                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
+                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                vcv_xml = "${data}/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
+                rcv_xml = "${data}/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz"
+                vcf_grch38 = "${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                vcf_grch37 = "${data}/clinvar_ftp/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                publish_dir = pub.toString()
+                keep_releases = 2
+                max_problem_fraction = 0.01
+                min_clnsuba_fraction = 0.4
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.trace.succeeded().size() == 10
+
+            def geneensg = { vcf ->
+                path(vcf).linesGzip.findAll { line -> !line.startsWith("#") }.collectEntries { line ->
+                    def cols = line.split("\t")
+                    def field = cols[7].split(";").find { entry -> entry.startsWith("GENEENSG=") }
+                    [(cols[2]): field ? field - "GENEENSG=" : null]
+                }
+            }
+
+            ["grch38", "grch37"].each { asm ->
+                def dir = new File("$outputDir/pub/${asm}").toPath()
+                def link = dir.resolve("clinvar.vcf.gz")
+                def index = dir.resolve("clinvar.vcf.gz.tbi")
+
+                assert java.nio.file.Files.isSymbolicLink(link)
+                assert java.nio.file.Files.isSymbolicLink(index)
+                assert java.nio.file.Files.readSymbolicLink(link).toString() == "releases/clinvar_20260804.vcf.gz"
+                assert java.nio.file.Files.readSymbolicLink(index).toString() == "releases/clinvar_20260804.vcf.gz.tbi"
+                assert new File(dir.toFile(), "CURRENT").text.trim() == "2026-08-04"
+
+                def genes = geneensg(link.toString())
+                assert genes["626313"] == "ENSG00000112276"
+                assert genes["9000006"] == "ENSG00000122482+ENSG00000112276"
+                assert genes["9000004"] == "ENSG00000160789"
+                assert genes["9000001"] == null
+                assert genes["9000002"] == null
+                assert genes["9000003"] == null
+                assert genes["9000005"] == null
+                assert genes["206926"] == "ENSG00000144285"
+
+                def provenance = path(dir.resolve("releases/clinvar_20260804.vcf.gz.provenance.json").toString()).json
+                assert provenance.date == "2026-08-04"
+                assert provenance.gates.passed
+                assert provenance.gates.record_count.output == 13
+                assert provenance.stats.with_geneensg == 9
+            }
+
+            assert geneensg("$outputDir/pub/grch38/clinvar.vcf.gz")["17788"] == "ENSG00000175206"
+            assert geneensg("$outputDir/pub/grch37/clinvar.vcf.gz")["17788"] == "ENSG00000175206+ENSG00000242349"
+            assert path("$outputDir/pub/cache/gene_maps/GRCh38_116/gene_map.json").exists()
+            assert path("$outputDir/pub/cache/gene_maps/GRCh37_116/gene_map.json").exists()
+        }
+    }
+
+    test("A release already published is not rebuilt") {
+
+        when {
+            params {
+                def data = "$baseDir/tests/data"
+                def pub = new File("$outputDir/pub")
+                ["grch38", "grch37"].each { asm ->
+                    def releases = new File(pub, "${asm}/releases")
+                    releases.mkdirs()
+                    new File(releases, "clinvar_20260804.vcf.gz").text = ""
+                }
+                assemblies = "GRCh38,GRCh37"
+                ensembl_release = 116
+                gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
+                gff_grch37 = "${data}/gff/genes.gff3.bgz"
+                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
+                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                vcv_xml = "${data}/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
+                rcv_xml = "${data}/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz"
+                vcf_grch38 = "${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                vcf_grch37 = "${data}/clinvar_ftp/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                publish_dir = pub.toString()
+                keep_releases = 2
+                max_problem_fraction = 0.01
+                min_clnsuba_fraction = 0.4
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.trace.tasks().size() == 1
+            assert workflow.stdout.any { line -> line.contains("published, nothing to do") }
+            assert !new File("$outputDir/pub/grch38/clinvar.vcf.gz").exists()
+        }
+    }
+
+    test("A release not yet on the mirror is incomplete") {
+
+        when {
+            params {
+                def data = "$baseDir/tests/data"
+                def pub = new File("$outputDir/pub")
+
+                assemblies = "GRCh38,GRCh37"
+                ensembl_release = 116
+                gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
+                gff_grch37 = "${data}/gff/genes.gff3.bgz"
+                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
+                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                clinvar_base_url = "file://${data}/clinvar_ftp"
+                month = "2026-09"
+                publish_dir = pub.toString()
+                keep_releases = 2
+                max_problem_fraction = 0.01
+                min_clnsuba_fraction = 0.4
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.trace.tasks().size() == 1
+            assert workflow.stdout.any { line -> line.contains("incomplete, nothing to do") }
+            assert !new File("$outputDir/pub/grch38").exists()
+        }
+    }
+
+    test("A failed gate publishes nothing") {
+
+        when {
+            params {
+                def data = "$baseDir/tests/data"
+                def pub = new File("$outputDir/pub")
+
+                assemblies = "GRCh38,GRCh37"
+                ensembl_release = 116
+                gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
+                gff_grch37 = "${data}/gff/genes.gff3.bgz"
+                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
+                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                vcv_xml = "${data}/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
+                rcv_xml = "${data}/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz"
+                vcf_grch38 = "${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                vcf_grch37 = "${data}/clinvar_ftp/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                publish_dir = pub.toString()
+                keep_releases = 2
+                max_problem_fraction = 0.01
+                min_clnsuba_fraction = 0.99
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert !new File("$outputDir/pub/grch38/releases").exists()
+            assert !new File("$outputDir/pub/grch37/releases").exists()
+        }
+    }
+
+    test("Refuses to replace a regular file at a link path") {
+
+        when {
+            params {
+                def data = "$baseDir/tests/data"
+                def pub = new File("$outputDir/pub")
+                new File(pub, "grch38").mkdirs()
+                new File(pub, "grch38/clinvar.vcf.gz").text = "regular file\n"
+                assemblies = "GRCh38,GRCh37"
+                ensembl_release = 116
+                gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
+                gff_grch37 = "${data}/gff/genes.gff3.bgz"
+                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
+                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                vcv_xml = "${data}/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
+                rcv_xml = "${data}/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz"
+                vcf_grch38 = "${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                vcf_grch37 = "${data}/clinvar_ftp/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                publish_dir = pub.toString()
+                keep_releases = 2
+                max_problem_fraction = 0.01
+                min_clnsuba_fraction = 0.4
+            }
+        }
+
+        then {
+            assert workflow.failed
+
+            def link = new File("$outputDir/pub/grch38/clinvar.vcf.gz")
+            assert !java.nio.file.Files.isSymbolicLink(link.toPath())
+            assert link.text == "regular file\n"
+            assert !new File("$outputDir/pub/grch38/releases/clinvar_20260804.vcf.gz").exists()
+        }
+    }
+}

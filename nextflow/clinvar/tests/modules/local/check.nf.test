@@ -1,0 +1,151 @@
+nextflow_process {
+
+    name "Test Process CHECK"
+    script "modules/local/check.nf"
+    process "CHECK"
+
+    setup {
+        run("BUILD_DB") {
+            script "modules/local/build_db.nf"
+            process {
+                """
+                def xml = "$baseDir/tests/data/clinvar_ftp/xml"
+                input[0] = file("\${xml}/ClinVarVCVRelease_2026-08.xml.gz")
+                input[1] = file("\${xml}/RCV_release/ClinVarRCVRelease_2026-08.xml.gz")
+                input[2] = "20260804"
+                """
+            }
+        }
+
+        run("BUILD_GENE_MAP") {
+            script "modules/local/build_gene_map.nf"
+            process {
+                """
+                def data = "$baseDir/tests/data"
+                def core = "\${data}/ensembl/homo_sapiens_core_116_37"
+                input[0] = Channel.of(
+                    [
+                        "GRCh38",
+                        file("\${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"),
+                        [file("\${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz")]
+                    ],
+                    [
+                        "GRCh37",
+                        file("\${data}/gff/genes.gff3.bgz"),
+                        ["gene", "object_xref", "xref", "external_db"].collect { name -> file("\${core}/\${name}.txt.gz") }
+                    ]
+                )
+                """
+            }
+        }
+
+        run("ANNOTATE") {
+            script "modules/local/annotate.nf"
+            process {
+                """
+                def annotate_vcfs = "$baseDir/tests/data/clinvar_ftp"
+                input[0] = Channel.of(
+                    ["GRCh38", file("\${annotate_vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
+                    ["GRCh37", file("\${annotate_vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
+                )
+                    .join(BUILD_GENE_MAP.out.gene_map)
+                    .combine(BUILD_DB.out.db)
+                    .combine(Channel.of("20260804"))
+                """
+            }
+        }
+    }
+
+    test("Gates pass on the annotated fixtures") {
+
+        when {
+            params {
+                cache_dir = "$outputDir/cache"
+                ensembl_release = 116
+                min_clnsuba_fraction = 0.4
+                max_problem_fraction = 0.01
+            }
+            process {
+                """
+                def vcfs = "$baseDir/tests/data/clinvar_ftp"
+                input[0] = Channel.of(
+                    ["GRCh38", file("\${vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
+                    ["GRCh37", file("\${vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
+                )
+                    .join(ANNOTATE.out.vcf.map { asm, out, tbi, _stats, _md5 -> [asm, out, tbi] })
+                    .join(BUILD_GENE_MAP.out.gene_map)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            assert process.out.gates.size() == 2
+
+            process.out.gates.each { asm, gates, validate ->
+                def result = path(gates).json
+                assert result.passed
+                assert result.record_count.input == 13
+                assert result.record_count.output == 13
+                assert result.geneensg_in_gff.unknown_count == 0
+                assert result.tabix.passed
+                assert path(validate).exists()
+            }
+        }
+    }
+
+    test("Fails when too few records carry CLNSUBA") {
+
+        when {
+            params {
+                cache_dir = "$outputDir/cache"
+                ensembl_release = 116
+                min_clnsuba_fraction = 0.99
+                max_problem_fraction = 0.01
+            }
+            process {
+                """
+                def vcfs = "$baseDir/tests/data/clinvar_ftp"
+                input[0] = Channel.of(
+                    ["GRCh38", file("\${vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
+                    ["GRCh37", file("\${vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
+                )
+                    .join(ANNOTATE.out.vcf.map { asm, out, tbi, _stats, _md5 -> [asm, out, tbi] })
+                    .join(BUILD_GENE_MAP.out.gene_map)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+        }
+    }
+
+    test("Fails when a GENEENSG ID is not in the gene map") {
+
+        when {
+            params {
+                cache_dir = "$outputDir/cache"
+                ensembl_release = 116
+                min_clnsuba_fraction = 0.4
+                max_problem_fraction = 0.01
+            }
+            process {
+                """
+                def vcfs = "$baseDir/tests/data/clinvar_ftp"
+                input[0] = Channel.of(
+                    ["GRCh38", file("\${vcfs}/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz")],
+                    ["GRCh37", file("\${vcfs}/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz")]
+                )
+                    .join(ANNOTATE.out.vcf.map { asm, out, tbi, _stats, _md5 -> [asm, out, tbi] })
+                    .combine(BUILD_GENE_MAP.out.gene_map.filter { asm, _gene_map -> asm == "GRCh38" }.map { _asm, gene_map -> gene_map })
+                    .filter { asm, _in, _out, _tbi, _gene_map -> asm == "GRCh37" }
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+        }
+    }
+}

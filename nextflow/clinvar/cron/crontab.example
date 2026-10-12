@@ -1,0 +1,12 @@
+# ClinVar pipeline, installed in the ensvar crontab. Pencilled; not yet live.
+# The script submits a SLURM head job and exits; a day with no new release is a no-op.
+#
+# CLINVAR_PARAMS   codon params file, see assets/codon.params.example.yaml
+# CLINVAR_RUN_DIR  launch and work directory on /hps
+# CLINVAR_ENV      optional file to source first (modules, Python env, htslib)
+
+CLINVAR_PARAMS=<PARAMS_DIR>/clinvar.params.yaml
+CLINVAR_RUN_DIR=<HPS_DIR>/clinvar
+CLINVAR_ENV=<ENV_DIR>/clinvar.env
+
+0 7 * * * <REPO_DIR>/nextflow/clinvar/cron/run_clinvar.sh >> <LOG_DIR>/clinvar_cron.log 2>&1

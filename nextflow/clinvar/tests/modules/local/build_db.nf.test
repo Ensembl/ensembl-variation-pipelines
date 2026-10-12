@@ -1,0 +1,38 @@
+nextflow_process {
+
+    name "Test Process BUILD_DB"
+    script "modules/local/build_db.nf"
+    process "BUILD_DB"
+
+    test("Builds the SQLite DB with its annotation table") {
+
+        when {
+            process {
+                """
+                def xml = "$baseDir/tests/data/clinvar_ftp/xml"
+                input[0] = file("\${xml}/ClinVarVCVRelease_2026-08.xml.gz")
+                input[1] = file("\${xml}/RCV_release/ClinVarRCVRelease_2026-08.xml.gz")
+                input[2] = "20260804"
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def db = process.out.db.get(0).toString()
+            assert path(db).fileName.toString() == "clinvar_20260804.sqlite"
+
+            def query = ["python3", "-c",
+                "import sqlite3, sys; print(sqlite3.connect(sys.argv[1]).execute('select count(*) from annotation').fetchone()[0])",
+                db].execute()
+            assert query.waitFor() == 0
+            assert query.text.trim() as int == 6
+
+            def md5 = path(process.out.md5.get(0)).json
+            def xml = "$baseDir/tests/data/clinvar_ftp/xml"
+            assert md5.vcv_xml == path("${xml}/ClinVarVCVRelease_2026-08.xml.gz").md5
+            assert md5.rcv_xml == path("${xml}/RCV_release/ClinVarRCVRelease_2026-08.xml.gz").md5
+        }
+    }
+}

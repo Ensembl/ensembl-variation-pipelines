@@ -1,0 +1,21 @@
+# Local run: copy, fill in the placeholders and pass with -params-file.
+# Leave an input unset to fetch it from NCBI or Ensembl.
+
+assemblies: GRCh38,GRCh37
+ensembl_release: 116
+
+# GFFs VEP annotates with
+gff_grch38: <DATA_DIR>/Homo_sapiens.GRCh38.116.chr.gff.gz
+gff_grch37: <DATA_DIR>/genes.gff3.bgz
+
+# Optional local inputs; ClinVar files must share one release date
+# month: 2026-08
+# vcv_xml: <DATA_DIR>/ClinVarVCVRelease_2026-08.xml.gz
+# rcv_xml: <DATA_DIR>/ClinVarRCVRelease_2026-08.xml.gz
+# vcf_grch38: <DATA_DIR>/clinvar_20260804.GRCh38.vcf.gz
+# vcf_grch37: <DATA_DIR>/clinvar_20260804.GRCh37.vcf.gz
+# entrez_tsv_grch38: <DATA_DIR>/Homo_sapiens.GRCh38.116.entrez.tsv.gz
+# core_dump_dir_grch37: <DATA_DIR>/homo_sapiens_core_116_37
+
+publish_dir: <OUTPUT_DIR>/vep_plugins_data
+keep_releases: 3

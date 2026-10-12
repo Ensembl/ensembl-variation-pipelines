@@ -1,0 +1,81 @@
+nextflow_process {
+
+    name "Test Process BUILD_GENE_MAP"
+    script "modules/local/build_gene_map.nf"
+    process "BUILD_GENE_MAP"
+
+    test("GRCh38 from the entrez TSV") {
+
+        when {
+            params {
+                cache_dir = "$outputDir/cache"
+                ensembl_release = 116
+            }
+            process {
+                """
+                input[0] = Channel.of([
+                    "GRCh38",
+                    file("$baseDir/tests/data/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"),
+                    [file("$baseDir/tests/data/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz")]
+                ])
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def map = path(process.out.gene_map.get(0).get(1)).json
+            assert map.provenance.assembly == "GRCh38"
+            assert map.provenance.mapping.kind == "entrez_tsv"
+            assert "ENSG00000112276" in map.gene_ids
+
+            // BVES is not a GFF gene name, so it resolves through its NCBI ID
+            assert !map.by_name.containsKey("BVES")
+            assert map.by_ncbi["11149"] == ["ENSG00000112276"]
+
+            // readthrough NCBI ID on a component gene with two NCBI IDs
+            assert !map.by_ncbi.containsKey("133039968")
+            assert !map.by_ncbi.containsKey("130008987")
+
+            assert path("$outputDir/cache/gene_maps/GRCh38_116/gene_map.json").exists()
+        }
+    }
+
+    test("GRCh37 from the core dumps") {
+
+        when {
+            params {
+                cache_dir = "$outputDir/cache"
+                ensembl_release = 116
+            }
+            process {
+                """
+                def dir = "$baseDir/tests/data/ensembl/homo_sapiens_core_116_37"
+                input[0] = Channel.of([
+                    "GRCh37",
+                    file("$baseDir/tests/data/gff/genes.gff3.bgz"),
+                    ["gene", "object_xref", "xref", "external_db"].collect { name -> file("\${dir}/\${name}.txt.gz") }
+                ])
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def map = path(process.out.gene_map.get(0).get(1)).json
+            assert map.provenance.assembly == "GRCh37"
+            assert map.provenance.mapping.kind == "core_dump"
+            assert map.by_name["BVES"] == ["ENSG00000112276"]
+            assert map.by_ncbi["11149"] == ["ENSG00000112276"]
+
+            // ITGB6 carries two NCBI IDs on GRCh37, so neither maps
+            assert !map.by_ncbi.containsKey("100505984")
+            assert !map.by_ncbi.containsKey("3694")
+            assert map.by_name["ITGB6"] == ["ENSG00000115221"]
+
+            assert path("$outputDir/cache/gene_maps/GRCh37_116/gene_map.json").exists()
+        }
+    }
+}

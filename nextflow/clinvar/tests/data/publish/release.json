@@ -1,0 +1,1 @@
+{"status": "ready", "date": "2026-08-04", "month": "2026-08", "reason": "", "inputs": {"vcv_xml": {"path": "vcv.xml.gz"}, "rcv_xml": {"path": "rcv.xml.gz"}, "vcf": {"GRCh38": {"path": "clinvar.vcf.gz"}}}}

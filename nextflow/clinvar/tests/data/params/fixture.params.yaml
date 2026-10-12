@@ -1,0 +1,22 @@
+# Offline fixture run. Paths are relative to nextflow/clinvar, so launch from
+# there and pass the output directory:
+#   nextflow run main.nf -profile standard \
+#     -params-file tests/data/params/fixture.params.yaml --publish_dir <tmp dir>
+
+assemblies: GRCh38,GRCh37
+ensembl_release: 116
+
+gff_grch38: tests/data/gff/Homo_sapiens.GRCh38.116.chr.gff.gz
+gff_grch37: tests/data/gff/genes.gff3.bgz
+entrez_tsv_grch38: tests/data/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz
+core_dump_dir_grch37: tests/data/ensembl/homo_sapiens_core_116_37
+
+vcv_xml: tests/data/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz
+rcv_xml: tests/data/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz
+vcf_grch38: tests/data/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz
+vcf_grch37: tests/data/clinvar_ftp/vcf_GRCh37/archive_2.0/2026/clinvar_20260804.vcf.gz
+
+# 6 of the 13 fixture records have an XML row; the rest test GENEENSG on its own.
+min_clnsuba_fraction: 0.4
+max_problem_fraction: 0.01
+keep_releases: 2

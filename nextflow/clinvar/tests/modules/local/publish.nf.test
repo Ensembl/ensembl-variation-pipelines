@@ -1,0 +1,160 @@
+nextflow_process {
+
+    name "Test Process PUBLISH"
+    script "modules/local/publish.nf"
+    process "PUBLISH"
+
+    test("Publishes a release behind relative links") {
+
+        when {
+            params {
+                keep_releases = 3
+                force = false
+            }
+            process {
+                """
+                def data = "$baseDir/tests/data"
+                def vcf = "\${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                def json = "\${data}/publish"
+                input[0] = Channel.of([
+                    "GRCh38",
+                    file(vcf),
+                    file("\${vcf}.tbi"),
+                    file("\${json}/stats.json"),
+                    file("\${json}/vcf_md5.txt"),
+                    file("\${json}/gates.json"),
+                    file("\${json}/validate.json"),
+                    file("\${json}/gene_map.json")
+                ])
+                input[1] = file("\${json}/release.json")
+                input[2] = file("\${json}/xml_md5.json")
+                input[3] = [
+                    date: "2026-08-04",
+                    publish_dir: "$outputDir/pub",
+                    commit: "abc123",
+                    nextflow_version: "test",
+                    start: "now",
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def dir = new File("$outputDir/pub/grch38")
+            def link = dir.toPath().resolve("clinvar.vcf.gz")
+            def index = dir.toPath().resolve("clinvar.vcf.gz.tbi")
+
+            assert java.nio.file.Files.isSymbolicLink(link)
+            assert java.nio.file.Files.isSymbolicLink(index)
+            assert java.nio.file.Files.readSymbolicLink(link).toString() == "releases/clinvar_20260804.vcf.gz"
+            assert java.nio.file.Files.readSymbolicLink(index).toString() == "releases/clinvar_20260804.vcf.gz.tbi"
+
+            assert new File(dir, "CURRENT").text.trim() == "2026-08-04"
+            assert new File(dir, "releases/clinvar_20260804.vcf.gz").exists()
+
+            def provenance = path("$outputDir/pub/grch38/releases/clinvar_20260804.vcf.gz.provenance.json").json
+            assert provenance.assembly == "GRCh38"
+            assert provenance.date == "2026-08-04"
+            assert provenance.pipeline.commit == "abc123"
+            assert provenance.gates.passed
+            assert provenance.stats.records == 13
+        }
+    }
+
+    test("Refuses to replace a regular file at a link path") {
+
+        when {
+            params {
+                def pub = new File("$outputDir/pub")
+                new File(pub, "grch38").mkdirs()
+                new File(pub, "grch38/clinvar.vcf.gz").text = "regular file\n"
+                keep_releases = 3
+                force = false
+            }
+            process {
+                """
+                def data = "$baseDir/tests/data"
+                def vcf = "\${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                def json = "\${data}/publish"
+                input[0] = Channel.of([
+                    "GRCh38",
+                    file(vcf),
+                    file("\${vcf}.tbi"),
+                    file("\${json}/stats.json"),
+                    file("\${json}/vcf_md5.txt"),
+                    file("\${json}/gates.json"),
+                    file("\${json}/validate.json"),
+                    file("\${json}/gene_map.json")
+                ])
+                input[1] = file("\${json}/release.json")
+                input[2] = file("\${json}/xml_md5.json")
+                input[3] = [
+                    date: "2026-08-04",
+                    publish_dir: "$outputDir/pub",
+                    commit: "abc123",
+                    nextflow_version: "test",
+                    start: "now",
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+
+            def dir = new File("$outputDir/pub/grch38")
+            assert !java.nio.file.Files.isSymbolicLink(dir.toPath().resolve("clinvar.vcf.gz"))
+            assert new File(dir, "clinvar.vcf.gz").text == "regular file\n"
+            assert !new File(dir, "releases/clinvar_20260804.vcf.gz").exists()
+        }
+    }
+
+    test("Replaces a regular file with force") {
+
+        when {
+            params {
+                def pub = new File("$outputDir/pub")
+                new File(pub, "grch38").mkdirs()
+                new File(pub, "grch38/clinvar.vcf.gz").text = "regular file\n"
+                keep_releases = 3
+                force = true
+            }
+            process {
+                """
+                def data = "$baseDir/tests/data"
+                def vcf = "\${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
+                def json = "\${data}/publish"
+                input[0] = Channel.of([
+                    "GRCh38",
+                    file(vcf),
+                    file("\${vcf}.tbi"),
+                    file("\${json}/stats.json"),
+                    file("\${json}/vcf_md5.txt"),
+                    file("\${json}/gates.json"),
+                    file("\${json}/validate.json"),
+                    file("\${json}/gene_map.json")
+                ])
+                input[1] = file("\${json}/release.json")
+                input[2] = file("\${json}/xml_md5.json")
+                input[3] = [
+                    date: "2026-08-04",
+                    publish_dir: "$outputDir/pub",
+                    commit: "abc123",
+                    nextflow_version: "test",
+                    start: "now",
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def link = new File("$outputDir/pub/grch38/clinvar.vcf.gz").toPath()
+            assert java.nio.file.Files.isSymbolicLink(link)
+            assert java.nio.file.Files.readSymbolicLink(link).toString() == "releases/clinvar_20260804.vcf.gz"
+        }
+    }
+}

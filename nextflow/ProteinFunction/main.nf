@@ -45,12 +45,11 @@ if (params.help) {
       --sift_run_type FULL --blastdb /path/to/sift_database --offline true
 
   General options:
-    --gtf FILE           Comma-separated list of annotation GTF files; requires
-                         FASTA files
-    --gff FILE           Comma-separated list of annotation GFF3 files; requires
-                         FASTA files; mutually exclusive with --gtf
-    --fasta FILE         Comma-separated list of FASTA files with genomic
-                         sequences; requires GTF/GFF3 files
+    --gtf FILE           Annotation GTF file; requires --fasta
+    --gff FILE           Annotation GFF3 file; requires --fasta;
+                         mutually exclusive with --gtf
+    --fasta FILE         FASTA file with genomic sequences; requires
+                         --gtf or --gff
     --translated FILE    Comma-separated list of FASTA files with peptide
                          sequence; skips sequence translation with GTF and FASTA
     --outdir VAL         Name of output dir (default: outdir)
@@ -177,10 +176,29 @@ def getFiles (files) {
   Channel.fromPath( files.tokenize(','), checkIfExists: true )
 }
 
+def getFile (arg, option) {
+  /*
+    Channel for a single file.
+
+    Translation takes one annotation and one genome. Sharding by sequence
+    region supplies the parallelism that a list of files used to, and a list
+    here cannot be checked for consistency: nothing ties entry N of --gtf to
+    entry N of --fasta, so a mismatch would silently translate the wrong
+    pairing or drop work altogether.
+  */
+  paths = arg.tokenize(',')
+  if (paths.size() > 1) {
+    exit 1, "ERROR: --${option} takes a single file but ${paths.size()} were given; " +
+            "concatenate them first if the annotation or genome is split"
+  }
+  Channel.fromPath( paths, checkIfExists: true )
+}
+
 workflow {
   // Translate transcripts from GTF and FASTA if no translation FASTA is given
   if (!params.translated) {
-    translate_fasta(getFiles(annotation), getFiles(params.fasta))
+    translate_fasta(getFile(annotation, params.gtf ? 'gtf' : 'gff'),
+                    getFile(params.fasta, 'fasta'))
     translated = translate_fasta.out
   } else {
     translated = getFiles(params.translated)

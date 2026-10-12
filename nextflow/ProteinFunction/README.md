@@ -43,8 +43,8 @@ requires human input and `--pph_data`.
 | Option | Purpose |
 | --- | --- |
 | `--translated` | Peptide FASTA files, comma-separated |
-| `--gtf`, `--gff` | Annotation files if peptides are not supplied; GTF and GFF3 give identical translations, and the two options are mutually exclusive |
-| `--fasta` | Genomic sequence files, required with `--gtf`/`--gff` |
+| `--gtf`, `--gff` | A single annotation file if peptides are not supplied; GTF and GFF3 give identical translations, and the two options are mutually exclusive |
+| `--fasta` | A single genomic sequence file, required with `--gtf`/`--gff` |
 | `--species` | Species name; defaults to `homo_sapiens` |
 | `--outdir` | Output directory; defaults to `outdir` |
 | `--host`, `--port`, `--user`, `--pass`, `--database` | Required MySQL connection settings in online mode |

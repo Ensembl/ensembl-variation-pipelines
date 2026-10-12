@@ -29,19 +29,21 @@ process translate_fasta {
   # decompress FASTA file if gzipped
   seq=${fasta}
   if [[ ${fasta.extension} == *gz ]]; then
-    gunzip ${fasta}
+    gunzip -c < ${fasta} > ${fasta.baseName}
     seq=${fasta.baseName}
   fi
 
   # decompress GTF file if gzipped
   annot=${gtf}
   if [[ ${gtf.extension} == *gz ]]; then
-    gunzip ${gtf}
+    gunzip -c < ${gtf} > ${gtf.baseName}
     annot=${gtf.baseName}
   fi
 
   agat_sp_extract_sequences.pl -g \${annot} -f \${seq} --protein \
                                -o ${gtf.baseName}_translated.fa
+
+  rm -rf \${seq} \${annot}
   """
 }
 

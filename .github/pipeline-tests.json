@@ -1,0 +1,31 @@
+{
+  "pipelines": {
+    "MaveDB": {"runner": "python", "paths": ["nextflow/MaveDB/"]},
+    "ProteinFunction": {"runner": "python", "paths": ["nextflow/ProteinFunction/"]},
+    "liftover": {"runner": "python", "paths": ["nextflow/liftover/"]},
+    "Remapping": {"runner": "python", "paths": ["nextflow/Remapping/"]},
+    "vcf_prepper": {
+      "runner": "external",
+      "workflow": ".github/workflows/unit_test.yml",
+      "paths": ["nextflow/vcf_prepper/"]
+    },
+    "pangenomes": {"runner": "python", "paths": ["nextflow/pangenomes/"]},
+    "vep_prepper": {"runner": "python", "paths": ["nextflow/vep_prepper/"]}
+  },
+  "shared_paths": [
+    {
+      "paths": ["nextflow/utils/"],
+      "pipelines": ["MaveDB", "ProteinFunction", "liftover", "Remapping", "pangenomes"]
+    },
+    {
+      "paths": ["tests/support/", "tests/__init__.py", "tests/run_pipeline_tests.py"],
+      "pipelines": ["MaveDB", "ProteinFunction", "liftover", "Remapping", "pangenomes", "vep_prepper"]
+    }
+  ],
+  "all_suite_paths": [
+    ".github/workflows/pipeline_tests.yml",
+    ".github/pipeline-tests.json",
+    "scripts/ci/",
+    "tests/ci/"
+  ]
+}

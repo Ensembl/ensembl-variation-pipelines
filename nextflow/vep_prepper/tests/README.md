@@ -10,9 +10,10 @@ Requires Nextflow, Java, `bgzip`, `tabix`, and `samtools`. The tests run the
 production `VEP_PREPPER` workflow locally using tiny synthetic GFF3 and FASTA
 files, with no network access or external datasets.
 
-The shared runner and helpers come from the CI setup branch
-`codex/pipeline-test-ci`. `suite.json` registers this suite with its selective
-workflow; `setup.sh` installs the genomic tools on the Ubuntu CI runner.
+The shared runner is `tests/run_pipeline_tests.py` and its helpers are in
+`tests/support/pipeline_test_support.py`. `suite.json` registers this suite with
+its selective workflow; `setup.sh` installs the genomic tools on the Ubuntu CI
+runner.
 
 Coverage includes:
 

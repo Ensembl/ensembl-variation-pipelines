@@ -9,11 +9,10 @@ select every registered Python suite.
 The CI infrastructure is independent of pipeline coverage. When a change
 touches a pipeline directory under `nextflow/` with no registered suite, the job
 summary reports that pipeline as a coverage gap. Manual runs and CI-only changes
-run every registered suite and list no gaps. On the current `main` baseline, VEP
-prepper is such a gap. Pipeline coverage can land in separate PRs in any order
-without editing the selector, workflow or root manifest. The phenotypes scaffold
-has no `main.nf`, so it cannot register a suite and its changes are always
-listed as gaps.
+run every registered suite and list no gaps. Pipeline coverage can land in
+separate PRs in any order without editing the selector, workflow or root
+manifest. The phenotypes scaffold has no `main.nf`, so it cannot register a
+suite and its changes are always listed as gaps.
 
 VCF prepper remains owned by `.github/workflows/unit_test.yml`, which is unchanged.
 Its existing nf-test discovery and dependencies also cover tests added by the

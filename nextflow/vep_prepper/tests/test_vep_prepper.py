@@ -16,7 +16,7 @@ class VepPrepperTests(NextflowTestCase):
     records = [
         "chr2\tfixture\tgene\t20\t24\t.\t+\t.\tID=second_chromosome",
         "chr1\tfixture\tgene\t25\t29\t.\t+\t.\tID=late",
-        "chr1\tfixture\tgene\t5\t9\t.\t+\t.\tID=long",
+        "chr1\tfixture\tgene\t5\t12\t.\t+\t.\tID=long",
         "chr1\tfixture\tgene\t5\t7\t.\t+\t.\tID=short",
     ]
 

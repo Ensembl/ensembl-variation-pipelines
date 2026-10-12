@@ -20,6 +20,13 @@ separate VCF coverage work. Keep its status check alongside the new
 The existing VCF workflow also selects `.github/**` changes, so edits to this CI
 infrastructure can still trigger that job.
 
+The VCF `github` test profile pins the VEP container to the immutable VEP 116.2
+image used by the existing RUN_VEP fixture. The previous untagged image moved to
+116.3 and added a downstream transcript annotation, failing the exact expected
+record without any repository change. Upgrade the image and its expected
+annotations together in a VCF-specific change. This pins only that test runtime;
+the VCF workflow still checks out its external Ensembl repositories at `main`.
+
 ## Register a pipeline suite
 
 Add these files in the pipeline's own coverage PR:

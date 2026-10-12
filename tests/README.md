@@ -6,12 +6,14 @@ older pipeline change. Renames select both source and destination pipelines.
 Pushes to `main`, merge queues and manual runs are also supported; manual runs
 select every registered Python suite.
 
-The CI infrastructure is independent of pipeline coverage. A pipeline with
-`nextflow/<pipeline>/main.nf` but no suite registration is reported in the job
-summary as a coverage gap. On the current `main` baseline, VEP prepper is such a
-gap. Pipeline coverage can land in separate PRs in any order without editing the
-selector, workflow or root manifest. The phenotypes scaffold has no `main.nf`
-and is outside this Nextflow inventory.
+The CI infrastructure is independent of pipeline coverage. When a change
+touches a pipeline directory under `nextflow/` with no registered suite, the job
+summary reports that pipeline as a coverage gap. Manual runs and CI-only changes
+run every registered suite and list no gaps. On the current `main` baseline, VEP
+prepper is such a gap. Pipeline coverage can land in separate PRs in any order
+without editing the selector, workflow or root manifest. The phenotypes scaffold
+has no `main.nf`, so it cannot register a suite and its changes are always
+listed as gaps.
 
 VCF prepper remains owned by `.github/workflows/unit_test.yml`, which is unchanged.
 Its existing nf-test discovery and dependencies also cover tests added by the
@@ -40,7 +42,7 @@ optional setup script with Bash from the repository root. Setup scripts may use
 `sudo` for system packages and `$GITHUB_ENV` for environment variables needed by
 subsequent steps. Pin external dependencies in each pipeline's setup script.
 Scripts run only for selected suites. Keep Python test modules directly under
-`tests/` so unittest discovers them.
+`tests/` so the registration check sees them.
 
 Run a registered suite locally from the repository root, replacing `PIPELINE`:
 
@@ -50,8 +52,10 @@ python3 tests/run_pipeline_tests.py PIPELINE --strict
 
 Install the suite's dependencies first. `--strict` makes skipped tests fail,
 including missing dependencies; empty suites, failed imports and failed tests
-also fail. Python tests without a suite registration are rejected during selection,
-so a missing marker cannot silently disable existing coverage. Omit `--strict`
+also fail. Selection rejects `test_*.py` files directly under
+`nextflow/<pipeline>/tests/` when that pipeline has no `suite.json`, so removing
+a marker cannot silently disable its suite. Python tests elsewhere in the
+repository are not checked. Omit `--strict`
 for a local run that reports dependency skips. Shared helpers in
 `tests/support/pipeline_test_support.py` provide isolated temporary
 fixtures and local, offline Nextflow module execution.
@@ -60,7 +64,8 @@ fixtures and local, offline Nextflow module execution.
 
 Pipeline-local changes select that pipeline. Changes to `nextflow/utils/` select
 the registered suites of its five known consumers: MaveDB, ProteinFunction,
-liftover, Remapping and pangenomes; unregistered consumers are reported as gaps.
+liftover, Remapping and pangenomes; unregistered consumers that have a
+`main.nf` are reported as gaps.
 Shared Python helpers, the runner, selector and CI configuration select every
 registered Python suite. Repository documentation alone selects none.
 
@@ -72,7 +77,9 @@ The aggregate check fails when selection fails, when a selected suite fails or
 is cancelled, or when a selected job unexpectedly skips. A successful aggregate
 with no selected suites means no registered suite was affected; it does not
 claim coverage for pipelines listed as gaps. Repository branch protection is
-not changed by this implementation.
+not changed by this implementation. Neither this check nor the VCF check is
+currently required on `main`; making them required is a separate repository
+settings change.
 
 Check the dependency-free selector, registration, runner and gate tests with:
 

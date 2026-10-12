@@ -11,8 +11,9 @@ on:
 permissions:
   contents: read
 
+# A push run tests only its own diff, so each push to main gets its own group.
 concurrency:
-  group: pipeline-tests-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  group: pipeline-tests-${{ github.event_name }}-${{ github.event.pull_request.number || (github.event_name == 'push' && github.sha) || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -23,11 +24,11 @@ jobs:
     outputs:
       python_pipelines: ${{ steps.select.outputs.python_pipelines }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: Check test selection behavior
@@ -53,13 +54,13 @@ jobs:
     env:
       NXF_SYNTAX_PARSER: v1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: nf-core/setup-nextflow@v2
+      - uses: nf-core/setup-nextflow@v3
         with:
           version: '26.04.4'
       - name: Install selected pipeline dependencies

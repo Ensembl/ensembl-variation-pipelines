@@ -13,7 +13,10 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                genome_meta = [
+                        'chrom_sizes':"${baseDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes"
+                    ]
+                input[0] = tuple(genome_meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }
@@ -22,8 +25,11 @@ nextflow_process {
             // assert process run correctly
             assert process.success
             
-            // assert the content of the output file - no variants, only header lines
-            assert path(process.out.get(0).get(0).get(1)).linesGzip.size() == 5
+            // assert the content of the output file - no variant left
+            def outputLines = path(process.out.get(0).get(0).get(1)).linesGzip
+            def variantLines = outputLines.findAll { !it.startsWith('#') }
+            assert outputLines.size() >= 1 : "Empty output file, should contain header."
+            assert variantLines.size() == 0
         }
 
     }
@@ -37,7 +43,10 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                genome_meta = [
+                        'chrom_sizes':"${baseDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes"
+                    ]
+                input[0] = tuple(genome_meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }
@@ -46,8 +55,9 @@ nextflow_process {
             // assert process run correctly
             assert process.success
 
-            // assert the content of the output file - one variant
-            assert path(process.out.get(0).get(0).get(1)).linesGzip.size() == 6
+            // assert the content of the output file - 1 variants
+            def variantLines = path(process.out.get(0).get(0).get(1)).linesGzip.findAll { !it.startsWith('#') }
+            assert variantLines.size() == 1
 
         }
 
@@ -62,7 +72,10 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                genome_meta = [
+                        'chrom_sizes':"${baseDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes"
+                    ]
+                input[0] = tuple(genome_meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }
@@ -71,14 +84,14 @@ nextflow_process {
             // assert process run correctly
             assert process.success
             
-            // assert the content of the output file - one variant
-            assert path(process.out.get(0).get(0).get(1)).linesGzip.size() == 6
-            
+            // assert the content of the output file - 1 variant
+            def variantLines = path(process.out.get(0).get(0).get(1)).linesGzip.findAll { !it.startsWith('#') }
+            assert variantLines.size() == 1
         }
 
     }
     
-    test("Remove none") {
+    test("Only remove position-based") {
 
         when {
             params {
@@ -87,7 +100,10 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = tuple("NONE", file("$baseDir/tests/data/test_removevariants.vcf.gz"))
+                genome_meta = [
+                        'chrom_sizes':"${baseDir}/tests/testdata/homo_sapiens_GRCh38.chrom.sizes"
+                    ]
+                input[0] = tuple(genome_meta, file("$baseDir/tests/data/test_removevariants.vcf.gz"))
                 """
             }
         }
@@ -96,8 +112,9 @@ nextflow_process {
             // assert process run correctly
             assert process.success
             
-            // assert the content of the output file - three variants
-            assert path(process.out.get(0).get(0).get(1)).linesGzip.size() == 8
+            // assert the content of the output file - 3 variants
+            def variantLines = path(process.out.get(0).get(0).get(1)).linesGzip.findAll { !it.startsWith('#') }
+            assert variantLines.size() == 3
         }
 
     }

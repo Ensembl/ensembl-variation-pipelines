@@ -14,15 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Download a file with resume and retries, then verify its checksum.
+"""Download a file with resume and retries, then verify its md5.
 
-The checksum comes from an NCBI md5 file (`<md5>  <name>`) or an Ensembl
-CHECKSUMS entry. A CHECKSUMS entry is BSD `sum` output, which gives a 16-bit
-rotating checksum and the number of 1 KiB blocks.
+The md5 comes from an NCBI md5 file (`<md5>  <name>`).
 
 Usage:
-    fetch_file.py URL --out PATH [--md5-url URL | --bsd-sum "SUM BLOCKS"]
-                  [--retries 3]
+    fetch_file.py URL --out PATH [--md5-url URL] [--retries 3]
 """
 
 import argparse
@@ -33,28 +30,12 @@ import time
 from clinvar_common import NotFound, die, download, md5sum, read_url
 
 
-def bsd_sum(path):
-    """Return (checksum, blocks) as BSD `sum` computes them."""
-    checksum, size = 0, 0
-    with open(path, "rb") as handle:
-        for block in iter(lambda: handle.read(1 << 20), b""):
-            size += len(block)
-            for byte in block:
-                checksum = ((checksum >> 1) | ((checksum & 1) << 15)) + byte
-                checksum &= 0xFFFF
-    return checksum, (size + 1023) // 1024
-
-
-def verify(path, md5_expected, bsd_expected):
+def verify(path, md5_expected):
     """Return an error message, or None when the file matches."""
     if md5_expected:
         got = md5sum(path)
         if got != md5_expected:
             return f"md5 {got} does not match {md5_expected}"
-    if bsd_expected:
-        got = bsd_sum(path)
-        if got != bsd_expected:
-            return f"BSD sum {got[0]} {got[1]} does not match {bsd_expected[0]} {bsd_expected[1]}"
     return None
 
 
@@ -62,19 +43,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("url")
     ap.add_argument("--out", required=True)
-    check = ap.add_mutually_exclusive_group()
-    check.add_argument("--md5-url")
-    check.add_argument("--bsd-sum", help='"SUM BLOCKS" from an Ensembl CHECKSUMS file')
+    ap.add_argument("--md5-url")
     ap.add_argument("--retries", type=int, default=3)
     args = ap.parse_args()
-
-    bsd_expected = None
-    if args.bsd_sum:
-        try:
-            checksum, blocks = (int(x) for x in args.bsd_sum.split())
-        except ValueError:
-            die(f'--bsd-sum wants "SUM BLOCKS", got {args.bsd_sum!r}')
-        bsd_expected = (checksum, blocks)
 
     md5_expected = None
     part = args.out + ".part"
@@ -84,7 +55,7 @@ def main():
             if args.md5_url and md5_expected is None:
                 md5_expected = read_url(args.md5_url).decode().split()[0].lower()
             download(args.url, part)
-            error = verify(part, md5_expected, bsd_expected)
+            error = verify(part, md5_expected)
             if error is None:
                 os.replace(part, args.out)
                 print(f"fetched {args.url} -> {args.out}", file=sys.stderr)

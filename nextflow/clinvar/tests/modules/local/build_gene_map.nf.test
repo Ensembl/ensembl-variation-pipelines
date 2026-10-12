@@ -4,19 +4,16 @@ nextflow_process {
     script "modules/local/build_gene_map.nf"
     process "BUILD_GENE_MAP"
 
-    test("GRCh38 from the entrez TSV") {
+    test("GRCh38 with a gene set label") {
 
         when {
-            params {
-                cache_dir = "$outputDir/cache"
-                ensembl_release = 116
-            }
             process {
                 """
                 input[0] = channel.of([
                     "GRCh38",
                     file("$baseDir/tests/data/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"),
-                    [file("$baseDir/tests/data/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz")]
+                    file("$baseDir/tests/data/ncbi_map/grch38.tsv.gz"),
+                    "GENCODE 50"
                 ])
                 """
             }
@@ -27,7 +24,11 @@ nextflow_process {
 
             def map = path(process.out.gene_map.get(0).get(1)).json
             assert map.provenance.assembly == "GRCh38"
-            assert map.provenance.mapping.kind == "entrez_tsv"
+            assert map.provenance.gene_set == "GENCODE 50"
+            assert map.provenance.gff.name == "Homo_sapiens.GRCh38.116.chr.gff.gz"
+            assert map.provenance.gff.md5 == new File("$baseDir/tests/data/gff/Homo_sapiens.GRCh38.116.chr.gff.gz").bytes.md5()
+            assert map.provenance.ncbi_map.name == "grch38.tsv.gz"
+            assert map.provenance.ncbi_map.md5 == new File("$baseDir/tests/data/ncbi_map/grch38.tsv.gz").bytes.md5()
             assert "ENSG00000112276" in map.gene_ids
 
             // BVES is not a GFF gene name, so it resolves through its NCBI ID
@@ -38,25 +39,19 @@ nextflow_process {
             // neither maps. 130008987 has no Ensembl xref.
             assert !map.by_ncbi.containsKey("133039968")
             assert !map.by_ncbi.containsKey("130008987")
-
-            assert path("$outputDir/cache/gene_maps/GRCh38_116/gene_map.json").exists()
         }
     }
 
-    test("GRCh37 from the core dumps") {
+    test("GRCh37 without a gene set label") {
 
         when {
-            params {
-                cache_dir = "$outputDir/cache"
-                ensembl_release = 116
-            }
             process {
                 """
-                def dir = "$baseDir/tests/data/ensembl/homo_sapiens_core_116_37"
                 input[0] = channel.of([
                     "GRCh37",
                     file("$baseDir/tests/data/gff/genes.gff3.bgz"),
-                    ["gene", "object_xref", "xref", "external_db"].collect { name -> file("\${dir}/\${name}.txt.gz") }
+                    file("$baseDir/tests/data/ncbi_map/grch37.tsv.gz"),
+                    ""
                 ])
                 """
             }
@@ -67,7 +62,9 @@ nextflow_process {
 
             def map = path(process.out.gene_map.get(0).get(1)).json
             assert map.provenance.assembly == "GRCh37"
-            assert map.provenance.mapping.kind == "core_dump"
+            assert map.provenance.containsKey("gene_set")
+            assert map.provenance.gene_set == null
+            assert map.provenance.ncbi_map.name == "grch37.tsv.gz"
             assert map.by_name["BVES"] == ["ENSG00000112276"]
             assert map.by_ncbi["11149"] == ["ENSG00000112276"]
 
@@ -75,8 +72,27 @@ nextflow_process {
             assert !map.by_ncbi.containsKey("100505984")
             assert !map.by_ncbi.containsKey("3694")
             assert map.by_name["ITGB6"] == ["ENSG00000115221"]
+        }
+    }
 
-            assert path("$outputDir/cache/gene_maps/GRCh37_116/gene_map.json").exists()
+    test("Fails on an NCBI map without the header") {
+
+        when {
+            process {
+                """
+                input[0] = channel.of([
+                    "GRCh38",
+                    file("$baseDir/tests/data/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"),
+                    file("$baseDir/tests/data/gff/genes.gff3.bgz"),
+                    ""
+                ])
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+            assert process.errorMessage.contains("does not start with the header gene_stable_id, ncbi_gene_id")
         }
     }
 }

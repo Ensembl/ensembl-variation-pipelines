@@ -60,6 +60,8 @@ nextflow_process {
             assert provenance.pipeline.commit == "abc123"
             assert provenance.gates.passed
             assert provenance.stats.records == 13
+            assert provenance.gene_map.gene_set == "GENCODE 50"
+            assert provenance.gene_map.ncbi_map.name == "grch38.tsv.gz"
         }
     }
 

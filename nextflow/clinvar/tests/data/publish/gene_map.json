@@ -1,1 +1,1 @@
-{"provenance": {"assembly": "GRCh38"}}
+{"provenance": {"assembly": "GRCh38", "gene_set": "GENCODE 50", "gff": {"name": "Homo_sapiens.GRCh38.116.chr.gff.gz", "md5": "7c779577b2975f52ded21706cf296d8a"}, "ncbi_map": {"name": "grch38.tsv.gz", "md5": "7c6abc0e986a2fced965e45bf4889c2a"}}}

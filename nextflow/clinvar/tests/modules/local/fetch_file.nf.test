@@ -10,7 +10,7 @@ nextflow_process {
             process {
                 """
                 def xml = "file://$baseDir/tests/data/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
-                input[0] = channel.of(["vcv_xml", xml, xml + ".md5", ""])
+                input[0] = channel.of(["vcv_xml", xml, xml + ".md5"])
                 """
             }
         }
@@ -22,23 +22,6 @@ nextflow_process {
             assert key == "vcv_xml"
             assert path(fetched).fileName.toString() == "ClinVarVCVRelease_2026-08.xml.gz"
             assert path(fetched).md5 == path("$baseDir/tests/data/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz").md5
-        }
-    }
-
-    test("Verifies an Ensembl CHECKSUMS entry") {
-
-        when {
-            process {
-                """
-                def dir = "file://$baseDir/tests/data/ensembl/homo_sapiens_core_116_37"
-                input[0] = channel.of(["mapping_GRCh37", dir + "/xref.txt.gz", "", "15853 1"])
-                """
-            }
-        }
-
-        then {
-            assert process.success
-            assert path(process.out.file.get(0).get(1)).fileName.toString() == "xref.txt.gz"
         }
     }
 }

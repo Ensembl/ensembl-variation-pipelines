@@ -7,15 +7,18 @@ from each monthly ClinVar release.
   `CLNPMID`, `CLNSUBN` and `CLNRCV`.
 - Resolves each `GENEINFO` gene to the Ensembl gene IDs of the gene set VEP
   annotates with, written as `GENEENSG`.
-- Web VEP reads the result from `<publish_dir>/<grch38|grch37>/clinvar.vcf.gz`.
+- Publishes each release under `publish_dir`, the pipeline's own output area.
+  The web VEP sandbox can read it there. Production web VEP does not read it
+  directly. A separate handover process, not yet built, will copy releases to
+  production.
 
 ## Flow
 
 | Step | Process | Does |
 |---|---|---|
 | 1 | `RESOLVE_RELEASE` | Picks the newest release, or `month`, and stops if it is already published or not yet complete |
-| 2 | `FETCH_FILE` | Downloads remote inputs and checks their md5 or Ensembl `CHECKSUMS` |
-| 3 | `BUILD_GENE_MAP` | Maps GFF gene names and NCBI gene IDs to Ensembl gene IDs, cached per assembly and Ensembl release |
+| 2 | `FETCH_FILE` | Downloads the remote ClinVar inputs and checks their md5 |
+| 3 | `BUILD_GENE_MAP` | Maps GFF gene names and NCBI gene IDs to Ensembl gene IDs |
 | 4 | `BUILD_DB` | Loads the VCV and RCV XML into `clinvar_<YYYYMMDD>.sqlite` and builds the annotation table |
 | 5 | `ANNOTATE` | Writes the enriched VCF per assembly, bgzipped and tabix-indexed |
 | 6 | `CHECK` | Runs the gates below |
@@ -29,17 +32,31 @@ cron is safe.
 Each `GENEINFO` entry `NAME:NCBIID` resolves to Ensembl gene IDs in order.
 
 1. If `NAME` is a gene name in the GFF, take those Ensembl IDs.
-2. Otherwise take the GFF genes that Ensembl xrefs to `NCBIID`, skipping any
-   gene that carries more than one NCBI ID.
+2. Otherwise take the GFF genes that the NCBI map pairs with `NCBIID`,
+   skipping any gene that carries more than one NCBI ID.
 
 - Unique IDs are joined with `+` in `GENEINFO` order.
 - A record with no resolved gene has no `GENEENSG`.
 - A record gets `GENEENSG` whether or not it has an XML row.
 
-| Assembly | NCBI IDs from |
-|---|---|
-| GRCh38 | `Homo_sapiens.GRCh38.<release>.entrez.tsv.gz` |
-| GRCh37 | `homo_sapiens_core_<release>_37` dump tables |
+## NCBI maps
+
+Each assembly needs an NCBI map, a TSV, optionally gzipped, with the header
+`gene_stable_id<TAB>ncbi_gene_id` and one row per Ensembl gene and NCBI gene
+pair. The pipeline reads the maps as local files and downloads nothing from
+Ensembl.
+
+`bin/make_ncbi_map.py` writes a map from Ensembl's NCBI gene xrefs. Run it
+when the source changes.
+
+```bash
+bin/make_ncbi_map.py --entrez-tsv Homo_sapiens.GRCh38.<rel>.entrez.tsv.gz --out grch38.tsv.gz
+bin/make_ncbi_map.py --core-dump-dir homo_sapiens_core_<rel>_37 --out grch37.tsv.gz
+```
+
+- `--entrez-tsv` takes the `EntrezGene` rows of an Ensembl entrez TSV.
+- `--core-dump-dir` joins the `gene`, `object_xref`, `xref` and `external_db`
+  dumps of a core database, keeping current genes and their `EntrezGene` xrefs.
 
 ## Requirements
 
@@ -60,15 +77,17 @@ Copy `assets/local.params.example.yaml`, fill in the paths and pass it with
 nextflow run main.nf -profile standard -params-file local.params.yaml
 ```
 
-- Leave an input unset to fetch it from NCBI or Ensembl.
+- Leave a ClinVar input unset to fetch it from NCBI.
 - A local ClinVar VCF's `##fileDate` must match the XML release date unless
   `allow_date_mismatch` is set.
 
 ## Codon run (not live yet)
 
-Copy `assets/codon.params.example.yaml` outside the repo and fill it in. Web VEP
-reads `$VEP_DATA_DIR/vep_plugins_data/grch3x/clinvar.vcf.gz`, so `publish_dir`
-is `<VEP_DATA_DIR>/vep_plugins_data`.
+Copy `assets/codon.params.example.yaml` outside the repo and fill it in.
+`publish_dir` is the production output area,
+`/hps/nobackup/flicek/ensembl/variation/ensvar/production/web_vep_pipelines/clinvar`.
+Production web VEP does not read it. The handover process will copy releases
+from there.
 
 1. `cron/crontab.example` runs `cron/run_clinvar.sh` daily as `ensvar`.
 2. The script submits `cron/clinvar_head.sbatch` unless a head job is already
@@ -89,27 +108,26 @@ is `<VEP_DATA_DIR>/vep_plugins_data`.
 |---|---|---|
 | `publish_dir` | required | Output root |
 | `gff_grch38`, `gff_grch37` | required per assembly | GFF VEP annotates with |
+| `ncbi_map_grch38`, `ncbi_map_grch37` | required per assembly | NCBI map, see above |
+| `gene_set_grch38`, `gene_set_grch37` | none | Gene set label, such as `GENCODE 50`, recorded in the provenance and the `GENEENSG` header |
 | `assemblies` | `GRCh38,GRCh37` | Assemblies to build |
-| `ensembl_release` | `116` | Ensembl release of the GFF and NCBI mapping |
 | `month` | newest | Release month, `YYYY-MM` |
 | `clinvar_base_url` | NCBI FTP | ClinVar download root |
 | `vcv_xml`, `rcv_xml` | fetched | Local XML releases, given together |
 | `vcf_grch38`, `vcf_grch37` | fetched | Local ClinVar VCFs |
-| `entrez_tsv_grch38` | fetched | Local Ensembl entrez TSV |
-| `core_dump_dir_grch37` | fetched | Local directory holding `gene`, `object_xref`, `xref` and `external_db` `.txt.gz` |
 | `allow_date_mismatch` | `false` | Accept a local VCF whose `##fileDate` differs from the XML date |
 | `force` | `false` | Rebuild a published release, and replace regular files at the link paths |
-| `cache_dir` | `<publish_dir>/cache` | Gene map cache |
 | `work_dir` | `work` in the launch directory | Nextflow work directory for intermediate files, about 24 GB on a full run. `-work-dir` takes precedence |
 | `keep_releases` | `3` | Releases kept per assembly |
 | `max_problem_fraction` | `0.01` | Largest ratio of validation problems to records that `validate.py` accepts |
 | `min_clnsuba_fraction` | `0.99` | Smallest share of records carrying `CLNSUBA` that `validate.py` accepts |
 | `queue`, `fetch_queue` | `production`, `datamover` | SLURM partitions; downloads use `fetch_queue` |
 
-The gene map cache is keyed by assembly and Ensembl release only. Delete the
-cached map after changing a GFF within a release.
-
 ## Outputs
+
+`publish_dir` is the pipeline's own output area. The web VEP sandbox reads the
+`clinvar.vcf.gz` links there. Production web VEP does not read `publish_dir`;
+the handover process, not yet built, will copy releases to production.
 
 ```
 <publish_dir>/
@@ -123,13 +141,13 @@ cached map after changing a GFF within a release.
       clinvar_<YYYYMMDD>.vcf.gz.provenance.json
   grch37/
     ...
-  cache/gene_maps/<assembly>_<release>/gene_map.json
 ```
 
 - `CURRENT` holds the published release date.
 - The provenance file records the input sources and md5s, the gene map
-  provenance, annotation stats, gate and validation results, pipeline commit,
-  Nextflow version and start time.
+  provenance (gene set label, GFF and NCBI map names and md5s), annotation
+  stats, gate and validation results, pipeline commit, Nextflow version and
+  start time.
 - Links are relative.
 - Each link is replaced atomically, the VCF link first and then the index link.
   Between the two swaps a reader can briefly see the new VCF with the old index.

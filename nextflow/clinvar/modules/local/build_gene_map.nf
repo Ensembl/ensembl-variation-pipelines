@@ -16,23 +16,19 @@
  * limitations under the License.
  */
 
-// storeDir caches the map by assembly and Ensembl release, so later ClinVar
-// releases reuse it. Delete the cached map after changing a GFF within a release.
-
 process BUILD_GENE_MAP {
   tag "${asm}"
-  storeDir "${params.cache_dir ?: params.publish_dir + '/cache'}/gene_maps/${asm}_${params.ensembl_release}"
 
   input:
-  tuple val(asm), path(gff), path(mapping, stageAs: 'mapping/*')
+  tuple val(asm), path(gff), path(ncbi_map), val(gene_set)
 
   output:
   tuple val(asm), path('gene_map.json'), emit: gene_map
 
   script:
-  def source = asm == 'GRCh37' ? '--core-dump-dir mapping' : "--entrez-tsv ${[mapping].flatten()[0]}"
+  def label = gene_set ? "--gene-set '${gene_set}'" : ''
 
   """
-  build_gene_map.py --assembly ${asm} --gff ${gff} ${source} --out gene_map.json
+  build_gene_map.py --assembly ${asm} --gff ${gff} --ncbi-map ${ncbi_map} ${label} --out gene_map.json
   """
 }

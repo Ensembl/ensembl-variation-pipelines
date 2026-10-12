@@ -151,18 +151,16 @@ CLINVAR_REDELIMIT = (
 
 def geneensg_header(provenance):
     """Return the ##INFO line for GENEENSG, naming the gene-map sources."""
-    gff = os.path.basename(provenance["gff"]["path"])
-    if provenance["mapping"]["kind"] == "core_dump":
-        mapping = "the EntrezGene xrefs of the Ensembl core database dump"
-    else:
-        mapping = os.path.basename(provenance["mapping"]["path"])
+    gff = provenance["gff"]["name"]
+    label = provenance.get("gene_set")
+    gene_set = f"the {label} gene set of {gff}" if label else f"the gene set of {gff}"
     desc = (
-        f"Ensembl gene IDs for the GENEINFO genes, in the gene set of {gff}. "
+        f"Ensembl gene IDs for the GENEINFO genes, in {gene_set}. "
         "A GENEINFO symbol that is a gene Name in that GFF gives the IDs of those "
         "genes. Any other symbol falls back to its NCBI gene ID, mapped through "
-        f"{mapping} to the GFF genes that carry no other NCBI gene ID. IDs are "
-        "unique, in GENEINFO order, and separated by +. Absent when no gene "
-        "resolves."
+        f"{provenance['ncbi_map']['name']} to the GFF genes that carry no other "
+        "NCBI gene ID. IDs are unique, in GENEINFO order, and separated by +. "
+        "Absent when no gene resolves."
     )
     return f'##INFO=<ID=GENEENSG,Number=.,Type=String,Description="{desc}">\n'
 

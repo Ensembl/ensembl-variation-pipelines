@@ -21,14 +21,14 @@ process FETCH_FILE {
   tag "${key}"
 
   input:
-  tuple val(key), val(url), val(md5_url), val(bsd_sum)
+  tuple val(key), val(url), val(md5_url)
 
   output:
   tuple val(key), path(name), emit: file
 
   script:
   name = url.tokenize('/')[-1]
-  def check = md5_url ? "--md5-url '${md5_url}'" : (bsd_sum ? "--bsd-sum '${bsd_sum}'" : '')
+  def check = md5_url ? "--md5-url '${md5_url}'" : ''
 
   """
   fetch_file.py '${url}' --out '${name}' ${check}

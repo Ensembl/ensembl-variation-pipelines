@@ -1,16 +1,20 @@
 # Params for the Codon run. Copy this file outside the repo, fill in the
-# placeholders and point the cron job at it. Web VEP reads
-# $VEP_DATA_DIR/vep_plugins_data/grch3x/clinvar.vcf.gz.
+# placeholders and point the cron job at it. publish_dir is the pipeline's
+# production output area. Production web VEP does not read it directly.
 
 assemblies: GRCh38,GRCh37
-ensembl_release: 116
 
-# GFFs VEP annotates with
-gff_grch38: <VEP_DATA_DIR>/<GRCh38 GFF dir>/Homo_sapiens.GRCh38.116.chr.gff.gz
-gff_grch37: <VEP_DATA_DIR>/<GRCh37 GFF dir>/genes.gff3.bgz
+# Gene set VEP annotates with
+gff_grch38: <GFF_DIR>/<GRCh38 GFF>.gff.gz
+gff_grch37: <GFF_DIR>/<GRCh37 GFF>.gff3.bgz
+gene_set_grch38: <GRCh38 gene set label, e.g. GENCODE 50>
+gene_set_grch37: <GRCh37 gene set label>
 
-publish_dir: <VEP_DATA_DIR>/vep_plugins_data
-cache_dir: <VEP_DATA_DIR>/vep_plugins_data/cache
+# NCBI maps that bin/make_ncbi_map.py writes
+ncbi_map_grch38: <NCBI_MAP_DIR>/grch38.tsv.gz
+ncbi_map_grch37: <NCBI_MAP_DIR>/grch37.tsv.gz
+
+publish_dir: /hps/nobackup/flicek/ensembl/variation/ensvar/production/web_vep_pipelines/clinvar
 keep_releases: 3
 
 queue: production

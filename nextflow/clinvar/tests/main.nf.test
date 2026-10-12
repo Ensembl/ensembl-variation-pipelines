@@ -11,11 +11,11 @@ nextflow_pipeline {
                 def pub = new File("$outputDir/pub")
 
                 assemblies = "GRCh38,GRCh37"
-                ensembl_release = 116
                 gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
                 gff_grch37 = "${data}/gff/genes.gff3.bgz"
-                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
-                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                ncbi_map_grch38 = "${data}/ncbi_map/grch38.tsv.gz"
+                ncbi_map_grch37 = "${data}/ncbi_map/grch37.tsv.gz"
+                gene_set_grch38 = "GENCODE 50"
                 vcv_xml = "${data}/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
                 rcv_xml = "${data}/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz"
                 vcf_grch38 = "${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
@@ -69,8 +69,23 @@ nextflow_pipeline {
 
             assert geneensg("$outputDir/pub/grch38/clinvar.vcf.gz")["17788"] == "ENSG00000175206"
             assert geneensg("$outputDir/pub/grch37/clinvar.vcf.gz")["17788"] == "ENSG00000175206+ENSG00000242349"
-            assert path("$outputDir/pub/cache/gene_maps/GRCh38_116/gene_map.json").exists()
-            assert path("$outputDir/pub/cache/gene_maps/GRCh37_116/gene_map.json").exists()
+            assert !new File("$outputDir/pub/cache").exists()
+
+            def provenance = { asm ->
+                path("$outputDir/pub/${asm}/releases/clinvar_20260804.vcf.gz.provenance.json").json.gene_map
+            }
+            assert provenance("grch38").gene_set == "GENCODE 50"
+            assert provenance("grch38").gff.name == "Homo_sapiens.GRCh38.116.chr.gff.gz"
+            assert provenance("grch38").ncbi_map.name == "grch38.tsv.gz"
+            assert provenance("grch37").gene_set == null
+            assert provenance("grch37").ncbi_map.name == "grch37.tsv.gz"
+
+            def header = { asm ->
+                path("$outputDir/pub/${asm}/clinvar.vcf.gz").linesGzip.find { line -> line.startsWith("##INFO=<ID=GENEENSG,") }
+            }
+            assert header("grch38").contains("in the GENCODE 50 gene set of Homo_sapiens.GRCh38.116.chr.gff.gz.")
+            assert header("grch37").contains("in the gene set of genes.gff3.bgz.")
+            assert header("grch37").contains("mapped through grch37.tsv.gz")
         }
     }
 
@@ -86,11 +101,10 @@ nextflow_pipeline {
                     new File(releases, "clinvar_20260804.vcf.gz").text = ""
                 }
                 assemblies = "GRCh38,GRCh37"
-                ensembl_release = 116
                 gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
                 gff_grch37 = "${data}/gff/genes.gff3.bgz"
-                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
-                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                ncbi_map_grch38 = "${data}/ncbi_map/grch38.tsv.gz"
+                ncbi_map_grch37 = "${data}/ncbi_map/grch37.tsv.gz"
                 vcv_xml = "${data}/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
                 rcv_xml = "${data}/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz"
                 vcf_grch38 = "${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
@@ -118,11 +132,10 @@ nextflow_pipeline {
                 def pub = new File("$outputDir/pub")
 
                 assemblies = "GRCh38,GRCh37"
-                ensembl_release = 116
                 gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
                 gff_grch37 = "${data}/gff/genes.gff3.bgz"
-                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
-                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                ncbi_map_grch38 = "${data}/ncbi_map/grch38.tsv.gz"
+                ncbi_map_grch37 = "${data}/ncbi_map/grch37.tsv.gz"
                 clinvar_base_url = "file://${data}/clinvar_ftp"
                 month = "2026-09"
                 publish_dir = pub.toString()
@@ -148,11 +161,10 @@ nextflow_pipeline {
                 def pub = new File("$outputDir/pub")
 
                 assemblies = "GRCh38,GRCh37"
-                ensembl_release = 116
                 gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
                 gff_grch37 = "${data}/gff/genes.gff3.bgz"
-                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
-                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                ncbi_map_grch38 = "${data}/ncbi_map/grch38.tsv.gz"
+                ncbi_map_grch37 = "${data}/ncbi_map/grch37.tsv.gz"
                 vcv_xml = "${data}/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
                 rcv_xml = "${data}/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz"
                 vcf_grch38 = "${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
@@ -181,11 +193,10 @@ nextflow_pipeline {
                 new File(pub, "grch38").mkdirs()
                 new File(pub, "grch38/clinvar.vcf.gz").text = "regular file\n"
                 assemblies = "GRCh38,GRCh37"
-                ensembl_release = 116
                 gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
                 gff_grch37 = "${data}/gff/genes.gff3.bgz"
-                entrez_tsv_grch38 = "${data}/ensembl/Homo_sapiens.GRCh38.116.entrez.tsv.gz"
-                core_dump_dir_grch37 = "${data}/ensembl/homo_sapiens_core_116_37"
+                ncbi_map_grch38 = "${data}/ncbi_map/grch38.tsv.gz"
+                ncbi_map_grch37 = "${data}/ncbi_map/grch37.tsv.gz"
                 vcv_xml = "${data}/clinvar_ftp/xml/ClinVarVCVRelease_2026-08.xml.gz"
                 rcv_xml = "${data}/clinvar_ftp/xml/RCV_release/ClinVarRCVRelease_2026-08.xml.gz"
                 vcf_grch38 = "${data}/clinvar_ftp/vcf_GRCh38/archive_2.0/2026/clinvar_20260804.vcf.gz"
@@ -205,6 +216,26 @@ nextflow_pipeline {
             assert !java.nio.file.Files.isSymbolicLink(link.toPath())
             assert link.text == "regular file\n"
             assert !new File("$outputDir/pub/grch38/releases/clinvar_20260804.vcf.gz").exists()
+        }
+    }
+
+    test("Requires an NCBI map for each assembly") {
+
+        when {
+            params {
+                def data = "$baseDir/tests/data"
+
+                assemblies = "GRCh38,GRCh37"
+                gff_grch38 = "${data}/gff/Homo_sapiens.GRCh38.116.chr.gff.gz"
+                gff_grch37 = "${data}/gff/genes.gff3.bgz"
+                ncbi_map_grch38 = "${data}/ncbi_map/grch38.tsv.gz"
+                publish_dir = "$outputDir/pub"
+            }
+        }
+
+        then {
+            assert workflow.failed
+            assert new File("$launchDir/meta/nextflow.log").text.contains("Please provide the NCBI map for GRCh37")
         }
     }
 }

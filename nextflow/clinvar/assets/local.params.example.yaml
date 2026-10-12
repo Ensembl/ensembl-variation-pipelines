@@ -1,12 +1,17 @@
 # Params for a local run. Copy this file, fill in the placeholders and pass it
-# with -params-file. Leave an input unset to fetch it from NCBI or Ensembl.
+# with -params-file. Leave a ClinVar input unset to fetch it from NCBI.
 
 assemblies: GRCh38,GRCh37
-ensembl_release: 116
 
-# GFFs VEP annotates with
-gff_grch38: <DATA_DIR>/Homo_sapiens.GRCh38.116.chr.gff.gz
-gff_grch37: <DATA_DIR>/genes.gff3.bgz
+# Gene set VEP annotates with. The labels are optional.
+gff_grch38: <DATA_DIR>/<GRCh38 GFF>.gff.gz
+gff_grch37: <DATA_DIR>/<GRCh37 GFF>.gff3.bgz
+# gene_set_grch38: <GRCh38 gene set label, e.g. GENCODE 50>
+# gene_set_grch37: <GRCh37 gene set label>
+
+# NCBI maps that bin/make_ncbi_map.py writes
+ncbi_map_grch38: <DATA_DIR>/ncbi_map.grch38.tsv.gz
+ncbi_map_grch37: <DATA_DIR>/ncbi_map.grch37.tsv.gz
 
 # Each of these is optional. Local ClinVar files must share one release date.
 # month: 2026-08
@@ -14,9 +19,7 @@ gff_grch37: <DATA_DIR>/genes.gff3.bgz
 # rcv_xml: <DATA_DIR>/ClinVarRCVRelease_2026-08.xml.gz
 # vcf_grch38: <DATA_DIR>/clinvar_20260804.GRCh38.vcf.gz
 # vcf_grch37: <DATA_DIR>/clinvar_20260804.GRCh37.vcf.gz
-# entrez_tsv_grch38: <DATA_DIR>/Homo_sapiens.GRCh38.116.entrez.tsv.gz
-# core_dump_dir_grch37: <DATA_DIR>/homo_sapiens_core_116_37
 
-publish_dir: <OUTPUT_DIR>/vep_plugins_data
+publish_dir: <OUTPUT_DIR>/clinvar
 # work_dir: <SCRATCH_DIR>/clinvar_work
 keep_releases: 3

@@ -16,15 +16,14 @@
 
 """Build the gene map annotate_vcf.py uses to resolve GENEINFO to Ensembl IDs.
 
-Reads the genes of the GFF VEP annotates with and Ensembl's NCBI gene xrefs.
-The xrefs come from the per-release entrez.tsv for GRCh38 and from a join over
-core database dumps for GRCh37, which has no entrez.tsv. `by_ncbi` keeps only
-GFF genes that carry exactly one NCBI gene ID, which drops readthrough and
-antisense NCBI IDs that Ensembl xrefs to a component gene.
+Reads the genes of the GFF VEP annotates with and an NCBI map, a TSV with the
+header `gene_stable_id<TAB>ncbi_gene_id` that make_ncbi_map.py writes.
+`by_ncbi` keeps only GFF genes that carry exactly one NCBI gene ID, which drops
+readthrough and antisense NCBI IDs that Ensembl xrefs to a component gene.
 
 Usage:
-    build_gene_map.py --assembly ASM --gff GFF
-                      (--entrez-tsv TSV | --core-dump-dir DIR) --out gene_map.json
+    build_gene_map.py --assembly ASM --gff GFF --ncbi-map MAP.tsv[.gz]
+                      [--gene-set LABEL] --out gene_map.json
 """
 
 import argparse
@@ -35,7 +34,7 @@ import os
 from clinvar_common import die, md5sum, open_text
 
 GENE_TYPES = ("gene", "ncRNA_gene", "pseudogene")
-CORE_TABLES = ("gene", "object_xref", "xref", "external_db")
+NCBI_MAP_HEADER = ["gene_stable_id", "ncbi_gene_id"]
 
 
 def read_gff(path):
@@ -60,46 +59,16 @@ def read_gff(path):
     return ids, by_name
 
 
-def entrez_pairs(path):
-    """Yield (gene stable ID, NCBI gene ID) from an Ensembl entrez.tsv."""
+def ncbi_pairs(path):
+    """Yield (gene stable ID, NCBI gene ID) from an NCBI map."""
     with open_text(path) as handle:
-        header = next(handle).rstrip("\n").split("\t")
-        if header[:5] != [
-            "gene_stable_id",
-            "transcript_stable_id",
-            "protein_stable_id",
-            "xref",
-            "db_name",
-        ]:
-            die(f"{path} does not look like an Ensembl entrez.tsv")
-        for line in handle:
+        if next(handle, "").rstrip("\n").split("\t") != NCBI_MAP_HEADER:
+            die(f"{path} does not start with the header gene_stable_id, ncbi_gene_id")
+        for number, line in enumerate(handle, start=2):
             cols = line.rstrip("\n").split("\t")
-            if len(cols) > 4 and cols[4] == "EntrezGene":
-                yield cols[0], cols[3]
-
-
-def core_rows(dump_dir, table):
-    with open_text(os.path.join(dump_dir, f"{table}.txt.gz")) as handle:
-        for line in handle:
-            yield line.rstrip("\n").split("\t")
-
-
-def core_pairs(dump_dir):
-    """Yield (gene stable ID, NCBI gene ID) joined from core database dumps.
-
-    Joins gene -> object_xref (Gene) -> xref -> external_db (EntrezGene) and
-    keeps current genes only.
-    """
-    entrez_dbs = {
-        r[0] for r in core_rows(dump_dir, "external_db") if r[1] == "EntrezGene"
-    }
-    ncbi_by_xref = {
-        r[0]: r[2] for r in core_rows(dump_dir, "xref") if r[1] in entrez_dbs
-    }
-    stable_by_gene = {r[0]: r[12] for r in core_rows(dump_dir, "gene") if r[10] == "1"}
-    for r in core_rows(dump_dir, "object_xref"):
-        if r[2] == "Gene" and r[3] in ncbi_by_xref and r[1] in stable_by_gene:
-            yield stable_by_gene[r[1]], ncbi_by_xref[r[3]]
+            if len(cols) != 2 or not all(cols):
+                die(f"{path} line {number} does not hold two columns")
+            yield cols[0], cols[1]
 
 
 def build(gff_ids, by_name, pairs):
@@ -125,9 +94,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--assembly", required=True)
     ap.add_argument("--gff", required=True)
-    source = ap.add_mutually_exclusive_group(required=True)
-    source.add_argument("--entrez-tsv")
-    source.add_argument("--core-dump-dir")
+    ap.add_argument("--ncbi-map", required=True)
+    ap.add_argument("--gene-set", help="gene set label, such as 'GENCODE 50'")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -135,35 +103,20 @@ def main():
     if not gff_ids:
         die(f"no gene features in {args.gff}")
 
-    if args.entrez_tsv:
-        pairs = list(entrez_pairs(args.entrez_tsv))
-        mapping = {
-            "kind": "entrez_tsv",
-            "path": args.entrez_tsv,
-            "md5": md5sum(args.entrez_tsv),
-        }
-    else:
-        for table in CORE_TABLES:
-            if not os.path.exists(os.path.join(args.core_dump_dir, f"{table}.txt.gz")):
-                die(f"{args.core_dump_dir} lacks {table}.txt.gz")
-        pairs = list(core_pairs(args.core_dump_dir))
-        mapping = {
-            "kind": "core_dump",
-            "path": args.core_dump_dir,
-            "md5": {
-                t: md5sum(os.path.join(args.core_dump_dir, f"{t}.txt.gz"))
-                for t in CORE_TABLES
-            },
-        }
+    pairs = list(ncbi_pairs(args.ncbi_map))
     if not pairs:
-        die("the mapping holds no EntrezGene xrefs")
+        die(f"{args.ncbi_map} holds no gene and NCBI ID pairs")
 
     by_name, by_ncbi = build(gff_ids, gff_names, pairs)
     gene_map = {
         "provenance": {
             "assembly": args.assembly,
-            "gff": {"path": args.gff, "md5": md5sum(args.gff)},
-            "mapping": mapping,
+            "gene_set": args.gene_set,
+            "gff": {"name": os.path.basename(args.gff), "md5": md5sum(args.gff)},
+            "ncbi_map": {
+                "name": os.path.basename(args.ncbi_map),
+                "md5": md5sum(args.ncbi_map),
+            },
         },
         "gene_ids": sorted(gff_ids),
         "by_name": by_name,

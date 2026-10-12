@@ -100,6 +100,7 @@ is `<VEP_DATA_DIR>/vep_plugins_data`.
 | `allow_date_mismatch` | `false` | Accept a local VCF whose `##fileDate` differs from the XML date |
 | `force` | `false` | Rebuild a published release, and replace regular files at the link paths |
 | `cache_dir` | `<publish_dir>/cache` | Gene map cache |
+| `work_dir` | `work` in the launch directory | Nextflow work directory for intermediate files, about 24 GB on a full run. `-work-dir` takes precedence |
 | `keep_releases` | `3` | Releases kept per assembly |
 | `max_problem_fraction` | `0.01` | Largest ratio of validation problems to records that `validate.py` accepts |
 | `min_clnsuba_fraction` | `0.99` | Smallest share of records carrying `CLNSUBA` that `validate.py` accepts |

@@ -18,4 +18,5 @@ gff_grch37: <DATA_DIR>/genes.gff3.bgz
 # core_dump_dir_grch37: <DATA_DIR>/homo_sapiens_core_116_37
 
 publish_dir: <OUTPUT_DIR>/vep_plugins_data
+# work_dir: <SCRATCH_DIR>/clinvar_work
 keep_releases: 3

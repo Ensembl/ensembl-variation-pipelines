@@ -8,6 +8,7 @@ nextflow.enable.dsl=2
 params.help       = false
 params.outdir     = "outdir"
 params.gtf        = null
+params.gff        = null
 params.fasta      = null
 params.translated = null
 params.species    = "homo_sapiens"
@@ -46,8 +47,10 @@ if (params.help) {
   General options:
     --gtf FILE           Comma-separated list of annotation GTF files; requires
                          FASTA files
+    --gff FILE           Comma-separated list of annotation GFF3 files; requires
+                         FASTA files; mutually exclusive with --gtf
     --fasta FILE         Comma-separated list of FASTA files with genomic
-                         sequences; requires GTF files
+                         sequences; requires GTF/GFF3 files
     --translated FILE    Comma-separated list of FASTA files with peptide
                          sequence; skips sequence translation with GTF and FASTA
     --outdir VAL         Name of output dir (default: outdir)
@@ -105,11 +108,14 @@ check_JVM_mem(min=4)
 print_summary()
 
 // Check input data
+annotation = params.gtf ?: params.gff
 if (!params.translated) {
-  if (!params.fasta && !params.gtf) {
-    exit 1, "ERROR: arguments --fasta/--gtf or --translated are mandatory"
-  } else if (!params.fasta || !params.gtf ) {
-    exit 1, "ERROR: both --fasta and --gtf need to be defined"
+  if (params.gtf && params.gff) {
+    exit 1, "ERROR: --gtf and --gff are mutually exclusive"
+  } else if (!params.fasta && !annotation) {
+    exit 1, "ERROR: arguments --fasta with --gtf/--gff, or --translated, are mandatory"
+  } else if (!params.fasta || !annotation ) {
+    exit 1, "ERROR: --fasta and one of --gtf/--gff need to be defined"
   }
 }
 
@@ -150,7 +156,7 @@ log.info """
   Predict protein function using SIFT and PolyPhen-2
   --------------------------------------------------
   species    : ${params.species}
-  GTF        : ${params.gtf}
+  annotation : ${annotation}
   FASTA      : ${params.fasta}
   translated : ${params.translated}
   outdir     : ${params.outdir}
@@ -174,7 +180,7 @@ def getFiles (files) {
 workflow {
   // Translate transcripts from GTF and FASTA if no translation FASTA is given
   if (!params.translated) {
-    translate_fasta(getFiles(params.gtf), getFiles(params.fasta))
+    translate_fasta(getFiles(annotation), getFiles(params.fasta))
     translated = translate_fasta.out
   } else {
     translated = getFiles(params.translated)
@@ -185,7 +191,10 @@ workflow {
   translated = translated
                  .splitFasta(record: [id: true, seqString: true, text: true])
                  .unique() // remove duplicated entries
-                 .map{ it -> [id: it.id,
+                 .map{ it -> [// GFF3 writes ID=transcript:ENST...; GTF writes
+                              // the bare stable ID. Normalise so that
+                              // translation_mapping.stable_id stays joinable.
+                              id: it.id.replaceFirst(/^(?:transcript|mRNA|CDS):/, ''),
                               // Remove stop codon (asterisk)
                               text: it.text.replaceAll(/\*/, ""),
                               seqString: it.seqString.replaceAll(/\*/, ""),

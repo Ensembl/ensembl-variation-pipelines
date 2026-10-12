@@ -1,8 +1,8 @@
 # Predict protein function with SIFT and PolyPhen-2
 
 This pipeline predicts amino acid substitutions using SIFT and, for human
-proteins, PolyPhen-2. It accepts peptide FASTA files or translates GTF/FASTA
-inputs with AGAT. Translation MD5 hashes identify the resulting prediction
+proteins, PolyPhen-2. It accepts peptide FASTA files or translates GTF/GFF3
+and FASTA inputs with AGAT. Translation MD5 hashes identify the resulting prediction
 matrices.
 
 ![Workflow diagram](diagram.png)
@@ -43,7 +43,8 @@ requires human input and `--pph_data`.
 | Option | Purpose |
 | --- | --- |
 | `--translated` | Peptide FASTA files, comma-separated |
-| `--gtf`, `--fasta` | Annotation and genomic sequence files if peptides are not supplied |
+| `--gtf`, `--gff` | Annotation files if peptides are not supplied; GTF and GFF3 give identical translations, and the two options are mutually exclusive |
+| `--fasta` | Genomic sequence files, required with `--gtf`/`--gff` |
 | `--species` | Species name; defaults to `homo_sapiens` |
 | `--outdir` | Output directory; defaults to `outdir` |
 | `--host`, `--port`, `--user`, `--pass`, `--database` | Required MySQL connection settings in online mode |

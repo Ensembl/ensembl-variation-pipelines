@@ -30,9 +30,14 @@ process run_pph2_on_all_aminoacid_substitutions {
   container "ensemblorg/polyphen-2:2.2.3"
   containerOptions "--bind ${params.pph_data}:/opt/pph2/data"
 
-  memory { peptide.size() * 100.MB + 4.GB }
-  errorStrategy 'ignore'
-  maxRetries 1
+  // peptide is a map, so peptide.size() is always 4; scale on the sequence
+  // length instead, using the same shape as the SIFT processes
+  memory {
+    mem = (peptide.seqString.size() * task.attempt * 4.MB + 4.GB)
+    mem < 50.GB ? mem : 50.GB
+  }
+  label 'retry_before_ignoring'
+  maxRetries 2
 
   input:
     val peptide

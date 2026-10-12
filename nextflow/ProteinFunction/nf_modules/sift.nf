@@ -42,9 +42,14 @@ process align_peptides {
   tag "${peptide.md5}"
   container "ensemblorg/sift:6.2.1"
 
-  memory { peptide.size() * 40.MB + 4.GB }
-  errorStrategy 'ignore'
-  maxRetries 1
+  // peptide is a map, so peptide.size() is always 4; scale on the sequence
+  // length instead, using the same shape as run_sift_on_all_aminoacid_substitutions
+  memory {
+    mem = (peptide.seqString.size() * task.attempt * 4.MB + 4.GB)
+    mem < 50.GB ? mem : 50.GB
+  }
+  label 'retry_before_ignoring'
+  maxRetries 2
 
   input:
     val peptide

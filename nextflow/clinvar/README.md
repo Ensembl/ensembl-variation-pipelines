@@ -139,15 +139,19 @@ A release is published only if every gate passes for that assembly.
 
 ## Resources
 
-Approximate times for a full release:
+Measured on the 2026-10 release (dated 2026-09-28, 4.56M records) with the
+standard profile on a 10-core, 16 GB laptop:
 
 | Step | Time | Memory requested |
 |---|---|---|
-| `BUILD_DB` | about 20 min | 8 GB |
-| `ANNOTATE` | about 2.5 min per assembly | 4 GB |
+| `BUILD_DB` | 43 min | 8 GB |
+| `ANNOTATE` | 4.6 min per assembly | 4 GB |
+| `CHECK` | 3.7 min per assembly | 4 GB |
+| Whole run, both assemblies | 52 min | |
 
-A run needs about 25 GB of scratch in the work directory. Remove old work
-directories after a successful run.
+The work directory holds the 11.8 GB database. With the XML releases fetched by
+the pipeline it reaches about 24 GB. Each published assembly is about 470 MB.
+Remove old work directories after a successful run.
 
 ## Tests
 

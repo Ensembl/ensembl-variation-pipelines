@@ -92,7 +92,6 @@ if (params.help) {
 }
 
 // Module imports
-include { decompress }                from './nf_modules/utils.nf'
 include { translate_fasta }           from './nf_modules/translations.nf'
 include { clear_assemblies;
           store_assemblies;

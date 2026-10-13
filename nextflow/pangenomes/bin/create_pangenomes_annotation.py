@@ -149,9 +149,9 @@ new_gtf = joint[
         "new_attribute",
     ]
 ]
-# Preserve the generic feature labels emitted by the previous GTF-based
-# pipeline for compatibility with downstream plugin type filters.
-new_gtf = new_gtf.assign(feature_x="transcript" if args.go else "gene")
+# Phenotypes.pm matches type case-sensitively, and include_types=Gene and
+# id_match=1 both need "Gene". GO.pm does not filter on type.
+new_gtf = new_gtf.assign(feature_x="transcript" if args.go else "Gene")
 new_gtf = new_gtf.sort_values(by=["chr_x", "start_x", "end_x"])
 
 if len(new_gtf) == 0:

@@ -209,7 +209,7 @@ class PangenomesAnnotationTests(TemporaryDirectoryTestCase):
             [
                 feature(
                     "1",
-                    "gene",
+                    "Gene",
                     5,
                     500,
                     "+",
@@ -218,7 +218,7 @@ class PangenomesAnnotationTests(TemporaryDirectoryTestCase):
                 ),
                 feature(
                     "2",
-                    "gene",
+                    "Gene",
                     90,
                     200,
                     "-",
@@ -392,7 +392,7 @@ workflow {{
             [
                 feature(
                     "2",
-                    "gene",
+                    "Gene",
                     90,
                     200,
                     "-",

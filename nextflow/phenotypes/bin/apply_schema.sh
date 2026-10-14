@@ -15,12 +15,5 @@ if [[ ! -x "$PYTHON_BIN" ]]; then
     exit 1
 fi
 
-connection_env=$(PYTHONPATH="${PIPELINE_DIR}/src" "$PYTHON_BIN" -m phenotypes.config \
-    --env-file "$ENV_FILE" --postgresql-env)
-eval "$connection_env"
-
-psql -X -v ON_ERROR_STOP=1 -v target_schema="$PGSCHEMA" \
-    -v schema_file="$SCHEMA_FILE" <<'SQL'
-SET search_path TO :"target_schema";
-\i :schema_file
-SQL
+PYTHONPATH="${PIPELINE_DIR}/src" exec "$PYTHON_BIN" -m phenotypes.config \
+    --env-file "$ENV_FILE" --apply-schema "$SCHEMA_FILE"

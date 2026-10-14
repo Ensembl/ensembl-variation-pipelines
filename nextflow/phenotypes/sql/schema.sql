@@ -1,5 +1,6 @@
 -- Create the tables and relationships for the phenotype datastore.
 -- Run in the target schema after it has been created.
+-- Model: variation-datastore-models/phenotypes
 
 BEGIN;
 

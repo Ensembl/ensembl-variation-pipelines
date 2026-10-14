@@ -1,14 +1,6 @@
-"""Read database connection details from an .env file.
+"""Read and validate database connection settings from an .env file."""
 
-Provide the selected connection settings to callers, or apply a PostgreSQL schema
-with connection settings passed directly through the child process environment.
-"""
-
-import argparse
 import configparser
-import os
-import subprocess
-import sys
 from pathlib import Path
 
 
@@ -50,31 +42,3 @@ def postgresql_environment(env_file: str | Path = ".env") -> dict[str, str]:
     if values.get("password"):
         result["PGPASSWORD"] = values["password"]
     return result
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description='Read the run-directory .env INI sections for database connections.')
-    parser.add_argument("--env-file", type=Path, default=Path(".env"))
-    parser.add_argument("--apply-schema", type=Path, required=True,
-                        help="Apply this SQL file using the configured PostgreSQL connection")
-    args = parser.parse_args()
-    try:
-        values = postgresql_environment(args.env_file)
-    except (OSError, ValueError) as error:
-        parser.exit(1, f"Configuration error: {error}\n")
-    try:
-        result = subprocess.run(
-            ["psql", "-X", "-v", "ON_ERROR_STOP=1",
-             "-v", f"target_schema={values['PGSCHEMA']}",
-             "-v", f"schema_file={args.apply_schema}"],
-            env=os.environ | values,
-            input='SET search_path TO :"target_schema";\n\\i :schema_file\n',
-            text=True,
-        )
-    except OSError as error:
-        parser.exit(1, f"Could not run psql: {error}\n")
-    return result.returncode
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

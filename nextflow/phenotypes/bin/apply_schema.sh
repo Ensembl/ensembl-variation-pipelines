@@ -1,19 +1,34 @@
 #!/bin/bash
 
-# Create the phenotype tables in the configured PostgreSQL schema.
-# Read connection details from an .env file and apply sql/schema.sql.
+# Apply sql/schema.sql using the [postgresql] settings in .env.
+# Usage: nextflow/phenotypes/bin/apply_schema.sh [ /path/to/.env ]
+# With no argument, read .env from the current working directory.
 
 set -euo pipefail
 
 PIPELINE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${1:-$PWD/.env}"
-PYTHON_BIN="${PIPELINE_DIR}/.venv/bin/python"
-SCHEMA_FILE="${PIPELINE_DIR}/sql/schema.sql"
+section=""
+schema="phenotypes"
 
-if [[ ! -x "$PYTHON_BIN" ]]; then
-    echo "Python environment not found. Run uv sync in $PIPELINE_DIR." >&2
-    exit 1
-fi
+while IFS='=' read -r key value || [[ -n "$key" ]]; do
+    if [[ "$key" == \[*\] ]]; then
+        section="$key"
+        continue
+    fi
+    [[ "$section" == "[postgresql]" ]] || continue
+    case "$key" in
+        host) export PGHOST="$value" ;;
+        port) export PGPORT="$value" ;;
+        user) export PGUSER="$value" ;;
+        name) export PGDATABASE="$value" ;;
+        schema) schema="$value" ;;
+        password) if [[ -n "$value" ]]; then export PGPASSWORD="$value"; fi ;;
+    esac
+done < "$ENV_FILE"
 
-PYTHONPATH="${PIPELINE_DIR}/src" exec "$PYTHON_BIN" -m phenotypes.config \
-    --env-file "$ENV_FILE" --apply-schema "$SCHEMA_FILE"
+exec psql -X -v ON_ERROR_STOP=1 \
+    -v target_schema="$schema" -v schema_file="${PIPELINE_DIR}/sql/schema.sql" <<'SQL'
+SET search_path TO :"target_schema";
+\i :schema_file
+SQL

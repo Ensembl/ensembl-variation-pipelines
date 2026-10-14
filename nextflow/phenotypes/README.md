@@ -32,17 +32,19 @@ cp -n "$PIPELINE_DIR/.env.example" .env
 chmod 600 .env
 ```
 
-Set the postgres db connection details in `.env`:
+Set the PostgreSQL connection details in `.env`:
 
-```.env
+```ini
 [postgresql]
 host=database_host
-port=database_port
+port=5432
 user=database_user
 name=database_name
 schema=phenotypes
 password=
 ```
+
+Leave `password` empty to use `.pgpass` or the `psql` password prompt.
 
 # First time only set-up **(first time only)**
 
@@ -62,10 +64,16 @@ CREATE SCHEMA phenotypes AUTHORIZATION ensevp;
 
 ## Create the tables **(first time only)**
 
-Apply `sql/schema.sql` to the configured empty schema:
+Apply `sql/schema.sql` to the configured empty schema using `.env` in the current directory:
 
 ```bash
 "$PIPELINE_DIR/bin/apply_schema.sh"
+```
+
+Alternatively, pass an explicit `.env` path:
+
+```bash
+"$PIPELINE_DIR/bin/apply_schema.sh" /path/to/run-directory/.env
 ```
 
 Check tables got generated correctly:

@@ -15,17 +15,16 @@ Make sure you have checked out to correct branch of these repositories.
 
 ### Python dependencies
 
-The python dependencies are currently available in `variation-eva` pyenv environment. To have access to this environment please add these to your `.bashrc` - 
-
+The python dependencies are defined in the [`pyproject.toml`](./pyproject.toml) file
+and are to be installed locally prior to pipeline execution. To install the dependencies in a local virtual environment in `.venv/`:
+```bash
+make install-deps
 ```
-PYENV_ROOT="/hps/software/users/ensembl/variation/.pyenv"
-if [[ -d "$PYENV_ROOT" ]]; then
-    export PYENV_ROOT
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-fi
+
+Then before executing the pipeline (either interactive or to be included in your slurm batch script):
+```bash
+# Activate the vcf-prepper virtualenv
+source .venv/bin/activate
 ```
 
 ### Rust setup

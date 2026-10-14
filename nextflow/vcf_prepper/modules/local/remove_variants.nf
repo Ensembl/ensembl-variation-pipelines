@@ -32,7 +32,6 @@ process REMOVE_VARIANTS {
   remove_patch_regions = params.remove_patch_regions ? "--remove_patch_regions" : ""
   
   '''
-  pyenv local variation-eva
   remove_variants.py \
     !{vcf} \
     --chrom_sizes !{chrom_sizes} \

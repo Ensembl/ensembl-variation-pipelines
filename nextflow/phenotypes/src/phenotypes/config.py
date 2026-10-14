@@ -62,6 +62,8 @@ def main() -> int:
     except (OSError, ValueError) as error:
         parser.exit(1, f"Configuration error: {error}\n")
     for key, value in values.items():
+        if key == "PGPASSWORD":
+            continue
         print(f"export {key}={shlex.quote(value)}")
     return 0
 

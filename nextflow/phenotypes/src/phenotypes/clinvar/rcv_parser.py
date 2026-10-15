@@ -1,8 +1,4 @@
-"""Read ClinVar RCV records and write variant–phenotype associations as JSONL.
-
-Keep source variant details, classifications and cited papers, using VCV
-mappings to match submitted conditions. Also write summary counts, warnings
-and rejected-record details.
+"""Read ClinVar RCV records and write variant–phenotype associations as JSONL
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Read and validate database connection settings from an .env file."""
+"""Read and validate database connection settings from an .env file"""
 
 import configparser
 from pathlib import Path

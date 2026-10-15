@@ -1,7 +1,6 @@
 # Phenotypes pipeline
 
-Pipeline to download and parse phenotype data for PostgreSQL. Database loading is not yet implemented.
-This pipeline uses Nextflow 26.04.0.
+Pipeline to download and parse phenotype data for PostgreSQL.
 
 ```bash
 module load nextflow/26.04.0
@@ -100,42 +99,16 @@ SET search_path TO phenotypes;
 
 ## ClinVar
 
-By default, the pipeline downloads the current [ClinVar RCV XML release](https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz)
+- By default, the pipeline downloads the current [ClinVar RCV XML release](https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz)
 and [VCV XML release](https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarVCVRelease_00-latest.xml.gz).
 Failed download attempts are retried three times.
-
-To use manually downloaded files, set `sources.clinvar.inputs.rcv` and/or `sources.clinvar.inputs.vcv` in the source configuration (`assets/source_config.json`). Inputs, species and assembly also come from `assets/source_config.json`. At present, these are hard-coded and can be edited by the user running the pipeline. 
-
-Each non-null input must name one existing file; relative paths are resolved from the configuration file's directory. Wildcards are not supported. ClinVar requires a human context and an assembly for its location filter; `assembly_uuid` is optional. Shared context validation also permits species-only contexts for future sources.
-
-By default, the source config file below is supplied to the pipeline. Here, `rcv` and `vcv` are `null`, and so the pipeline will download the files for you. You can supply an alternative `source_config.json` file using:
+- To use manually downloaded files, set `sources.clinvar.inputs.rcv` and/or `sources.clinvar.inputs.vcv` in the source configuration (`assets/source_config.json`). Inputs, species and assembly also come from `assets/source_config.json`. At present, these are hard-coded and can be edited by the user running the pipeline. 
+- ClinVar requires a human context and an assembly for its location filter; `assembly_uuid` is optional.
+- You can supply an alternative `source_config.json` file using:
 
 ```bash
 nextflow run "$PIPELINE_DIR/main.nf" --source_config /path/to/source_config.json
 ```
 
-```json
-{
-  "sources": {
-    "clinvar": {
-      "inputs": {
-        "rcv": null,
-        "vcv": null
-      },
-      "contexts": [
-        {
-          "species_taxonomy_id": 9606,
-          "species_production_name": "homo_sapiens",
-          "assembly": "GRCh38",
-          "assembly_uuid": "fd7fea38-981a-4d73-a879-6f9daef86f08"
-        }
-      ]
-    }
-  }
-}
-```
-
-Outputs are published to `<outdir>/clinvar/<species_production_name>/<assembly>/`.
+- Outputs are published to `<outdir>/clinvar/<species_production_name>/<assembly>/`.
 The first JSONL line contains shared `metadata`; subsequent lines contain associations.
-`pipeline_run_date` is the parser's production date and stays unchanged when an output is reused with `-resume`.
-The summary's `warnings` counts include routine placeholder substitutions, trait splits and TraitChoice combinations; these three events are not repeated in `warnings.txt`. Matching warnings include submitted and aggregate trait details.

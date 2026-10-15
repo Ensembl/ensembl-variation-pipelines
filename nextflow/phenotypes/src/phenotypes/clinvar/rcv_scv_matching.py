@@ -1,7 +1,7 @@
-"""Match submitted conditions to the conditions in a ClinVar RCV record.
-
-Keep a unique direct match when available. Otherwise use the supplied VCV
-mappings to find a single supported match, leaving uncertain matches unresolved.
+"""Match submitted conditions to the conditions in a ClinVar RCV record
+- Keep a unique direct match when available
+- Otherwise use the supplied VCV mappings to find a single supported match, 
+leaving uncertain matches unresolved
 """
 
 from phenotypes.clinvar.vcv_parser import normalise_name

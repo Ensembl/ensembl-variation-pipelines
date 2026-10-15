@@ -25,12 +25,8 @@ workflow CLINVAR {
     clinvar_vcv = source_settings.inputs.vcv ? channel.value(file(source_settings.inputs.vcv, checkIfExists: true)) :
         DOWNLOAD_CLINVAR.out.xml.filter { release_type, xml -> release_type == 'VCV' }.map { release_type, xml -> xml }.first()
 
-    python_source = file("${projectDir}/src", checkIfExists: true)
-    python_source_contents = channel.fromPath("${projectDir}/src/**/*.py", checkIfExists: true)
-        .map { source_file -> tuple(python_source.relativize(source_file).toString(), source_file.text) }
-        .toSortedList { left, right -> left[0] <=> right[0] }
     processing_contexts = channel.fromList(source_settings.contexts)
-    PARSE_CLINVAR(clinvar_rcv, clinvar_vcv, python_source, python_source_contents, processing_contexts)
+    PARSE_CLINVAR(clinvar_rcv, clinvar_vcv, processing_contexts)
 
     emit:
     rcv_xml = clinvar_rcv

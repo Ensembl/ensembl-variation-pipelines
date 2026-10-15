@@ -1,5 +1,5 @@
-// Download either the RCV or VCV XML release from ClinVar.
-// Retry failed downloads and give the file its final name only after success.
+// Download either the RCV or VCV XML release from ClinVar
+// Retry failed downloads 3 times
 
 process DOWNLOAD_CLINVAR {
     tag "ClinVar ${release_type} XML"

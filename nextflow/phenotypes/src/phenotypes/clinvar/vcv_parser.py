@@ -1,7 +1,6 @@
-"""Read ClinVar VCV XML and collect its submitted-condition mappings in memory.
-
-Keep the record versions and mappings needed by the RCV parser to match
-submitted condition names and identifiers to ClinVar's aggregate conditions.
+"""Read ClinVar VCV XML
+- Keep the record versions and mappings needed by the RCV parser to match
+submitted condition names and identifiers to ClinVar's aggregate conditions
 """
 
 import gzip

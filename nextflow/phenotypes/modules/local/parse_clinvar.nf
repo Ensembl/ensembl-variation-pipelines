@@ -10,8 +10,6 @@ process PARSE_CLINVAR {
     input:
     path rcv_xml
     path vcv_xml
-    path python_source
-    val python_source_contents
     val processing_context
 
     output:
@@ -23,7 +21,7 @@ process PARSE_CLINVAR {
     script:
     def context_argument = "'" + groovy.json.JsonOutput.toJson(processing_context).replace("'", "'\"'\"'") + "'"
     """
-    PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="${python_source}" \
+    PYTHONDONTWRITEBYTECODE=1 \
     "${projectDir}/.venv/bin/python" -m phenotypes.clinvar.rcv_parser \
         --rcv-input "${rcv_xml}" \
         --vcv-input "${vcv_xml}" \

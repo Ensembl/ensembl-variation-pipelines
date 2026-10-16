@@ -1,0 +1,104 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_workflow {
+
+    name "Test workflow PREPARE_GENOME"
+    script "../main.nf"
+    workflow "PREPARE_GENOME"
+
+    test("output path, synonyms and chrom-sizes creation, FTP download, cache") {
+
+        def genome_uuid = "209b71d3-90a8-4af0-913f-6e154ba14b03"
+        def species = 'oryzias_latipes'
+        def assembly = 'ASM223467v1'
+        def genome = "${species}_${assembly}"
+        def test_meta = [
+            'genome_uuid': genome_uuid,
+            'genome': genome,
+            'species': species,
+            'assembly': assembly
+        ]
+        def test_meta_json = groovy.json.JsonOutput.toJson(test_meta)
+
+        when {
+            params {
+                version = 110
+                ini_file = "${projectDir}/tests/testdata/test_db.ini"
+                output_dir = "${workDir}/path/to/output"
+                use_vep_cache = 1
+                use_old_infra = 1
+            }
+            workflow {
+                """
+                def meta = new groovy.json.JsonSlurperClassic().parseText('''${test_meta_json}''')
+                def input_set = [[meta, '${baseDir}/tests/testdata/test.vcf.gz']]
+
+                input[0] = Channel.fromList(input_set)
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+
+            // genome specific directories created
+            assert file("${workDir}/path/to/output/tmp/${genome_uuid}").exists()
+            assert file("${workDir}/path/to/output/api/${genome_uuid}").exists()
+            assert file("${workDir}/path/to/output/tracks/${genome_uuid}").exists()
+
+            // existing attributes of test_meta should not change (more are added)
+            def workflow_out_meta = workflow.out.get(0).get(0).get(0)
+
+            test_meta.each { key, value ->
+                def value_in = value
+                def value_out = workflow_out_meta.get(key)
+                assert value_in == value_out: "PREPARE_GENOME workflow modified input metadata with key '${key}' (${value_in} -> ${value_out})."
+            }
+
+            // Following list of attributes should be added to output meta data
+            assert workflow_out_meta.synonym_file != null
+            assert workflow_out_meta.vep_config != null
+            assert workflow_out_meta.chrom_sizes != null
+            assert workflow_out_meta.genome_temp_dir != null
+            assert workflow_out_meta.genome_api_outdir != null
+            assert workflow_out_meta.genome_tracks_outdir != null
+            assert workflow_out_meta.cache_dir != null
+            assert workflow_out_meta.gff_dir != null
+            assert workflow_out_meta.fasta_dir != null
+            assert workflow_out_meta.conservation_data_dir != null
+
+            assert file("${workDir}/path/to/output/tmp/${genome_uuid}/${test_meta.genome}.synonyms").exists(): "Synonyms file not found at expected temp output path."
+            assert file("${workDir}/path/to/output/tmp/${genome_uuid}/${test_meta.genome}.chrom.sizes").exists(): "Chromosome sizes file not found at expected temp output path."
+            //cache checks
+            def cache_dir = new File(workflow_out_meta.cache_dir)
+            assert cache_dir.isDirectory(): "Directory cache_dir does not exist on filesystem"
+            assert cache_dir.list().size() > 0: "cache_dir is empty"
+            assert new File("${workflow_out_meta.cache_dir}/${test_meta.species}/${params.version}_${test_meta.assembly}").isDirectory()
+            //Fasta checks
+            def fasta_dir = new File(workflow_out_meta.fasta_dir)
+            assert fasta_dir.isDirectory(): "Directory fasta_dir does not exist on filesystem"
+            assert fasta_dir.list().size() > 0: "fasta_dir is empty"
+            def fasta_file = fasta_dir.listFiles().find {
+                it.isFile() && it.name.endsWith(".fa.gz")
+            }
+            assert fasta_file != null: "Unmasked bgzipped fasta file not found at expected path."
+            assert new File("${fasta_file}.fai").exists(): "Unmasked bgzipped fasta index file not found at expected path."
+            assert new File("${fasta_file}.gzi").exists(): "Unmasked bgzipped block index file not found at expected path."
+        }
+    }
+}

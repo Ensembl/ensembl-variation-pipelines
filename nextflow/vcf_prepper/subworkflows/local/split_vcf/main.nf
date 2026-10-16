@@ -18,8 +18,8 @@
 // Split large VCF
 //
 
-include { READ_VCF_CHR } from "../../modules/local/read_vcf_chr.nf"
-include { SPLIT_VCF_CHR } from "../../modules/local/split_vcf_chr.nf"
+include { READ_VCF_CHR } from "../../../modules/local/read_vcf_chr/main.nf"
+include { SPLIT_VCF_CHR } from "../../../modules/local/split_vcf_chr/main.nf"
 
 workflow SPLIT_VCF {
   take:

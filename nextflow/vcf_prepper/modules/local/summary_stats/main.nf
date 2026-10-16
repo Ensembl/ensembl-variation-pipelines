@@ -33,7 +33,10 @@ process SUMMARY_STATS {
   output_file =  "UPDATED_SS_" + file(vcf).getName()
   vcf_index = output_file + ".${index_type}"
   
-  if (params.population_data_file) {
+  if (params.containsKey('population_data_file') && params.population_data_file == "") {
+    population_data_file = ""
+  }
+  else if (params.population_data_file){
     population_data_file = "--population_data_file " + params.population_data_file
   }
   else if (!params.structural_variant && file("${projectDir}/assets/population_data.json").exists()){

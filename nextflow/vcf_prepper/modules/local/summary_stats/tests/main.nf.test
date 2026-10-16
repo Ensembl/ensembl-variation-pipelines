@@ -1,0 +1,96 @@
+/*
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+nextflow_process {
+
+    name "Test process SUMMARY_STATS"
+    script "../main.nf"
+    process "SUMMARY_STATS"
+
+	test("summary_stats - no population_data_file") {
+
+        when {
+            params {
+                population_data_file = ""
+            }
+            process {
+                """                
+                meta = [
+                    'species':'homo_sapiens',
+                    'assembly':'GRCh38',
+                    'index_type': 'tbi'
+                ]
+                vcf = "${moduleDir}/tests/testdata/test.vcf_VEP.vcf.gz"
+                vcf_index = "${moduleDir}/tests/testdata/test.vcf_VEP.vcf.gz.csi"
+
+                input[0] = tuple(meta, vcf, vcf_index)
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def out_vcf = path(process.out.get(0).get(0).get(1)).vcf
+
+            // file content ok
+            assert out_vcf.variants.size() == 1
+            assert out_vcf.variantsMD5 == 'd02d526bfcb5ffeae9f836987211fd6a'
+            assert path(process.out.get(0).get(0).get(1)).md5 == "7080d9b08465c9fd09967a9a0ccb5ce1"
+
+            // header has summary stats tag
+            assert out_vcf.header.hasInfoLine('NTCSQ')
+            assert out_vcf.header.hasInfoLine('NRCSQ')
+            assert out_vcf.header.hasInfoLine('NGENE')
+            assert out_vcf.header.hasInfoLine('NVPHN')
+            assert out_vcf.header.hasInfoLine('NGPHN')
+            assert out_vcf.header.hasInfoLine('NCITE')
+            assert out_vcf.header.hasInfoLine('RAF')
+
+            // corrent summary stats value
+            assert out_vcf.getInfoTag('NTCSQ', "1", 230710048) == '12'
+            assert out_vcf.getInfoTag('NGENE', "1", 230710048) == '1'
+		}
+    }
+
+    test("summary_stats - no RAF") {
+
+        when {
+            params {
+                population_data_file = "${projectDir}/assets/population_data.json"
+            }
+            process {
+                """                
+                def meta = [
+                    'species':'homo_sapiens',
+                    'assembly':'GRCh38',
+                    'index_type': 'tbi'
+                ]
+                vcf = file("${moduleDir}/tests/testdata/test.vcf_VEP.vcf.gz")
+                vcf_index = file("${moduleDir}/tests/testdata/test.vcf_VEP.vcf.gz.csi")
+
+                input[0] = tuple(meta, vcf, vcf_index)
+                """
+            }
+        }
+
+        then {
+            assert process.failed
+			assert process.errorReport.contains("Unable to retrieve CSQ field index for RAF")
+		}
+    }
+}

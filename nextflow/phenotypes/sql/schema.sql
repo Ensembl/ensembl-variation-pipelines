@@ -1,4 +1,5 @@
--- Phenotype datastore schema
+-- Create the tables and relationships for the phenotype datastore.
+-- Run in the target schema after it has been created.
 -- Model: variation-datastore-models/phenotypes
 
 BEGIN;
@@ -28,15 +29,15 @@ CREATE TABLE source (
 CREATE TABLE import_run (
     import_run_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     source_version TEXT,
-    download_url TEXT,
-    download_date DATE,
-    ingestion_date DATE NOT NULL,
-    pipeline_version TEXT
+    file_names TEXT[] NOT NULL,
+    file_checksums TEXT[] NOT NULL,
+    pipeline_run_date DATE NOT NULL,
+    pipeline_revision TEXT
 );
 
 CREATE TABLE publication (
     publication_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    identifier TEXT NOT NULL,
+    identifier TEXT,
     source TEXT NOT NULL,
     url TEXT,
     UNIQUE (source, identifier)
@@ -67,10 +68,13 @@ CREATE TABLE entity_component (
 CREATE TABLE genome_context (
     genome_context_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     entity_id BIGINT NOT NULL REFERENCES entity (entity_id) ON DELETE CASCADE,
-    species_taxon_id INTEGER NOT NULL,
-    species_scientific_name TEXT NOT NULL,
+    species_taxonomy_id INTEGER NOT NULL,
+    species_production_name TEXT NOT NULL,
     organism_id TEXT,
     organism_display_name TEXT,
+    assembly TEXT,
+    assembly_accession TEXT,
+    assembly_uuid TEXT,
     genome_uuid TEXT
 );
 
@@ -115,15 +119,23 @@ CREATE TABLE source_report (
 );
 
 CREATE TABLE reported_variant (
-    source_report_id BIGINT PRIMARY KEY REFERENCES source_report (source_report_id) ON DELETE CASCADE,
+    reported_variant_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    source_report_id BIGINT UNIQUE REFERENCES source_report (source_report_id) ON DELETE CASCADE,
+    parent_reported_variant_id BIGINT REFERENCES reported_variant (reported_variant_id) ON DELETE CASCADE,
+    component_ordinal INTEGER,
     identifier TEXT,
+    alternative_identifiers TEXT[] NOT NULL DEFAULT '{}',
     variant_type TEXT,
-    structural_attributes JSONB NOT NULL DEFAULT '{}'
+    structural_attributes JSONB NOT NULL DEFAULT '{}',
+    UNIQUE (parent_reported_variant_id, component_ordinal),
+    CHECK (
+        (source_report_id IS NOT NULL) <> (parent_reported_variant_id IS NOT NULL)
+    )
 );
 
 CREATE TABLE reported_variant_location (
     reported_variant_location_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    source_report_id BIGINT NOT NULL REFERENCES reported_variant (source_report_id) ON DELETE CASCADE,
+    reported_variant_id BIGINT NOT NULL REFERENCES reported_variant (reported_variant_id) ON DELETE CASCADE,
     assembly TEXT,
     assembly_accession TEXT,
     assembly_status TEXT,

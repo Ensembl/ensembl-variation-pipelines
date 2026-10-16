@@ -689,6 +689,47 @@ def _inheritance_types(assertion: ET.Element) -> list[str]:
     )
 
 
+def _assessment_somatic_status(
+    assessment_type: str, default_status: str, inheritance_types: list[str],
+) -> tuple[str, str | None]:
+    modes = {_normalise_name(value) for value in inheritance_types}
+    if assessment_type != "germline_classification" or "somatic mutation" not in modes:
+        return default_status, None
+    if modes != {"somatic mutation"}:
+        return "unspecified", "conflicting_inheritance_context"
+    return "somatic", None
+
+
+def _uncertain_conditions(trait_set: ET.Element | None) -> bool:
+    return (
+        trait_set is not None
+        and _normalise_name(trait_set.get("multipleConditionExplanation", "")) == "uncertain"
+    )
+
+
+def _combined_traits(
+    traits: list[dict[str, Any]], *, uncertain: bool = False,
+) -> dict[str, Any]:
+    references = []
+    for trait in traits:
+        references.extend(trait["external_references"])
+        references.extend(
+            {
+                "database": mapping["database"],
+                "accession": mapping["accession"],
+                "reference_subject": "phenotype",
+            }
+            for mapping in trait["phenotype"]["ontology_mappings"]
+        )
+    name = " OR ".join(trait["phenotype"]["reported_name"] for trait in traits)
+    if uncertain:
+        name += " (condition uncertain)"
+    return {
+        "phenotype": {"reported_name": name, "ontology_mappings": []},
+        "external_references": _unique(references),
+    }
+
+
 def _aggregate_assessments(
     reference_assertion: ET.Element,
     *, publication_warnings: list[tuple[str, str | None, str]] | None = None,
@@ -699,6 +740,7 @@ def _aggregate_assessments(
 
     assessments = []
     warnings = []
+    inheritance_types = _inheritance_types(reference_assertion)
     for element in classifications:
         classification = CLASSIFICATION_TYPES.get(element.tag)
         if classification is None:
@@ -709,6 +751,11 @@ def _aggregate_assessments(
             continue
         if element.tag != "SomaticClinicalImpact":
             descriptions = descriptions[:1]
+        somatic_status, context_warning = _assessment_somatic_status(
+            assessment_type, somatic_status, inheritance_types,
+        )
+        if context_warning:
+            warnings.append(context_warning)
 
         publications = _publication_ids(element, warnings=publication_warnings)
         if element.tag in {"GermlineClassification", "NoClassification"}:
@@ -757,13 +804,15 @@ def _submission_trait_indexes(
     matching: SubmissionMatching | None = None,
     *, trait_choice: bool = False,
 ) -> tuple[set[int], str | None]:
-    if len(aggregate_traits) == 1 and not trait_choice:
+    trait_set = assertion.find("TraitSet")
+    uncertain = _uncertain_conditions(trait_set)
+    if len(aggregate_traits) == 1 and not trait_choice and not uncertain:
         return {0}, None
 
-    trait_set = assertion.find("TraitSet")
     if (
         trait_choice and len(aggregate_traits) > 1 and trait_set is not None
         and trait_set.get("Type") != "TraitChoice"
+        and not (trait_set.get("Type") == "Disease" and uncertain)
     ):
         return set(), "submission_trait_set_choice_mismatch"
     submission_traits = trait_set.findall("Trait") if trait_set is not None else []
@@ -841,6 +890,7 @@ def _submission_assessments(
         if not classification_elements:
             continue
 
+        uncertain = _uncertain_conditions(assertion.find("TraitSet"))
         trait_indexes, trait_warning = _submission_trait_indexes(
             assertion, aggregate_traits, matching, trait_choice=trait_choice
         )
@@ -865,7 +915,9 @@ def _submission_assessments(
                 ],
             }, ensure_ascii=False)
             warnings.append((trait_warning, accession, details))
-            if trait_choice:
+            if trait_choice or (
+                uncertain and trait_warning != "submission_trait_set_subset_mapped"
+            ):
                 continue
 
         submission = assertion.find("ClinVarSubmissionID")
@@ -879,6 +931,11 @@ def _submission_assessments(
 
         for element in classification_elements:
             assessment_type, somatic_status = CLASSIFICATION_TYPES[element.tag]
+            somatic_status, context_warning = _assessment_somatic_status(
+                assessment_type, somatic_status, inheritance_types,
+            )
+            if context_warning:
+                warnings.append((context_warning, accession, "; ".join(inheritance_types)))
             value = _combined_assessment_value(element, _text(element), element.tag)
             raw_date = element.get("DateLastEvaluated") or classification_container.get(
                 "DateLastEvaluated"
@@ -900,6 +957,7 @@ def _submission_assessments(
                 "submitters": [submitter] if submitter else [],
                 "publications": publications,
                 "_trait_indexes": sorted(trait_indexes),
+                "_uncertain_conditions": uncertain,
             }
             if inheritance_types:
                 assessment["annotation"] = {
@@ -954,7 +1012,12 @@ def parse_clinvar_set(
     if matching is not None:
         matching.start_rcv(
             rcv_accession, len(aggregate_traits), reported_variant["identifier"],
-            match_single_trait=trait_set["is_choice"],
+            match_single_trait=(
+                trait_set["is_choice"] or any(
+                    _uncertain_conditions(assertion.find("TraitSet"))
+                    for assertion in clinvar_set.findall("ClinVarAssertion")
+                )
+            ),
         )
     submission_assessments, submission_warnings = _submission_assessments(
         clinvar_set, aggregate_traits, matching, trait_choice=trait_set["is_choice"]
@@ -968,38 +1031,35 @@ def parse_clinvar_set(
     relationship_type = assertion.get("Type") if assertion is not None else None
     aggregate_inheritance_types = _inheritance_types(reference_assertion)
 
-    output_traits = [({index}, trait) for index, trait in enumerate(aggregate_traits)]
+    output_traits = [
+        ({index}, trait, False) for index, trait in enumerate(aggregate_traits)
+    ]
     if trait_set["is_choice"] and len(aggregate_traits) > 1:
-        references = []
-        for trait in aggregate_traits:
-            references.extend(trait["external_references"])
-            references.extend(
-                {
-                    "database": mapping["database"],
-                    "accession": mapping["accession"],
-                    "reference_subject": "phenotype",
-                }
-                for mapping in trait["phenotype"]["ontology_mappings"]
-            )
-        output_traits = [(set(range(len(aggregate_traits))), {
-            "phenotype": {
-                "reported_name": " OR ".join(
-                    trait["phenotype"]["reported_name"] for trait in aggregate_traits
-                ),
-                "ontology_mappings": [],
-            },
-            "external_references": _unique(references),
-        })]
+        output_traits = [(
+            set(range(len(aggregate_traits))), _combined_traits(aggregate_traits), False,
+        )]
+    uncertain_groups = _unique(
+        tuple(assessment["_trait_indexes"]) for assessment in submission_assessments
+        if assessment["_uncertain_conditions"]
+    )
+    for indexes in uncertain_groups:
+        output_traits.append((
+            set(indexes),
+            _combined_traits([aggregate_traits[index] for index in indexes], uncertain=True),
+            True,
+        ))
 
     records = []
-    statuses = _unique(item["somatic_status"] for item in aggregate_assessments)
-    if any(item["assessment_type"] == "no_classification" for item in submission_assessments):
-        statuses = _unique([*statuses, "unspecified"])
+    statuses = _unique(item["somatic_status"] for item in assessments)
     for somatic_status in statuses:
-        for trait_indexes, trait in output_traits:
+        for trait_indexes, trait, uncertain in output_traits:
             status_assessments = []
             for assessment in assessments:
                 if assessment["somatic_status"] != somatic_status:
+                    continue
+                if assessment.get("_uncertain_conditions", False) != uncertain:
+                    continue
+                if uncertain and set(assessment["_trait_indexes"]) != trait_indexes:
                     continue
                 if (
                     assessment["assessment_level"] == "submission"
@@ -1010,7 +1070,7 @@ def parse_clinvar_set(
                     {
                         key: value
                         for key, value in assessment.items()
-                        if key not in {"somatic_status", "_trait_indexes"}
+                        if key not in {"somatic_status", "_trait_indexes", "_uncertain_conditions"}
                     }
                 )
 

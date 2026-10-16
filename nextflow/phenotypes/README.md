@@ -112,3 +112,36 @@ nextflow run "$PIPELINE_DIR/main.nf" --source_config /path/to/source_config.json
 
 - Outputs are published to `<outdir>/clinvar/<species_production_name>/<assembly>/`.
 The first JSONL line contains shared `metadata`; subsequent lines contain associations.
+
+### Condition groups and somatic context
+
+A submission with `multipleConditionExplanation="Uncertain"` keeps its matched
+conditions together in one phenotype label, for example
+`Joubert syndrome 23 OR Short-rib thoracic dysplasia 14 with polydactyly (condition uncertain)`.
+Its classification, publications and inheritance stay with that submission and
+are not copied onto separate condition rows. The original RCV label remains in
+`source_report.reported_phenotype_name`. The qualifier belongs to the phenotype
+label; no additional JSONL or database fields are required.
+
+Every submitted condition must match uniquely using the direct or VCV matching
+rules. A complete submitted subset of an ordinary multi-trait RCV gets its own
+combined label. Partial, ambiguous and unmatched condition sets produce a warning
+and are not attached to a narrower condition. A TraitChoice requires a complete
+match to all its alternatives; either a submitted TraitChoice or
+`Disease` with `multipleConditionExplanation="Uncertain"` can satisfy that rule.
+Component ontology identifiers remain external references, not mappings for the
+whole combined phenotype.
+
+Uncertain submissions use a separate qualified row. Aggregate assessments and
+other submissions keep their existing condition treatment, so one submission's
+uncertainty does not qualify another assessment. A single RCV can therefore
+produce ordinary rows and a combined uncertain row.
+
+For any `GermlineClassification` value, an assertion whose own inheritance modes
+contain only `Somatic mutation` has `somatic_status="somatic"`. If it reports
+`Somatic mutation` alongside another mode, its status is `unspecified` and
+`conflicting_inheritance_context` is reported. Classification type, value and raw
+inheritance annotations are preserved. The rule is applied separately to the
+aggregate and each submission; an aggregate annotation does not set an SCV's
+status. Output groups include statuses found only on submissions. Other
+classification categories retain their existing status rules.

@@ -13,12 +13,12 @@ process download_MaveDB_metadata {
   url = "https://api.mavedb.org/api/v1/score-sets/${urn}"
   res = urllib.request.urlopen(url).read()
   res = json.loads(res)
-
-  with open("metadata.json", "w") as f:
-      json.dump(res, f)
+  
+  with open('metadata.json', 'w') as f:
+    json.dump(res, f)
 
   with open("LICENCE.txt", "w") as f:
-      f.write(res["license"]["shortName"])
+    f.write(res['license']['shortName'])
   """
 }
 

@@ -690,6 +690,58 @@ def _assessment_somatic_status(
     return "somatic", None
 
 
+def _uncertain_context_details(
+    clinvar_set: ET.Element, assessments: list[dict[str, Any]],
+) -> str | None:
+    """Avoid splitting a legacy classification into contexts the source cannot clearly separate."""
+    contexts = {
+        item["somatic_status"] for item in assessments
+        if item["assessment_type"] == "germline_classification"
+    }
+    if not contexts:
+        return None
+
+    origin_conflicts = []
+    reference = clinvar_set.find("ReferenceClinVarAssertion")
+    for assertion in [reference] + clinvar_set.findall("ClinVarAssertion"):
+        if assertion is None or not is_current(_text(assertion.find("RecordStatus"))):
+            continue
+        if assertion is reference:
+            classification = assertion.find("Classifications/GermlineClassification")
+            if classification is None or not any(
+                _text(item) for item in classification.findall("Description")
+            ):
+                continue
+        elif _text(assertion.find("Classification/GermlineClassification")) is None:
+            continue
+
+        context, _ = _assessment_somatic_status(
+            "germline_classification", "germline", _inheritance_types(assertion),
+        )
+        origins = _unique(
+            value for element in assertion.findall("ObservedIn/Sample/Origin")
+            if (value := _text(element)) is not None
+        )
+        normalised_origins = {_normalise_name(value) for value in origins}
+        opposite_origin = {"germline": "somatic", "somatic": "germline"}.get(context)
+        # Origin is a contradiction check only, not an inheritance value or a
+        # replacement classification. Unknown/de novo origins do not assign context.
+        if opposite_origin and opposite_origin in normalised_origins:
+            origin_conflicts.append({
+                "source_accession": _versioned_accession(assertion.find("ClinVarAccession")),
+                "assigned_context": context,
+                "sample_origins": origins,
+            })
+
+    if len(contexts) <= 1 and "unspecified" not in contexts and not origin_conflicts:
+        return None
+    return json.dumps({
+        "germline_assessment_contexts": sorted(contexts),
+        "conflicting_sample_origins": origin_conflicts,
+        "action": "all assessments retained in one unspecified record",
+    }, ensure_ascii=False)
+
+
 def _condition_group(trait_set: ET.Element | None) -> str | None:
     """Use only this assertion's explicit grouping, never its SCVs or trait relationships."""
     if trait_set is None:
@@ -1003,11 +1055,17 @@ def parse_clinvar_set(
             assessment["reported_condition_set"] = condition_set
 
     records = []
-    statuses = _unique(item["somatic_status"] for item in assessments)
+    uncertain_context = _uncertain_context_details(clinvar_set, assessments)
+    if uncertain_context is not None:
+        contextual_warnings.append(("ambiguous_somatic_context", None, uncertain_context))
+    statuses = (
+        ["unspecified"] if uncertain_context is not None
+        else _unique(item["somatic_status"] for item in assessments)
+    )
     for somatic_status in statuses:
         status_assessments = []
         for assessment in assessments:
-            if assessment["somatic_status"] != somatic_status:
+            if uncertain_context is None and assessment["somatic_status"] != somatic_status:
                 continue
             status_assessments.append({
                 key: value for key, value in assessment.items() if key != "somatic_status"

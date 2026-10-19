@@ -99,49 +99,113 @@ SET search_path TO phenotypes;
 
 ## ClinVar
 
-- By default, the pipeline downloads the current [ClinVar RCV XML release](https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz)
-and [VCV XML release](https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarVCVRelease_00-latest.xml.gz).
-Failed download attempts are retried three times.
-- To use manually downloaded files, set `sources.clinvar.inputs.rcv` and/or `sources.clinvar.inputs.vcv` in the source configuration (`assets/source_config.json`). Inputs, species and assembly also come from `assets/source_config.json`. At present, these are hard-coded and can be edited by the user running the pipeline. 
-- ClinVar requires a human context and an assembly for its location filter; `assembly_uuid` is optional.
-- You can supply an alternative `source_config.json` file using:
+- By default, the pipeline downloads the current ClinVar RCV XML release from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz
+Failed download attempts are retried three times
+- To use a pre-downloaded file, set `sources.clinvar.inputs.rcv` in the source configuration (`assets/source_config.json`) - a missing or null value triggers download
+- Species and assembly also come from the `source_config.json` file
+- ClinVar requires a human context and an assembly for its location filter, `assembly_uuid` is optional
+- The default `source_config.json` used is the one in `/assets`, but an alternative can be provided by using:
 
 ```bash
 nextflow run "$PIPELINE_DIR/main.nf" --source_config /path/to/source_config.json
 ```
 
-- Outputs are published to `<outdir>/clinvar/<species_production_name>/<assembly>/`.
-The first JSONL line contains shared `metadata`; subsequent lines contain associations.
+- The intermediate JSONL is published to `<outdir>/clinvar/<species_production_name>/<assembly>/`
+- The first JSONL line contains `metadata` shared across all records, subsequent lines are the records themselves
 
 ### Notes
 
-#### Condition groups
+The sections below contain some notes on how the parser handles the data
 
-Certain condition groups stay together rather than being split into independent phenotype associations:
+#### Multi-phenotype records
 
-| ClinVar grouping | Output phenotype label |
+- The parser keeps each RCV's complete set of phenotypes together, without splitting multi-traits
+- In some cases, a separator is used as it may help the user with interpretation later on, this is selected as follows:
+
+| ClinVar grouping | Meaning | Example output label |
+| --- | --- | --- |
+| `TraitChoice` | Alternative conditions. | A OR B |
+| `multipleConditionExplanation="Uncertain"` | One or several conditions may apply; OR does not mean exactly one. | A OR B (condition uncertain) |
+| `multipleConditionExplanation="Novel disease"` | Features together describe a proposed new disease. | Muscle weakness AND Developmental delay (novel disease) |
+| `multipleConditionExplanation="Co-occurring"` | Conditions are reported together in the same individual. | A AND B (co-occurring conditions) |
+| Missing, unknown or conflicting grouping | Keep the set without choosing AND or OR. | A; B (condition set) |
+
+#### Aggregate and submission assessments
+
+- Submission assessment (associated with an SCV) is a submitter's classification of the pheno-variant relationship -- there can be multiple contributing to one pheno-variant relationship
+- Aggregate assessment is ClinVar's summary of the >=1 submission assessments
+- The parser keeps both the RCV aggregate and its current, supported SCV assessments
+
+#### Germline, somatic and unspecified context
+
+- The parser assigns a context to each assessment separately, including the aggregate and each SCV 
+- It reads this from certain tags with the following rules:
+
+| XML classification | Context |
 | --- | --- |
-| `TraitChoice` | `A OR B` |
-| `multipleConditionExplanation="Uncertain"` | `A OR B (condition uncertain)` |
-| `multipleConditionExplanation="Novel disease"` | `A AND B (novel disease)` |
-| `multipleConditionExplanation="Co-occurring"` | `A AND B (co-occurring conditions)` |
+| `GermlineClassification` | `germline` |
+| `SomaticClinicalImpact` | `somatic` |
+| `OncogenicityClassification` | `somatic` |
+| `NoClassification` | `unspecified` |
 
-#### `warnings.txt`
+- As per the ClinVar docs, historical somatic assessments can appear under the `GermlineClassification` tag, but it'd be wrong to classify these as germline, so the parser:
+  - Checks that assertion's `ModeOfInheritance` values:
+    - If it only contains `Somatic mutation`: use `somatic`
+    - `Somatic mutation` plus another mode: use `unspecified` and output a warning
+    - No `Somatic mutation`: keep `germline`
+- Assessments with the same context are collected into one output record per RCV
+- An `unspecified` assessment would go into a separate unspecified record
+- For example, an RCV with a germline classification, somatic clinical-impact assessment and oncogenicity assessment produces two records:
+
+```text
+Same variant and complete condition set
+├── germline record
+│   └── germline assessment
+└── somatic record
+    ├── clinical-impact assessment
+    └── oncogenicity assessment
+```
+
+#### Phenotype names and observed features
+
+- The main phenotype name is the aggregate trait's preferred name, or its single available alternate name
+- The whole RCV is rejected if the aggregate trait has neither
+- Replace nonspecific labels such as `See cases`, `not provided` and `not specified` with `ClinVar: phenotype not specified`, keeping the original report label in `source_report.reported_phenotype_name`
+- Treat `DrugResponse` names, such as `Ezetimibe response`, as phenotype names
+- Use the assertion-level `TraitSet` for assessed conditions
+- Clinical features under `ObservedIn/TraitSet` are currently not extracted or used as replacements. For example, `RCV000051340.4` is labelled `See cases` even though its SCV reports `Global developmental delay` as an observed feature. Its output uses the placeholder - it does not create a separate classified association for that feature
+- If an SCV condition has an identifier but no name, keep the name null and use the identifier in its condition-set display label
+
+#### Assembly, locations and alleles
+
+- The parser keep placements for the configured assembly only - it rejects the RCV if the variant, or any haplotype component, has no placement on that assembly
+- Prefer sequence accessions beginning `NC_` when available
+- Keep multiple qualifying placements separate, including X/Y placements - do not flatten them
+
+#### Supported variant representations
+
+- Retain structural variants and haplotypes
+- Haplotype components keep their own identifiers and locations; the assessment applies to the complete haplotype, not independently to each component
+- `Variant`, `Haplotype` and `Haplotype, single variant` MeasureSets are supported
+- GenotypeSets, including diplotypes and compound heterozygotes, and other MeasureSet types are skipped.
+
+#### Cleaning and provenance
+
+- Write valid assessment dates as `YYYY-MM-DD`
+- Remove recognised DOI prefixes and formatting spaces
+- Invalid supplied dates, numbers and selected DOIs become null with a warning; the remaining record is kept
+- Do not substitute a URL for an invalid DOI or look up missing values
+
+#### Output: `warnings.txt`
 
 - `warnings.txt` is a tab-separated file, with columns `RCV`, `VCV`, `SCV`, `warning` and `details`
 - `SCV` is blank when the warning is not tied to a particular submission
-- A warning does not reject the whole RCV - its aggregate association remains, but a value may be missing or an SCV assessment may be left unattached
+- A warning does not reject the whole RCV - a value may be missing or a non-current SCV may be skipped
 - Whole-record exclusions are listed separately in `rejections.txt`
 - An RCV or SCV can appear more than once because it can have several warnings
 
 | Warning | Meaning and effect on the output |
 | --- | --- |
-| `submission_trait_set_unmapped` | No submitted condition could be matched uniquely to an RCV condition, or the SCV has no conditions to match. Its assessment is not attached. |
-| `submission_trait_set_partially_mapped` | Some submitted conditions matched, but others did not. An ordinary, ungrouped submission keeps its unique matches; an explicitly grouped submission is left unattached because its full combination has not matched. |
-| `submission_trait_set_ambiguous` | A submitted condition matches more than one RCV condition, so the parser cannot choose one. Other unique matches from an ordinary submission may remain; an explicitly grouped submission is left unattached. |
-| `submission_trait_set_subset_mapped` | Every submitted condition matched, but the SCV covers only part of the RCV condition set. Its assessment stays with that matched scope. A grouped subset gets its own combined row, without the broader aggregate assessment. |
-| `submission_trait_set_choice_mismatch` | The conditions match, but the SCV does not report an OR grouping compatible with the RCV's TraitChoice or Uncertain group. The SCV keeps its own appropriately grouped or split rows rather than being attached to the aggregate OR row. |
-| `vcv_rcv_version_unavailable` | The exact RCV accession/version is not listed under the relevant VCV in the supplied VCV file. VCV fallback matching is skipped; existing unique direct matches are retained. |
 | `non_current_submission` | The SCV has a non-current record status, so its assessments are skipped. |
 | `alternate_trait_name_used` | A preferred trait name is missing, so the single available alternate name is used instead. |
 | `duplicate_trait_merged` | A repeated trait is merged using its ClinVar trait ID, or identical XML when no ID is present. Its mappings and references are combined rather than creating another trait. |
@@ -151,8 +215,29 @@ Certain condition groups stay together rather than being split into independent 
 | `invalid_last_evaluated_date` | The assessment date cannot be read as a valid supported date. It becomes null; the assessment remains. |
 | `invalid_doi` | The selected DOI cannot be recognised after cleaning. The publication remains with a null identifier; a URL is not substituted for the invalid DOI. |
 
-For example, `RCV004801462.2 / SCV005051716.2` produces
-`submission_trait_set_partially_mapped`: two features match, but the submitted
-`HP:0000798` maps through VCV to `MedGen:C0868910 / Oligozoospermia`, whereas the
-RCV uses `MedGen:C0028960 / Oligospermia`. The complete SCV assessment is therefore
-left unattached, while the aggregate association is retained.
+#### Output: `rejections.txt`
+
+- This file has columns `RCV`, `VCV`, `rejection_reason` and `details`.
+- A rejection excludes the whole RCV from `clinvar_output.jsonl`
+- The reasons and meanings are as follows:
+
+| Rejection reason | Meaning |
+| --- | --- |
+| `non_current_record` | The outer record or aggregate assertion is not current. |
+| `missing_reference_assertion` | The RCV aggregate assertion is missing. |
+| `missing_rcv_accession` | The aggregate has no RCV accession. |
+| `missing_trait_set` | The aggregate has no condition set. |
+| `unsupported_trait_set_type` | Its condition-set type is not supported. |
+| `missing_traits` | The condition set contains no traits. |
+| `missing_preferred_trait_name` | An aggregate trait has no preferred name and no single unambiguous alternate. |
+| `unsupported_phenotype_instruction` | A PhenotypeInstruction contains text other than a recognised nonspecific label. |
+| `missing_supported_traits` | No usable traits remain after trait processing; a defensive check. |
+| `unsupported_genotype_set` | The record uses an unsupported GenotypeSet, such as a diplotype or compound heterozygote. |
+| `missing_measure_set` | The aggregate has no MeasureSet describing the variant. |
+| `missing_measure_set_type` | The MeasureSet has no type. |
+| `unsupported_measure_set_type` | Its type is not Variant, Haplotype or Haplotype, single variant. |
+| `unsupported_variant_representation` | There are no measures, or a non-Haplotype MeasureSet has more than one measure. |
+| `missing_requested_assembly_location` | The variant or a haplotype component has no placement on the configured assembly. |
+| `unsupported_classification` | No usable aggregate assessment is present in a supported classification category. |
+
+- For example, `RCV000677106.1` has only a GRCh37 placement and is rejected with `missing_requested_assembly_location` when GRCh38 is requested

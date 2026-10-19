@@ -1,4 +1,4 @@
-// Parse the supplied ClinVar files for one species and assembly.
+// Parse the supplied ClinVar RCV file for one species and assembly.
 // Publish the association records, summary, warnings and rejections.
 
 process PARSE_CLINVAR {
@@ -9,7 +9,6 @@ process PARSE_CLINVAR {
 
     input:
     path rcv_xml
-    path vcv_xml
     val processing_context
 
     output:
@@ -24,7 +23,6 @@ process PARSE_CLINVAR {
     PYTHONDONTWRITEBYTECODE=1 \
     "${projectDir}/.venv/bin/python" -m phenotypes.clinvar.rcv_parser \
         --rcv-input "${rcv_xml}" \
-        --vcv-input "${vcv_xml}" \
         --genome-context ${context_argument} \
         --pipeline-directory "${projectDir}" \
         --records clinvar_output.jsonl \

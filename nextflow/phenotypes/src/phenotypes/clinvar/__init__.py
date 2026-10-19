@@ -1,1 +1,1 @@
-"""Tools for reading ClinVar data and matching submitted conditions."""
+"""Read ClinVar variant–condition assertions while preserving their condition sets."""

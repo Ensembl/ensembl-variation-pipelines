@@ -1,5 +1,4 @@
-"""Read ClinVar RCV records and write variant–phenotype associations as JSONL
-"""
+"""Write ClinVar RCV associations as JSONL, preserving each assertion's condition set."""
 
 from __future__ import annotations
 
@@ -17,12 +16,6 @@ from time import monotonic
 from typing import Any, BinaryIO, Iterable
 from urllib.parse import urlsplit
 
-from phenotypes.clinvar.rcv_scv_matching import SubmissionMatching
-from phenotypes.clinvar.vcv_parser import (
-    PROGRESS_INTERVAL, VcvMappings, format_elapsed, is_current,
-    normalise_accession as _normalise_accession,
-    normalise_name as _normalise_name,
-)
 from phenotypes.provenance import git_revision, input_file_provenance
 from phenotypes.source_config import (
     DEFAULT_SOURCE_CONFIG, load_source_config, validate_clinvar_context,
@@ -45,12 +38,12 @@ PLACEHOLDER_PHENOTYPE_NAMES = {
 
 SUMMARY_ONLY_EVENTS = {
     "placeholder_phenotype_used",
-    "multiple_traits_split",
     "multiple_traits_combined_as_choice",
     "multiple_traits_combined_as_group",
 }
 
 OR_CONDITION_GROUPS = {"choice", "uncertain"}
+PROGRESS_INTERVAL = 100_000
 
 CLASSIFICATION_TYPES = {
     "GermlineClassification": ("germline_classification", "germline"),
@@ -73,6 +66,20 @@ class RejectedRecord(Exception):
         super().__init__(reason)
         self.reason = reason
         self.source_value = source_value
+
+
+def _normalise_name(value: str) -> str:
+    return " ".join(value.split()).casefold()
+
+
+def is_current(status: str | None) -> bool:
+    return not status or status.strip() in {"", "current"}
+
+
+def format_elapsed(started: float) -> str:
+    hours, remainder = divmod(int(monotonic() - started), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
 def _text(element: ET.Element | None) -> str | None:
@@ -291,18 +298,25 @@ def _normalise_ontology_reference(
     return reference
 
 
-def _trait_names(trait: ET.Element) -> tuple[str | None, list[str]]:
+def _trait_name(trait: ET.Element) -> tuple[str | None, bool]:
+    """Use the preferred name, or one unambiguous alternate; report alternate use."""
     preferred_name = None
-    names = []
+    alternate_names = []
     for name in trait.findall("Name"):
         value_element = name.find("ElementValue")
         value = _text(value_element)
         if value is None:
             continue
-        names.append(value)
         if preferred_name is None and value_element.get("Type") == "Preferred":
             preferred_name = value
-    return preferred_name, _unique(names)
+        elif value_element.get("Type") == "Alternate":
+            alternate_names.append(value)
+    if preferred_name is not None:
+        return preferred_name, False
+    alternate_names = _unique(alternate_names)
+    if len(alternate_names) == 1:
+        return alternate_names[0], True
+    return None, False
 
 
 def _trait_ontology_mappings(trait: ET.Element) -> list[dict[str, str]]:
@@ -317,26 +331,6 @@ def _trait_ontology_mappings(trait: ET.Element) -> list[dict[str, str]]:
         if mapping is not None
     ]
     return _unique(mappings)
-
-
-def _trait_match_keys(trait: ET.Element) -> tuple[list[str], list[str]]:
-    _, names = _trait_names(trait)
-    mappings = _trait_ontology_mappings(trait)
-    accessions = [mapping["accession"] for mapping in mappings]
-    for path in ("XRef", "Name/XRef", "Symbol/XRef", "AttributeSet/XRef"):
-        for xref in trait.findall(path):
-            database = xref.get("DB")
-            accession = xref.get("ID")
-            if database and database.casefold() == "medgen":
-                database = "MedGen"
-            if database in {"MedGen", "MeSH"} and accession:
-                accession = _normalise_accession(database, accession)
-                if accession:
-                    accessions.append(f"{database}:{accession}")
-    return (
-        _unique(_normalise_name(name) for name in names),
-        _unique(accessions),
-    )
 
 
 def _trait_external_references(
@@ -400,15 +394,9 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
     seen_traits = {}
     source_names = []
     for trait in trait_elements:
-        source_name, _ = _trait_names(trait)
-        if source_name is None:
-            alternate_names = _unique(
-                value for element in trait.findall('Name/ElementValue[@Type="Alternate"]')
-                if (value := _text(element)) is not None
-            )
-            if len(alternate_names) == 1:
-                source_name = alternate_names[0]
-                warnings.append("alternate_trait_name_used")
+        source_name, used_alternate = _trait_name(trait)
+        if used_alternate:
+            warnings.append("alternate_trait_name_used")
         if source_name is None:
             raise RejectedRecord(
                 "missing_preferred_trait_name",
@@ -430,17 +418,12 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
 
         all_ontology_mappings = _trait_ontology_mappings(trait)
         ontology_mappings = _primary_ontology_mappings(all_ontology_mappings)
-        match_names, match_accessions = _trait_match_keys(trait)
         parsed_trait = {
             "external_references": _trait_external_references(trait, ontology_mappings),
             "phenotype": {
                 "reported_name": reported_name,
                 "ontology_mappings": ontology_mappings,
             },
-            "match_names": _unique(
-                match_names + [_normalise_name(reported_name)]
-            ),
-            "match_accessions": match_accessions,
         }
         trait_id = (trait.get("ID") or "").strip()
         deduplication_key = (
@@ -449,8 +432,6 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
         if deduplication_key in seen_traits:
             previous, repeated_traits = seen_traits[deduplication_key]
             repeated_traits.append(trait)
-            for field in ("match_names", "match_accessions"):
-                previous[field] = _unique(previous[field] + parsed_trait[field])
             previous["phenotype"]["ontology_mappings"] = _unique(
                 previous["phenotype"]["ontology_mappings"] + ontology_mappings
             )
@@ -467,11 +448,20 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
 
     if not traits:
         raise RejectedRecord("missing_supported_traits")
+    condition_group = _condition_group(trait_set)
+    condition_set = None
+    if (
+        len(trait_elements) > 1 or condition_group is not None
+        or trait_set.get("multipleConditionExplanation") is not None
+        or trait_set.find("Trait/TraitRelationship") is not None
+    ):
+        condition_set = _reported_condition_set(trait_set)
     return (
         {
             "reported_name": "; ".join(_unique(source_names)),
             "traits": traits,
-            "condition_group": _condition_group(trait_set),
+            "condition_group": condition_group,
+            "reported_condition_set": condition_set,
         },
         warnings,
     )
@@ -701,19 +691,86 @@ def _assessment_somatic_status(
 
 
 def _condition_group(trait_set: ET.Element | None) -> str | None:
-    """Recognise explicit alternatives or a jointly asserted condition set."""
+    """Use only this assertion's explicit grouping, never its SCVs or trait relationships."""
     if trait_set is None:
         return None
-    if trait_set.get("Type") == "TraitChoice":
-        return "choice"
     explanation = _normalise_name(trait_set.get("multipleConditionExplanation", ""))
+    if trait_set.get("Type") == "TraitChoice":
+        if explanation in {"", "uncertain"}:
+            return explanation or "choice"
+        # Conflicting instructions must not silently become either AND or OR.
+        return "condition set"
     if explanation in {"uncertain", "novel disease", "co-occurring"}:
         return explanation
     return None
 
 
+def _condition_set_name(names: list[str], group: str | None) -> str | None:
+    if not names:
+        return None
+    if len(names) == 1:
+        return names[0]
+    joiner, qualifier = {
+        "choice": (" OR ", ""),
+        "uncertain": (" OR ", " (condition uncertain)"),
+        "novel disease": (" AND ", " (novel disease)"),
+        "co-occurring": (" AND ", " (co-occurring conditions)"),
+    }.get(group, ("; ", " (condition set)"))
+    # Uncertain OR means one or several of the conditions, not exactly one.
+    return joiner.join(names) + qualifier
+
+
+def _reported_condition_set(trait_set: ET.Element | None) -> dict[str, Any] | None:
+    """Retain an assertion's own conditions without resolving them to another assertion's terms."""
+    if trait_set is None:
+        return None
+    traits = []
+    labels = []
+    for trait in trait_set.findall("Trait"):
+        name, _ = _trait_name(trait)
+        identifiers = []
+        for path in ("XRef", "Name/XRef", "Symbol/XRef", "AttributeSet/XRef"):
+            for xref in trait.findall(path):
+                database, accession = xref.get("DB"), xref.get("ID")
+                if not database or not accession:
+                    continue
+                if database == "OMIM" and xref.get("Type") != "MIM":
+                    continue
+                if database in {"HP", "Human Phenotype Ontology"} and (
+                    xref.get("Type", "").casefold() == "secondary"
+                ):
+                    continue
+                identifiers.append({"database": database, "accession": accession})
+        identifiers = _unique(identifiers)
+        traits.append({
+            "name": name,
+            "type": trait.get("Type"),
+            "identifiers": identifiers,
+            "relationships": _unique(
+                {"type": relationship.get("Type"), "identifier": relationship.get("ID")}
+                for relationship in trait.findall("TraitRelationship")
+            ),
+        })
+        if name:
+            labels.append(name)
+        elif identifiers:
+            identifier = identifiers[0]
+            accession = identifier["accession"]
+            prefix = identifier["database"] + ":"
+            labels.append(accession if accession.startswith(prefix) else prefix + accession)
+        else:
+            trait_id = trait.get("ID")
+            labels.append(f"ClinVar trait {trait_id}" if trait_id else "Unnamed condition")
+    return {
+        "name": _condition_set_name(labels, _condition_group(trait_set)),
+        "type": trait_set.get("Type"),
+        "multiple_condition_explanation": trait_set.get("multipleConditionExplanation"),
+        "traits": traits,
+    }
+
+
 def _combined_traits(
-    traits: list[dict[str, Any]], group: str,
+    traits: list[dict[str, Any]], group: str | None,
 ) -> dict[str, Any]:
     references = []
     for trait in traits:
@@ -726,18 +783,9 @@ def _combined_traits(
             }
             for mapping in trait["phenotype"]["ontology_mappings"]
         )
-    joiner = " OR " if group in OR_CONDITION_GROUPS else " AND "
-    if group == "condition set":
-        joiner = "; "
-    name = joiner.join(trait["phenotype"]["reported_name"] for trait in traits)
-    qualifier = {
-        "choice": "",
-        "uncertain": " (condition uncertain)",
-        "novel disease": " (novel disease)",
-        "co-occurring": " (co-occurring conditions)",
-        "condition set": " (condition set)",
-    }[group]
-    name += qualifier
+    name = _condition_set_name(
+        [trait["phenotype"]["reported_name"] for trait in traits], group,
+    )
     return {
         "phenotype": {"reported_name": name, "ontology_mappings": []},
         "external_references": _unique(references),
@@ -813,72 +861,8 @@ def _aggregate_assessments(
     return assessments, warnings
 
 
-def _submission_trait_indexes(
-    assertion: ET.Element, aggregate_traits: list[dict[str, Any]],
-    matching: SubmissionMatching | None = None,
-    *, aggregate_group: str | None = None,
-) -> tuple[set[int], str | None]:
-    trait_set = assertion.find("TraitSet")
-    group = _condition_group(trait_set)
-    if len(aggregate_traits) == 1 and aggregate_group is None and group is None:
-        return {0}, None
-
-    submission_traits = trait_set.findall("Trait") if trait_set is not None else []
-    if not submission_traits:
-        return set(), "submission_trait_set_unmapped"
-
-    matched_indexes = set()
-    unmatched = False
-    ambiguous = False
-    for submission_trait in submission_traits:
-        names, accessions = _trait_match_keys(submission_trait)
-        accession_matches = {
-            index
-            for index, aggregate_trait in enumerate(aggregate_traits)
-            if set(accessions) & set(aggregate_trait["match_accessions"])
-        }
-        matches = accession_matches
-        if not matches:
-            matches = {
-                index
-                for index, aggregate_trait in enumerate(aggregate_traits)
-                if set(names) & set(aggregate_trait["match_names"])
-            }
-
-        if matching is not None:
-            matches = matching.match(
-                matches, aggregate_traits,
-                _versioned_accession(assertion.find("ClinVarAccession")),
-                submission_trait=submission_trait,
-            )
-
-        if len(matches) == 1:
-            matched_indexes.update(matches)
-        elif len(matches) == 0:
-            unmatched = True
-        else:
-            ambiguous = True
-
-    if ambiguous:
-        return matched_indexes, "submission_trait_set_ambiguous"
-    if not matched_indexes:
-        return set(), "submission_trait_set_unmapped"
-    if unmatched:
-        return matched_indexes, "submission_trait_set_partially_mapped"
-    if len(matched_indexes) < len(aggregate_traits):
-        return matched_indexes, "submission_trait_set_subset_mapped"
-    if (
-        aggregate_group in OR_CONDITION_GROUPS and len(aggregate_traits) > 1
-        and group not in OR_CONDITION_GROUPS
-    ):
-        return matched_indexes, "submission_trait_set_choice_mismatch"
-    return matched_indexes, None
-
-
 def _submission_assessments(
-    clinvar_set: ET.Element, aggregate_traits: list[dict[str, Any]],
-    matching: SubmissionMatching | None = None,
-    *, aggregate_group: str | None = None,
+    clinvar_set: ET.Element,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, str | None, str]]]:
     assessments = []
     warnings = []
@@ -903,39 +887,7 @@ def _submission_assessments(
         if not classification_elements:
             continue
 
-        group = _condition_group(assertion.find("TraitSet"))
-        trait_indexes, trait_warning = _submission_trait_indexes(
-            assertion, aggregate_traits, matching, aggregate_group=aggregate_group
-        )
-        if trait_warning:
-            submitted_traits = assertion.find("TraitSet")
-            details = json.dumps({
-                "submitted_trait_set_type": (
-                    submitted_traits.get("Type") if submitted_traits is not None else None
-                ),
-                "submitted_condition_group": group,
-                "aggregate_condition_group": aggregate_group,
-                "requires_complete_choice": aggregate_group in OR_CONDITION_GROUPS,
-                "submitted_traits": [
-                    {"names": _trait_names(trait)[1],
-                     "accessions": _trait_match_keys(trait)[1]}
-                    for trait in assertion.findall("TraitSet/Trait")
-                ],
-                "aggregate_traits": [
-                    {"name": trait["phenotype"]["reported_name"],
-                     "accessions": trait["match_accessions"],
-                     "matched": index in trait_indexes}
-                    for index, trait in enumerate(aggregate_traits)
-                ],
-            }, ensure_ascii=False)
-            warnings.append((trait_warning, accession, details))
-            # A fully matched group can have its own narrower/differently grouped
-            # row. An incomplete or ambiguous group must not be reduced to members.
-            if group is not None and trait_warning not in {
-                "submission_trait_set_subset_mapped", "submission_trait_set_choice_mismatch",
-            }:
-                continue
-
+        condition_set = _reported_condition_set(assertion.find("TraitSet"))
         submission = assertion.find("ClinVarSubmissionID")
         submitter = submission.get("submitter") if submission is not None else None
         publications = _unique_publications(
@@ -970,10 +922,9 @@ def _submission_assessments(
                 "review_status": _text(classification_container.find("ReviewStatus")),
                 "last_evaluated_date": last_evaluated_date,
                 "source_accession": accession,
+                "reported_condition_set": condition_set,
                 "submitters": [submitter] if submitter else [],
                 "publications": publications,
-                "_trait_indexes": sorted(trait_indexes),
-                "_condition_group": group,
             }
             if inheritance_types:
                 assessment["annotation"] = {
@@ -983,100 +934,8 @@ def _submission_assessments(
     return assessments, warnings
 
 
-def _group_assessments(
-    clinvar_set: ET.Element, trait_set: dict[str, Any],
-    aggregate_assessments: list[dict[str, Any]],
-    submission_assessments: list[dict[str, Any]],
-) -> tuple[list[tuple[dict[str, Any], list[dict[str, Any]]]], str | None]:
-    """Keep assessments with their condition set, without copying a group to its members."""
-    traits = trait_set["traits"]
-    full_set = tuple(range(len(traits)))
-    aggregate_group = trait_set["condition_group"]
-    current_submissions = [
-        assertion for assertion in clinvar_set.findall("ClinVarAssertion")
-        if is_current(_text(assertion.find("RecordStatus")))
-    ]
-    if aggregate_group is None and any(
-        _condition_group(assertion.find("TraitSet")) is not None
-        for assertion in current_submissions
-    ):
-        accessions = [
-            _versioned_accession(assertion.find("ClinVarAccession"))
-            for assertion in current_submissions
-        ]
-        groups = {assessment["_condition_group"] for assessment in submission_assessments}
-        # Only inherit a grouping when every current SCV is represented and agrees
-        # on the complete RCV condition set. Missing or narrower SCVs prevent it.
-        complete = (
-            all(accessions)
-            and set(accessions) == {
-                assessment["source_accession"] for assessment in submission_assessments
-            }
-            and all(
-                tuple(assessment["_trait_indexes"]) == full_set
-                for assessment in submission_assessments
-            )
-        )
-        if complete and groups <= OR_CONDITION_GROUPS:
-            aggregate_group = "uncertain" if "uncertain" in groups else "choice"
-        elif complete and len(groups) == 1 and None not in groups:
-            aggregate_group = next(iter(groups))
-        else:
-            # The aggregate still concerns the full set, but the SCVs do not
-            # establish one shared AND/OR relationship. Do not invent one.
-            aggregate_group = "condition set"
-
-    output = {}
-
-    def add(indexes: tuple[int, ...], group: str | None, assessment: dict[str, Any]) -> None:
-        if len(indexes) == 1 and group == "choice":
-            group = None
-        key = (indexes, group)
-        if key not in output:
-            trait = (
-                _combined_traits([traits[index] for index in indexes], group)
-                if group is not None else traits[indexes[0]]
-            )
-            output[key] = (trait, [])
-        output[key][1].append(assessment)
-
-    for assessment in aggregate_assessments:
-        if aggregate_group is not None:
-            add(full_set, aggregate_group, assessment)
-        else:
-            for index in full_set:
-                add((index,), None, assessment)
-
-    for assessment in submission_assessments:
-        indexes = tuple(assessment["_trait_indexes"])
-        group = assessment["_condition_group"]
-        if not indexes:
-            continue
-        if group is not None:
-            if (
-                indexes == full_set and group in OR_CONDITION_GROUPS
-                and aggregate_group in OR_CONDITION_GROUPS
-            ):
-                group = aggregate_group
-            add(indexes, group, assessment)
-        else:
-            for index in indexes:
-                add((index,), None, assessment)
-
-    event = None
-    if len(traits) > 1:
-        if aggregate_group in OR_CONDITION_GROUPS:
-            event = "multiple_traits_combined_as_choice"
-        elif aggregate_group is not None:
-            event = "multiple_traits_combined_as_group"
-        else:
-            event = "multiple_traits_split"
-    return list(output.values()), event
-
-
 def parse_clinvar_set(
     clinvar_set: ET.Element, assembly: str,
-    matching: SubmissionMatching | None = None,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, str | None, str]]]:
     for path in ("RecordStatus", "ReferenceClinVarAssertion/RecordStatus"):
         status = _text(clinvar_set.find(path))
@@ -1117,22 +976,7 @@ def parse_clinvar_set(
     contextual_warnings = [(warning, None, "") for warning in warnings]
     contextual_warnings.extend(numeric_warnings)
     contextual_warnings.extend(publication_warnings)
-    if matching is not None:
-        matching.start_rcv(
-            rcv_accession, len(aggregate_traits), reported_variant["identifier"],
-            match_single_trait=(
-                trait_set["condition_group"] is not None or any(
-                    _condition_group(assertion.find("TraitSet")) is not None
-                    for assertion in clinvar_set.findall("ClinVarAssertion")
-                )
-            ),
-        )
-    submission_assessments, submission_warnings = _submission_assessments(
-        clinvar_set, aggregate_traits, matching,
-        aggregate_group=trait_set["condition_group"],
-    )
-    if matching is not None:
-        contextual_warnings.extend(matching.warnings)
+    submission_assessments, submission_warnings = _submission_assessments(clinvar_set)
     contextual_warnings.extend(submission_warnings)
     assessments = aggregate_assessments + submission_assessments
 
@@ -1140,51 +984,55 @@ def parse_clinvar_set(
     relationship_type = assertion.get("Type") if assertion is not None else None
     aggregate_inheritance_types = _inheritance_types(reference_assertion)
 
-    output_traits, grouping_event = _group_assessments(
-        clinvar_set, trait_set, aggregate_assessments, submission_assessments,
-    )
-    if grouping_event:
-        contextual_warnings.append((grouping_event, None, ""))
+    # ClinVar already groups these SCVs under this RCV. Keep that membership,
+    # but retain each SCV's own condition set rather than asserting term equivalence.
+    # Classification context (germline/somatic/unspecified) can still require rows.
+    if len(aggregate_traits) > 1:
+        trait = _combined_traits(aggregate_traits, trait_set["condition_group"])
+        event = (
+            "multiple_traits_combined_as_choice"
+            if trait_set["condition_group"] in OR_CONDITION_GROUPS
+            else "multiple_traits_combined_as_group"
+        )
+        contextual_warnings.append((event, None, ""))
+    else:
+        trait = aggregate_traits[0]
+    condition_set = trait_set["reported_condition_set"]
+    if condition_set is not None:
+        for assessment in aggregate_assessments:
+            assessment["reported_condition_set"] = condition_set
 
     records = []
     statuses = _unique(item["somatic_status"] for item in assessments)
     for somatic_status in statuses:
-        for trait, grouped_assessments in output_traits:
-            status_assessments = []
-            for assessment in grouped_assessments:
-                if assessment["somatic_status"] != somatic_status:
-                    continue
-                status_assessments.append(
-                    {
-                        key: value
-                        for key, value in assessment.items()
-                        if key not in {"somatic_status", "_trait_indexes", "_condition_group"}
-                    }
-                )
-
-            if not status_assessments:
+        status_assessments = []
+        for assessment in assessments:
+            if assessment["somatic_status"] != somatic_status:
                 continue
+            status_assessments.append({
+                key: value for key, value in assessment.items() if key != "somatic_status"
+            })
 
-            records.append(
-                {
-                    "phenotype": trait["phenotype"],
-                    "somatic_status": somatic_status,
-                    "source_report": {
-                        "source_accession": rcv_accession,
-                        "reported_phenotype_name": trait_set["reported_name"],
-                        "reported_relationship_type": relationship_type,
-                        "reported_variant": reported_variant,
-                        "reported_allele": reported_allele,
-                        "reported_genes": reported_genes,
-                        "external_references": trait["external_references"],
-                        "annotation": (
-                            {"inheritance_types": aggregate_inheritance_types}
-                            if aggregate_inheritance_types else None
-                        ),
-                    },
-                    "assessments": status_assessments,
-                }
-            )
+        records.append(
+            {
+                "phenotype": trait["phenotype"],
+                "somatic_status": somatic_status,
+                "source_report": {
+                    "source_accession": rcv_accession,
+                    "reported_phenotype_name": trait_set["reported_name"],
+                    "reported_relationship_type": relationship_type,
+                    "reported_variant": reported_variant,
+                    "reported_allele": reported_allele,
+                    "reported_genes": reported_genes,
+                    "external_references": trait["external_references"],
+                    "annotation": (
+                        {"inheritance_types": aggregate_inheritance_types}
+                        if aggregate_inheritance_types else None
+                    ),
+                },
+                "assessments": status_assessments,
+            }
+        )
     return records, contextual_warnings
 
 
@@ -1208,7 +1056,6 @@ def parse_clinvar(
     records_path: str | Path,
     summary_path: str | Path,
     *,
-    vcv_input: str | Path,
     genome_context: dict[str, Any] | None = None,
     pipeline_run_date: str | None = None,
     pipeline_revision: str | None = None,
@@ -1252,12 +1099,11 @@ def parse_clinvar(
     warning_counts: Counter[str] = Counter()
     unique_phenotype_names: set[str] = set()
     print(
-        "[Recording ClinVar inputs] Calculating SHA-256 checksums (RCV, VCV)",
+        "[Recording ClinVar input] Calculating SHA-256 checksum (RCV)",
         file=sys.stderr, flush=True,
     )
-    input_files = input_file_provenance([rcv_input, vcv_input])
+    input_files = input_file_provenance([rcv_input])
     with (
-        VcvMappings(vcv_input) as vcv,
         _open_xml(rcv_input) as xml_handle,
         records_path.open("w", encoding="utf-8") as records_handle,
         warnings_path.open("w", encoding="utf-8", newline="") as warnings_handle,
@@ -1272,7 +1118,6 @@ def parse_clinvar(
         rejections_writer = csv.writer(rejections_handle, delimiter="\t", lineterminator="\n")
         warnings_writer.writerow(["RCV", "VCV", "SCV", "warning", "details"])
         rejections_writer.writerow(["RCV", "VCV", "rejection_reason", "details"])
-        matching = SubmissionMatching(vcv)
         root = None
         release_date = None
         for event, element in ET.iterparse(xml_handle, events=("start", "end")):
@@ -1296,12 +1141,6 @@ def parse_clinvar(
                 }
                 records_handle.write(json.dumps({"metadata": metadata}, ensure_ascii=False))
                 records_handle.write("\n")
-                if vcv.release_date and vcv.release_date != release_date:
-                    print(
-                        f"[Parsing ClinVar RCV] Warning: RCV release {release_date} and VCV release "
-                        f"{vcv.release_date} differ; enrichment requires matching RCV/SCV versions",
-                        file=sys.stderr, flush=True,
-                    )
                 continue
 
             if event != "end" or element.tag != "ClinVarSet":
@@ -1309,9 +1148,7 @@ def parse_clinvar(
 
             summary["n_records_seen"] += 1
             try:
-                records, warnings = parse_clinvar_set(
-                    element, assembly, matching,
-                )
+                records, warnings = parse_clinvar_set(element, assembly)
             except RejectedRecord as error:
                 rcv_accession = _versioned_accession(
                     element.find("ReferenceClinVarAssertion/ClinVarAccession")
@@ -1375,7 +1212,6 @@ def parse_clinvar(
 def _argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='Parse ClinVar RCV XML and output an intermediate JSONL file.')
     parser.add_argument("--rcv-input", type=Path, help="Staged RCV XML/XML.GZ; otherwise use the source config input")
-    parser.add_argument("--vcv-input", type=Path, help="Staged VCV XML/XML.GZ; otherwise use the source config input")
     context_arguments = parser.add_mutually_exclusive_group()
     context_arguments.add_argument("--source-config", type=Path,
                                    help=f"Source configuration JSON (default: {DEFAULT_SOURCE_CONFIG})")
@@ -1405,14 +1241,12 @@ def main() -> int:
                 raise ValueError("Standalone parsing requires one ClinVar context; use Nextflow to process multiple contexts")
             genome_context = contexts[0]
         rcv_input = args.rcv_input or inputs.get("rcv")
-        vcv_input = args.vcv_input or inputs.get("vcv")
-        if not rcv_input or not vcv_input:
-            raise ValueError("Standalone parsing needs both RCV and VCV input paths in the source config; use Nextflow to download omitted files")
+        if not rcv_input:
+            raise ValueError("Standalone parsing needs an RCV input path in the source config; use Nextflow to download an omitted file")
     except (OSError, ValueError) as error:
         parser.error(str(error))
     summary = parse_clinvar(
         rcv_input=rcv_input,
-        vcv_input=vcv_input,
         assembly=genome_context["assembly"],
         records_path=args.records,
         summary_path=args.summary,

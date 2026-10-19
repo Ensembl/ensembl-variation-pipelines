@@ -20,6 +20,7 @@ from urllib.parse import urlsplit
 from phenotypes.clinvar.rcv_scv_matching import SubmissionMatching
 from phenotypes.clinvar.vcv_parser import (
     PROGRESS_INTERVAL, VcvMappings, format_elapsed, is_current,
+    normalise_accession as _normalise_accession,
     normalise_name as _normalise_name,
 )
 from phenotypes.provenance import git_revision, input_file_provenance
@@ -46,7 +47,10 @@ SUMMARY_ONLY_EVENTS = {
     "placeholder_phenotype_used",
     "multiple_traits_split",
     "multiple_traits_combined_as_choice",
+    "multiple_traits_combined_as_group",
 }
+
+OR_CONDITION_GROUPS = {"choice", "uncertain"}
 
 CLASSIFICATION_TYPES = {
     "GermlineClassification": ("germline_classification", "germline"),
@@ -323,8 +327,10 @@ def _trait_match_keys(trait: ET.Element) -> tuple[list[str], list[str]]:
         for xref in trait.findall(path):
             database = xref.get("DB")
             accession = xref.get("ID")
+            if database and database.casefold() == "medgen":
+                database = "MedGen"
             if database in {"MedGen", "MeSH"} and accession:
-                accession = accession.removeprefix(f"{database}:")
+                accession = _normalise_accession(database, accession)
                 if accession:
                     accessions.append(f"{database}:{accession}")
     return (
@@ -461,17 +467,11 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
 
     if not traits:
         raise RejectedRecord("missing_supported_traits")
-    is_choice = trait_set_type == "TraitChoice"
-    if len(traits) > 1:
-        warnings.append(
-            "multiple_traits_combined_as_choice" if is_choice else "multiple_traits_split"
-        )
-
     return (
         {
             "reported_name": "; ".join(_unique(source_names)),
             "traits": traits,
-            "is_choice": is_choice,
+            "condition_group": _condition_group(trait_set),
         },
         warnings,
     )
@@ -700,15 +700,20 @@ def _assessment_somatic_status(
     return "somatic", None
 
 
-def _uncertain_conditions(trait_set: ET.Element | None) -> bool:
-    return (
-        trait_set is not None
-        and _normalise_name(trait_set.get("multipleConditionExplanation", "")) == "uncertain"
-    )
+def _condition_group(trait_set: ET.Element | None) -> str | None:
+    """Recognise explicit alternatives or a jointly asserted condition set."""
+    if trait_set is None:
+        return None
+    if trait_set.get("Type") == "TraitChoice":
+        return "choice"
+    explanation = _normalise_name(trait_set.get("multipleConditionExplanation", ""))
+    if explanation in {"uncertain", "novel disease", "co-occurring"}:
+        return explanation
+    return None
 
 
 def _combined_traits(
-    traits: list[dict[str, Any]], *, uncertain: bool = False,
+    traits: list[dict[str, Any]], group: str,
 ) -> dict[str, Any]:
     references = []
     for trait in traits:
@@ -721,9 +726,18 @@ def _combined_traits(
             }
             for mapping in trait["phenotype"]["ontology_mappings"]
         )
-    name = " OR ".join(trait["phenotype"]["reported_name"] for trait in traits)
-    if uncertain:
-        name += " (condition uncertain)"
+    joiner = " OR " if group in OR_CONDITION_GROUPS else " AND "
+    if group == "condition set":
+        joiner = "; "
+    name = joiner.join(trait["phenotype"]["reported_name"] for trait in traits)
+    qualifier = {
+        "choice": "",
+        "uncertain": " (condition uncertain)",
+        "novel disease": " (novel disease)",
+        "co-occurring": " (co-occurring conditions)",
+        "condition set": " (condition set)",
+    }[group]
+    name += qualifier
     return {
         "phenotype": {"reported_name": name, "ontology_mappings": []},
         "external_references": _unique(references),
@@ -802,19 +816,13 @@ def _aggregate_assessments(
 def _submission_trait_indexes(
     assertion: ET.Element, aggregate_traits: list[dict[str, Any]],
     matching: SubmissionMatching | None = None,
-    *, trait_choice: bool = False,
+    *, aggregate_group: str | None = None,
 ) -> tuple[set[int], str | None]:
     trait_set = assertion.find("TraitSet")
-    uncertain = _uncertain_conditions(trait_set)
-    if len(aggregate_traits) == 1 and not trait_choice and not uncertain:
+    group = _condition_group(trait_set)
+    if len(aggregate_traits) == 1 and aggregate_group is None and group is None:
         return {0}, None
 
-    if (
-        trait_choice and len(aggregate_traits) > 1 and trait_set is not None
-        and trait_set.get("Type") != "TraitChoice"
-        and not (trait_set.get("Type") == "Disease" and uncertain)
-    ):
-        return set(), "submission_trait_set_choice_mismatch"
     submission_traits = trait_set.findall("Trait") if trait_set is not None else []
     if not submission_traits:
         return set(), "submission_trait_set_unmapped"
@@ -859,13 +867,18 @@ def _submission_trait_indexes(
         return matched_indexes, "submission_trait_set_partially_mapped"
     if len(matched_indexes) < len(aggregate_traits):
         return matched_indexes, "submission_trait_set_subset_mapped"
+    if (
+        aggregate_group in OR_CONDITION_GROUPS and len(aggregate_traits) > 1
+        and group not in OR_CONDITION_GROUPS
+    ):
+        return matched_indexes, "submission_trait_set_choice_mismatch"
     return matched_indexes, None
 
 
 def _submission_assessments(
     clinvar_set: ET.Element, aggregate_traits: list[dict[str, Any]],
     matching: SubmissionMatching | None = None,
-    *, trait_choice: bool = False,
+    *, aggregate_group: str | None = None,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, str | None, str]]]:
     assessments = []
     warnings = []
@@ -890,9 +903,9 @@ def _submission_assessments(
         if not classification_elements:
             continue
 
-        uncertain = _uncertain_conditions(assertion.find("TraitSet"))
+        group = _condition_group(assertion.find("TraitSet"))
         trait_indexes, trait_warning = _submission_trait_indexes(
-            assertion, aggregate_traits, matching, trait_choice=trait_choice
+            assertion, aggregate_traits, matching, aggregate_group=aggregate_group
         )
         if trait_warning:
             submitted_traits = assertion.find("TraitSet")
@@ -900,7 +913,9 @@ def _submission_assessments(
                 "submitted_trait_set_type": (
                     submitted_traits.get("Type") if submitted_traits is not None else None
                 ),
-                "requires_complete_choice": trait_choice,
+                "submitted_condition_group": group,
+                "aggregate_condition_group": aggregate_group,
+                "requires_complete_choice": aggregate_group in OR_CONDITION_GROUPS,
                 "submitted_traits": [
                     {"names": _trait_names(trait)[1],
                      "accessions": _trait_match_keys(trait)[1]}
@@ -909,15 +924,16 @@ def _submission_assessments(
                 "aggregate_traits": [
                     {"name": trait["phenotype"]["reported_name"],
                      "accessions": trait["match_accessions"],
-                     "matched": (None if trait_warning == "submission_trait_set_choice_mismatch"
-                                 else index in trait_indexes)}
+                     "matched": index in trait_indexes}
                     for index, trait in enumerate(aggregate_traits)
                 ],
             }, ensure_ascii=False)
             warnings.append((trait_warning, accession, details))
-            if trait_choice or (
-                uncertain and trait_warning != "submission_trait_set_subset_mapped"
-            ):
+            # A fully matched group can have its own narrower/differently grouped
+            # row. An incomplete or ambiguous group must not be reduced to members.
+            if group is not None and trait_warning not in {
+                "submission_trait_set_subset_mapped", "submission_trait_set_choice_mismatch",
+            }:
                 continue
 
         submission = assertion.find("ClinVarSubmissionID")
@@ -957,7 +973,7 @@ def _submission_assessments(
                 "submitters": [submitter] if submitter else [],
                 "publications": publications,
                 "_trait_indexes": sorted(trait_indexes),
-                "_uncertain_conditions": uncertain,
+                "_condition_group": group,
             }
             if inheritance_types:
                 assessment["annotation"] = {
@@ -965,6 +981,98 @@ def _submission_assessments(
                 }
             assessments.append(assessment)
     return assessments, warnings
+
+
+def _group_assessments(
+    clinvar_set: ET.Element, trait_set: dict[str, Any],
+    aggregate_assessments: list[dict[str, Any]],
+    submission_assessments: list[dict[str, Any]],
+) -> tuple[list[tuple[dict[str, Any], list[dict[str, Any]]]], str | None]:
+    """Keep assessments with their condition set, without copying a group to its members."""
+    traits = trait_set["traits"]
+    full_set = tuple(range(len(traits)))
+    aggregate_group = trait_set["condition_group"]
+    current_submissions = [
+        assertion for assertion in clinvar_set.findall("ClinVarAssertion")
+        if is_current(_text(assertion.find("RecordStatus")))
+    ]
+    if aggregate_group is None and any(
+        _condition_group(assertion.find("TraitSet")) is not None
+        for assertion in current_submissions
+    ):
+        accessions = [
+            _versioned_accession(assertion.find("ClinVarAccession"))
+            for assertion in current_submissions
+        ]
+        groups = {assessment["_condition_group"] for assessment in submission_assessments}
+        # Only inherit a grouping when every current SCV is represented and agrees
+        # on the complete RCV condition set. Missing or narrower SCVs prevent it.
+        complete = (
+            all(accessions)
+            and set(accessions) == {
+                assessment["source_accession"] for assessment in submission_assessments
+            }
+            and all(
+                tuple(assessment["_trait_indexes"]) == full_set
+                for assessment in submission_assessments
+            )
+        )
+        if complete and groups <= OR_CONDITION_GROUPS:
+            aggregate_group = "uncertain" if "uncertain" in groups else "choice"
+        elif complete and len(groups) == 1 and None not in groups:
+            aggregate_group = next(iter(groups))
+        else:
+            # The aggregate still concerns the full set, but the SCVs do not
+            # establish one shared AND/OR relationship. Do not invent one.
+            aggregate_group = "condition set"
+
+    output = {}
+
+    def add(indexes: tuple[int, ...], group: str | None, assessment: dict[str, Any]) -> None:
+        if len(indexes) == 1 and group == "choice":
+            group = None
+        key = (indexes, group)
+        if key not in output:
+            trait = (
+                _combined_traits([traits[index] for index in indexes], group)
+                if group is not None else traits[indexes[0]]
+            )
+            output[key] = (trait, [])
+        output[key][1].append(assessment)
+
+    for assessment in aggregate_assessments:
+        if aggregate_group is not None:
+            add(full_set, aggregate_group, assessment)
+        else:
+            for index in full_set:
+                add((index,), None, assessment)
+
+    for assessment in submission_assessments:
+        indexes = tuple(assessment["_trait_indexes"])
+        group = assessment["_condition_group"]
+        if not indexes:
+            continue
+        if group is not None:
+            if (
+                indexes == full_set and group in OR_CONDITION_GROUPS
+                and aggregate_group in OR_CONDITION_GROUPS
+            ):
+                group = aggregate_group
+            add(indexes, group, assessment)
+        else:
+            for index in indexes:
+                add((index,), None, assessment)
+
+    event = None
+    if len(traits) > 1:
+        if aggregate_group in OR_CONDITION_GROUPS:
+            event = "multiple_traits_combined_as_choice"
+        elif aggregate_group is not None:
+            event = "multiple_traits_combined_as_group"
+        else:
+            event = "multiple_traits_split"
+    return list(output.values()), event
+
 
 def parse_clinvar_set(
     clinvar_set: ET.Element, assembly: str,
@@ -1013,14 +1121,15 @@ def parse_clinvar_set(
         matching.start_rcv(
             rcv_accession, len(aggregate_traits), reported_variant["identifier"],
             match_single_trait=(
-                trait_set["is_choice"] or any(
-                    _uncertain_conditions(assertion.find("TraitSet"))
+                trait_set["condition_group"] is not None or any(
+                    _condition_group(assertion.find("TraitSet")) is not None
                     for assertion in clinvar_set.findall("ClinVarAssertion")
                 )
             ),
         )
     submission_assessments, submission_warnings = _submission_assessments(
-        clinvar_set, aggregate_traits, matching, trait_choice=trait_set["is_choice"]
+        clinvar_set, aggregate_traits, matching,
+        aggregate_group=trait_set["condition_group"],
     )
     if matching is not None:
         contextual_warnings.extend(matching.warnings)
@@ -1031,46 +1140,25 @@ def parse_clinvar_set(
     relationship_type = assertion.get("Type") if assertion is not None else None
     aggregate_inheritance_types = _inheritance_types(reference_assertion)
 
-    output_traits = [
-        ({index}, trait, False) for index, trait in enumerate(aggregate_traits)
-    ]
-    if trait_set["is_choice"] and len(aggregate_traits) > 1:
-        output_traits = [(
-            set(range(len(aggregate_traits))), _combined_traits(aggregate_traits), False,
-        )]
-    uncertain_groups = _unique(
-        tuple(assessment["_trait_indexes"]) for assessment in submission_assessments
-        if assessment["_uncertain_conditions"]
+    output_traits, grouping_event = _group_assessments(
+        clinvar_set, trait_set, aggregate_assessments, submission_assessments,
     )
-    for indexes in uncertain_groups:
-        output_traits.append((
-            set(indexes),
-            _combined_traits([aggregate_traits[index] for index in indexes], uncertain=True),
-            True,
-        ))
+    if grouping_event:
+        contextual_warnings.append((grouping_event, None, ""))
 
     records = []
     statuses = _unique(item["somatic_status"] for item in assessments)
     for somatic_status in statuses:
-        for trait_indexes, trait, uncertain in output_traits:
+        for trait, grouped_assessments in output_traits:
             status_assessments = []
-            for assessment in assessments:
+            for assessment in grouped_assessments:
                 if assessment["somatic_status"] != somatic_status:
-                    continue
-                if assessment.get("_uncertain_conditions", False) != uncertain:
-                    continue
-                if uncertain and set(assessment["_trait_indexes"]) != trait_indexes:
-                    continue
-                if (
-                    assessment["assessment_level"] == "submission"
-                    and not trait_indexes.intersection(assessment.get("_trait_indexes", []))
-                ):
                     continue
                 status_assessments.append(
                     {
                         key: value
                         for key, value in assessment.items()
-                        if key not in {"somatic_status", "_trait_indexes", "_uncertain_conditions"}
+                        if key not in {"somatic_status", "_trait_indexes", "_condition_group"}
                     }
                 )
 
@@ -1098,6 +1186,7 @@ def parse_clinvar_set(
                 }
             )
     return records, contextual_warnings
+
 
 def _open_xml(path: Path) -> BinaryIO:
     if path.suffix.lower() == ".gz":

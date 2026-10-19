@@ -4,7 +4,7 @@
 leaving uncertain matches unresolved
 """
 
-from phenotypes.clinvar.vcv_parser import normalise_name
+from phenotypes.clinvar.vcv_parser import normalise_accession, normalise_name
 
 
 class SubmissionMatching:
@@ -37,7 +37,7 @@ class SubmissionMatching:
             return direct_matches
         matches = set()
         for cui, name in mappings:
-            identifier = f"MedGen:{cui}" if cui else None
+            identifier = f"MedGen:{normalise_accession('MedGen', cui)}" if cui else None
             targets = {i for i, trait in enumerate(aggregate_traits)
                        if identifier and identifier in trait["match_accessions"]}
             if not targets and name:

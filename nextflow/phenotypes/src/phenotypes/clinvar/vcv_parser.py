@@ -23,6 +23,13 @@ def normalise_name(value):
     return " ".join(value.split()).casefold()
 
 
+def normalise_accession(database, value):
+    """Build comparison keys only; preserve source identifiers in exported data."""
+    if database.casefold() == "medgen":
+        return value.upper().removeprefix("MEDGEN:")
+    return value.removeprefix(database + ":")
+
+
 def is_current(status):
     status = (status or "").strip()
     return not status or status == "current"
@@ -32,7 +39,7 @@ def mapping_key(kind, reference, value):
     if kind == "Name":
         value = normalise_name(value)
     else:
-        value = value.removeprefix(reference + ":")
+        value = normalise_accession(reference, value)
     return kind, reference.casefold(), value
 
 

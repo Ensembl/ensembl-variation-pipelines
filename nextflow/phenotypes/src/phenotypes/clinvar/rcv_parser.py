@@ -261,6 +261,14 @@ def _observed_in_publication_ids(
     )
 
 
+def _is_omim_condition_reference(element: ET.Element) -> bool:
+    """Accept MIM entries with or without a type, never dotted allelic-variant IDs."""
+    return (
+        element.get("Type") in {None, "", "MIM"}
+        and re.fullmatch(r"(?:OMIM:)?[0-9]{6}", element.get("ID", "")) is not None
+    )
+
+
 def _normalise_ontology_reference(
     element: ET.Element,
 ) -> dict[str, str] | None:
@@ -286,7 +294,7 @@ def _normalise_ontology_reference(
         database = "EFO"
         accession = re.sub(r"^EFO[:_]", "", accession)
         accession = f"EFO:{accession}"
-    elif database == "OMIM" and reference_type == "MIM":
+    elif database == "OMIM" and _is_omim_condition_reference(element):
         if not accession.startswith("OMIM:"):
             accession = f"OMIM:{accession}"
     else:
@@ -347,7 +355,7 @@ def _trait_external_references(
             accession = xref.get("ID")
             if not accession or database not in {"MONDO", "MedGen", "Orphanet", "OMIM"}:
                 continue
-            if database == "OMIM" and xref.get("Type") != "MIM":
+            if database == "OMIM" and not _is_omim_condition_reference(xref):
                 continue
             mapping = _normalise_ontology_reference(xref)
             if mapping and (mapping["database"], mapping["accession"]) in primary_keys:
@@ -743,7 +751,7 @@ def _uncertain_context_details(
 
 
 def _condition_group(trait_set: ET.Element | None) -> str | None:
-    """Use only this assertion's explicit grouping, never its SCVs or trait relationships."""
+    """Use this assertion's set-level grouping, not member relationships or other assertions."""
     if trait_set is None:
         return None
     explanation = _normalise_name(trait_set.get("multipleConditionExplanation", ""))
@@ -752,7 +760,7 @@ def _condition_group(trait_set: ET.Element | None) -> str | None:
             return explanation or "choice"
         # Conflicting instructions must not silently become either AND or OR.
         return "condition set"
-    if explanation in {"uncertain", "novel disease", "co-occurring"}:
+    if explanation == "uncertain":
         return explanation
     return None
 
@@ -760,16 +768,9 @@ def _condition_group(trait_set: ET.Element | None) -> str | None:
 def _condition_set_name(names: list[str], group: str | None) -> str | None:
     if not names:
         return None
-    if len(names) == 1:
-        return names[0]
-    joiner, qualifier = {
-        "choice": (" OR ", ""),
-        "uncertain": (" OR ", " (condition uncertain)"),
-        "novel disease": (" AND ", " (novel disease)"),
-        "co-occurring": (" AND ", " (co-occurring conditions)"),
-    }.get(group, ("; ", " (condition set)"))
+    joiner = " OR " if group in OR_CONDITION_GROUPS else "; "
     # Uncertain OR means one or several of the conditions, not exactly one.
-    return joiner.join(names) + qualifier
+    return joiner.join(names)
 
 
 def _reported_condition_set(trait_set: ET.Element | None) -> dict[str, Any] | None:
@@ -786,7 +787,7 @@ def _reported_condition_set(trait_set: ET.Element | None) -> dict[str, Any] | No
                 database, accession = xref.get("DB"), xref.get("ID")
                 if not database or not accession:
                     continue
-                if database == "OMIM" and xref.get("Type") != "MIM":
+                if database == "OMIM" and not _is_omim_condition_reference(xref):
                     continue
                 if database in {"HP", "Human Phenotype Ontology"} and (
                     xref.get("Type", "").casefold() == "secondary"

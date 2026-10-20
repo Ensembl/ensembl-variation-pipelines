@@ -125,10 +125,14 @@ The sections below contain some notes on how the parser handles the data
 | ClinVar grouping | Meaning | Example output label |
 | --- | --- | --- |
 | `TraitChoice` | Alternative conditions. | A OR B |
-| `multipleConditionExplanation="Uncertain"` | One or several conditions may apply; OR does not mean exactly one. | A OR B (condition uncertain) |
-| `multipleConditionExplanation="Novel disease"` | Features together describe a proposed new disease. | Muscle weakness AND Developmental delay (novel disease) |
-| `multipleConditionExplanation="Co-occurring"` | Conditions are reported together in the same individual. | A AND B (co-occurring conditions) |
-| Missing, unknown or conflicting grouping | Keep the set without choosing AND or OR. | A; B (condition set) |
+| `multipleConditionExplanation="Uncertain"` | One or several conditions may apply; OR does not mean exactly one. | A OR B |
+| `multipleConditionExplanation="Novel disease"` | Features describe a proposed new disease; use a neutral separator. | Muscle weakness; Developmental delay |
+| `multipleConditionExplanation="Co-occurring"` | Conditions are reported together; use a neutral separator. | A; B |
+| `TraitChoice` with a non-empty explanation other than `Uncertain` | Set-level instructions differ; keep a neutral separator. | A; B |
+| Missing, unknown or conflicting grouping | Keep the set without choosing AND or OR. | A; B |
+
+The phenotype name uses the aggregate's grouping. For `RCV001834555.3`, the aggregate has TraitChoice, so its label becomes
+`Hyperparathyroidism 4 OR Hypoparathyroidism, familial isolated, 2`.
 
 #### Aggregate and submission assessments
 
@@ -174,7 +178,7 @@ Same variant and complete condition set
 - Treat `DrugResponse` names, such as `Ezetimibe response`, as phenotype names
 - Use the assertion-level `TraitSet` for assessed conditions
 - Clinical features under `ObservedIn/TraitSet` are currently not extracted or used as replacements. For example, `RCV000051340.4` is labelled `See cases` even though its SCV reports `Global developmental delay` as an observed feature. Its output uses the placeholder - it does not create a separate classified association for that feature
-- If an SCV condition has an identifier but no name, keep the name null and use the identifier in its condition-set display label
+- Keep aggregate-trait six-digit OMIM condition references with `Type="MIM"` or no type; exclude allelic-variant references such as `613665.0004`
 
 #### Assembly, locations and alleles
 

@@ -181,7 +181,6 @@ CREATE TABLE phenotype_assessment (
     review_status TEXT,
     last_evaluated_date DATE,
     source_accession TEXT,
-    reported_condition_set JSONB,
     submitters TEXT[] NOT NULL DEFAULT '{}'
 );
 

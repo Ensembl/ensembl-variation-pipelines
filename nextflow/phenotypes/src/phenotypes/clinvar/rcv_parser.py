@@ -457,19 +457,11 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
     if not traits:
         raise RejectedRecord("missing_supported_traits")
     condition_group = _condition_group(trait_set)
-    condition_set = None
-    if (
-        len(trait_elements) > 1 or condition_group is not None
-        or trait_set.get("multipleConditionExplanation") is not None
-        or trait_set.find("Trait/TraitRelationship") is not None
-    ):
-        condition_set = _reported_condition_set(trait_set)
     return (
         {
             "reported_name": "; ".join(_unique(source_names)),
             "traits": traits,
             "condition_group": condition_group,
-            "reported_condition_set": condition_set,
         },
         warnings,
     )
@@ -773,55 +765,6 @@ def _condition_set_name(names: list[str], group: str | None) -> str | None:
     return joiner.join(names)
 
 
-def _reported_condition_set(trait_set: ET.Element | None) -> dict[str, Any] | None:
-    """Retain an assertion's own conditions without resolving them to another assertion's terms."""
-    if trait_set is None:
-        return None
-    traits = []
-    labels = []
-    for trait in trait_set.findall("Trait"):
-        name, _ = _trait_name(trait)
-        identifiers = []
-        for path in ("XRef", "Name/XRef", "Symbol/XRef", "AttributeSet/XRef"):
-            for xref in trait.findall(path):
-                database, accession = xref.get("DB"), xref.get("ID")
-                if not database or not accession:
-                    continue
-                if database == "OMIM" and not _is_omim_condition_reference(xref):
-                    continue
-                if database in {"HP", "Human Phenotype Ontology"} and (
-                    xref.get("Type", "").casefold() == "secondary"
-                ):
-                    continue
-                identifiers.append({"database": database, "accession": accession})
-        identifiers = _unique(identifiers)
-        traits.append({
-            "name": name,
-            "type": trait.get("Type"),
-            "identifiers": identifiers,
-            "relationships": _unique(
-                {"type": relationship.get("Type"), "identifier": relationship.get("ID")}
-                for relationship in trait.findall("TraitRelationship")
-            ),
-        })
-        if name:
-            labels.append(name)
-        elif identifiers:
-            identifier = identifiers[0]
-            accession = identifier["accession"]
-            prefix = identifier["database"] + ":"
-            labels.append(accession if accession.startswith(prefix) else prefix + accession)
-        else:
-            trait_id = trait.get("ID")
-            labels.append(f"ClinVar trait {trait_id}" if trait_id else "Unnamed condition")
-    return {
-        "name": _condition_set_name(labels, _condition_group(trait_set)),
-        "type": trait_set.get("Type"),
-        "multiple_condition_explanation": trait_set.get("multipleConditionExplanation"),
-        "traits": traits,
-    }
-
-
 def _combined_traits(
     traits: list[dict[str, Any]], group: str | None,
 ) -> dict[str, Any]:
@@ -940,7 +883,6 @@ def _submission_assessments(
         if not classification_elements:
             continue
 
-        condition_set = _reported_condition_set(assertion.find("TraitSet"))
         submission = assertion.find("ClinVarSubmissionID")
         submitter = submission.get("submitter") if submission is not None else None
         publications = _unique_publications(
@@ -975,7 +917,6 @@ def _submission_assessments(
                 "review_status": _text(classification_container.find("ReviewStatus")),
                 "last_evaluated_date": last_evaluated_date,
                 "source_accession": accession,
-                "reported_condition_set": condition_set,
                 "submitters": [submitter] if submitter else [],
                 "publications": publications,
             }
@@ -1037,8 +978,8 @@ def parse_clinvar_set(
     relationship_type = assertion.get("Type") if assertion is not None else None
     aggregate_inheritance_types = _inheritance_types(reference_assertion)
 
-    # ClinVar already groups these SCVs under this RCV. Keep that membership,
-    # but retain each SCV's own condition set rather than asserting term equivalence.
+    # ClinVar already groups these SCVs under this RCV. Keep that membership;
+    # do not infer independent classifications for individual traits.
     # Classification context (germline/somatic/unspecified) can still require rows.
     if len(aggregate_traits) > 1:
         trait = _combined_traits(aggregate_traits, trait_set["condition_group"])
@@ -1050,11 +991,6 @@ def parse_clinvar_set(
         contextual_warnings.append((event, None, ""))
     else:
         trait = aggregate_traits[0]
-    condition_set = trait_set["reported_condition_set"]
-    if condition_set is not None:
-        for assessment in aggregate_assessments:
-            assessment["reported_condition_set"] = condition_set
-
     records = []
     uncertain_context = _uncertain_context_details(clinvar_set, assessments)
     if uncertain_context is not None:

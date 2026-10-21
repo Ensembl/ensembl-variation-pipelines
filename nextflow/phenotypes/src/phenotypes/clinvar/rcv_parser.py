@@ -419,9 +419,9 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
                 {"trait_id": trait.get("ID"), "reported_name": source_name},
             )
 
-        reported_name = source_name
+        phenotype_name = source_name
         if is_placeholder:
-            reported_name = PHENOTYPE_NOT_SPECIFIED
+            phenotype_name = PHENOTYPE_NOT_SPECIFIED
             warnings.append("placeholder_phenotype_used")
 
         all_ontology_mappings = _trait_ontology_mappings(trait)
@@ -429,7 +429,7 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
         parsed_trait = {
             "external_references": _trait_external_references(trait, ontology_mappings),
             "phenotype": {
-                "reported_name": reported_name,
+                "phenotype_name": phenotype_name,
                 "ontology_mappings": ontology_mappings,
             },
         }
@@ -457,9 +457,10 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
     if not traits:
         raise RejectedRecord("missing_supported_traits")
     condition_group = _condition_group(trait_set)
+    # Keep source names as a list, separate from the generated display label.
     return (
         {
-            "reported_name": "; ".join(_unique(source_names)),
+            "reported_phenotype_name": _unique(source_names),
             "traits": traits,
             "condition_group": condition_group,
         },
@@ -780,10 +781,10 @@ def _combined_traits(
             for mapping in trait["phenotype"]["ontology_mappings"]
         )
     name = _condition_set_name(
-        [trait["phenotype"]["reported_name"] for trait in traits], group,
+        [trait["phenotype"]["phenotype_name"] for trait in traits], group,
     )
     return {
-        "phenotype": {"reported_name": name, "ontology_mappings": []},
+        "phenotype": {"phenotype_name": name, "ontology_mappings": []},
         "external_references": _unique(references),
     }
 
@@ -796,6 +797,7 @@ def _aggregate_assessments(
     if classifications is None:
         return [], []
 
+    rcv_accession = _versioned_accession(reference_assertion.find("ClinVarAccession"))
     assessments = []
     warnings = []
     inheritance_types = _inheritance_types(reference_assertion)
@@ -849,7 +851,7 @@ def _aggregate_assessments(
                     "somatic_status": somatic_status,
                     "review_status": _text(element.find("ReviewStatus")),
                     "last_evaluated_date": last_evaluated_date,
-                    "source_accession": None,
+                    "source_accession": rcv_accession,
                     "submitters": [],
                     "publications": publications,
                 }
@@ -1014,7 +1016,7 @@ def parse_clinvar_set(
                 "somatic_status": somatic_status,
                 "source_report": {
                     "source_accession": rcv_accession,
-                    "reported_phenotype_name": trait_set["reported_name"],
+                    "reported_phenotype_name": trait_set["reported_phenotype_name"],
                     "reported_relationship_type": relationship_type,
                     "reported_variant": reported_variant,
                     "reported_allele": reported_allele,
@@ -1167,7 +1169,7 @@ def parse_clinvar(
                     records_handle.write("\n")
                     summary["n_records_emitted"] += 1
                     unique_phenotype_names.add(
-                        _normalise_name(record["phenotype"]["reported_name"])
+                        _normalise_name(record["phenotype"]["phenotype_name"])
                     )
                 warning_counts.update(warning for warning, _, _ in warnings)
                 for warning, scv_accession, details in warnings:

@@ -45,7 +45,7 @@ CREATE TABLE publication (
 
 CREATE TABLE phenotype (
     phenotype_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name TEXT NOT NULL,
+    phenotype_name TEXT NOT NULL,
     primary_ontology_term_id BIGINT REFERENCES ontology_term (ontology_term_id) ON DELETE RESTRICT
 );
 
@@ -108,7 +108,7 @@ CREATE TABLE source_report (
     source_id BIGINT NOT NULL REFERENCES source (source_id) ON DELETE RESTRICT,
     import_run_id BIGINT NOT NULL REFERENCES import_run (import_run_id) ON DELETE RESTRICT,
     source_accession TEXT,
-    reported_phenotype_name TEXT NOT NULL,
+    reported_phenotype_name TEXT[] NOT NULL,
     reported_genes TEXT[] NOT NULL DEFAULT '{}',
     reported_allele TEXT,
     comparison_allele TEXT,

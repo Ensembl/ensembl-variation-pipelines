@@ -460,7 +460,7 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
     # Keep source names as a list, separate from the generated display label.
     return (
         {
-            "reported_phenotype_name": _unique(source_names),
+            "reported_phenotype_names": _unique(source_names),
             "traits": traits,
             "condition_group": condition_group,
         },
@@ -1016,7 +1016,7 @@ def parse_clinvar_set(
                 "somatic_status": somatic_status,
                 "source_report": {
                     "source_accession": rcv_accession,
-                    "reported_phenotype_name": trait_set["reported_phenotype_name"],
+                    "reported_phenotype_names": trait_set["reported_phenotype_names"],
                     "reported_relationship_type": relationship_type,
                     "reported_variant": reported_variant,
                     "reported_allele": reported_allele,

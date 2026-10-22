@@ -28,6 +28,7 @@ CREATE TABLE source (
 
 CREATE TABLE import_run (
     import_run_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    source_name TEXT NOT NULL,
     source_version TEXT,
     file_names TEXT[] NOT NULL,
     file_checksums TEXT[] NOT NULL,
@@ -55,19 +56,8 @@ CREATE TABLE phenotype_measurement (
     measured_entity_id BIGINT NOT NULL REFERENCES entity (entity_id) ON DELETE RESTRICT
 );
 
-CREATE TABLE entity_component (
-    entity_component_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    parent_entity_id BIGINT NOT NULL REFERENCES entity (entity_id) ON DELETE CASCADE,
-    component_entity_id BIGINT NOT NULL REFERENCES entity (entity_id) ON DELETE RESTRICT,
-    allele TEXT,
-    ordinal INTEGER CHECK (ordinal > 0),
-    CHECK (parent_entity_id <> component_entity_id),
-    UNIQUE (parent_entity_id, ordinal)
-);
-
 CREATE TABLE genome_context (
     genome_context_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    entity_id BIGINT NOT NULL REFERENCES entity (entity_id) ON DELETE CASCADE,
     species_taxonomy_id INTEGER NOT NULL,
     species_production_name TEXT NOT NULL,
     organism_id TEXT,
@@ -78,9 +68,16 @@ CREATE TABLE genome_context (
     genome_uuid TEXT
 );
 
+CREATE TABLE entity_genome_context (
+    entity_genome_context_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    entity_id BIGINT NOT NULL REFERENCES entity (entity_id) ON DELETE CASCADE,
+    genome_context_id BIGINT NOT NULL REFERENCES genome_context (genome_context_id) ON DELETE RESTRICT,
+    UNIQUE (entity_id, genome_context_id)
+);
+
 CREATE TABLE entity_location (
     entity_location_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    genome_context_id BIGINT NOT NULL REFERENCES genome_context (genome_context_id) ON DELETE CASCADE,
+    entity_genome_context_id BIGINT NOT NULL REFERENCES entity_genome_context (entity_genome_context_id) ON DELETE CASCADE,
     seq_region_name TEXT NOT NULL,
     seq_region_start BIGINT NOT NULL,
     seq_region_end BIGINT NOT NULL,

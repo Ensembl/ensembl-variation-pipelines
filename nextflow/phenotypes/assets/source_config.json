@@ -2,7 +2,8 @@
   "sources": {
     "clinvar": {
       "inputs": {
-        "rcv": null
+        "rcv": null,
+        "vcv": null
       },
       "contexts": [
         {

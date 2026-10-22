@@ -1,4 +1,4 @@
-// Parse the supplied ClinVar RCV file for one species and assembly.
+// Parse RCV associations and use VCV records for component identifiers.
 // Publish the association records, summary, warnings and rejections.
 
 process PARSE_CLINVAR {
@@ -9,6 +9,7 @@ process PARSE_CLINVAR {
 
     input:
     path rcv_xml
+    path vcv_xml
     val processing_context
 
     output:
@@ -20,9 +21,11 @@ process PARSE_CLINVAR {
     script:
     def context_argument = "'" + groovy.json.JsonOutput.toJson(processing_context).replace("'", "'\"'\"'") + "'"
     """
+    # Prepare entity and entity_locations values alongside the source associations.
     PYTHONDONTWRITEBYTECODE=1 \
     "${projectDir}/.venv/bin/python" -m phenotypes.clinvar.rcv_parser \
         --rcv-input "${rcv_xml}" \
+        --vcv-input "${vcv_xml}" \
         --genome-context ${context_argument} \
         --pipeline-directory "${projectDir}" \
         --records clinvar_output.jsonl \

@@ -66,10 +66,10 @@ def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
         inputs = settings.get("inputs", {})
         if not isinstance(inputs, dict):
             raise ValueError(f"Source {source!r} inputs must be an object")
-        resolved_inputs = {}
+        resolved_inputs = {"rcv": None, "vcv": None}
         for name, input_path in inputs.items():
-            if name != "rcv":
-                raise ValueError(f"Unknown ClinVar input {name!r}; use 'rcv'")
+            if name not in {"rcv", "vcv"}:
+                raise ValueError(f"Unknown ClinVar input {name!r}; use 'rcv' or 'vcv'")
             if input_path is None:
                 resolved_inputs[name] = None
                 continue

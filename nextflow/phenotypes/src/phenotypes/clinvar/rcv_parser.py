@@ -16,12 +16,14 @@ from time import monotonic
 from typing import Any, BinaryIO, Iterable
 from urllib.parse import urlsplit
 
+from phenotypes.clinvar.vcv_parser import read_component_accessions
 from phenotypes.provenance import git_revision, input_file_provenance
 from phenotypes.source_config import (
     DEFAULT_SOURCE_CONFIG, load_source_config, validate_clinvar_context,
 )
 
 
+SOURCE = "ClinVar"
 PHENOTYPE_NOT_SPECIFIED = "ClinVar: phenotype not specified"
 PLACEHOLDER_PHENOTYPE_NAMES = {
     "none",
@@ -531,8 +533,92 @@ def _reported_allele(
     return allele_pairs[0][1], False
 
 
+def _prepare_entity(variant: dict[str, Any]) -> dict[str, Any]:
+    """Choose the provisional association target without an Ensembl lookup.
+
+    Preserve the original source identity in reported_variant. A single rsID
+    identifies a simple variant's target; otherwise use its ClinVar identity,
+    removing only the namespace prefix and VCV record version. Missing identity
+    stays missing, so loading can refuse it rather than inventing an identifier.
+    """
+    compound = bool(variant.get("components"))
+    rsids = {
+        value for value in variant.get("alternative_identifiers", [])
+        if isinstance(value, str) and re.fullmatch(r"rs[0-9]+", value)
+    }
+    identifier = variant.get("identifier")
+    if not compound and len(rsids) == 1:
+        identifier = next(iter(rsids))
+    elif isinstance(identifier, str):
+        identifier = identifier.removeprefix("ClinVar:")
+        if re.fullmatch(r"VCV[0-9]+(?:\.[0-9]+)?", identifier):
+            identifier = identifier.split(".")[0]
+    return {
+        "identifier": identifier,
+        "type": "Haplotype" if compound else "Variant",
+        "label": identifier,
+    }
+
+
+def _provisional_entity_location(location: dict[str, Any]) -> dict[str, Any] | None:
+    """Prepare a VCF-first reference span; never modify the source placement.
+
+    Counting the full literal REF string includes any padding bases. This end
+    is a reference-span end, not an inferred endpoint for a symbolic SV. Keep
+    anchors as supplied. Without a usable VCF representation, copy an exact
+    source interval as coordinates only; do not interpret uncertain bounds.
+    """
+    accession = location.get("sequence_accession")
+    region = location.get("chromosome")
+    # Scaffold coordinates must not be assigned to the containing chromosome.
+    if accession and (not region or not accession.startswith("NC_")):
+        region = accession
+    if not isinstance(region, str) or not region.strip():
+        return None
+    strand = {"+": 1, "1": 1, "-": -1, "-1": -1, 1: 1, -1: -1}.get(location.get("strand"))
+    position = location.get("position_vcf")
+    reference = location.get("reference_allele_vcf")
+    alternate = location.get("alternate_allele_vcf")
+    has_vcf = (
+        type(position) is int and position >= 1
+        and isinstance(reference, str) and re.fullmatch(r"[ACGTNacgtn]+", reference)
+        and isinstance(alternate, str) and re.fullmatch(r"[ACGTNacgtn]+", alternate)
+    )
+    if has_vcf:
+        start, stop = position, position + len(reference) - 1
+    else:
+        if any(location.get(name) is not None for name in (
+            "outer_start", "inner_start", "inner_stop", "outer_stop",
+        )):
+            return None
+        start, stop = location.get("start"), location.get("stop")
+        if type(start) is not int or type(stop) is not int:
+            return None
+        if start < 1 or stop < 0 or stop < start - 1:
+            return None
+    return {
+        "seq_region_name": region,
+        "seq_region_start": start,
+        "seq_region_end": stop,
+        "seq_region_strand": strand,
+        "reference_allele": reference if has_vcf else None,
+        "alternate_alleles": [alternate] if has_vcf else [],
+    }
+
+
+def _prepare_entity_locations(variant: dict[str, Any]) -> list[dict[str, Any]]:
+    # Only the association target's own placements, never haplotype members.
+    locations = []
+    for source_location in variant.get("locations", []):
+        location = _provisional_entity_location(source_location)
+        if location is not None:
+            locations.append(location)
+    return _unique(locations)
+
+
 def _parse_variant(
     reference_assertion: ET.Element, assembly: str, *,
+    component_accessions: dict[str, str | None] | None = None,
     warnings: list[tuple[str, str | None, str]] | None = None,
 ) -> dict[str, Any]:
     measure_set = reference_assertion.find("MeasureSet")
@@ -565,8 +651,18 @@ def _parse_variant(
     for ordinal, measure in enumerate(measures, start=1):
         allele_id = measure.get("ID")
         identifier = f"ClinVar:Allele:{allele_id}" if allele_id else None
+        mapped_accession = component_accessions.get(allele_id) if component_accessions is not None else None
+        if allele_id and component_accessions is not None and mapped_accession is None:
+            warning = (
+                "ambiguous_component_vcv" if allele_id in component_accessions
+                else "missing_component_vcv"
+            )
+            if warnings is not None:
+                warnings.append((warning, None, f"component {ordinal}: {identifier}"))
         try:
-            component = _parse_measure(measure, assembly, identifier, warnings=warnings)
+            component = _parse_measure(
+                measure, assembly, mapped_accession or identifier, warnings=warnings,
+            )
         except RejectedRecord as error:
             if error.reason == "missing_requested_assembly_location":
                 raise RejectedRecord(error.reason, {
@@ -575,7 +671,12 @@ def _parse_variant(
                     "component_ordinal": ordinal,
                 }) from error
             raise
-        components.append(component.pop("reported_variant"))
+        reported_component = component.pop("reported_variant")
+        if mapped_accession:
+            reported_component["alternative_identifiers"] = _unique(
+                [identifier, *reported_component["alternative_identifiers"]]
+            )
+        components.append(reported_component)
         genes.extend(component.pop("reported_genes"))
 
     return {
@@ -932,6 +1033,7 @@ def _submission_assessments(
 
 def parse_clinvar_set(
     clinvar_set: ET.Element, assembly: str,
+    *, component_accessions: dict[str, str | None] | None = None,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, str | None, str]]]:
     for path in ("RecordStatus", "ReferenceClinVarAssertion/RecordStatus"):
         status = _text(clinvar_set.find(path))
@@ -951,7 +1053,10 @@ def parse_clinvar_set(
     trait_set, warnings = _parse_traits(reference_assertion)
     aggregate_traits = trait_set["traits"]
     numeric_warnings = []
-    variant = _parse_variant(reference_assertion, assembly, warnings=numeric_warnings)
+    variant = _parse_variant(
+        reference_assertion, assembly, component_accessions=component_accessions,
+        warnings=numeric_warnings,
+    )
     reported_variant = variant.pop("reported_variant")
     reported_genes = variant.pop("reported_genes")
     reported_allele, ambiguous_location = _reported_allele(
@@ -993,6 +1098,20 @@ def parse_clinvar_set(
         contextual_warnings.append((event, None, ""))
     else:
         trait = aggregate_traits[0]
+    entity = _prepare_entity(reported_variant)
+    entity_locations = _prepare_entity_locations(reported_variant)
+    phenotype = {
+        **trait["phenotype"],
+        "ontology_mappings": [
+            {
+                **mapping,
+                # Existing provisional-label policy: ClinVar name, no lookup.
+                "label": trait["phenotype"]["phenotype_name"],
+                "mapping_method": "source_provided",
+            }
+            for mapping in trait["phenotype"]["ontology_mappings"]
+        ],
+    }
     records = []
     uncertain_context = _uncertain_context_details(clinvar_set, assessments)
     if uncertain_context is not None:
@@ -1012,8 +1131,10 @@ def parse_clinvar_set(
 
         records.append(
             {
-                "phenotype": trait["phenotype"],
+                "phenotype": phenotype,
+                "entity": entity,
                 "somatic_status": somatic_status,
+                "entity_locations": entity_locations,
                 "source_report": {
                     "source_accession": rcv_accession,
                     "reported_phenotype_names": trait_set["reported_phenotype_names"],
@@ -1053,6 +1174,7 @@ def parse_clinvar(
     records_path: str | Path,
     summary_path: str | Path,
     *,
+    vcv_input: str | Path,
     genome_context: dict[str, Any] | None = None,
     pipeline_run_date: str | None = None,
     pipeline_revision: str | None = None,
@@ -1067,6 +1189,7 @@ def parse_clinvar(
             "assembly": assembly, "assembly_uuid": None,
         }
     rcv_input = Path(rcv_input)
+    vcv_input = Path(vcv_input)
     pipeline_run_date = (
         date.fromisoformat(pipeline_run_date).isoformat()
         if pipeline_run_date else date.today().isoformat()
@@ -1096,10 +1219,11 @@ def parse_clinvar(
     warning_counts: Counter[str] = Counter()
     unique_phenotype_names: set[str] = set()
     print(
-        "[Recording ClinVar input] Calculating SHA-256 checksum (RCV)",
+        "[Recording ClinVar inputs] Calculating SHA-256 checksums (RCV, VCV)",
         file=sys.stderr, flush=True,
     )
-    input_files = input_file_provenance([rcv_input])
+    input_files = input_file_provenance([rcv_input, vcv_input])
+    component_accessions, vcv_release_date = read_component_accessions(vcv_input)
     with (
         _open_xml(rcv_input) as xml_handle,
         records_path.open("w", encoding="utf-8") as records_handle,
@@ -1126,9 +1250,10 @@ def parse_clinvar(
                 if not release_date:
                     raise ValueError("ReleaseSet is missing required Dated attribute")
                 metadata = {
-                    "source": "ClinVar",
+                    "source": SOURCE,
                     "genome_context": genome_context,
                     "import_run": {
+                        "source_name": SOURCE,
                         "source_version": release_date,
                         "file_names": input_files["file_names"],
                         "file_checksums": input_files["file_checksums"],
@@ -1138,6 +1263,13 @@ def parse_clinvar(
                 }
                 records_handle.write(json.dumps({"metadata": metadata}, ensure_ascii=False))
                 records_handle.write("\n")
+                if vcv_release_date and release_date != vcv_release_date:
+                    warning = "input_release_date_mismatch"
+                    warning_counts[warning] += 1
+                    warnings_writer.writerow([
+                        "", "", "", warning,
+                        f"RCV release: {release_date}; VCV release: {vcv_release_date}",
+                    ])
                 continue
 
             if event != "end" or element.tag != "ClinVarSet":
@@ -1145,7 +1277,9 @@ def parse_clinvar(
 
             summary["n_records_seen"] += 1
             try:
-                records, warnings = parse_clinvar_set(element, assembly)
+                records, warnings = parse_clinvar_set(
+                    element, assembly, component_accessions=component_accessions,
+                )
             except RejectedRecord as error:
                 rcv_accession = _versioned_accession(
                     element.find("ReferenceClinVarAssertion/ClinVarAccession")
@@ -1209,6 +1343,7 @@ def parse_clinvar(
 def _argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='Parse ClinVar RCV XML and output an intermediate JSONL file.')
     parser.add_argument("--rcv-input", type=Path, help="Staged RCV XML/XML.GZ; otherwise use the source config input")
+    parser.add_argument("--vcv-input", type=Path, help="Staged VCV XML/XML.GZ for component IDs; otherwise use the source config input")
     context_arguments = parser.add_mutually_exclusive_group()
     context_arguments.add_argument("--source-config", type=Path,
                                    help=f"Source configuration JSON (default: {DEFAULT_SOURCE_CONFIG})")
@@ -1238,12 +1373,14 @@ def main() -> int:
                 raise ValueError("Standalone parsing requires one ClinVar context; use Nextflow to process multiple contexts")
             genome_context = contexts[0]
         rcv_input = args.rcv_input or inputs.get("rcv")
-        if not rcv_input:
-            raise ValueError("Standalone parsing needs an RCV input path in the source config; use Nextflow to download an omitted file")
+        vcv_input = args.vcv_input or inputs.get("vcv")
+        if not rcv_input or not vcv_input:
+            raise ValueError("Standalone parsing needs RCV and VCV input paths; use Nextflow to download omitted files")
     except (OSError, ValueError) as error:
         parser.error(str(error))
     summary = parse_clinvar(
         rcv_input=rcv_input,
+        vcv_input=vcv_input,
         assembly=genome_context["assembly"],
         records_path=args.records,
         summary_path=args.summary,

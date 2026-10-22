@@ -20,7 +20,7 @@ workflow CLINVAR {
             .map { release_type, xml -> xml }.first()
 
     processing_contexts = channel.fromList(source_settings.contexts)
-    PARSE_CLINVAR(clinvar_rcv, clinvar_vcv, processing_contexts)
+    PARSE_CLINVAR(clinvar_rcv, clinvar_vcv, channel.value(source_settings.source_name), processing_contexts)
 
     emit:
     rcv_xml = clinvar_rcv

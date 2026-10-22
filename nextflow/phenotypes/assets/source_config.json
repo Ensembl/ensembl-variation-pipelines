@@ -1,6 +1,6 @@
 {
   "sources": {
-    "clinvar": {
+    "ClinVar": {
       "inputs": {
         "rcv": null,
         "vcv": null

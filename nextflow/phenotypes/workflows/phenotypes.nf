@@ -19,7 +19,7 @@ def read_source_config(config_path) {
 workflow PHENOTYPES {
     main:
     source_config = read_source_config(params.source_config)
-    CLINVAR(source_config.sources.clinvar)
+    CLINVAR(source_config.sources.ClinVar)
 
     emit:
     records = CLINVAR.out.records

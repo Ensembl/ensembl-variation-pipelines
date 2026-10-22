@@ -58,7 +58,7 @@ def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
     if not isinstance(sources, dict) or not sources:
         raise ValueError("Source configuration must contain a non-empty sources object")
     for source, settings in sources.items():
-        if source != "clinvar":
+        if source != "ClinVar":
             raise ValueError(f"No workflow is implemented for source {source!r}")
         contexts = settings.get("contexts") if isinstance(settings, dict) else None
         if not isinstance(contexts, list) or not contexts:
@@ -82,6 +82,7 @@ def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
                 raise ValueError(f"sources.{source}.inputs.{name} is not a file: {input_file}")
             resolved_inputs[name] = str(input_file)
         settings["inputs"] = resolved_inputs
+        settings["source_name"] = source
         seen = set()
         validated = []
         for context in contexts:

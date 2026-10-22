@@ -23,7 +23,6 @@ from phenotypes.source_config import (
 )
 
 
-SOURCE = "ClinVar"
 PHENOTYPE_NOT_SPECIFIED = "ClinVar: phenotype not specified"
 PLACEHOLDER_PHENOTYPE_NAMES = {
     "none",
@@ -1175,10 +1174,13 @@ def parse_clinvar(
     summary_path: str | Path,
     *,
     vcv_input: str | Path,
+    source_name: str,
     genome_context: dict[str, Any] | None = None,
     pipeline_run_date: str | None = None,
     pipeline_revision: str | None = None,
 ) -> dict[str, Any]:
+    if not isinstance(source_name, str) or not source_name.strip():
+        raise ValueError("Source name must come from the source configuration key")
     if genome_context is not None:
         genome_context = validate_clinvar_context(genome_context)
         if genome_context.get("assembly") != assembly:
@@ -1250,10 +1252,10 @@ def parse_clinvar(
                 if not release_date:
                     raise ValueError("ReleaseSet is missing required Dated attribute")
                 metadata = {
-                    "source": SOURCE,
+                    "source": source_name,
                     "genome_context": genome_context,
                     "import_run": {
-                        "source_name": SOURCE,
+                        "source_name": source_name,
                         "source_version": release_date,
                         "file_names": input_files["file_names"],
                         "file_checksums": input_files["file_checksums"],
@@ -1344,6 +1346,7 @@ def _argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='Parse ClinVar RCV XML and output an intermediate JSONL file.')
     parser.add_argument("--rcv-input", type=Path, help="Staged RCV XML/XML.GZ; otherwise use the source config input")
     parser.add_argument("--vcv-input", type=Path, help="Staged VCV XML/XML.GZ for component IDs; otherwise use the source config input")
+    parser.add_argument("--source-name", help="Source configuration key, supplied internally by Nextflow with --genome-context")
     context_arguments = parser.add_mutually_exclusive_group()
     context_arguments.add_argument("--source-config", type=Path,
                                    help=f"Source configuration JSON (default: {DEFAULT_SOURCE_CONFIG})")
@@ -1365,8 +1368,14 @@ def main() -> int:
         inputs = {}
         if args.genome_context is not None:
             genome_context = validate_clinvar_context(args.genome_context)
+            if not args.source_name:
+                raise ValueError("--genome-context requires --source-name from the source configuration")
+            source_name = args.source_name
         else:
-            settings = load_source_config(args.source_config or DEFAULT_SOURCE_CONFIG)["sources"]["clinvar"]
+            if args.source_name is not None:
+                raise ValueError("--source-name is only used internally with --genome-context")
+            settings = load_source_config(args.source_config or DEFAULT_SOURCE_CONFIG)["sources"]["ClinVar"]
+            source_name = settings["source_name"]
             contexts = settings["contexts"]
             inputs = settings["inputs"]
             if len(contexts) != 1:
@@ -1381,6 +1390,7 @@ def main() -> int:
     summary = parse_clinvar(
         rcv_input=rcv_input,
         vcv_input=vcv_input,
+        source_name=source_name,
         assembly=genome_context["assembly"],
         records_path=args.records,
         summary_path=args.summary,

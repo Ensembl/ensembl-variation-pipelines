@@ -85,8 +85,6 @@ CREATE TABLE entity_location (
     seq_region_start BIGINT NOT NULL,
     seq_region_end BIGINT NOT NULL,
     seq_region_strand INTEGER CHECK (seq_region_strand IN (-1, 1)),
-    reference_allele TEXT,
-    alternate_alleles TEXT[] NOT NULL DEFAULT '{}',
     CHECK (
         seq_region_start >= 1
         AND seq_region_end >= 0

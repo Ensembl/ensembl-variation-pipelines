@@ -26,7 +26,6 @@ workflow CLINVAR {
     rcv_xml = clinvar_rcv
     vcv_xml = clinvar_vcv
     records = PARSE_CLINVAR.out.records
-    summary = PARSE_CLINVAR.out.summary
     warnings = PARSE_CLINVAR.out.warnings
     rejections = PARSE_CLINVAR.out.rejections
 }

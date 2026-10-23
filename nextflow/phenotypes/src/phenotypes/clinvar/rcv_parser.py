@@ -275,11 +275,11 @@ def _observed_in_publication_ids(
     )
 
 
-def _is_omim_condition_reference(element: ET.Element) -> bool:
+def _is_omim_condition_reference(element: ET.Element, accession: str) -> bool:
     """Keep six-digit condition IDs, never explicit or dotted allelic variants."""
     return (
         element.get("Type", "").casefold() != "allelic variant"
-        and re.fullmatch(r"(?:OMIM:)?[0-9]{6}", element.get("ID", "")) is not None
+        and re.fullmatch(r"(?:OMIM:)?[0-9]{6}", accession) is not None
     )
 
 
@@ -312,9 +312,13 @@ def _trait_reported_phenotype_ontology_terms(trait: ET.Element) -> list[dict[str
         identity = PHENOTYPE_ONTOLOGY_SOURCES.get(database)
         if identity is None or not accession:
             continue
-        if database == "OMIM" and not _is_omim_condition_reference(reference):
-            continue
         source, namespace = identity
+        # Collapse repeated copies of this database's prefix, preserving the ID.
+        prefix = f"{namespace}:"
+        while accession.startswith(prefix + prefix):
+            accession = accession[len(prefix):]
+        if database == "OMIM" and not _is_omim_condition_reference(reference, accession):
+            continue
         # Namespace numeric IDs and unqualified MedGen/MeSH IDs; keep qualified IDs.
         if re.fullmatch(r"[0-9]+", accession) or (
             source in {"MedGen", "MeSH"} and ":" not in accession

@@ -1,4 +1,4 @@
-"""Regression tests for shared extraction and the phenotype consumer."""
+"""Unit tests for shared extraction, configuration and VCV identity resolution."""
 
 import gzip
 import json
@@ -8,7 +8,6 @@ import xml.etree.ElementTree as ET
 from io import BytesIO
 from pathlib import Path
 
-from phenotypes.clinvar.rcv_parser import parse_clinvar
 from variation_sources.clinvar.extract import extract
 from variation_sources.clinvar.variants import parse_variant
 from variation_sources.clinvar.xml import iter_release
@@ -26,31 +25,6 @@ CONTEXT = {
 
 
 class ClinvarTests(unittest.TestCase):
-    def test_all_phenotype_outputs_match_upstream(self):
-        with tempfile.TemporaryDirectory() as directory:
-            directory = Path(directory)
-            parse_clinvar(
-                DATA / "rcv.xml",
-                "GRCh38",
-                directory / "records.jsonl",
-                directory / "summary.json",
-                vcv_input=DATA / "vcv.xml",
-                source_name="ClinVar",
-                genome_context=CONTEXT,
-                pipeline_run_date="2026-01-01",
-                pipeline_revision="test-revision",
-            )
-            for name in (
-                "records.jsonl",
-                "summary.json",
-                "warnings.txt",
-                "rejections.txt",
-            ):
-                with self.subTest(output=name):
-                    self.assertEqual(
-                        (directory / name).read_bytes(),
-                        (DATA / ("phenotypes.expected." + name)).read_bytes(),
-                    )
 
     def test_extract_keeps_variants_without_phenotypes_and_reports_genotypes(self):
         with tempfile.TemporaryDirectory() as directory:

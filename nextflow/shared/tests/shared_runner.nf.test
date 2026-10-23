@@ -1,0 +1,40 @@
+nextflow_pipeline {
+    name 'Standalone shared ClinVar input runner'
+    script 'main.nf'
+    tag 'pipeline'
+    tag 'shared_runner'
+
+    test('Resolve configuration-relative local files without phenotypes') {
+        when {
+            params {
+                source_config = "$baseDir/tests/data/source_config.json"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.stdout.join('\n').contains('RCV: ') },
+                { assert workflow.stdout.join('\n').contains('/tests/data/rcv.xml') },
+                { assert workflow.stdout.join('\n').contains('VCV: ') },
+                { assert workflow.stdout.join('\n').contains('/tests/data/vcv.xml') }
+            )
+        }
+    }
+
+    test('Default shared asset downloads and publishes both releases - stub') {
+        options '-stub-run'
+        when {
+            params {
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("$outputDir/results/clinvar/inputs/ClinVarRCVRelease_00-latest.xml.gz").exists() },
+                { assert file("$outputDir/results/clinvar/inputs/ClinVarVCVRelease_00-latest.xml.gz").exists() }
+            )
+        }
+    }
+}

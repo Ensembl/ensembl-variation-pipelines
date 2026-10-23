@@ -43,6 +43,51 @@ The default URLs use `latest`; use local, versioned input files for reproducible
 releases. Sharing code does not itself share completed work between independently
 launched pipelines.
 
+## Run input preparation independently
+
+The shared runner uses `assets/source_config.json` in this directory and the
+shared Python environment. From the repository root:
+
+```bash
+uv sync --locked --project nextflow/shared
+nextflow run nextflow/shared --outdir results/shared
+```
+
+The default asset sets both inputs to null, so this downloads the latest RCV
+and VCV releases. Downloads are copied to `results/shared/clinvar/inputs/`.
+The runner prints the resolved paths and prepares inputs only; it does not run
+phenotype or synonym parsing. Local execution requires `curl` on `PATH`.
+
+To use existing files, copy the shared asset, set `sources.ClinVar.inputs.rcv`
+and `sources.ClinVar.inputs.vcv` to literal paths, and pass your configuration:
+
+```bash
+nextflow run nextflow/shared --source_config /path/to/source_config.json
+```
+
+Relative input paths resolve against that JSON file's directory. Existing input
+files are used directly; only downloaded files are published. For a small local
+fixture run without downloading anything:
+
+```bash
+nextflow run nextflow/shared \
+    --source_config nextflow/shared/tests/data/source_config.json
+```
+
+Both the shared runner and phenotypes default to the single asset at
+`nextflow/shared/assets/source_config.json`, selected by the common Nextflow
+include `conf/source.config`. Standalone Python parsing uses
+that same default. Consumers import the loader, default path and ClinVar context
+validator directly from `variation_sources.source_config`; there is no phenotype
+configuration wrapper. The common asset retains the phenotype
+pipeline's GRCh38 assembly UUID. Run-specific settings can still be supplied
+with `--source_config`; relative input paths resolve against that file.
+All callers use the same shared Python validator;
+Nextflow callers can import `read_source_config` from `lib/source_config.nf`,
+passing a configuration path and their environment's Python executable.
+The reusable `CLINVAR_INPUTS` workflow receives validated settings explicitly
+and does not read any pipeline's assets itself.
+
 ## Reuse from synonyms
 
 From `nextflow/synonyms/workflows/clinvar.nf`, import:
@@ -102,19 +147,52 @@ before claiming complete ClinVar synonym coverage.
 
 ## Validation
 
-From the repository root after `uv sync --locked --project nextflow/phenotypes`:
+The shared package has its own environment and lockfile. From the repository
+root, create `nextflow/shared/.venv` and run the shared ClinVar unit tests:
 
 ```bash
-nextflow/phenotypes/.venv/bin/python -m unittest discover -s nextflow/shared/tests -v
+uv sync --locked --project nextflow/shared
+nextflow/shared/.venv/bin/python -m unittest discover \
+    -s nextflow/shared/tests -p 'test_clinvar*.py' -v
 ```
 
-With Python 3.14, Java 17+, Nextflow 26.04.0 and nf-test 0.9.5 on `PATH`:
+This installs only `variation-sources`; phenotypes is not needed. The package
+requires Python 3.12 or later. Use Python 3.14 for the Nextflow module tests to
+match their declared runtime.
+
+`test_clinvar.py` covers extraction, configuration, statuses, assembly rejection
+and VCV component identity. `test_clinvar_sources.py` covers XML streaming and
+cleanup, identifier namespaces, assembly and scaffold selection, malformed
+coordinates, allele ambiguity, rejection accounting, empty releases, and keeping
+each haplotype member's HGVS evidence attached to its own allele. These contracts
+are the starting point for a synonyms adapter. The existing extractor reads RCV
+evidence; full VCV-only variant extraction remains future work.
+
+With Java 17+, Nextflow 26.04.0 and nf-test 0.9.5 on `PATH`, run the nine shared
+module and input-workflow tests independently of phenotypes:
 
 ```bash
+export PATH="$PWD/nextflow/shared/.venv/bin:$PATH"
+cd nextflow/shared
+nf-test test modules/local/clinvar tests/clinvar_inputs.nf.test tests/shared_runner.nf.test
+```
+
+The phenotype integration tests use the consumer's separate environment. From
+the repository root:
+
+```bash
+uv sync --locked --project nextflow/phenotypes
+nextflow/phenotypes/.venv/bin/python -m unittest discover \
+    -s nextflow/shared/tests -p 'test_phenotype_regression.py' -v
 export PATH="$PWD/nextflow/phenotypes/.venv/bin:$PATH"
 cd nextflow/shared
-nf-test test
+nf-test test tests/phenotype_module.nf.test tests/phenotypes.nf.test
 ```
+
+The regression compares all four phenotype output files against the upstream
+baseline. To run all Python tests together, use the phenotype environment with
+`-p 'test_*.py'`. To run all fourteen Nextflow tests together, use `nf-test test`
+after setting up the phenotype environment.
 
 Tests use tiny synthetic XML files and no external ClinVar downloads. They cover
 real and stub module execution, local/missing inputs, literal-path validation,

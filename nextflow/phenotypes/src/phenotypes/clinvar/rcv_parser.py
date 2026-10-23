@@ -29,7 +29,7 @@ from variation_sources.clinvar.variants import (
 
 from phenotypes.clinvar.vcv_parser import read_component_accessions
 from phenotypes.provenance import git_revision, input_file_provenance
-from phenotypes.source_config import (
+from variation_sources.source_config import (
     DEFAULT_SOURCE_CONFIG, load_source_config, validate_clinvar_context,
 )
 

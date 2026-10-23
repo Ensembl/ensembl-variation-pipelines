@@ -24,6 +24,22 @@ nextflow_pipeline {
         }
     }
 
+    test('Default common asset supports phenotype execution - stub') {
+        options '-stub-run'
+        when {
+            params {
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_output.jsonl").exists() },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_summary.json").exists() }
+            )
+        }
+    }
+
     test('Pipeline stub preserves publishing locations') {
         options '-stub-run'
         when {

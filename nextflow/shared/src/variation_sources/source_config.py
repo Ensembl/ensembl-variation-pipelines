@@ -5,8 +5,12 @@ from pathlib import Path
 
 from variation_sources.context import validate_clinvar_context
 
+__all__ = ["DEFAULT_SOURCE_CONFIG", "load_source_config", "validate_clinvar_context"]
 
-def load_source_config(path: str | Path) -> dict:
+DEFAULT_SOURCE_CONFIG = Path(__file__).resolve().parents[2] / "assets/source_config.json"
+
+
+def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
     config_path = Path(path).resolve()
     with config_path.open(encoding="utf-8") as handle:
         config = json.load(handle)

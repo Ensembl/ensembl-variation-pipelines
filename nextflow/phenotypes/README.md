@@ -121,10 +121,10 @@ SET search_path TO phenotypes;
 
 - By default, the pipeline downloads the current ClinVar RCV XML release from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz
 Failed download attempts are retried three times
-- To use a pre-downloaded file, set `sources.ClinVar.inputs.rcv` in the source configuration (`assets/source_config.json`) - a missing or null value triggers download
+- To use a pre-downloaded file, set `sources.ClinVar.inputs.rcv` in the common source configuration (`../shared/assets/source_config.json`) - a missing or null value triggers download
 - Species and assembly also come from the `source_config.json` file
 - ClinVar requires a human context and an assembly for its location filter, `assembly_uuid` is optional
-- The default `source_config.json` used is the one in `/assets`, but an alternative can be provided by using:
+- Both phenotypes and the shared input runner default to `nextflow/shared/assets/source_config.json`. An alternative can be provided by using:
 
 ```bash
 nextflow run "$PIPELINE_DIR/main.nf" --source_config /path/to/source_config.json

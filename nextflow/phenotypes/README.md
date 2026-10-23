@@ -21,6 +21,26 @@ The Python project requires Python 3.14 and uses `uv`. Create or update the virt
 uv sync
 ```
 
+This installs `variation-sources` from the adjacent `../shared` directory.
+Keep both directories when copying the checkout. Downloads, variant evidence,
+context validation and provenance are maintained in
+[the shared components](../shared/README.md); phenotype transformations remain
+in this pipeline.
+
+The default `standard` profile runs tasks with this virtual environment on
+`PATH`. For Slurm without a managed runtime, activate it before launching:
+
+```bash
+source .venv/bin/activate
+nextflow run main.nf -profile slurm
+```
+
+Managed task runtimes are available through `-profile docker`,
+`-profile singularity`, and `-profile conda`; combine with `slurm` for cluster
+execution, for example `-profile slurm,singularity`. Configuration validation
+still uses the pipeline's virtual environment, so run `uv sync` first with any
+profile. Publishing and optional parser arguments are in `conf/modules.config`.
+
 ## Database connection
 
 Copy `.env` to the run directory:
@@ -101,7 +121,7 @@ SET search_path TO phenotypes;
 
 - By default, the pipeline downloads the current ClinVar RCV XML release from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz
 Failed download attempts are retried three times
-- To use a pre-downloaded file, set `sources.clinvar.inputs.rcv` in the source configuration (`assets/source_config.json`) - a missing or null value triggers download
+- To use a pre-downloaded file, set `sources.ClinVar.inputs.rcv` in the source configuration (`assets/source_config.json`) - a missing or null value triggers download
 - Species and assembly also come from the `source_config.json` file
 - ClinVar requires a human context and an assembly for its location filter, `assembly_uuid` is optional
 - The default `source_config.json` used is the one in `/assets`, but an alternative can be provided by using:
@@ -174,7 +194,7 @@ Same variant and complete condition set
 
 - The main phenotype name is the aggregate trait's preferred name, or its single available alternate name
 - The whole RCV is rejected if the aggregate trait has neither
-- Replace nonspecific labels such as `See cases`, `not provided` and `not specified` with `ClinVar: phenotype not specified`, keeping the original report label in `source_report.reported_phenotype_name`
+- Replace nonspecific labels such as `See cases`, `not provided` and `not specified` with `ClinVar: phenotype not specified`, keeping the original report label in `source_report.reported_phenotype_names`
 - Treat `DrugResponse` names, such as `Ezetimibe response`, as phenotype names
 - Use the assertion-level `TraitSet` for assessed conditions
 - Clinical features under `ObservedIn/TraitSet` are currently not extracted or used as replacements. For example, `RCV000051340.4` is labelled `See cases` even though its SCV reports `Global developmental delay` as an observed feature. Its output uses the placeholder - it does not create a separate classified association for that feature

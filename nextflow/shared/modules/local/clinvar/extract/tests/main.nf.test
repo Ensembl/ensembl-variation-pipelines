@@ -1,0 +1,56 @@
+nextflow_process {
+    name 'ClinVar source extraction'
+    script 'modules/local/clinvar/extract/main.nf'
+    process 'EXTRACT_CLINVAR'
+    tag 'modules'
+    tag 'modules_local'
+    tag 'clinvar'
+    tag 'clinvar/extract'
+
+    test('Extract variants without requiring phenotypes') {
+        when {
+            process {
+                """
+                def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
+                input[0] = [[id: 'clinvar'], file('$baseDir/tests/data/rcv.xml'), context]
+                input[1] = file('$baseDir/src')
+                input[2] = 'test-source-version'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert file(process.out.records[0][1]).readLines().size() == 3 },
+                { assert file(process.out.records[0][1]).text.contains('rs999999') },
+                { assert file(process.out.summary[0][1]).text.contains('"n_records_emitted": 2') },
+                { assert file(process.out.rejections[0][1]).text.contains('unsupported_genotype_set') },
+                { assert process.out.versions_python[0][2].startsWith('3.') },
+                { assert process.out.versions_parser[0][2] == '0.1.0' }
+            )
+        }
+    }
+
+    test('stub') {
+        options '-stub-run'
+        when {
+            process {
+                """
+                input[0] = [[id: 'clinvar'], file('$baseDir/tests/data/rcv.xml'), [:]]
+                input[1] = file('$baseDir/src')
+                input[2] = 'test-source-version'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert file(process.out.records[0][1]).exists() },
+                { assert file(process.out.summary[0][1]).exists() },
+                { assert file(process.out.rejections[0][1]).exists() },
+                { assert process.out.versions_python[0][2].startsWith('3.') },
+                { assert process.out.versions_parser[0][2] == '0.1.0' }
+            )
+        }
+    }
+}

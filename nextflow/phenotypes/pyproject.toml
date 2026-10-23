@@ -7,9 +7,10 @@ authors = [
     { name = "Aine Fairbrother-Browne", email = "fairbrot@ebi.ac.uk" }
 ]
 requires-python = ">=3.14"
-dependencies = [
-    "psycopg[binary]>=3.3,<4",
-]
+dependencies = ["variation-sources", "psycopg[binary]>=3.3,<4"]
+
+[tool.uv.sources]
+variation-sources = { path = "../shared", editable = true }
 
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]

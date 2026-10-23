@@ -1,32 +1,30 @@
-// Use local ClinVar RCV/VCV XML files or download the omitted releases.
-// Run the parser once for each configured species and assembly context.
-
-include { DOWNLOAD_CLINVAR } from '../modules/local/download_clinvar'
-include { PARSE_CLINVAR } from '../modules/local/parse_clinvar'
+include { CLINVAR_INPUTS } from '../../shared/workflows/clinvar_inputs/main'
+include { source_contents } from '../../shared/lib/source_files'
+include { PARSE_CLINVAR } from '../modules/local/clinvar/phenotypes/main'
 
 workflow CLINVAR {
     take:
     source_settings
 
     main:
-    missing_inputs = ['rcv', 'vcv'].findAll { release_type -> !source_settings.inputs[release_type] }
-    DOWNLOAD_CLINVAR(channel.fromList(missing_inputs))
-
-    clinvar_rcv = source_settings.inputs.rcv ? channel.value(file(source_settings.inputs.rcv, checkIfExists: true)) :
-        DOWNLOAD_CLINVAR.out.xml.filter { release_type, xml -> release_type == 'rcv' }
-            .map { release_type, xml -> xml }.first()
-    clinvar_vcv = source_settings.inputs.vcv ? channel.value(file(source_settings.inputs.vcv, checkIfExists: true)) :
-        DOWNLOAD_CLINVAR.out.xml.filter { release_type, xml -> release_type == 'vcv' }
-            .map { release_type, xml -> xml }.first()
-
-    processing_contexts = channel.fromList(source_settings.contexts)
-    PARSE_CLINVAR(clinvar_rcv, clinvar_vcv, channel.value(source_settings.source_name), processing_contexts)
+    CLINVAR_INPUTS(source_settings)
+    python_source = file("${projectDir}/src", checkIfExists: true)
+    shared_source = file("${projectDir}/../shared/src", checkIfExists: true)
+    processing_inputs = channel.fromList(source_settings.contexts)
+        .combine(CLINVAR_INPUTS.out.rcv_xml)
+        .combine(CLINVAR_INPUTS.out.vcv_xml)
+        .map { context, rcv, vcv ->
+            tuple([id: "clinvar_${context.species_production_name}_${context.assembly}".toString()] + context, rcv, vcv, context)
+        }
+    // Keep each context and its files together in one task tuple.
+    PARSE_CLINVAR(processing_inputs, channel.value(source_settings.source_name), python_source, source_contents(python_source), shared_source, source_contents(shared_source))
 
     emit:
-    rcv_xml = clinvar_rcv
-    vcv_xml = clinvar_vcv
-    records = PARSE_CLINVAR.out.records
-    summary = PARSE_CLINVAR.out.summary
-    warnings = PARSE_CLINVAR.out.warnings
-    rejections = PARSE_CLINVAR.out.rejections
+    rcv_xml = CLINVAR_INPUTS.out.rcv_xml
+    vcv_xml = CLINVAR_INPUTS.out.vcv_xml
+    // Preserve the established public [processing_context, file] contracts.
+    records = PARSE_CLINVAR.out.records.map { meta, records -> tuple(meta.findAll { key, value -> key != 'id' }, records) }
+    summary = PARSE_CLINVAR.out.summary.map { meta, summary -> tuple(meta.findAll { key, value -> key != 'id' }, summary) }
+    warnings = PARSE_CLINVAR.out.warnings.map { meta, warnings -> tuple(meta.findAll { key, value -> key != 'id' }, warnings) }
+    rejections = PARSE_CLINVAR.out.rejections.map { meta, rejections -> tuple(meta.findAll { key, value -> key != 'id' }, rejections) }
 }

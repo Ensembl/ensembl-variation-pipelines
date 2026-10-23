@@ -1,0 +1,7 @@
+.nf-test/
+.nf-test.log*
+.nextflow/
+.nextflow.log*
+__pycache__/
+.venv/
+dist/

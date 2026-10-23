@@ -1,0 +1,45 @@
+nextflow_pipeline {
+    name 'Phenotype consumer of shared ClinVar components'
+    script '../../phenotypes/main.nf'
+    tag 'pipeline'
+    tag 'clinvar'
+    tag 'clinvar/download'
+    tag 'clinvar/phenotypes'
+
+    test('Local inputs broadcast to both assembly contexts') {
+        when {
+            params {
+                source_config = "$baseDir/tests/data/source_config.json"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_output.jsonl").readLines().size() == 2 },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh37/clinvar_output.jsonl").readLines().size() == 1 },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_summary.json").text.contains('"missing_trait_set": 1') },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh37/clinvar_summary.json").text.contains('"missing_requested_assembly_location": 1') }
+            )
+        }
+    }
+
+    test('Pipeline stub preserves publishing locations') {
+        options '-stub-run'
+        when {
+            params {
+                source_config = "$baseDir/tests/data/source_config.json"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_output.jsonl").exists() },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh37/clinvar_output.jsonl").exists() },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/warnings.txt").exists() },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh37/rejections.txt").exists() }
+            )
+        }
+    }
+}

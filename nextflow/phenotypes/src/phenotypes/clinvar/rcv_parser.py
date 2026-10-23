@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import gzip
 import json
 import re
 import sys
@@ -13,8 +12,20 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 from time import monotonic
-from typing import Any, BinaryIO, Iterable
+from typing import Any, Iterable
 from urllib.parse import urlsplit
+
+from variation_sources.clinvar.xml import iter_release
+from variation_sources.clinvar.variants import (
+    RejectedRecord,
+    text as _text,
+    integer as _integer,
+    versioned_accession as _versioned_accession,
+    unique as _unique,
+    reported_allele as _reported_allele,
+    parse_variant as _parse_variant,
+    open_xml as _open_xml,
+)
 
 from phenotypes.clinvar.vcv_parser import read_component_accessions
 from phenotypes.provenance import git_revision, input_file_provenance
@@ -53,21 +64,6 @@ CLASSIFICATION_TYPES = {
     "NoClassification": ("no_classification", "unspecified"),
 }
 
-STRUCTURAL_ATTRIBUTE_TYPES = {
-    "AbsoluteCopyNumber",
-    "ReferenceCopyNumber",
-    "CopyNumberTuple",
-    "ISCNCoordinates",
-}
-
-
-class RejectedRecord(Exception):
-
-    def __init__(self, reason: str, source_value: Any = None) -> None:
-        super().__init__(reason)
-        self.reason = reason
-        self.source_value = source_value
-
 
 def _normalise_name(value: str) -> str:
     return " ".join(value.split()).casefold()
@@ -81,28 +77,6 @@ def format_elapsed(started: float) -> str:
     hours, remainder = divmod(int(monotonic() - started), 3600)
     minutes, seconds = divmod(remainder, 60)
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-
-
-def _text(element: ET.Element | None) -> str | None:
-    if element is None or element.text is None:
-        return None
-    value = element.text.strip()
-    return value or None
-
-
-def _integer(
-    value: str | None, *,
-    warnings: list[tuple[str, str | None, str]] | None = None,
-    xml_field: str = "",
-) -> int | None:
-    if value is None:
-        return None
-    try:
-        return int(value)
-    except ValueError:
-        if warnings is not None:
-            warnings.append(("invalid_numeric_attribute", None, f"{xml_field}: {value!r}"))
-        return None
 
 
 def _normalise_last_evaluated_date(
@@ -131,27 +105,6 @@ def _normalise_last_evaluated_date(
             return None, "invalid_last_evaluated_date"
 
     return date_value, None
-
-
-def _versioned_accession(element: ET.Element | None) -> str | None:
-    if element is None:
-        return None
-    accession = element.get("Acc")
-    if not accession:
-        return None
-    version = element.get("Version")
-    return f"{accession}.{version}" if version else accession
-
-
-def _unique(values: Iterable[Any]) -> list[Any]:
-    result = []
-    seen = set()
-    for value in values:
-        key = json.dumps(value, sort_keys=True) if isinstance(value, dict) else value
-        if key not in seen:
-            result.append(value)
-            seen.add(key)
-    return result
 
 
 def _unique_publications(
@@ -468,69 +421,6 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
         warnings,
     )
 
-def _parse_location(
-    element: ET.Element, *,
-    warnings: list[tuple[str, str | None, str]] | None = None,
-    measure_id: str | None = None,
-) -> dict[str, Any]:
-    context = (
-        f"Measure[@ID={measure_id!r}]/SequenceLocation"
-        f"[@Assembly={element.get('Assembly')!r}][@Accession={element.get('Accession')!r}]"
-    )
-
-    def integer(attribute: str) -> int | None:
-        return _integer(element.get(attribute), warnings=warnings,
-                        xml_field=f"{context}/@{attribute}")
-
-    return {
-        "assembly": element.get("Assembly"),
-        "assembly_accession": element.get("AssemblyAccessionVersion"),
-        "assembly_status": element.get("AssemblyStatus"),
-        "chromosome": element.get("Chr"),
-        "sequence_accession": element.get("Accession"),
-        "start": integer("start"),
-        "stop": integer("stop"),
-        "display_start": integer("display_start"),
-        "display_stop": integer("display_stop"),
-        "outer_start": integer("outerStart"),
-        "inner_start": integer("innerStart"),
-        "inner_stop": integer("innerStop"),
-        "outer_stop": integer("outerStop"),
-        "position_vcf": integer("positionVCF"),
-        "reference_allele_vcf": element.get("referenceAlleleVCF"),
-        "alternate_allele_vcf": element.get("alternateAlleleVCF"),
-        "variant_length": integer("variantLength"),
-        "strand": element.get("Strand"),
-    }
-
-
-def _preferred_locations(locations: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    locations = _unique(locations)
-    nc_locations = [
-        location
-        for location in locations
-        if (location["sequence_accession"] or "").startswith("NC_")
-    ]
-    return nc_locations or locations
-
-
-def _reported_allele(
-    locations: list[dict[str, Any]],
-) -> tuple[str | None, bool]:
-    allele_pairs = _unique(
-        (
-            location["reference_allele_vcf"],
-            location["alternate_allele_vcf"],
-        )
-        for location in locations
-    )
-    if len(allele_pairs) > 1:
-        return None, True
-    if not allele_pairs:
-        return None, False
-
-    return allele_pairs[0][1], False
-
 
 def _prepare_entity(variant: dict[str, Any]) -> dict[str, Any]:
     """Choose the provisional association target without an Ensembl lookup.
@@ -613,146 +503,6 @@ def _prepare_entity_locations(variant: dict[str, Any]) -> list[dict[str, Any]]:
         if location is not None:
             locations.append(location)
     return _unique(locations)
-
-
-def _parse_variant(
-    reference_assertion: ET.Element, assembly: str, *,
-    component_accessions: dict[str, str | None] | None = None,
-    warnings: list[tuple[str, str | None, str]] | None = None,
-) -> dict[str, Any]:
-    measure_set = reference_assertion.find("MeasureSet")
-    if measure_set is None:
-        genotype_set = reference_assertion.find("GenotypeSet")
-        if genotype_set is not None:
-            raise RejectedRecord("unsupported_genotype_set", {
-                "type": genotype_set.get("Type"),
-                "id": genotype_set.get("ID"),
-                "accession": _versioned_accession(genotype_set),
-            })
-        raise RejectedRecord("missing_measure_set")
-
-    measure_set_type = measure_set.get("Type")
-    if not measure_set_type:
-        raise RejectedRecord("missing_measure_set_type")
-    vcv_accession = _versioned_accession(measure_set)
-    if measure_set_type not in {"Variant", "Haplotype", "Haplotype, single variant"}:
-        raise RejectedRecord("unsupported_measure_set_type", measure_set_type)
-
-    measures = measure_set.findall("Measure")
-    if not measures or (measure_set_type != "Haplotype" and len(measures) != 1):
-        raise RejectedRecord("unsupported_variant_representation", len(measures))
-
-    if measure_set_type == "Variant":
-        return _parse_measure(measures[0], assembly, vcv_accession, warnings=warnings)
-
-    components = []
-    genes = []
-    for ordinal, measure in enumerate(measures, start=1):
-        allele_id = measure.get("ID")
-        identifier = f"ClinVar:Allele:{allele_id}" if allele_id else None
-        mapped_accession = component_accessions.get(allele_id) if component_accessions is not None else None
-        if allele_id and component_accessions is not None and mapped_accession is None:
-            warning = (
-                "ambiguous_component_vcv" if allele_id in component_accessions
-                else "missing_component_vcv"
-            )
-            if warnings is not None:
-                warnings.append((warning, None, f"component {ordinal}: {identifier}"))
-        try:
-            component = _parse_measure(
-                measure, assembly, mapped_accession or identifier, warnings=warnings,
-            )
-        except RejectedRecord as error:
-            if error.reason == "missing_requested_assembly_location":
-                raise RejectedRecord(error.reason, {
-                    **error.source_value,
-                    "component_identifier": identifier,
-                    "component_ordinal": ordinal,
-                }) from error
-            raise
-        reported_component = component.pop("reported_variant")
-        if mapped_accession:
-            reported_component["alternative_identifiers"] = _unique(
-                [identifier, *reported_component["alternative_identifiers"]]
-            )
-        components.append(reported_component)
-        genes.extend(component.pop("reported_genes"))
-
-    return {
-        "reported_genes": _unique(genes),
-        "reported_variant": {
-            "identifier": vcv_accession,
-            "alternative_identifiers": [],
-            "variant_type": measure_set_type,
-            "locations": [],
-            "structural_attributes": {},
-            "components": components,
-        },
-    }
-
-
-def _parse_measure(
-    measure: ET.Element, assembly: str, reported_identifier: str | None,
-    *, warnings: list[tuple[str, str | None, str]] | None = None,
-) -> dict[str, Any]:
-
-    alternative_identifiers = []
-    for xref in measure.findall("XRef"):
-        database = xref.get("DB")
-        identifier = xref.get("ID")
-        if not identifier:
-            continue
-        if database == "dbSNP" and xref.get("Type") == "rs":
-            alternative_identifiers.append(
-                identifier if identifier.startswith("rs") else f"rs{identifier}"
-            )
-        elif database == "dbVar":
-            alternative_identifiers.append(f"dbVar:{identifier}")
-
-    structural_attributes = {}
-    for attribute in measure.findall("./AttributeSet/Attribute"):
-        attribute_type = attribute.get("Type")
-        value = _text(attribute) or attribute.get("integerValue")
-        if attribute_type in STRUCTURAL_ATTRIBUTE_TYPES and value is not None:
-            values = structural_attributes.setdefault(attribute_type, [])
-            if value not in values:
-                values.append(value)
-
-    locations = _preferred_locations(
-        [
-            _parse_location(location, warnings=warnings, measure_id=measure.get("ID"))
-            for location in measure.findall("SequenceLocation")
-            if location.get("Assembly") == assembly
-        ]
-    )
-    if not locations:
-        raise RejectedRecord(
-            "missing_requested_assembly_location",
-            {
-                "requested_assembly": assembly,
-                "available_assemblies": _unique(
-                    location.get("Assembly")
-                    for location in measure.findall("SequenceLocation")
-                    if location.get("Assembly")
-                ),
-            },
-        )
-    genes = []
-    for value in measure.findall("./MeasureRelationship/Symbol/ElementValue"):
-        if value.get("Type") == "Preferred" and _text(value):
-            genes.append(_text(value))
-
-    return {
-        "reported_genes": _unique(gene for gene in genes if gene),
-        "reported_variant": {
-            "identifier": reported_identifier,
-            "alternative_identifiers": _unique(alternative_identifiers),
-            "variant_type": measure.get("Type"),
-            "locations": locations,
-            "structural_attributes": structural_attributes,
-            "components": [],
-        },
-    }
 
 
 def _combined_assessment_value(
@@ -1153,12 +903,6 @@ def parse_clinvar_set(
     return records, contextual_warnings
 
 
-def _open_xml(path: Path) -> BinaryIO:
-    if path.suffix.lower() == ".gz":
-        return gzip.open(path, "rb")
-    return path.open("rb")
-
-
 def _report_progress(summary: dict[str, Any], started_at: float, stage: str) -> None:
     print(
         f"[Parsing ClinVar RCV] {stage}: {summary['n_records_seen']:,} records processed; "
@@ -1241,16 +985,10 @@ def parse_clinvar(
         rejections_writer = csv.writer(rejections_handle, delimiter="\t", lineterminator="\n")
         warnings_writer.writerow(["RCV", "VCV", "SCV", "warning", "details"])
         rejections_writer.writerow(["RCV", "VCV", "rejection_reason", "details"])
-        root = None
         release_date = None
-        for event, element in ET.iterparse(xml_handle, events=("start", "end")):
-            if root is None and event == "start":
-                if element.tag != "ReleaseSet":
-                    raise ValueError(f"Expected ReleaseSet root, found {element.tag}")
-                root = element
-                release_date = root.get("Dated")
-                if not release_date:
-                    raise ValueError("ReleaseSet is missing required Dated attribute")
+        for event, element in iter_release(xml_handle, "RCV"):
+            if event == "release":
+                release_date = element.get("Dated")
                 metadata = {
                     "source": source_name,
                     "genome_context": genome_context,
@@ -1272,9 +1010,6 @@ def parse_clinvar(
                         "", "", "", warning,
                         f"RCV release: {release_date}; VCV release: {vcv_release_date}",
                     ])
-                continue
-
-            if event != "end" or element.tag != "ClinVarSet":
                 continue
 
             summary["n_records_seen"] += 1
@@ -1317,9 +1052,6 @@ def parse_clinvar(
                         scv_accession, warning, details,
                     ])
 
-            element.clear()
-            if root is not None:
-                root.clear()
             if summary["n_records_seen"] % PROGRESS_INTERVAL == 0:
                 _report_progress(summary, started_at, "Progress")
 

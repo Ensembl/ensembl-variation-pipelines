@@ -1,0 +1,3 @@
+RCV	VCV	rejection_reason	details
+RCV000000002.1	VCV000000002.1	missing_trait_set	
+RCV000000003.1	VCV000000003.1	unsupported_genotype_set	"{""type"": ""CompoundHeterozygote"", ""id"": ""30"", ""accession"": ""VCV000000003.1""}"

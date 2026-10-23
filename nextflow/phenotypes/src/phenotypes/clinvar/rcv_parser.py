@@ -315,8 +315,10 @@ def _trait_reported_phenotype_ontology_terms(trait: ET.Element) -> list[dict[str
         if database == "OMIM" and not _is_omim_condition_reference(reference):
             continue
         source, namespace = identity
-        # Namespace numeric IDs and unqualified MedGen IDs; keep qualified IDs.
-        if re.fullmatch(r"[0-9]+", accession) or (source == "MedGen" and ":" not in accession):
+        # Namespace numeric IDs and unqualified MedGen/MeSH IDs; keep qualified IDs.
+        if re.fullmatch(r"[0-9]+", accession) or (
+            source in {"MedGen", "MeSH"} and ":" not in accession
+        ):
             accession = f"{namespace}:{accession}"
         terms.append({"accession": accession, "label": None, "source": source})
     return _unique(terms)

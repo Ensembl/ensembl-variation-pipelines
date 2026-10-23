@@ -22,7 +22,6 @@ process PARSE_CLINVAR {
     def context_argument = "'" + groovy.json.JsonOutput.toJson(processing_context).replace("'", "'\"'\"'") + "'"
     def source_argument = "'" + source_name.replace("'", "'\"'\"'") + "'"
     """
-    # Emit model-shaped associations with source_reports, nested assessments and evidence.
     PYTHONDONTWRITEBYTECODE=1 \
     "${projectDir}/.venv/bin/python" -m phenotypes.clinvar.rcv_parser \
         --rcv-input "${rcv_xml}" \

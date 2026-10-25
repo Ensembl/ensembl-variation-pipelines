@@ -148,7 +148,6 @@ process translate_region {
   */
   tag "${region}"
   container "quay.io/biocontainers/agat:1.4.2--pl5321hdfd78af_0"
-  label 'long'
 
   // AGAT's omniscient parser holds ~6.2 KB per annotation line, which on an
   // Ensembl GTF (~414 bytes/line) is ~15x the slice's own size. Request 20x
@@ -158,9 +157,12 @@ process translate_region {
     def gb = (annot.size() / (1024 ** 3) * 20 + 2) as int
     "${(gb < 4 ? 4 : gb) * task.attempt} GB"
   }
-  // Retry on cgroup/scheduler kills (130-140) and on Perl's own
-  // "Out of memory!" death, which exits 1.
-  errorStrategy { task.exitStatus in 130..140 || task.exitStatus == 1 ? 'retry' : 'finish' }
+  // Resource-limit statuses as in nextflow.config, plus exit 1, which is how
+  // Perl dies from its own "Out of memory!" rather than being killed.
+  errorStrategy { task.exitStatus == null ||
+                  task.exitStatus in 130..140 ||
+                  task.exitStatus == 143 ||
+                  task.exitStatus == 1 ? 'retry' : 'finish' }
   maxRetries 3
 
   input:

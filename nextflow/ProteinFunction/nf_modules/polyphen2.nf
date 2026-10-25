@@ -102,7 +102,6 @@ process run_weka {
 process store_pph2_scores {
   tag "${peptide.md5} ${model}"
   container "ensemblorg/ensembl-vep:latest"
-  time '10m'
 
   cache false
 

@@ -98,7 +98,12 @@ process run_sift_on_all_aminoacid_substitutions {
     mem = (peptide.seqString.size() * task.attempt * 4.MB + 4.GB)
     mem < 50.GB ? mem : 50.GB 
   }
-  errorStrategy { (task.exitStatus == 140 && task.attempt <= maxRetries ) ? 'retry' : 'ignore' }
+  // Retry the resource-limit statuses listed in nextflow.config, so that the
+  // task.attempt memory escalation above takes effect; ignore other failures
+  // so that one bad peptide does not stop the run.
+  errorStrategy { task.exitStatus == null ||
+                  task.exitStatus in 130..140 ||
+                  task.exitStatus == 143 ? 'retry' : 'ignore' }
   maxRetries 2
 
   input:
@@ -125,7 +130,6 @@ process run_sift_on_all_aminoacid_substitutions {
 process store_sift_scores {
   tag "${peptide.id}"
   container "ensemblorg/ensembl-vep:latest"
-  time '10m'
 
   cache false
 

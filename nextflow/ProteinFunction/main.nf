@@ -92,7 +92,8 @@ if (params.help) {
 }
 
 // Module imports
-include { translate_fasta }           from './nf_modules/translations.nf'
+include { translate_fasta;
+          dedup_translations }        from './nf_modules/translations.nf'
 include { clear_assemblies;
           store_assemblies;
           drop_translation_mapping; 
@@ -202,21 +203,26 @@ workflow {
   } else {
     translated = getFiles(params.translated)
   }
-  files = translated
+  // collect() gives a value channel, so the same files feed both the
+  // deduplication task and store_assemblies without consuming a queue twice.
+  files = translated.collect()
 
-  // Parse translation FASTA file
-  translated = translated
+  /*
+    Deduplicate and build the translation mapping in a task rather than with
+    channel operators. Stable ID normalisation, stop-codon removal and MD5
+    hashing all happen in bin/dedup_translations.pl, which streams and keeps
+    only hashes, so the head node never holds the proteome.
+  */
+  dedup_translations( files )
+
+  // One record per unique sequence; already normalised and stop-stripped, so
+  // the MD5 here matches the one written to translation_mapping.tsv.
+  translated = dedup_translations.out.unique
                  .splitFasta(record: [id: true, seqString: true, text: true])
-                 .unique() // remove duplicated entries
-                 .map{ it -> [// GFF3 writes ID=transcript:ENST...; GTF writes
-                              // the bare stable ID. Normalise so that
-                              // translation_mapping.stable_id stays joinable.
-                              id: it.id.replaceFirst(/^(?:transcript|mRNA|CDS):/, ''),
-                              // Remove stop codon (asterisk)
-                              text: it.text.replaceAll(/\*/, ""),
-                              seqString: it.seqString.replaceAll(/\*/, ""),
-                              // Add MD5 hashes for the translation sequences
-                              md5: it.seqString.replaceAll(/\*/, "").md5() ]}
+                 .map{ it -> [id: it.id,
+                              text: it.text,
+                              seqString: it.seqString,
+                              md5: it.seqString.md5() ]}
 
   // Write translation mapping with transcript ID and MD5 hashes to database
   if ( !params.offline && params.sift_run_type == "FULL" && params.pph_run_type == "FULL" ) {
@@ -228,18 +234,12 @@ workflow {
     translation_mapping_wait = "ready"
     assemblies_wait = "ready"
   }
-  translation_mapping = translated.collectFile(
-                          name: "translation_mapping.tsv",
-                          storeDir: params.outdir,
-                          newLine: true) { it.id + "\t" + it.md5 }
+  translation_mapping = dedup_translations.out.mapping
 
   if (!params.offline) {
     store_translation_mapping(translation_mapping, translation_mapping_wait)
-    store_assemblies(files.collect(), assemblies_wait)
+    store_assemblies(files, assemblies_wait)
   }
-
-  // Get unique translations based on MD5 hashes of their sequences
-  translated = translated.unique { it.md5 }
 
   // Run protein function prediction
   errors = Channel.of("# failure reasons")

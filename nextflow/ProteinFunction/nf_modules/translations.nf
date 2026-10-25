@@ -213,6 +213,46 @@ process merge_translations {
   """
 }
 
+process dedup_translations {
+  /*
+  Collapse the translated proteins to one record per unique sequence and write
+  the transcript -> MD5 mapping.
+
+  This exists so the head node never holds the proteome. Doing it with channel
+  operators meant splitFasta emitting one map per transcript, each carrying the
+  full FASTA record and its sequence, and two unique() operators retaining
+  every item they had seen, so head memory scaled with the proteome rather than
+  with the number of tasks. On the human TAGENE set that is 370,915 records
+  over a 160 MB protein FASTA, held twice.
+
+  Returns 2 files:
+      1) Protein FASTA with one record per unique sequence
+      2) 'translation_mapping.tsv' of stable ID and MD5, one row per transcript
+
+  Uses the AGAT image only for its Perl; samtools:1.21 has none. That costs a
+  pull on the --translated path, which would otherwise need no AGAT, but avoids
+  adding a sixth image to the pipeline.
+  */
+  tag "${translated}"
+  container "quay.io/biocontainers/agat:1.4.2--pl5321hdfd78af_0"
+  publishDir "${params.outdir}", mode: 'copy', overwrite: true,
+             pattern: 'translation_mapping.tsv'
+
+  // Holds an MD5 per unique sequence and a stable ID per record, not sequences.
+  memory { 2.GB * task.attempt }
+
+  input:
+    path translated
+
+  output:
+    path 'unique_translations.fa',  emit: unique
+    path 'translation_mapping.tsv', emit: mapping
+
+  """
+  dedup_translations.pl unique_translations.fa translation_mapping.tsv ${translated}
+  """
+}
+
 workflow translate_fasta {
   /*
   Drop-in replacement for the old single-task process: takes the annotation and

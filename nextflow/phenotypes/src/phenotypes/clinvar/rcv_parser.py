@@ -1,5 +1,3 @@
-"""Write ClinVar RCV associations as JSONL, preserving each assertion's condition set."""
-
 from __future__ import annotations
 
 import argparse
@@ -53,8 +51,6 @@ STRUCTURAL_ATTRIBUTE_TYPES = {
     "ISCNCoordinates",
 }
 
-# Phenotype vocabularies/catalogues share the term dictionary. Resource links
-# such as GeneReviews are kept separately, not treated as phenotype identifiers.
 PHENOTYPE_ONTOLOGY_SOURCES = {
     "HP": ("Human Phenotype Ontology", "HP"),
     "HPO": ("Human Phenotype Ontology", "HP"),
@@ -276,7 +272,6 @@ def _observed_in_publication_ids(
 
 
 def _is_omim_condition_reference(element: ET.Element, accession: str) -> bool:
-    """Keep six-digit condition IDs, never explicit or dotted allelic variants."""
     return (
         element.get("Type", "").casefold() != "allelic variant"
         and re.fullmatch(r"(?:OMIM:)?[0-9]{6}", accession) is not None
@@ -284,7 +279,6 @@ def _is_omim_condition_reference(element: ET.Element, accession: str) -> bool:
 
 
 def _trait_name(trait: ET.Element) -> tuple[str | None, bool]:
-    """Use the preferred name, or one unambiguous alternate; report alternate use."""
     preferred_name = None
     alternate_names = []
     for name in trait.findall("Name"):
@@ -305,7 +299,6 @@ def _trait_name(trait: ET.Element) -> tuple[str | None, bool]:
 
 
 def _trait_reported_phenotype_ontology_terms(trait: ET.Element) -> list[dict[str, Any]]:
-    """Keep all supported trait terms, regardless of primary/secondary flags."""
     terms = []
     for reference in trait.iter("XRef"):
         database, accession = reference.get("DB"), reference.get("ID")
@@ -313,13 +306,11 @@ def _trait_reported_phenotype_ontology_terms(trait: ET.Element) -> list[dict[str
         if identity is None or not accession:
             continue
         source, namespace = identity
-        # Collapse repeated copies of this database's prefix, preserving the ID.
         prefix = f"{namespace}:"
         while accession.startswith(prefix + prefix):
             accession = accession[len(prefix):]
         if database == "OMIM" and not _is_omim_condition_reference(reference, accession):
             continue
-        # Namespace numeric IDs and unqualified MedGen/MeSH IDs; keep qualified IDs.
         if re.fullmatch(r"[0-9]+", accession) or (
             source in {"MedGen", "MeSH"} and ":" not in accession
         ):
@@ -329,7 +320,6 @@ def _trait_reported_phenotype_ontology_terms(trait: ET.Element) -> list[dict[str
 
 
 def _trait_reported_external_references(trait: ET.Element) -> list[dict[str, str]]:
-    """Keep supported non-ontology resource links with their source DB/ID text."""
     result = []
     for xref in trait.iter("XRef"):
         database, accession = xref.get("DB"), xref.get("ID")
@@ -493,13 +483,6 @@ def _reported_allele(
 
 
 def _prepare_entity(variant: dict[str, Any]) -> dict[str, Any]:
-    """Choose the provisional ClinVar association target without a lookup.
-
-    Preserve the original source identity in reported_entity. A single rsID
-    identifies a simple variant's target; otherwise use its ClinVar identity,
-    removing only the namespace prefix and VCV record version. Missing identity
-    stays missing, so loading can refuse it rather than inventing an identifier.
-    """
     compound = bool(variant.get("components"))
     rsids = {
         value for value in variant.get("alternative_identifiers", [])
@@ -702,7 +685,6 @@ def _assessment_somatic_status(
 def _uncertain_context_details(
     clinvar_set: ET.Element, assessments: list[dict[str, Any]],
 ) -> str | None:
-    """Avoid splitting a legacy classification into contexts the source cannot clearly separate."""
     contexts = {
         item["somatic_status"] for item in assessments
         if item["assessment_type"] == "germline_classification"
@@ -733,8 +715,6 @@ def _uncertain_context_details(
         )
         normalised_origins = {_normalise_name(value) for value in origins}
         opposite_origin = {"germline": "somatic", "somatic": "germline"}.get(context)
-        # Origin is a contradiction check only, not an inheritance value or a
-        # replacement classification. Unknown/de novo origins do not assign context.
         if opposite_origin and opposite_origin in normalised_origins:
             origin_conflicts.append({
                 "source_accession": _versioned_accession(assertion.find("ClinVarAccession")),
@@ -752,14 +732,12 @@ def _uncertain_context_details(
 
 
 def _condition_group(trait_set: ET.Element | None) -> str | None:
-    """Use this assertion's set-level grouping, not member relationships or other assertions."""
     if trait_set is None:
         return None
     explanation = _normalise_name(trait_set.get("multipleConditionExplanation", ""))
     if trait_set.get("Type") == "TraitChoice":
         if explanation in {"", "uncertain"}:
             return explanation or "choice"
-        # Conflicting instructions must not silently become either AND or OR.
         return "condition set"
     if explanation == "uncertain":
         return explanation
@@ -770,7 +748,6 @@ def _condition_set_name(names: list[str], group: str | None) -> str | None:
     if not names:
         return None
     joiner = " OR " if group in OR_CONDITION_GROUPS else "; "
-    # Uncertain OR means one or several of the conditions, not exactly one.
     return joiner.join(names)
 
 
@@ -790,7 +767,6 @@ def _combined_traits(
 
 
 def _publication_evidence(publications: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Keep publications under their assessment's model evidence object."""
     return {
         "publications": publications, "ega_accessions": [], "statistics": [],
     } if publications else None
@@ -991,9 +967,6 @@ def parse_clinvar_set(
     relationship_type = assertion.get("Type") if assertion is not None else None
     aggregate_inheritance_types = _inheritance_types(reference_assertion)
 
-    # ClinVar already groups these SCVs under this RCV. Keep that membership;
-    # do not infer independent classifications for individual traits.
-    # Classification context (germline/somatic/unspecified) can still require rows.
     if len(aggregate_traits) > 1:
         trait = _combined_traits(aggregate_traits, trait_set["condition_group"])
     else:

@@ -1,10 +1,3 @@
-"""Map ClinVar Allele IDs to their own versioned VCV accessions.
-
-Only a direct SimpleAllele in ClassifiedRecord or IncludedRecord identifies
-the archive's individual variant. Nested haplotype members and SCV alleles
-must not inherit the enclosing archive's accession or version.
-"""
-
 from __future__ import annotations
 
 import gzip
@@ -28,13 +21,6 @@ def _report_progress(n_records: int, started: float, stage: str) -> None:
 def read_component_accessions(
     path: str | Path,
 ) -> tuple[dict[str, str | None], str | None]:
-    """Return Allele ID -> accession.version, plus the VCV release date.
-
-    None marks an ambiguous mapping rather than choosing a record by file
-    order. Included-only variants are valid identifiers even when they have no
-    independent classification. XML trees are discarded after each archive;
-    only the identifier dictionary remains in memory.
-    """
     path = Path(path)
     accessions: dict[str, str | None] = {}
     started = monotonic()

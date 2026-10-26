@@ -1,6 +1,3 @@
-// Download one ClinVar XML release (RCV or VCV).
-// Retry failed downloads 3 times
-
 process DOWNLOAD_CLINVAR {
     tag "ClinVar ${release_type.toUpperCase()} XML"
 

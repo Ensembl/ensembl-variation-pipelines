@@ -1,6 +1,3 @@
-// Parse RCV associations and use VCV records for component identifiers.
-// Publish the association records, warnings and rejections.
-
 process PARSE_CLINVAR {
     tag "${source_name} ${processing_context.species_production_name} ${processing_context.assembly}"
 

@@ -1,6 +1,3 @@
-"""Load phenotypes data into the phenotypes postgresql db
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -45,7 +42,6 @@ def required_text(values: dict, name: str) -> str:
 
 
 def read_metadata(path: Path) -> dict:
-    """Check the header and refuse an empty snapshot before opening the database."""
     with path.open(encoding="utf-8") as handle:
         header = json.loads(handle.readline())
         if not isinstance(header, dict) or not isinstance(header.get("metadata"), dict):
@@ -76,14 +72,12 @@ def read_metadata(path: Path) -> dict:
 
 
 class ClinVarLoader:
-    """Readable row-wise inserts for initial mini-file validation, not bulk ETL."""
 
     def __init__(self, cursor: psycopg.Cursor) -> None:
         self.cursor = cursor
         self.created: Counter[str] = Counter()
 
     def insert(self, table: str, values: dict[str, Any]) -> int:
-        """Table and column names come from this module, never from JSONL keys."""
         query = sql.SQL("INSERT INTO {} ({}) VALUES ({}) RETURNING {}").format(
             sql.Identifier(table),
             sql.SQL(", ").join(map(sql.Identifier, values)),
@@ -112,7 +106,6 @@ class ClinVarLoader:
         self, taxonomy_id: int, production_name: str,
         assembly: str, assembly_uuid: str | None, genome_uuid: str | None,
     ) -> int:
-        """Find or create shared metadata once for this input's context."""
         row = self.cursor.execute(
             """SELECT genome_context_id FROM genome_context
                WHERE species_taxonomy_id = %s
@@ -145,7 +138,6 @@ class ClinVarLoader:
         })
 
     def target_entity(self, entity: dict, context_id: int) -> int:
-        """Store required entity/context links, never provisional coordinates."""
         if "genome_contexts" in entity:
             raise ValueError("Entity contexts must come from metadata.genome_context only")
         entity_id = self.entity(
@@ -160,7 +152,6 @@ class ClinVarLoader:
         self, source_id: int, name: str,
         measurement_type: str | None, measured_entity_id: int | None,
     ) -> int:
-        # Exact text only: no synonym matching or cross-source harmonisation.
         row = self.cursor.execute(
             """SELECT p.phenotype_id FROM phenotype p
                JOIN phenotype_association a USING (phenotype_id)
@@ -193,7 +184,6 @@ class ClinVarLoader:
         if row:
             if row[1] != source:
                 raise ValueError(f"Ontology accession {accession} has a different source")
-            # Reuse term identity; label enrichment belongs to harmonisation.
             return row[0]
         return self.insert("ontology_term", {
             "accession": accession, "source": source, "label": label,
@@ -237,7 +227,6 @@ class ClinVarLoader:
             source = required_text(publication, "source")
             identifier, url = publication.get("identifier"), publication.get("url")
             if identifier is None:
-                # Two missing DOI identifiers do not identify the same reference.
                 publication_id = self.insert("publication", {
                     "source": source, "identifier": None, "url": url,
                 })
@@ -256,7 +245,6 @@ class ClinVarLoader:
         self, entity: dict, *, report_id: int | None = None,
         parent_id: int | None = None, ordinal: int | None = None,
     ) -> None:
-        """Copy the source representation, including any supplied components."""
         reported_id = self.insert("reported_entity", {
             "source_report_id": report_id, "parent_reported_entity_id": parent_id,
             "component_ordinal": ordinal, "identifier": entity.get("identifier"),
@@ -384,7 +372,6 @@ class ClinVarLoader:
 
 
 def replace_reports(cursor: psycopg.Cursor, source_id: int) -> dict[str, int]:
-    """Replace source reports without modifying shared entity locations."""
     cursor.execute(
         """CREATE TEMP TABLE clinvar_previous_associations (
                phenotype_association_id BIGINT, phenotype_id BIGINT
@@ -448,8 +435,6 @@ def load_clinvar(
         "n_records_loaded": 0, "n_source_reports_replaced": 0,
         "n_orphan_associations_removed": 0, "n_orphan_phenotypes_removed": 0,
     }
-    # The context manager commits only on success, otherwise rolling back all
-    # inserts, replacement deletes and temporary-table work together.
     with psycopg.connect(**connection_args) as connection:
         with connection.cursor() as cursor:
             exists = cursor.execute(
@@ -508,7 +493,6 @@ def load_clinvar(
                         continue
                     record = None
                     try:
-                        # Keep decimal statistics exact, including very small p-values.
                         record = simplejson.loads(line, use_decimal=True)
                         loader.record(record, source_id, run_id, context_id)
                     except (ValueError, KeyError, TypeError, AttributeError, psycopg.Error) as error:
@@ -539,7 +523,7 @@ def load_clinvar(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description='Load phenotypes data into the phenotypes postgresql db\n')
     parser.add_argument("--input", type=Path, required=True, help="Complete source JSONL snapshot")
     parser.add_argument("--env-file", type=Path, default=Path(".env"))
     parser.add_argument("--replace", action="store_true", help="Replace ALL existing ClinVar reports")

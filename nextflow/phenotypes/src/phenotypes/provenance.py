@@ -1,8 +1,3 @@
-"""Record input filenames, file checksums and the pipeline's Git commit
-- These values identify the input files and the checkout's base revision for
-the parser's output metadata
-"""
-
 from hashlib import file_digest
 from pathlib import Path
 import subprocess

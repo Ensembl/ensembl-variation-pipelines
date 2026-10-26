@@ -1,5 +1,3 @@
-// Load the parsed snapshot into PostgreSQL; publish the committed load summary.
-
 process LOAD_CLINVAR {
     tag "ClinVar ${processing_context.species_production_name} ${processing_context.assembly}"
 

@@ -1,6 +1,3 @@
-// Use local ClinVar RCV/VCV XML files or download the omitted releases.
-// Parse the configured context, then load the snapshot into PostgreSQL.
-
 include { DOWNLOAD_CLINVAR } from '../modules/local/download_clinvar'
 include { PARSE_CLINVAR } from '../modules/local/parse_clinvar'
 include { LOAD_CLINVAR } from '../modules/local/load_clinvar'

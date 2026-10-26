@@ -1,8 +1,3 @@
-"""Read and check the input files and species settings for each data source
-- Resolve file paths relative to the configuration file and check any supplied
-assembly settings
-"""
-
 import argparse
 import json
 import re

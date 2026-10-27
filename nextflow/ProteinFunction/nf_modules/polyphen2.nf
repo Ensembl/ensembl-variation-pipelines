@@ -141,11 +141,27 @@ workflow run_pph2_pipeline {
   } else if ( params.pph_run_type == "FULL" && !params.offline ) {
     delete_prediction_data("polyphen_%")
     wait = delete_prediction_data.out
-    get_pph2_version()
-    update_meta("polyphen_version", get_pph2_version.out)
   } else {
     wait = "ready"
   }
+
+  /*
+    The PolyPhen-2 version describes the scores, so it is recorded wherever
+    they are written: in the variation database when writing there, and in the
+    SQLite meta table, which is the only record an offline run keeps.
+  */
+  to_variation_db = params.pph_run_type == "FULL" && !params.offline
+  meta = Channel.empty()
+  if ( params.sqlite || to_variation_db ) {
+    get_pph2_version()
+    if ( to_variation_db ) {
+      update_meta("polyphen_version", get_pph2_version.out)
+    }
+    if ( params.sqlite ) {
+      meta = get_pph2_version.out.map{ v -> "polyphen_version=" + v.trim() }
+    }
+  }
+
   // Run PolyPhen-2 and Weka
   pph2 = run_pph2_on_all_aminoacid_substitutions(translated)
 
@@ -157,4 +173,5 @@ workflow run_pph2_pipeline {
   emit:
     errors = pph2.errors
     sqlite = store_pph2_scores.out.sqlite
+    meta
 }

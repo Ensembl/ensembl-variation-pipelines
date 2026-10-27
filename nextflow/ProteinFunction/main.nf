@@ -172,6 +172,30 @@ log.info """
   PPH2 data  : ${params.pph_data}
   """
 
+def run_meta () {
+  /*
+    Rows describing the run itself for the SQLite meta table: what went in,
+    which predictors ran over it, and when.
+
+    Null params are dropped, so a run driven by --translated records no
+    gtf/gff3/fasta and a run that translates records no translated, rather
+    than storing empty strings that read as though a file was given.
+    workflow.start is the pipeline's own start time, not the time the merge
+    task happened to run.
+  */
+  rows = ["species":       params.species,
+          "gtf":           params.gtf,
+          "gff3":          params.gff,
+          "fasta":         params.fasta,
+          "translated":    params.translated,
+          "blastdb":       params.blastdb,
+          "sift_run_type": params.sift_run_type,
+          "pph_run_type":  params.pph_run_type,
+          "run_date":      workflow.start.format("yyyy-MM-dd'T'HH:mm:ssXXX")]
+  rows.findAll { it.value != null }
+      .collect { key, value -> "${key}=${value}" }
+}
+
 def getFiles (files) {
   Channel.fromPath( files.tokenize(','), checkIfExists: true )
 }
@@ -244,21 +268,25 @@ workflow {
   // Run protein function prediction
   errors = Channel.of("# failure reasons")
   sqlite_files = Channel.empty()
+  // key=value rows describing the run, written to the SQLite meta table.
+  sqlite_meta = params.sqlite ? Channel.fromList(run_meta()) : Channel.empty()
 
   if ( params.sift_run_type != "NONE" ) {
     sift_result = run_sift_pipeline(translated)
     errors = errors.concat(sift_result.errors)
     sqlite_files = sqlite_files.mix(sift_result.sqlite)
+    sqlite_meta = sqlite_meta.mix(sift_result.meta)
   }
 
   if ( params.pph_run_type  != "NONE" ) {
     pph_result = run_pph2_pipeline(translated)
     errors = errors.concat(pph_result.errors)
     sqlite_files = sqlite_files.mix(pph_result.sqlite)
+    sqlite_meta = sqlite_meta.mix(pph_result.meta)
   }
 
   if ( params.sqlite ) {
-    postprocess_sqlite_db(sqlite_files.toList())
+    postprocess_sqlite_db(sqlite_files.toList(), sqlite_meta.toList())
   }
 
   errors

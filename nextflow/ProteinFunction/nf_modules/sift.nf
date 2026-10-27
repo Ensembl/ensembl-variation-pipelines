@@ -12,6 +12,21 @@ process get_sift_version {
   """
 }
 
+process get_psiblast_version {
+  /*
+  Get the version of psiblast that builds the alignments
+
+  SIFT scores are derived from the PSI-BLAST alignment, so the BLAST version
+  changes both the scores and the number of sequences chosen, which in turn
+  decides the low-confidence flag. Recording it makes two runs comparable.
+  */
+  container "ensemblorg/sift:6.2.1"
+  output: stdout
+  """
+  psiblast -version | grep -Po "psiblast: \\K.*" | tr -d '\n'
+  """
+}
+
 process get_sift_db_version {
   /*
   Get version from UniRef release note file (if available)
@@ -69,8 +84,10 @@ ${peptide.text}EOL
 
   set error=0
   setenv tmpdir "."
-  #setenv NCBI "/opt/blast/bin/"
-  setenv NCBI "/hps/software/users/ensembl/ensw/C8-MAR21-sandybridge/linuxbrew/Cellar/blast/2.2.30/bin"
+  # seqs_chosen_via_median_info.csh calls psiblast unqualified, so the binary
+  # comes from PATH - the container's own BLAST. Its version is recorded in
+  # the SQLite meta table as sift_blast_version, because it changes the
+  # alignment and so the scores.
   seqs_chosen_via_median_info.csh ${peptide.md5}.fa \\
                                   ${blastdb_dir}/${blastdb_name} \\
                                   ${params.median_cutoff} || setenv error \$status
@@ -159,16 +176,19 @@ process store_sift_scores {
 include { delete_prediction_data; update_meta } from './database.nf'        
 include { filter_existing_translations        } from './translations.nf'
 
+/*
+  Each version goes to the variation database through its own subworkflow:
+  update_meta can only be invoked once per workflow scope, so one wrapper per
+  key is what lets them all be written.
+*/
 workflow update_sift_version {
-  get_sift_version()
-  update_meta("sift_version", get_sift_version.out)
+  take: version
+  main: update_meta("sift_version", version)
 }
 
 workflow update_sift_db_version {
-  take: db
-  main:
-    get_sift_db_version( db.parent, db )
-    update_meta("sift_db_version", get_sift_db_version.out)
+  take: version
+  main: update_meta("sift_db_version", version)
 }
 
 workflow run_sift_pipeline {
@@ -181,11 +201,39 @@ workflow run_sift_pipeline {
     } else if ( params.sift_run_type == "FULL" && !params.offline ) {
       delete_prediction_data("sift")
       wait = delete_prediction_data.out
-      update_sift_version()
-      update_sift_db_version( file(params.blastdb) )
     } else {
       wait = "ready"
     }
+
+    /*
+      Versions of SIFT, of the psiblast that builds its alignments, and of the
+      BLAST database searched. They describe the scores, so they are recorded
+      wherever the scores are written: in the variation database when writing
+      there, and in the SQLite meta table, which is the only record an offline
+      run keeps. Collected once and used for both.
+    */
+    to_variation_db = params.sift_run_type == "FULL" && !params.offline
+    meta = Channel.empty()
+    if ( params.sqlite || to_variation_db ) {
+      blastdb = file(params.blastdb)
+      get_sift_version()
+      get_sift_db_version( blastdb.parent, blastdb )
+
+      if ( to_variation_db ) {
+        update_sift_version( get_sift_version.out )
+        update_sift_db_version( get_sift_db_version.out )
+      }
+      if ( params.sqlite ) {
+        // The psiblast version is collected here rather than above because
+        // the variation database has no meta key for it.
+        get_psiblast_version()
+        meta = meta.mix(
+          get_sift_version.out.map    { v -> "sift_version=" + v.trim() },
+          get_psiblast_version.out.map{ v -> "sift_blast_version=" + v.trim() },
+          get_sift_db_version.out.map { v -> "sift_db_version=" + v.trim() })
+      }
+    }
+
     // Align translated sequences against BLAST database to run SIFT
     blast = align_peptides(translated,
                            file(params.blastdb).parent,
@@ -197,4 +245,5 @@ workflow run_sift_pipeline {
   emit:
     errors = all_errors
     sqlite = store_sift_scores.out.sqlite
+    meta
 }

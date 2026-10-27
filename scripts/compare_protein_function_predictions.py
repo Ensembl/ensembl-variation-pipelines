@@ -158,6 +158,14 @@ def parse_args():
         help="how many differing cells to list per record (default: 10)",
     )
     parser.add_argument(
+        "--evidence",
+        metavar="MD5:ANALYSIS",
+        help="print the per-position evidence MySQL stores for one record "
+             "(sequence_number and conservation_score), then exit. These are "
+             "SIFT's alignment depth and median conservation, so they show "
+             "whether a difference comes from the alignment or the scoring",
+    )
+    parser.add_argument(
         "--show",
         metavar="MD5:ANALYSIS",
         help="decode and print one record from both sides, then exit",
@@ -567,6 +575,74 @@ def name_of(attrib_id):
     return EXPECTED_ANALYSIS.get(attrib_id, f"attrib_{attrib_id}")
 
 
+def decode_ber_pairs(blob):
+    """Decode Perl pack("ww", ...) - pairs of BER compressed integers.
+
+    Each integer is a big-endian sequence of 7-bit groups whose high bit marks
+    a continuation, which is what the adaptor writes into
+    protein_function_predictions_attrib.position_values.
+    """
+    numbers = []
+    value = 0
+    for byte in blob:
+        value = (value << 7) | (byte & 0x7F)
+        if not byte & 0x80:
+            numbers.append(value)
+            value = 0
+    return list(zip(numbers[0::2], numbers[1::2]))
+
+
+def show_evidence(db, key, mapping):
+    """Print the per-position evidence attribs MySQL holds for one record."""
+    try:
+        md5, name = key.rsplit(":", 1)
+    except ValueError:
+        sys.exit("ERROR: --evidence expects MD5:ANALYSIS, e.g. 7f3a...:sift")
+    if name not in EXPECTED_ANALYSIS.values():
+        sys.exit(f"ERROR: unknown analysis '{name}'")
+
+    found = {}
+    for code, hex_blob in db.rows(
+        "SELECT at.code, HEX(pfpa.position_values) "
+        "FROM protein_function_predictions_attrib pfpa "
+        "JOIN translation_md5 t "
+        "  ON t.translation_md5_id = pfpa.translation_md5_id "
+        "JOIN attrib a ON a.attrib_id = pfpa.analysis_attrib_id "
+        "JOIN attrib_type at ON at.attrib_type_id = pfpa.attrib_type_id "
+        f"WHERE t.translation_md5 = '{md5}' AND a.value = '{name}'"
+    ):
+        pairs = decode_ber_pairs(bytes.fromhex(hex_blob))
+        # The adaptor stores conservation_score multiplied by 100;
+        # sequence_number is a plain count.
+        if code == "conservation_score":
+            found[code] = {pos: value / 100.0 for pos, value in pairs}
+        else:
+            found[code] = dict(pairs)
+
+    print(f"{label(md5, mapping)}  {name}")
+    if not found:
+        print("  no evidence stored for this record")
+        return
+
+    seqs = found.get("sequence_number", {})
+    cons = found.get("conservation_score", {})
+    print(f"  {'pos':>6}{'sequence_number':>18}{'conservation_score':>21}"
+          f"{'low confidence':>17}")
+    for pos in sorted(set(seqs) | set(cons)):
+        n = seqs.get(pos)
+        c = cons.get(pos)
+        # The rule in bin/store_sift_scores.pl
+        low = ""
+        if n is not None and c is not None:
+            low = "yes" if (c > 3.25 or n < 10) else "no"
+        print(f"  {pos:>6}{'-' if n is None else n:>18}"
+              f"{'-' if c is None else format(c, 'g'):>21}{low:>17}")
+    if seqs:
+        values = sorted(seqs.values())
+        print(f"  sequence_number: min {values[0]}, max {values[-1]}, "
+              f"median {values[len(values) // 2]}")
+
+
 def show_one(db, sqlite_path, key, mapping, peptides):
     """Decode and print one record from both sides."""
     try:
@@ -626,6 +702,10 @@ def main():
     try:
         mapping = load_mapping(args.mapping, db)
         peptides = load_peptides(args.peptides)
+
+        if args.evidence:
+            show_evidence(db, args.evidence, mapping)
+            return 0
 
         if args.show:
             show_one(db, args.sqlite, args.show, mapping, peptides)

@@ -30,9 +30,14 @@ process run_pph2_on_all_aminoacid_substitutions {
   container "ensemblorg/polyphen-2:2.2.3"
   containerOptions "--bind ${params.pph_data}:/opt/pph2/data"
 
-  memory { peptide.size() * 100.MB + 4.GB }
-  errorStrategy 'ignore'
-  maxRetries 1
+  // peptide is a map, so peptide.size() is always 4; scale on the sequence
+  // length instead, using the same shape as the SIFT processes
+  memory {
+    mem = (peptide.seqString.size() * task.attempt * 4.MB + 4.GB)
+    mem < 50.GB ? mem : 50.GB
+  }
+  label 'retry_before_ignoring'
+  maxRetries 2
 
   input:
     val peptide
@@ -97,7 +102,6 @@ process run_weka {
 process store_pph2_scores {
   tag "${peptide.md5} ${model}"
   container "ensemblorg/ensembl-vep:latest"
-  time '10m'
 
   cache false
 
@@ -137,11 +141,27 @@ workflow run_pph2_pipeline {
   } else if ( params.pph_run_type == "FULL" && !params.offline ) {
     delete_prediction_data("polyphen_%")
     wait = delete_prediction_data.out
-    get_pph2_version()
-    update_meta("polyphen_version", get_pph2_version.out)
   } else {
     wait = "ready"
   }
+
+  /*
+    The PolyPhen-2 version describes the scores, so it is recorded wherever
+    they are written: in the variation database when writing there, and in the
+    SQLite meta table, which is the only record an offline run keeps.
+  */
+  to_variation_db = params.pph_run_type == "FULL" && !params.offline
+  meta = Channel.empty()
+  if ( params.sqlite || to_variation_db ) {
+    get_pph2_version()
+    if ( to_variation_db ) {
+      update_meta("polyphen_version", get_pph2_version.out)
+    }
+    if ( params.sqlite ) {
+      meta = get_pph2_version.out.map{ v -> "polyphen_version=" + v.trim() }
+    }
+  }
+
   // Run PolyPhen-2 and Weka
   pph2 = run_pph2_on_all_aminoacid_substitutions(translated)
 
@@ -153,4 +173,5 @@ workflow run_pph2_pipeline {
   emit:
     errors = pph2.errors
     sqlite = store_pph2_scores.out.sqlite
+    meta
 }

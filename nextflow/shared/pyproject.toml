@@ -1,0 +1,10 @@
+[project]
+name = "variation-sources"
+version = "0.1.0"
+description = "Shared source evidence extraction for Ensembl variation pipelines"
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"

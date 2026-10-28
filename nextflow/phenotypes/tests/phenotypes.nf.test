@@ -1,0 +1,62 @@
+nextflow_pipeline {
+    name 'Phenotype consumer of shared ClinVar components'
+    script 'main.nf'
+    tag 'pipeline'
+    tag 'clinvar'
+    tag 'clinvar/phenotypes'
+
+    test('Parse local evidence with database loading disabled by test configuration') {
+        options "-c $baseDir/tests/skip_load.config"
+        when {
+            params {
+                source_config = "$baseDir/tests/data/source_config.json"
+                env_file = "$baseDir/tests/data/database.env"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_output.jsonl").readLines().size() == 2 },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_output.jsonl").text.contains('"source_reports"') },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/rejections.txt").text.contains('missing_trait_set') }
+            )
+        }
+    }
+
+    test('Default common asset supports phenotype parsing and loading - stub') {
+        options '-stub-run'
+        when {
+            params {
+                env_file = "$baseDir/tests/data/database.env"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_output.jsonl").exists() },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/warnings.txt").exists() },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/rejections.txt").exists() },
+                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_load_summary.json").exists() }
+            )
+        }
+    }
+
+    test('Refuse multiple loading contexts before whole-source replacement') {
+        options '-stub-run'
+        when {
+            params {
+                source_config = "$baseDir/tests/data/source_config_multiple.json"
+                env_file = "$baseDir/tests/data/database.env"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stdout.join('\n').contains('requires one context per source snapshot') }
+            )
+        }
+    }
+}

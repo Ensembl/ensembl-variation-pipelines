@@ -1,0 +1,6 @@
+name: clinvar_extract
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - conda-forge::python=3.14.0

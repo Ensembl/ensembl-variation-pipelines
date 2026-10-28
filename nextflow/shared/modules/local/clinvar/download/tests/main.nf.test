@@ -1,0 +1,46 @@
+nextflow_process {
+    name 'ClinVar download'
+    script 'modules/local/clinvar/download/main.nf'
+    process 'DOWNLOAD_CLINVAR'
+    tag 'modules'
+    tag 'modules_local'
+    tag 'clinvar'
+    tag 'clinvar/download'
+
+    test('Download a local gzipped fixture using curl') {
+        when {
+            process {
+                """
+                input[0] = [[id: 'clinvar_rcv'], 'RCV', 'file://$baseDir/tests/data/rcv.xml.gz']
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert file(process.out.xml[0][2]).bytes[0] == 31 },
+                { assert file(process.out.xml[0][2]).bytes[1] == -117 },
+                { assert process.out.xml[0][1] == 'RCV' },
+                { assert process.out.versions_curl[0][2] ==~ /[0-9].*/ }
+            )
+        }
+    }
+
+    test('stub') {
+        options '-stub-run'
+        when {
+            process {
+                """
+                input[0] = [[id: 'clinvar_rcv'], 'RCV', 'https://example.invalid/unused']
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert file(process.out.xml[0][2]).exists() },
+                { assert process.out.versions_curl[0][2] ==~ /[0-9].*/ }
+            )
+        }
+    }
+}

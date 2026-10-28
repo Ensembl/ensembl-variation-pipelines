@@ -1,5 +1,3 @@
-"""Write ClinVar RCV associations as JSONL, preserving each assertion's condition set."""
-
 from __future__ import annotations
 
 import argparse
@@ -8,7 +6,6 @@ import json
 import re
 import sys
 import xml.etree.ElementTree as ET
-from collections import Counter
 from datetime import date
 from pathlib import Path
 from time import monotonic
@@ -17,16 +14,11 @@ from urllib.parse import urlsplit
 
 from variation_sources.clinvar.xml import iter_release
 from variation_sources.clinvar.variants import (
-    RejectedRecord,
-    text as _text,
-    integer as _integer,
-    versioned_accession as _versioned_accession,
-    unique as _unique,
-    reported_allele as _reported_allele,
-    parse_variant as _parse_variant,
-    open_xml as _open_xml,
+    RejectedRecord, text as _text, integer as _integer,
+    versioned_accession as _versioned_accession, unique as _unique,
+    reported_allele as _reported_allele, open_xml as _open_xml,
 )
-
+from phenotypes.clinvar.source_adapter import parse_reported_entity as _parse_variant
 from phenotypes.clinvar.vcv_parser import read_component_accessions
 from phenotypes.provenance import git_revision, input_file_provenance
 from variation_sources.source_config import (
@@ -48,12 +40,6 @@ PLACEHOLDER_PHENOTYPE_NAMES = {
     ".",
 }
 
-SUMMARY_ONLY_EVENTS = {
-    "placeholder_phenotype_used",
-    "multiple_traits_combined_as_choice",
-    "multiple_traits_combined_as_group",
-}
-
 OR_CONDITION_GROUPS = {"choice", "uncertain"}
 PROGRESS_INTERVAL = 100_000
 
@@ -62,6 +48,24 @@ CLASSIFICATION_TYPES = {
     "SomaticClinicalImpact": ("somatic_clinical_impact", "somatic"),
     "OncogenicityClassification": ("oncogenicity", "somatic"),
     "NoClassification": ("no_classification", "unspecified"),
+}
+
+PHENOTYPE_ONTOLOGY_SOURCES = {
+    "HP": ("Human Phenotype Ontology", "HP"),
+    "HPO": ("Human Phenotype Ontology", "HP"),
+    "Human Phenotype Ontology": ("Human Phenotype Ontology", "HP"),
+    "EFO": ("EFO", "EFO"),
+    "EFO: The Experimental Factor Ontology": ("EFO", "EFO"),
+    "MONDO": ("MONDO", "MONDO"),
+    "MedGen": ("MedGen", "MedGen"),
+    "Orphanet": ("Orphanet", "Orphanet"),
+    "OMIM": ("OMIM", "OMIM"),
+    "MeSH": ("MeSH", "MeSH"),
+    "SNOMED CT": ("SNOMED CT", "SNOMEDCT"),
+}
+EXTERNAL_REFERENCE_DATABASES = {
+    "GeneReviews", "Genetic Testing Registry (GTR)",
+    "Genetic Alliance", "Office of Rare Diseases",
 }
 
 
@@ -215,53 +219,14 @@ def _observed_in_publication_ids(
     )
 
 
-def _is_omim_condition_reference(element: ET.Element) -> bool:
-    """Accept MIM entries with or without a type, never dotted allelic-variant IDs."""
+def _is_omim_condition_reference(element: ET.Element, accession: str) -> bool:
     return (
-        element.get("Type") in {None, "", "MIM"}
-        and re.fullmatch(r"(?:OMIM:)?[0-9]{6}", element.get("ID", "")) is not None
+        element.get("Type", "").casefold() != "allelic variant"
+        and re.fullmatch(r"(?:OMIM:)?[0-9]{6}", accession) is not None
     )
 
 
-def _normalise_ontology_reference(
-    element: ET.Element,
-) -> dict[str, str] | None:
-    database = element.get("DB")
-    accession = element.get("ID")
-    reference_type = element.get("Type")
-    if not database or not accession:
-        return None
-
-    if database in {"HP", "Human Phenotype Ontology"}:
-        database = "Human Phenotype Ontology"
-        while accession.startswith("HP:HP:"):
-            accession = accession[3:]
-        if not accession.startswith("HP:"):
-            accession = f"HP:{accession}"
-    elif database == "MONDO":
-        if not accession.startswith("MONDO:"):
-            accession = f"MONDO:{accession}"
-    elif database == "Orphanet":
-        if not accession.startswith("Orphanet:"):
-            accession = f"Orphanet:{accession}"
-    elif database in {"EFO", "EFO: The Experimental Factor Ontology"}:
-        database = "EFO"
-        accession = re.sub(r"^EFO[:_]", "", accession)
-        accession = f"EFO:{accession}"
-    elif database == "OMIM" and _is_omim_condition_reference(element):
-        if not accession.startswith("OMIM:"):
-            accession = f"OMIM:{accession}"
-    else:
-        return None
-
-    reference = {"database": database, "accession": accession}
-    if reference_type:
-        reference["mapping_type"] = reference_type
-    return reference
-
-
 def _trait_name(trait: ET.Element) -> tuple[str | None, bool]:
-    """Use the preferred name, or one unambiguous alternate; report alternate use."""
     preferred_name = None
     alternate_names = []
     for name in trait.findall("Name"):
@@ -281,61 +246,39 @@ def _trait_name(trait: ET.Element) -> tuple[str | None, bool]:
     return None, False
 
 
-def _trait_ontology_mappings(trait: ET.Element) -> list[dict[str, str]]:
-    references = []
-    for name in trait.findall("Name"):
-        references.extend(name.findall("XRef"))
-    references.extend(trait.findall("XRef"))
-    references.extend(trait.findall("./AttributeSet/XRef"))
-    mappings = [
-        mapping
-        for mapping in (_normalise_ontology_reference(item) for item in references)
-        if mapping is not None
-    ]
-    return _unique(mappings)
+def _trait_reported_phenotype_ontology_terms(trait: ET.Element) -> list[dict[str, Any]]:
+    terms = []
+    for reference in trait.iter("XRef"):
+        database, accession = reference.get("DB"), reference.get("ID")
+        identity = PHENOTYPE_ONTOLOGY_SOURCES.get(database)
+        if identity is None or not accession:
+            continue
+        source, namespace = identity
+        prefix = f"{namespace}:"
+        while accession.startswith(prefix + prefix):
+            accession = accession[len(prefix):]
+        if database == "OMIM" and not _is_omim_condition_reference(reference, accession):
+            continue
+        if re.fullmatch(r"[0-9]+", accession) or (
+            source in {"MedGen", "MeSH"} and ":" not in accession
+        ):
+            accession = f"{namespace}:{accession}"
+        terms.append({"accession": accession, "label": None, "source": source})
+    return _unique(terms)
 
 
-def _trait_external_references(
-    trait: ET.Element, primary_mappings: Iterable[dict[str, str]]
-) -> list[dict[str, str]]:
-    primary_keys = {
-        (mapping["database"], mapping["accession"])
-        for mapping in primary_mappings
-    }
+def _trait_reported_external_references(trait: ET.Element) -> list[dict[str, str]]:
     result = []
-    for path in ("XRef", "Name/XRef", "Symbol/XRef", "AttributeSet/XRef"):
-        for xref in trait.findall(path):
-            database = xref.get("DB")
-            accession = xref.get("ID")
-            if not accession or database not in {"MONDO", "MedGen", "Orphanet", "OMIM"}:
-                continue
-            if database == "OMIM" and not _is_omim_condition_reference(xref):
-                continue
-            mapping = _normalise_ontology_reference(xref)
-            if mapping and (mapping["database"], mapping["accession"]) in primary_keys:
-                continue
-            result.append({
-                "database": database,
-                "accession": accession,
-                "reference_subject": "phenotype",
-            })
+    for xref in trait.iter("XRef"):
+        database, accession = xref.get("DB"), xref.get("ID")
+        if database not in EXTERNAL_REFERENCE_DATABASES or not accession:
+            continue
+        result.append({
+            "database": database,
+            "accession": accession,
+            "reference_subject": "phenotype",
+        })
     return _unique(result)
-
-
-def _primary_ontology_mappings(
-    mappings: Iterable[dict[str, str]],
-) -> list[dict[str, str]]:
-    result = []
-    seen = set()
-    for mapping in mappings:
-        if mapping.get("mapping_type", "").casefold() != "primary":
-            continue
-        key = (mapping["database"], mapping["accession"])
-        if key in seen:
-            continue
-        result.append(mapping)
-        seen.add(key)
-    return result
 
 
 def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list[str]]:
@@ -352,9 +295,9 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
         raise RejectedRecord("missing_traits")
 
     traits = []
+    reported_phenotypes = []
     warnings = []
     seen_traits = {}
-    source_names = []
     for trait in trait_elements:
         source_name, used_alternate = _trait_name(trait)
         if used_alternate:
@@ -365,7 +308,6 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
                 {"trait_id": trait.get("ID"), "trait_type": trait.get("Type")},
             )
 
-        source_names.append(source_name)
         is_placeholder = _normalise_name(source_name) in PLACEHOLDER_PHENOTYPE_NAMES
         if trait_set_type == "PhenotypeInstruction" and not is_placeholder:
             raise RejectedRecord(
@@ -376,46 +318,48 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
         phenotype_name = source_name
         if is_placeholder:
             phenotype_name = PHENOTYPE_NOT_SPECIFIED
-            warnings.append("placeholder_phenotype_used")
 
-        all_ontology_mappings = _trait_ontology_mappings(trait)
-        ontology_mappings = _primary_ontology_mappings(all_ontology_mappings)
+        reported_terms = _trait_reported_phenotype_ontology_terms(trait)
         parsed_trait = {
-            "external_references": _trait_external_references(trait, ontology_mappings),
-            "phenotype": {
-                "phenotype_name": phenotype_name,
-                "ontology_mappings": ontology_mappings,
-            },
+            "phenotype": {"phenotype_name": phenotype_name},
+            "reported_phenotypes": [{
+                "name": source_name,
+                "reported_phenotype_ontology_terms": reported_terms,
+            }],
+            "reported_external_references": _trait_reported_external_references(trait),
         }
         trait_id = (trait.get("ID") or "").strip()
         deduplication_key = (
             ("id", trait_id) if trait_id else ("xml", ET.tostring(trait, encoding="unicode"))
         )
         if deduplication_key in seen_traits:
-            previous, repeated_traits = seen_traits[deduplication_key]
-            repeated_traits.append(trait)
-            previous["phenotype"]["ontology_mappings"] = _unique(
-                previous["phenotype"]["ontology_mappings"] + ontology_mappings
-            )
-            previous["external_references"] = _unique(
-                reference for source_trait in repeated_traits
-                for reference in _trait_external_references(
-                    source_trait, previous["phenotype"]["ontology_mappings"]
-                )
+            previous = seen_traits[deduplication_key]
+            for reported in previous["reported_phenotypes"]:
+                if reported["name"] == source_name:
+                    reported["reported_phenotype_ontology_terms"] = _unique(
+                        reported["reported_phenotype_ontology_terms"] + reported_terms
+                    )
+                    break
+            else:
+                previous["reported_phenotypes"].extend(parsed_trait["reported_phenotypes"])
+                reported_phenotypes.extend(parsed_trait["reported_phenotypes"])
+            previous["reported_external_references"] = _unique(
+                previous["reported_external_references"]
+                + parsed_trait["reported_external_references"]
             )
             warnings.append("duplicate_trait_merged")
             continue
-        seen_traits[deduplication_key] = (parsed_trait, [trait])
+        seen_traits[deduplication_key] = parsed_trait
         traits.append(parsed_trait)
+        reported_phenotypes.extend(parsed_trait["reported_phenotypes"])
 
     if not traits:
         raise RejectedRecord("missing_supported_traits")
     condition_group = _condition_group(trait_set)
-    # Keep source names as a list, separate from the generated display label.
     return (
         {
-            "reported_phenotype_names": _unique(source_names),
             "traits": traits,
+            "reported_phenotypes": reported_phenotypes,
             "condition_group": condition_group,
         },
         warnings,
@@ -423,13 +367,6 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
 
 
 def _prepare_entity(variant: dict[str, Any]) -> dict[str, Any]:
-    """Choose the provisional association target without an Ensembl lookup.
-
-    Preserve the original source identity in reported_variant. A single rsID
-    identifies a simple variant's target; otherwise use its ClinVar identity,
-    removing only the namespace prefix and VCV record version. Missing identity
-    stays missing, so loading can refuse it rather than inventing an identifier.
-    """
     compound = bool(variant.get("components"))
     rsids = {
         value for value in variant.get("alternative_identifiers", [])
@@ -447,62 +384,6 @@ def _prepare_entity(variant: dict[str, Any]) -> dict[str, Any]:
         "type": "Haplotype" if compound else "Variant",
         "label": identifier,
     }
-
-
-def _provisional_entity_location(location: dict[str, Any]) -> dict[str, Any] | None:
-    """Prepare a VCF-first reference span; never modify the source placement.
-
-    Counting the full literal REF string includes any padding bases. This end
-    is a reference-span end, not an inferred endpoint for a symbolic SV. Keep
-    anchors as supplied. Without a usable VCF representation, copy an exact
-    source interval as coordinates only; do not interpret uncertain bounds.
-    """
-    accession = location.get("sequence_accession")
-    region = location.get("chromosome")
-    # Scaffold coordinates must not be assigned to the containing chromosome.
-    if accession and (not region or not accession.startswith("NC_")):
-        region = accession
-    if not isinstance(region, str) or not region.strip():
-        return None
-    strand = {"+": 1, "1": 1, "-": -1, "-1": -1, 1: 1, -1: -1}.get(location.get("strand"))
-    position = location.get("position_vcf")
-    reference = location.get("reference_allele_vcf")
-    alternate = location.get("alternate_allele_vcf")
-    has_vcf = (
-        type(position) is int and position >= 1
-        and isinstance(reference, str) and re.fullmatch(r"[ACGTNacgtn]+", reference)
-        and isinstance(alternate, str) and re.fullmatch(r"[ACGTNacgtn]+", alternate)
-    )
-    if has_vcf:
-        start, stop = position, position + len(reference) - 1
-    else:
-        if any(location.get(name) is not None for name in (
-            "outer_start", "inner_start", "inner_stop", "outer_stop",
-        )):
-            return None
-        start, stop = location.get("start"), location.get("stop")
-        if type(start) is not int or type(stop) is not int:
-            return None
-        if start < 1 or stop < 0 or stop < start - 1:
-            return None
-    return {
-        "seq_region_name": region,
-        "seq_region_start": start,
-        "seq_region_end": stop,
-        "seq_region_strand": strand,
-        "reference_allele": reference if has_vcf else None,
-        "alternate_alleles": [alternate] if has_vcf else [],
-    }
-
-
-def _prepare_entity_locations(variant: dict[str, Any]) -> list[dict[str, Any]]:
-    # Only the association target's own placements, never haplotype members.
-    locations = []
-    for source_location in variant.get("locations", []):
-        location = _provisional_entity_location(source_location)
-        if location is not None:
-            locations.append(location)
-    return _unique(locations)
 
 
 def _combined_assessment_value(
@@ -544,7 +425,6 @@ def _assessment_somatic_status(
 def _uncertain_context_details(
     clinvar_set: ET.Element, assessments: list[dict[str, Any]],
 ) -> str | None:
-    """Avoid splitting a legacy classification into contexts the source cannot clearly separate."""
     contexts = {
         item["somatic_status"] for item in assessments
         if item["assessment_type"] == "germline_classification"
@@ -575,8 +455,6 @@ def _uncertain_context_details(
         )
         normalised_origins = {_normalise_name(value) for value in origins}
         opposite_origin = {"germline": "somatic", "somatic": "germline"}.get(context)
-        # Origin is a contradiction check only, not an inheritance value or a
-        # replacement classification. Unknown/de novo origins do not assign context.
         if opposite_origin and opposite_origin in normalised_origins:
             origin_conflicts.append({
                 "source_accession": _versioned_accession(assertion.find("ClinVarAccession")),
@@ -594,14 +472,12 @@ def _uncertain_context_details(
 
 
 def _condition_group(trait_set: ET.Element | None) -> str | None:
-    """Use this assertion's set-level grouping, not member relationships or other assertions."""
     if trait_set is None:
         return None
     explanation = _normalise_name(trait_set.get("multipleConditionExplanation", ""))
     if trait_set.get("Type") == "TraitChoice":
         if explanation in {"", "uncertain"}:
             return explanation or "choice"
-        # Conflicting instructions must not silently become either AND or OR.
         return "condition set"
     if explanation == "uncertain":
         return explanation
@@ -612,7 +488,6 @@ def _condition_set_name(names: list[str], group: str | None) -> str | None:
     if not names:
         return None
     joiner = " OR " if group in OR_CONDITION_GROUPS else "; "
-    # Uncertain OR means one or several of the conditions, not exactly one.
     return joiner.join(names)
 
 
@@ -621,22 +496,20 @@ def _combined_traits(
 ) -> dict[str, Any]:
     references = []
     for trait in traits:
-        references.extend(trait["external_references"])
-        references.extend(
-            {
-                "database": mapping["database"],
-                "accession": mapping["accession"],
-                "reference_subject": "phenotype",
-            }
-            for mapping in trait["phenotype"]["ontology_mappings"]
-        )
+        references.extend(trait["reported_external_references"])
     name = _condition_set_name(
         [trait["phenotype"]["phenotype_name"] for trait in traits], group,
     )
     return {
-        "phenotype": {"phenotype_name": name, "ontology_mappings": []},
-        "external_references": _unique(references),
+        "phenotype": {"phenotype_name": name},
+        "reported_external_references": _unique(references),
     }
+
+
+def _publication_evidence(publications: list[dict[str, Any]]) -> dict[str, Any] | None:
+    return {
+        "publications": publications, "ega_accessions": [], "statistics": [],
+    } if publications else None
 
 
 def _aggregate_assessments(
@@ -703,7 +576,7 @@ def _aggregate_assessments(
                     "last_evaluated_date": last_evaluated_date,
                     "source_accession": rcv_accession,
                     "submitters": [],
-                    "publications": publications,
+                    "evidence": _publication_evidence(publications),
                 }
             )
     return assessments, warnings
@@ -770,7 +643,7 @@ def _submission_assessments(
                 "last_evaluated_date": last_evaluated_date,
                 "source_accession": accession,
                 "submitters": [submitter] if submitter else [],
-                "publications": publications,
+                "evidence": _publication_evidence(publications),
             }
             if inheritance_types:
                 assessment["annotation"] = {
@@ -806,12 +679,12 @@ def parse_clinvar_set(
         reference_assertion, assembly, component_accessions=component_accessions,
         warnings=numeric_warnings,
     )
-    reported_variant = variant.pop("reported_variant")
+    reported_entity = variant.pop("reported_entity")
     reported_genes = variant.pop("reported_genes")
     reported_allele, ambiguous_location = _reported_allele(
-        reported_variant["locations"]
+        reported_entity["locations"]
     )
-    for component in reported_variant["components"]:
+    for component in reported_entity["components"]:
         if _reported_allele(component["locations"])[1]:
             ambiguous_location = True
     if ambiguous_location:
@@ -834,32 +707,14 @@ def parse_clinvar_set(
     relationship_type = assertion.get("Type") if assertion is not None else None
     aggregate_inheritance_types = _inheritance_types(reference_assertion)
 
-    # ClinVar already groups these SCVs under this RCV. Keep that membership;
-    # do not infer independent classifications for individual traits.
-    # Classification context (germline/somatic/unspecified) can still require rows.
     if len(aggregate_traits) > 1:
         trait = _combined_traits(aggregate_traits, trait_set["condition_group"])
-        event = (
-            "multiple_traits_combined_as_choice"
-            if trait_set["condition_group"] in OR_CONDITION_GROUPS
-            else "multiple_traits_combined_as_group"
-        )
-        contextual_warnings.append((event, None, ""))
     else:
         trait = aggregate_traits[0]
-    entity = _prepare_entity(reported_variant)
-    entity_locations = _prepare_entity_locations(reported_variant)
+    entity = _prepare_entity(reported_entity)
     phenotype = {
-        **trait["phenotype"],
-        "ontology_mappings": [
-            {
-                **mapping,
-                # Existing provisional-label policy: ClinVar name, no lookup.
-                "label": trait["phenotype"]["phenotype_name"],
-                "mapping_method": "source_provided",
-            }
-            for mapping in trait["phenotype"]["ontology_mappings"]
-        ],
+        **trait["phenotype"], "mapped_terms": [], "ontology_accessions": [],
+        "measurement": None,
     }
     records = []
     uncertain_context = _uncertain_context_details(clinvar_set, assessments)
@@ -883,29 +738,29 @@ def parse_clinvar_set(
                 "phenotype": phenotype,
                 "entity": entity,
                 "somatic_status": somatic_status,
-                "entity_locations": entity_locations,
-                "source_report": {
+                "source_reports": [{
                     "source_accession": rcv_accession,
-                    "reported_phenotype_names": trait_set["reported_phenotype_names"],
+                    "reported_phenotypes": trait_set["reported_phenotypes"],
                     "reported_relationship_type": relationship_type,
-                    "reported_variant": reported_variant,
+                    "reported_entity": reported_entity,
                     "reported_allele": reported_allele,
                     "reported_genes": reported_genes,
-                    "external_references": trait["external_references"],
+                    "reported_external_references": trait["reported_external_references"],
+                    "evidence": None,
+                    "assessments": status_assessments,
                     "annotation": (
                         {"inheritance_types": aggregate_inheritance_types}
                         if aggregate_inheritance_types else None
                     ),
-                },
-                "assessments": status_assessments,
+                }],
             }
         )
     return records, contextual_warnings
 
 
-def _report_progress(summary: dict[str, Any], started_at: float, stage: str) -> None:
+def _report_progress(n_records: int, started_at: float, stage: str) -> None:
     print(
-        f"[Parsing ClinVar RCV] {stage}: {summary['n_records_seen']:,} records processed; "
+        f"[Parsing ClinVar RCV] {stage}: {n_records:,} records processed; "
         f"elapsed {format_elapsed(started_at)}",
         file=sys.stderr, flush=True,
     )
@@ -915,25 +770,18 @@ def parse_clinvar(
     rcv_input: str | Path,
     assembly: str,
     records_path: str | Path,
-    summary_path: str | Path,
     *,
     vcv_input: str | Path,
     source_name: str,
-    genome_context: dict[str, Any] | None = None,
+    genome_context: dict[str, Any],
     pipeline_run_date: str | None = None,
     pipeline_revision: str | None = None,
-) -> dict[str, Any]:
+) -> None:
     if not isinstance(source_name, str) or not source_name.strip():
         raise ValueError("Source name must come from the source configuration key")
-    if genome_context is not None:
-        genome_context = validate_clinvar_context(genome_context)
-        if genome_context.get("assembly") != assembly:
-            raise ValueError("GenomeContext assembly must match the requested assembly")
-    else:
-        genome_context = {
-            "species_taxonomy_id": 9606, "species_production_name": "homo_sapiens",
-            "assembly": assembly, "assembly_uuid": None,
-        }
+    genome_context = validate_clinvar_context(genome_context)
+    if genome_context["assembly"] != assembly:
+        raise ValueError("GenomeContext assembly must match the requested assembly")
     rcv_input = Path(rcv_input)
     vcv_input = Path(vcv_input)
     pipeline_run_date = (
@@ -943,27 +791,10 @@ def parse_clinvar(
     if pipeline_revision is None:
         pipeline_revision = git_revision(Path(__file__).resolve().parent)
     records_path = Path(records_path)
-    summary_path = Path(summary_path)
-    warnings_path = summary_path.parent / "warnings.txt"
-    rejections_path = summary_path.parent / "rejections.txt"
-
-    for output_path in (records_path, summary_path):
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    summary: dict[str, Any] = {
-        "n_records_seen": 0,
-        "n_records_accepted": 0,
-        "perc_records_accepted": 0.0,
-        "n_records_rejected": 0,
-        "perc_records_rejected": 0.0,
-        "rejections_by_reason": {},
-        "n_records_emitted": 0,
-        "n_unique_phenotypes": 0,
-        "warnings": {},
-    }
-    rejection_counts: Counter[str] = Counter()
-    warning_counts: Counter[str] = Counter()
-    unique_phenotype_names: set[str] = set()
+    records_path.parent.mkdir(parents=True, exist_ok=True)
+    warnings_path = records_path.parent / "warnings.txt"
+    rejections_path = records_path.parent / "rejections.txt"
+    n_records = 0
     print(
         "[Recording ClinVar inputs] Calculating SHA-256 checksums (RCV, VCV)",
         file=sys.stderr, flush=True,
@@ -1005,14 +836,13 @@ def parse_clinvar(
                 records_handle.write("\n")
                 if vcv_release_date and release_date != vcv_release_date:
                     warning = "input_release_date_mismatch"
-                    warning_counts[warning] += 1
                     warnings_writer.writerow([
                         "", "", "", warning,
                         f"RCV release: {release_date}; VCV release: {vcv_release_date}",
                     ])
                 continue
 
-            summary["n_records_seen"] += 1
+            n_records += 1
             try:
                 records, warnings = parse_clinvar_set(
                     element, assembly, component_accessions=component_accessions,
@@ -1031,47 +861,24 @@ def parse_clinvar(
                 rejections_writer.writerow([
                     rcv_accession, vcv_accession, error.reason, details,
                 ])
-                summary["n_records_rejected"] += 1
-                rejection_counts[error.reason] += 1
             else:
-                summary["n_records_accepted"] += 1
                 for record in records:
                     records_handle.write(json.dumps(record, ensure_ascii=False))
                     records_handle.write("\n")
-                    summary["n_records_emitted"] += 1
-                    unique_phenotype_names.add(
-                        _normalise_name(record["phenotype"]["phenotype_name"])
-                    )
-                warning_counts.update(warning for warning, _, _ in warnings)
                 for warning, scv_accession, details in warnings:
-                    if warning in SUMMARY_ONLY_EVENTS:
-                        continue
                     warnings_writer.writerow([
-                        records[0]["source_report"]["source_accession"],
-                        records[0]["source_report"]["reported_variant"]["identifier"],
+                        records[0]["source_reports"][0]["source_accession"],
+                        records[0]["source_reports"][0]["reported_entity"]["identifier"],
                         scv_accession, warning, details,
                     ])
 
-            if summary["n_records_seen"] % PROGRESS_INTERVAL == 0:
-                _report_progress(summary, started_at, "Progress")
+            if n_records % PROGRESS_INTERVAL == 0:
+                _report_progress(n_records, started_at, "Progress")
 
     if release_date is None:
         raise ValueError("No ReleaseSet root found")
 
-    if summary["n_records_seen"]:
-        for outcome in ("accepted", "rejected"):
-            summary[f"perc_records_{outcome}"] = round(
-                100 * summary[f"n_records_{outcome}"] / summary["n_records_seen"],
-                2,
-            )
-    summary["n_unique_phenotypes"] = len(unique_phenotype_names)
-    summary["rejections_by_reason"] = dict(sorted(rejection_counts.items()))
-    summary["warnings"] = dict(sorted(warning_counts.items()))
-    with summary_path.open("w", encoding="utf-8") as summary_handle:
-        json.dump(summary, summary_handle, ensure_ascii=False, indent=2)
-        summary_handle.write("\n")
-    _report_progress(summary, started_at, "Complete")
-    return summary
+    _report_progress(n_records, started_at, "Complete")
 
 
 def _argument_parser() -> argparse.ArgumentParser:
@@ -1085,7 +892,6 @@ def _argument_parser() -> argparse.ArgumentParser:
     context_arguments.add_argument("--genome-context", type=json.loads,
                                    help="One configured context as JSON, supplied internally by Nextflow")
     parser.add_argument("--records", required=True, type=Path, help="Accepted JSONL output")
-    parser.add_argument("--summary", required=True, type=Path, help="Summary JSON output")
     parser.add_argument("--pipeline-run-date", type=lambda value: date.fromisoformat(value).isoformat(),
                         help="Output production date (YYYY-MM-DD); defaults to the parser's start date")
     parser.add_argument("--pipeline-directory", type=Path,
@@ -1119,18 +925,16 @@ def main() -> int:
             raise ValueError("Standalone parsing needs RCV and VCV input paths; use Nextflow to download omitted files")
     except (OSError, ValueError) as error:
         parser.error(str(error))
-    summary = parse_clinvar(
+    parse_clinvar(
         rcv_input=rcv_input,
         vcv_input=vcv_input,
         source_name=source_name,
         assembly=genome_context["assembly"],
         records_path=args.records,
-        summary_path=args.summary,
         genome_context=genome_context,
         pipeline_run_date=args.pipeline_run_date,
         pipeline_revision=git_revision(args.pipeline_directory or Path(__file__).resolve().parent),
     )
-    print(json.dumps(summary))
     return 0
 
 

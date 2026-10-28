@@ -27,6 +27,7 @@ CONTEXT = {
     "species_production_name": "homo_sapiens",
     "assembly": "GRCh38",
     "assembly_uuid": None,
+    "genome_uuid": None,
 }
 
 

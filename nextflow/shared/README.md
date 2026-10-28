@@ -177,8 +177,19 @@ cd nextflow/shared
 nf-test test modules/local/clinvar tests/clinvar_inputs.nf.test tests/shared_runner.nf.test
 ```
 
-The phenotype integration tests use the consumer's separate environment. From
-the repository root:
+The phenotype integration tests use the consumer's separate environment.
+The parser adopts the base branch's source-report/entity model and emits records,
+warnings and rejections; the consumer loader now emits `clinvar_load_summary.json`
+in place of a parser summary. A local adapter renders shared variant evidence
+in that model without changing the shared extractor's variant/allele contract.
+`genome_uuid` is now retained by shared context validation, alongside the existing
+nullable `assembly_uuid`.
+
+The database consumer accepts one configured context per source snapshot, as in
+the base branch. Shared evidence extraction still supports multiple contexts.
+Pipeline tests disable or stub database writes and use a dummy `.env` fixture;
+the loader metadata preflight is also tested without a database connection.
+From the repository root:
 
 ```bash
 uv sync --locked --project nextflow/phenotypes
@@ -189,9 +200,9 @@ cd nextflow/shared
 nf-test test tests/phenotype_module.nf.test tests/phenotypes.nf.test
 ```
 
-The regression compares all four phenotype output files against the upstream
+The regression compares all three phenotype output files against the upstream
 baseline. To run all Python tests together, use the phenotype environment with
-`-p 'test_*.py'`. To run all fourteen Nextflow tests together, use `nf-test test`
+`-p 'test_*.py'`. To run all fifteen Nextflow tests together, use `nf-test test`
 after setting up the phenotype environment.
 
 Tests use tiny synthetic XML files and no external ClinVar downloads. They cover

@@ -49,14 +49,6 @@ output:
         type: file
         description: Variant-phenotype associations with import metadata.
         ontologies: []
-  summary:
-  - - meta:
-        type: map
-        description: Caller metadata with id; passed through unchanged.
-    - '*_summary.json':
-        type: file
-        description: Parser counts and diagnostics summary.
-        ontologies: []
   warnings:
   - - meta:
         type: map

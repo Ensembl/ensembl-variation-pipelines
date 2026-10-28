@@ -14,9 +14,8 @@ CREATE TABLE entity (
 CREATE TABLE ontology_term (
     ontology_term_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     accession TEXT NOT NULL UNIQUE,
-    label TEXT NOT NULL,
-    source TEXT NOT NULL,
-    url TEXT
+    label TEXT,
+    source TEXT NOT NULL
 );
 
 CREATE TABLE source (
@@ -46,8 +45,15 @@ CREATE TABLE publication (
 
 CREATE TABLE phenotype (
     phenotype_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    phenotype_name TEXT NOT NULL,
-    primary_ontology_term_id BIGINT REFERENCES ontology_term (ontology_term_id) ON DELETE RESTRICT
+    phenotype_name TEXT NOT NULL
+);
+
+-- Harmonisation-selected terms only, not an automatic union of source terms.
+-- Derive mapped_terms (labels) and ontology_accessions in the same accession order.
+CREATE TABLE phenotype_ontology_term (
+    phenotype_id BIGINT NOT NULL REFERENCES phenotype (phenotype_id) ON DELETE CASCADE,
+    ontology_term_id BIGINT NOT NULL REFERENCES ontology_term (ontology_term_id) ON DELETE RESTRICT,
+    PRIMARY KEY (phenotype_id, ontology_term_id)
 );
 
 CREATE TABLE phenotype_measurement (
@@ -60,10 +66,7 @@ CREATE TABLE genome_context (
     genome_context_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     species_taxonomy_id INTEGER NOT NULL,
     species_production_name TEXT NOT NULL,
-    organism_id TEXT,
-    organism_display_name TEXT,
     assembly TEXT,
-    assembly_accession TEXT,
     assembly_uuid TEXT,
     genome_uuid TEXT
 );
@@ -82,8 +85,6 @@ CREATE TABLE entity_location (
     seq_region_start BIGINT NOT NULL,
     seq_region_end BIGINT NOT NULL,
     seq_region_strand INTEGER CHECK (seq_region_strand IN (-1, 1)),
-    reference_allele TEXT,
-    alternate_alleles TEXT[] NOT NULL DEFAULT '{}',
     CHECK (
         seq_region_start >= 1
         AND seq_region_end >= 0
@@ -105,34 +106,34 @@ CREATE TABLE source_report (
     source_id BIGINT NOT NULL REFERENCES source (source_id) ON DELETE RESTRICT,
     import_run_id BIGINT NOT NULL REFERENCES import_run (import_run_id) ON DELETE RESTRICT,
     source_accession TEXT,
-    reported_phenotype_names TEXT[] NOT NULL,
     reported_genes TEXT[] NOT NULL DEFAULT '{}',
     reported_allele TEXT,
-    comparison_allele TEXT,
-    allele_role TEXT,
+    reported_comparison_allele TEXT,
+    reported_allele_role TEXT,
     reported_relationship_type TEXT,
-    reported_biological_context TEXT,
-    biological_context_id BIGINT REFERENCES ontology_term (ontology_term_id) ON DELETE RESTRICT
+    reported_biological_context TEXT
 );
 
-CREATE TABLE reported_variant (
-    reported_variant_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+CREATE TABLE reported_entity (
+    reported_entity_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     source_report_id BIGINT UNIQUE REFERENCES source_report (source_report_id) ON DELETE CASCADE,
-    parent_reported_variant_id BIGINT REFERENCES reported_variant (reported_variant_id) ON DELETE CASCADE,
+    parent_reported_entity_id BIGINT REFERENCES reported_entity (reported_entity_id) ON DELETE CASCADE,
     component_ordinal INTEGER,
     identifier TEXT,
     alternative_identifiers TEXT[] NOT NULL DEFAULT '{}',
-    variant_type TEXT,
+    entity_type TEXT NOT NULL,
+    label TEXT,
+    reported_type TEXT,
     structural_attributes JSONB NOT NULL DEFAULT '{}',
-    UNIQUE (parent_reported_variant_id, component_ordinal),
+    UNIQUE (parent_reported_entity_id, component_ordinal),
     CHECK (
-        (source_report_id IS NOT NULL) <> (parent_reported_variant_id IS NOT NULL)
+        (source_report_id IS NOT NULL) <> (parent_reported_entity_id IS NOT NULL)
     )
 );
 
-CREATE TABLE reported_variant_location (
-    reported_variant_location_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    reported_variant_id BIGINT NOT NULL REFERENCES reported_variant (reported_variant_id) ON DELETE CASCADE,
+CREATE TABLE reported_entity_location (
+    reported_entity_location_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    reported_entity_id BIGINT NOT NULL REFERENCES reported_entity (reported_entity_id) ON DELETE CASCADE,
     assembly TEXT,
     assembly_accession TEXT,
     assembly_status TEXT,
@@ -153,11 +154,18 @@ CREATE TABLE reported_variant_location (
     strand TEXT
 );
 
-CREATE TABLE phenotype_ontology_mapping (
-    phenotype_ontology_mapping_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+CREATE TABLE reported_phenotype (
+    reported_phenotype_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     source_report_id BIGINT NOT NULL REFERENCES source_report (source_report_id) ON DELETE CASCADE,
+    phenotype_ordinal INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    UNIQUE (source_report_id, phenotype_ordinal)
+);
+
+CREATE TABLE reported_phenotype_ontology_term (
+    reported_phenotype_id BIGINT NOT NULL REFERENCES reported_phenotype (reported_phenotype_id) ON DELETE CASCADE,
     ontology_term_id BIGINT NOT NULL REFERENCES ontology_term (ontology_term_id) ON DELETE RESTRICT,
-    mapping_method TEXT
+    PRIMARY KEY (reported_phenotype_id, ontology_term_id)
 );
 
 CREATE TABLE external_reference (

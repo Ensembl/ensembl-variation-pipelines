@@ -21,6 +21,7 @@ CONTEXT = {
     "species_production_name": "homo_sapiens",
     "assembly": "GRCh38",
     "assembly_uuid": None,
+    "genome_uuid": None,
 }
 
 
@@ -174,6 +175,15 @@ class ClinvarTests(unittest.TestCase):
         self.assertIsNone(validate_clinvar_context(CONTEXT)["assembly_uuid"])
         with self.assertRaisesRegex(ValueError, "requires an assembly"):
             validate_clinvar_context({**CONTEXT, "assembly": None})
+
+    def test_genome_uuid_is_preserved_and_validated_by_the_shared_context(self):
+        genome_uuid = "fd7fea38-981a-4d73-a879-6f9daef86f08"
+        context = validate_clinvar_context({**CONTEXT, "genome_uuid": genome_uuid})
+        self.assertEqual(context["genome_uuid"], genome_uuid)
+        for field in ("assembly_uuid", "genome_uuid"):
+            with self.subTest(field=field):
+                with self.assertRaisesRegex(ValueError, field):
+                    validate_clinvar_context({**CONTEXT, field: "invalid"})
 
     def test_invalid_release_headers_are_rejected_by_shared_reader(self):
         cases = [

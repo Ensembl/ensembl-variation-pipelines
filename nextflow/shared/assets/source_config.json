@@ -10,7 +10,8 @@
           "species_taxonomy_id": 9606,
           "species_production_name": "homo_sapiens",
           "assembly": "GRCh38",
-          "assembly_uuid": "fd7fea38-981a-4d73-a879-6f9daef86f08"
+          "assembly_uuid": "fd7fea38-981a-4d73-a879-6f9daef86f08",
+          "genome_uuid": null
         }
       ]
     }

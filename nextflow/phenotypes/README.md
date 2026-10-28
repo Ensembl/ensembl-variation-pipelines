@@ -1,6 +1,6 @@
 # Phenotypes pipeline
 
-Pipeline to download and parse phenotype data for PostgreSQL.
+Pipeline to download, parse, load and harmonise phenotype data into PostgreSQL.
 
 ```bash
 module load nextflow/26.04.0
@@ -21,25 +21,13 @@ The Python project requires Python 3.14 and uses `uv`. Create or update the virt
 uv sync
 ```
 
-This installs `variation-sources` from the adjacent `../shared` directory.
-Keep both directories when copying the checkout. Downloads, variant evidence,
-context validation and provenance are maintained in
-[the shared components](../shared/README.md); phenotype transformations remain
-in this pipeline.
-
-The default `standard` profile runs tasks with this virtual environment on
-`PATH`. For Slurm without a managed runtime, activate it before launching:
-
-```bash
-source .venv/bin/activate
-nextflow run main.nf -profile slurm
-```
-
-Managed task runtimes are available through `-profile docker`,
-`-profile singularity`, and `-profile conda`; combine with `slurm` for cluster
-execution, for example `-profile slurm,singularity`. Configuration validation
-still uses the pipeline's virtual environment, so run `uv sync` first with any
-profile. Publishing and optional parser arguments are in `conf/modules.config`.
+The local `variation-sources` dependency is installed from `../shared`. Keep
+both directories together. Shared source parsing, validation and provenance are
+maintained there; phenotype interpretation and database loading remain here.
+The default local profile uses this virtual environment for parser tasks.
+Parser tasks also support Docker, Singularity and Conda profiles. The loader
+uses the phenotype virtual environment and a native PostgreSQL client runtime;
+the Slurm profile loads `postgresql/16` for that process.
 
 ## Database connection
 
@@ -119,12 +107,20 @@ SET search_path TO phenotypes;
 
 ## ClinVar
 
-- By default, the pipeline downloads the current ClinVar RCV XML release from https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz
-Failed download attempts are retried three times
-- To use a pre-downloaded file, set `sources.ClinVar.inputs.rcv` in the common source configuration (`../shared/assets/source_config.json`) - a missing or null value triggers download
+- By default, the pipeline downloads the current ClinVar XML releases:
+  - RCV: https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz
+  - VCV: https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarVCVRelease_00-latest.xml.gz
+- Failed download attempts are retried three times, separately for each file
+- To use pre-downloaded files, set `sources.ClinVar.inputs.rcv` and
+  `sources.ClinVar.inputs.vcv` in the source configuration (`../shared/assets/source_config.json`).
+- The source key (`ClinVar`) supplies the source name in the JSONL metadata and database; no separate name setting is needed.
+  A missing or null value downloads that file only; an incorrect supplied path is an error
+- The parser reads VCV first to map haplotype component Allele IDs to versioned
+  VCV accessions, then parses associations from RCV. VCV does not change phenotype
+  grouping, classifications or which SCVs belong to an RCV
 - Species and assembly also come from the `source_config.json` file
 - ClinVar requires a human context and an assembly for its location filter, `assembly_uuid` is optional
-- Both phenotypes and the shared input runner default to `nextflow/shared/assets/source_config.json`. An alternative can be provided by using:
+- Both phenotypes and the shared runner use `nextflow/shared/assets/source_config.json` by default, but an alternative can be provided by using:
 
 ```bash
 nextflow run "$PIPELINE_DIR/main.nf" --source_config /path/to/source_config.json
@@ -132,93 +128,25 @@ nextflow run "$PIPELINE_DIR/main.nf" --source_config /path/to/source_config.json
 
 - The intermediate JSONL is published to `<outdir>/clinvar/<species_production_name>/<assembly>/`
 - The first JSONL line contains `metadata` shared across all records, subsequent lines are the records themselves
+- Each record follows `PhenotypeAssociation`: `phenotype`, `entity`, `somatic_status` and `source_reports`. Assessments belong inside each source report; publications belong inside each assessment's evidence
+- Shared source, import-run and genome-context objects remain in the header rather than being repeated in each record
+- Parser outputs are `clinvar_output.jsonl`, `warnings.txt` and `rejections.txt`.
 
-### Notes
+### Run the pipeline
 
-The sections below contain some notes on how the parser handles the data
+The workflow runs download → parse → load. Create the database tables first,
+then run from the directory containing `.env`:
 
-#### Multi-phenotype records
-
-- The parser keeps each RCV's complete set of phenotypes together, without splitting multi-traits
-- In some cases, a separator is used as it may help the user with interpretation later on, this is selected as follows:
-
-| ClinVar grouping | Meaning | Example output label |
-| --- | --- | --- |
-| `TraitChoice` | Alternative conditions. | A OR B |
-| `multipleConditionExplanation="Uncertain"` | One or several conditions may apply; OR does not mean exactly one. | A OR B |
-| `multipleConditionExplanation="Novel disease"` | Features describe a proposed new disease; use a neutral separator. | Muscle weakness; Developmental delay |
-| `multipleConditionExplanation="Co-occurring"` | Conditions are reported together; use a neutral separator. | A; B |
-| `TraitChoice` with a non-empty explanation other than `Uncertain` | Set-level instructions differ; keep a neutral separator. | A; B |
-| Missing, unknown or conflicting grouping | Keep the set without choosing AND or OR. | A; B |
-
-The phenotype name uses the aggregate's grouping. For `RCV001834555.3`, the aggregate has TraitChoice, so its label becomes
-`Hyperparathyroidism 4 OR Hypoparathyroidism, familial isolated, 2`.
-
-#### Aggregate and submission assessments
-
-- Submission assessment (associated with an SCV) is a submitter's classification of the pheno-variant relationship -- there can be multiple contributing to one pheno-variant relationship
-- Aggregate assessment is ClinVar's summary of the >=1 submission assessments
-- The parser keeps both the RCV aggregate and its current, supported SCV assessments
-
-#### Germline, somatic and unspecified context
-
-- The parser assigns a context to each assessment separately, including the aggregate and each SCV 
-- It reads this from certain tags with the following rules:
-
-| XML classification | Context |
-| --- | --- |
-| `GermlineClassification` | `germline` |
-| `SomaticClinicalImpact` | `somatic` |
-| `OncogenicityClassification` | `somatic` |
-| `NoClassification` | `unspecified` |
-
-- As per the ClinVar docs, historical somatic assessments can appear under the `GermlineClassification` tag, but it'd be wrong to classify these as germline, so the parser:
-  - Checks that assertion's `ModeOfInheritance` values:
-    - If it only contains `Somatic mutation`: use `somatic`
-    - `Somatic mutation` plus another mode: use `unspecified` and output a warning
-    - No `Somatic mutation`: keep `germline`
-- Assessments with the same context are collected into one output record per RCV
-- An `unspecified` assessment would go into a separate unspecified record
-- For example, an RCV with a germline classification, somatic clinical-impact assessment and oncogenicity assessment produces two records:
-
-```text
-Same variant and complete condition set
-├── germline record
-│   └── germline assessment
-└── somatic record
-    ├── clinical-impact assessment
-    └── oncogenicity assessment
+```bash
+module load nextflow/26.04.0
+nextflow run "$PIPELINE_DIR/main.nf" \
+    --source_config /path/to/source_config.json \
+    --outdir output
 ```
 
-#### Phenotype names and observed features
+- If ClinVar is already loaded, the loader refuses to overwrite it unless `--replace` is supplied. Replacement covers **all existing reports for that source**, not just the configured assembly
 
-- The main phenotype name is the aggregate trait's preferred name, or its single available alternate name
-- The whole RCV is rejected if the aggregate trait has neither
-- Replace nonspecific labels such as `See cases`, `not provided` and `not specified` with `ClinVar: phenotype not specified`, keeping the original report label in `source_report.reported_phenotype_names`
-- Treat `DrugResponse` names, such as `Ezetimibe response`, as phenotype names
-- Use the assertion-level `TraitSet` for assessed conditions
-- Clinical features under `ObservedIn/TraitSet` are currently not extracted or used as replacements. For example, `RCV000051340.4` is labelled `See cases` even though its SCV reports `Global developmental delay` as an observed feature. Its output uses the placeholder - it does not create a separate classified association for that feature
-- Keep aggregate-trait six-digit OMIM condition references with `Type="MIM"` or no type; exclude allelic-variant references such as `613665.0004`
-
-#### Assembly, locations and alleles
-
-- The parser keep placements for the configured assembly only - it rejects the RCV if the variant, or any haplotype component, has no placement on that assembly
-- Prefer sequence accessions beginning `NC_` when available
-- Keep multiple qualifying placements separate, including X/Y placements - do not flatten them
-
-#### Supported variant representations
-
-- Retain structural variants and haplotypes
-- Haplotype components keep their own identifiers and locations; the assessment applies to the complete haplotype, not independently to each component
-- `Variant`, `Haplotype` and `Haplotype, single variant` MeasureSets are supported
-- GenotypeSets, including diplotypes and compound heterozygotes, and other MeasureSet types are skipped.
-
-#### Cleaning and provenance
-
-- Write valid assessment dates as `YYYY-MM-DD`
-- Remove recognised DOI prefixes and formatting spaces
-- Invalid supplied dates, numbers and selected DOIs become null with a warning; the remaining record is kept
-- Do not substitute a URL for an invalid DOI or look up missing values
+### Notes
 
 #### Output: `warnings.txt`
 
@@ -235,9 +163,13 @@ Same variant and complete condition set
 | `duplicate_trait_merged` | A repeated trait is merged using its ClinVar trait ID, or identical XML when no ID is present. Its mappings and references are combined rather than creating another trait. |
 | `ambiguous_primary_location` | Retained placements for the variant or a haplotype component have different VCF reference/alternate allele pairs. Locations remain separate; the parent `reported_allele` is null if its own placements are ambiguous. |
 | `conflicting_inheritance_context` | An assertion reports `Somatic mutation` alongside another inheritance mode. Its context is set to `unspecified`; the classification and reported inheritance values are preserved. |
+| `ambiguous_somatic_context` | Legacy classification contexts conflict or contradict sample origin. All assessments remain together in one unspecified record rather than being split. |
 | `invalid_numeric_attribute` | A supplied coordinate or other numeric location attribute is not a valid integer. That value becomes null; the rest of the record is retained. |
 | `invalid_last_evaluated_date` | The assessment date cannot be read as a valid supported date. It becomes null; the assessment remains. |
 | `invalid_doi` | The selected DOI cannot be recognised after cleaning. The publication remains with a null identifier; a URL is not substituted for the invalid DOI. |
+| `missing_component_vcv` | No current individual VCV with a version was found for a haplotype component. Keep its original Allele ID. |
+| `ambiguous_component_vcv` | Several different accession/version values were found for one component Allele ID. Keep its original Allele ID rather than choosing one. |
+| `input_release_date_mismatch` | The RCV and VCV release dates differ. Processing continues, but identifiers may come from different snapshots. |
 
 #### Output: `rejections.txt`
 

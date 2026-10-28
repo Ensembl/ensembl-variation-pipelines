@@ -15,7 +15,6 @@ process PARSE_CLINVAR {
 
     output:
     tuple val(meta), path("${task.ext.prefix ?: meta.id}_output.jsonl"), emit: records
-    tuple val(meta), path("${task.ext.prefix ?: meta.id}_summary.json"), emit: summary
     tuple val(meta), path('warnings.txt'), emit: warnings
     tuple val(meta), path('rejections.txt'), emit: rejections
     tuple val("${task.process}"), val('python'), eval("python --version | sed 's/Python //'"), emit: versions_python, topic: versions
@@ -39,14 +38,12 @@ process PARSE_CLINVAR {
         --vcv-input "${vcv_xml}" \\
         --source-name ${source_argument} \\
         --genome-context ${context_argument} \\
-        --records '${prefix}_output.jsonl' \\
-        --summary '${prefix}_summary.json'
+        --records '${prefix}_output.jsonl'
     """
 
     stub:
     def prefix = task.ext.prefix ?: meta.id
     """
     touch '${prefix}_output.jsonl' warnings.txt rejections.txt
-    printf '{}\\n' > '${prefix}_summary.json'
     """
 }

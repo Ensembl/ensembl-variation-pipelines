@@ -1,6 +1,6 @@
 nextflow_pipeline {
     name 'Phenotype consumer of shared ClinVar components'
-    script '../../phenotypes/main.nf'
+    script 'main.nf'
     tag 'pipeline'
     tag 'clinvar'
     tag 'clinvar/phenotypes'
@@ -9,7 +9,7 @@ nextflow_pipeline {
         options "-c $baseDir/tests/skip_load.config"
         when {
             params {
-                source_config = "$baseDir/tests/data/source_config_single.json"
+                source_config = "$baseDir/tests/data/source_config.json"
                 env_file = "$baseDir/tests/data/database.env"
                 outdir = "$outputDir/results"
             }
@@ -36,24 +36,6 @@ nextflow_pipeline {
             assertAll(
                 { assert workflow.success },
                 { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_output.jsonl").exists() },
-                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_load_summary.json").exists() }
-            )
-        }
-    }
-
-    test('Local-input pipeline stub preserves diagnostic and loader outputs') {
-        options '-stub-run'
-        when {
-            params {
-                source_config = "$baseDir/tests/data/source_config_single.json"
-                env_file = "$baseDir/tests/data/database.env"
-                outdir = "$outputDir/results"
-            }
-        }
-        then {
-            assertAll(
-                { assert workflow.success },
-                { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_output.jsonl").exists() },
                 { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/warnings.txt").exists() },
                 { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/rejections.txt").exists() },
                 { assert file("$outputDir/results/clinvar/homo_sapiens/GRCh38/clinvar_load_summary.json").exists() }
@@ -65,7 +47,7 @@ nextflow_pipeline {
         options '-stub-run'
         when {
             params {
-                source_config = "$baseDir/tests/data/source_config.json"
+                source_config = "$baseDir/tests/data/source_config_multiple.json"
                 env_file = "$baseDir/tests/data/database.env"
                 outdir = "$outputDir/results"
             }

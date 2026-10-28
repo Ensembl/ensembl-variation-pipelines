@@ -35,11 +35,12 @@ Copy `.env` to the run directory:
 
 ```bash
 cd /path/to/run-directory
-cp -n "$PIPELINE_DIR/.env.example" .env
+cp -n "$PIPELINE_DIR/../shared/assets/.env.example" .env
 chmod 600 .env
 ```
 
-Set the PostgreSQL connection details in `.env`:
+Set the PostgreSQL connection details in `.env`, including the required
+consumer schema (`phenotypes` here):
 
 ```ini
 [postgresql]
@@ -52,6 +53,11 @@ password=
 ```
 
 Leave `password` empty to use `.pgpass` or the `psql` password prompt.
+
+The shared `variation_sources.database` module validates these settings and
+builds both loader connection arguments and PostgreSQL client environment
+variables. The schema helper uses the same parser through the Python environment
+created by `uv sync`. Phenotype SQL and loading policies remain in this pipeline.
 
 # First time only set-up **(first time only)**
 
@@ -197,3 +203,33 @@ nextflow run "$PIPELINE_DIR/main.nf" \
 | `unsupported_classification` | No usable aggregate assessment is present in a supported classification category. |
 
 - For example, `RCV000677106.1` has only a GRCh37 placement and is rejected with `missing_requested_assembly_location` when GRCh38 is requested
+
+
+## Tests
+
+From the repository root, run the phenotype Python tests in this consumer's
+own environment:
+
+```bash
+uv sync --locked --project nextflow/phenotypes
+nextflow/phenotypes/.venv/bin/python -m unittest discover -s nextflow/phenotypes/tests -v
+```
+
+These tests check phenotype associations, source identities, ontology identifiers,
+parser-to-loader metadata compatibility, protected-schema policy and the schema
+application command. Assertions describe the current output model and loading
+behavior. Shared source parsing and database settings have their own tests in
+`nextflow/shared/tests`.
+
+With Java 17+, Nextflow 26.04.0 and nf-test 0.9.5 available:
+
+```bash
+cd nextflow/phenotypes
+nf-test test
+```
+
+The Nextflow suite checks the phenotype parser module, pipeline publishing and
+the single-context loading guard. Parser integration uses a test configuration
+that disables database loading; full workflow stubs check loader outputs. Schema
+command tests use a fake `psql`, and database calls are intercepted. These tests
+do not exercise a live PostgreSQL server.

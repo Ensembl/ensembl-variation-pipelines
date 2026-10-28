@@ -43,7 +43,7 @@ The default URLs use `latest`; use local, versioned input files for reproducible
 releases. Sharing code does not itself share completed work between independently
 launched pipelines.
 
-## Run input preparation independently
+## Run download and extraction
 
 The shared runner uses `assets/source_config.json` in this directory and the
 shared Python environment. From the repository root:
@@ -55,8 +55,18 @@ nextflow run nextflow/shared --outdir results/shared
 
 The default asset sets both inputs to null, so this downloads the latest RCV
 and VCV releases. Downloads are copied to `results/shared/clinvar/inputs/`.
-The runner prints the resolved paths and prepares inputs only; it does not run
-phenotype or synonym parsing. Local execution requires `curl` on `PATH`.
+The runner prints the resolved input paths and calls `EXTRACT_CLINVAR` once per
+configured genome context. RCV evidence is written under
+`results/shared/clinvar/evidence/<species_production_name>/<assembly>/`:
+
+- `clinvar.jsonl`: metadata and source variant evidence.
+- `clinvar.summary.json`: extraction counts and rejection reasons.
+- `rejections.jsonl`: unsupported records and missing assembly placements.
+
+The VCV release is prepared alongside RCV but is not parsed by this extractor.
+Phenotype transformation and synonym mapping remain consumer steps.
+The default local profile puts the shared virtual environment on task `PATH`.
+Local execution also requires `curl` on `PATH`.
 
 To use existing files, copy the shared asset, set `sources.ClinVar.inputs.rcv`
 and `sources.ClinVar.inputs.vcv` to literal paths, and pass your configuration:
@@ -66,12 +76,13 @@ nextflow run nextflow/shared --source_config /path/to/source_config.json
 ```
 
 Relative input paths resolve against that JSON file's directory. Existing input
-files are used directly; only downloaded files are published. For a small local
-fixture run without downloading anything:
+files are used directly; extraction outputs and any downloaded files are
+published. For a small local fixture run without downloading anything:
 
 ```bash
 nextflow run nextflow/shared \
-    --source_config nextflow/shared/tests/data/source_config.json
+    --source_config nextflow/shared/tests/data/source_config.json \
+    --outdir results/shared-test
 ```
 
 Both the shared runner and phenotypes default to the single asset at
@@ -145,69 +156,51 @@ to parent synonyms. Assembly UUID may be null; ClinVar requires an assembly labe
 RCV extraction alone does not cover VCV-only variants; add a VCV evidence adapter
 before claiming complete ClinVar synonym coverage.
 
-## Validation
+## Database configuration
 
-The shared package has its own environment and lockfile. From the repository
-root, create `nextflow/shared/.venv` and run the shared ClinVar unit tests:
+Consumers import database configuration directly from
+`variation_sources.database`:
+
+- `database_config(section, env_file)` reads INI settings and validates the
+  required connection fields and port.
+- `postgresql_connection_args(settings)` maps validated settings to driver
+  arguments without importing a database driver.
+- `postgresql_environment(env_file)` builds string-valued PostgreSQL environment
+  variables for tools such as `psql` and requires an explicit schema.
+
+Copy `nextflow/shared/assets/.env.example` into the run directory and fill in
+the connection details and consumer schema. Both the phenotype loader and its
+schema helper use these shared functions. A blank password is omitted from
+connection arguments and environment overrides, allowing libpq authentication.
+SQL schemas, driver dependencies, transactions and loading policies remain with
+each consumer. The shared download-and-extract runner does not read this file or
+require database settings.
+
+## Tests
+
+Shared tests cover ClinVar streaming, variant identities, assembly selection,
+source evidence, configuration validation and PostgreSQL settings. They run in
+the shared environment independently of any consumer:
 
 ```bash
 uv sync --locked --project nextflow/shared
-nextflow/shared/.venv/bin/python -m unittest discover \
-    -s nextflow/shared/tests -p 'test_clinvar*.py' -v
+nextflow/shared/.venv/bin/python -m unittest discover -s nextflow/shared/tests -v
 ```
 
-This installs only `variation-sources`; phenotypes is not needed. The package
-requires Python 3.12 or later. Use Python 3.14 for the Nextflow module tests to
-match their declared runtime.
-
-`test_clinvar.py` covers extraction, configuration, statuses, assembly rejection
-and VCV component identity. `test_clinvar_sources.py` covers XML streaming and
-cleanup, identifier namespaces, assembly and scaffold selection, malformed
-coordinates, allele ambiguity, rejection accounting, empty releases, and keeping
-each haplotype member's HGVS evidence attached to its own allele. These contracts
-are the starting point for a synonyms adapter. The existing extractor reads RCV
-evidence; full VCV-only variant extraction remains future work.
-
-With Java 17+, Nextflow 26.04.0 and nf-test 0.9.5 on `PATH`, run the nine shared
-module and input-workflow tests independently of phenotypes:
+With Java 17+, Nextflow 26.04.0 and nf-test 0.9.5 available, run the shared
+module, input-workflow and download/extraction runner tests:
 
 ```bash
-export PATH="$PWD/nextflow/shared/.venv/bin:$PATH"
 cd nextflow/shared
-nf-test test modules/local/clinvar tests/clinvar_inputs.nf.test tests/shared_runner.nf.test
+nf-test test
 ```
 
-The phenotype integration tests use the consumer's separate environment.
-The parser adopts the base branch's source-report/entity model and emits records,
-warnings and rejections; the consumer loader now emits `clinvar_load_summary.json`
-in place of a parser summary. A local adapter renders shared variant evidence
-in that model without changing the shared extractor's variant/allele contract.
-`genome_uuid` is now retained by shared context validation, alongside the existing
-nullable `assembly_uuid`.
+The module tests check explicit inputs, outputs, version topics and stubs. The
+runner checks published evidence for multiple assembly contexts. Synthetic XML
+and local file URLs keep these tests independent of external ClinVar releases
+and database services. Container and Conda execution are not exercised.
 
-The database consumer accepts one configured context per source snapshot, as in
-the base branch. Shared evidence extraction still supports multiple contexts.
-Pipeline tests disable or stub database writes and use a dummy `.env` fixture;
-the loader metadata preflight is also tested without a database connection.
-From the repository root:
-
-```bash
-uv sync --locked --project nextflow/phenotypes
-nextflow/phenotypes/.venv/bin/python -m unittest discover \
-    -s nextflow/shared/tests -p 'test_phenotype_regression.py' -v
-export PATH="$PWD/nextflow/phenotypes/.venv/bin:$PATH"
-cd nextflow/shared
-nf-test test tests/phenotype_module.nf.test tests/phenotypes.nf.test
-```
-
-The regression compares all three phenotype output files against the upstream
-baseline. To run all Python tests together, use the phenotype environment with
-`-p 'test_*.py'`. To run all fifteen Nextflow tests together, use `nf-test test`
-after setting up the phenotype environment.
-
-Tests use tiny synthetic XML files and no external ClinVar downloads. They cover
-real and stub module execution, local/missing inputs, literal-path validation,
-multiple assembly contexts, phenotype outputs matching the rebased upstream schema, gzip input, source
-statuses, release headers, genotype rejection and haplotype relationships.
-CI runs the same suites. Containers and Conda runtimes are declared but are not
-exercised by the local-runtime test suite.
+Phenotype behavior and loading policies are tested in the
+[phenotype suite](../phenotypes/README.md#tests). That suite reuses the small raw
+XML fixtures from `shared/tests/data`; its configurations and database fixtures
+belong to `phenotypes/tests/data`.

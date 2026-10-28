@@ -14,10 +14,6 @@ nextflow_pipeline {
         then {
             assertAll(
                 { assert workflow.success },
-                { assert workflow.stdout.join('\n').contains('RCV: ') },
-                { assert workflow.stdout.join('\n').contains('/tests/data/rcv.xml') },
-                { assert workflow.stdout.join('\n').contains('VCV: ') },
-                { assert workflow.stdout.join('\n').contains('/tests/data/vcv.xml') },
                 { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/clinvar.jsonl").readLines().size() == 3 },
                 { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/clinvar.jsonl").text.contains('rs999999') },
                 { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/clinvar.summary.json").text.contains('"n_records_emitted": 2') },

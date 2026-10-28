@@ -7,3 +7,7 @@ __pycache__/
 .ruff_cache
 
 .env
+.nf-test/
+.nf-test.log*
+.nextflow/
+.nextflow.log*

@@ -1,3 +1,5 @@
+"""Read shared database settings without importing a database driver."""
+
 import configparser
 from pathlib import Path
 
@@ -40,3 +42,21 @@ def postgresql_environment(env_file: str | Path = ".env") -> dict[str, str]:
     if values.get("password"):
         result["PGPASSWORD"] = values["password"]
     return result
+
+
+def postgresql_connection_args(settings: dict, *, connect_timeout: int = 15) -> dict:
+    """Build driver arguments from validated settings; defer blank passwords.
+
+    Omitting an empty password preserves libpq authentication through .pgpass
+    or the environment. Callers retain ownership of schema and loading policy.
+    """
+    arguments = {
+        "host": settings["host"],
+        "port": settings["port"],
+        "user": settings["user"],
+        "dbname": settings["name"],
+        "connect_timeout": connect_timeout,
+    }
+    if settings.get("password"):
+        arguments["password"] = settings["password"]
+    return arguments

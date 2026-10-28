@@ -16,7 +16,7 @@ import simplejson
 from psycopg import sql
 from psycopg.types.json import Jsonb
 
-from phenotypes.config import database_config
+from variation_sources.database import database_config, postgresql_connection_args
 from variation_sources.source_config import validate_clinvar_context
 
 
@@ -416,13 +416,7 @@ def load_clinvar(
     schema = required_text(settings, "schema")
     if schema in {"public", "pg_catalog", "information_schema"} or schema.startswith("pg_"):
         raise ValueError(f"Refusing protected schema {schema}")
-    connection_args = {
-        "host": settings["host"], "port": settings["port"],
-        "user": settings["user"], "dbname": settings["name"],
-        "connect_timeout": 15,
-    }
-    if settings.get("password"):
-        connection_args["password"] = settings["password"]
+    connection_args = postgresql_connection_args(settings)
     print(
         f"[Loading ClinVar] Target: {settings['host']} / {settings['name']} / {schema}",
         file=sys.stderr, flush=True,

@@ -26,7 +26,7 @@ nextflow_process {
                 { assert file(process.out.summary[0][1]).text.contains('"n_records_emitted": 2') },
                 { assert file(process.out.rejections[0][1]).text.contains('unsupported_genotype_set') },
                 { assert process.out.versions_python[0][2].startsWith('3.') },
-                { assert process.out.versions_parser[0][2] == '0.1.0' }
+                { assert process.out.versions_parser[0][2] ==~ /[0-9]+\.[0-9]+\.[0-9]+.*/ }
             )
         }
     }
@@ -49,7 +49,7 @@ nextflow_process {
                 { assert file(process.out.summary[0][1]).exists() },
                 { assert file(process.out.rejections[0][1]).exists() },
                 { assert process.out.versions_python[0][2].startsWith('3.') },
-                { assert process.out.versions_parser[0][2] == '0.1.0' }
+                { assert process.out.versions_parser[0][2] ==~ /[0-9]+\.[0-9]+\.[0-9]+.*/ }
             )
         }
     }

@@ -1,10 +1,10 @@
 nextflow_pipeline {
-    name 'Standalone shared ClinVar input runner'
+    name 'Standalone shared ClinVar download and extraction runner'
     script 'main.nf'
     tag 'pipeline'
     tag 'shared_runner'
 
-    test('Resolve configuration-relative local files without phenotypes') {
+    test('Extract local RCV evidence for both assembly contexts without phenotypes') {
         when {
             params {
                 source_config = "$baseDir/tests/data/source_config.json"
@@ -17,12 +17,19 @@ nextflow_pipeline {
                 { assert workflow.stdout.join('\n').contains('RCV: ') },
                 { assert workflow.stdout.join('\n').contains('/tests/data/rcv.xml') },
                 { assert workflow.stdout.join('\n').contains('VCV: ') },
-                { assert workflow.stdout.join('\n').contains('/tests/data/vcv.xml') }
+                { assert workflow.stdout.join('\n').contains('/tests/data/vcv.xml') },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/clinvar.jsonl").readLines().size() == 3 },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/clinvar.jsonl").text.contains('rs999999') },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/clinvar.summary.json").text.contains('"n_records_emitted": 2') },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/rejections.jsonl").text.contains('unsupported_genotype_set') },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh37/clinvar.jsonl").readLines().size() == 1 },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh37/clinvar.summary.json").text.contains('"n_records_rejected": 3') },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh37/rejections.jsonl").readLines().size() == 3 }
             )
         }
     }
 
-    test('Default shared asset downloads and publishes both releases - stub') {
+    test('Default common asset downloads and extracts with published outputs - stub') {
         options '-stub-run'
         when {
             params {
@@ -33,7 +40,10 @@ nextflow_pipeline {
             assertAll(
                 { assert workflow.success },
                 { assert file("$outputDir/results/clinvar/inputs/ClinVarRCVRelease_00-latest.xml.gz").exists() },
-                { assert file("$outputDir/results/clinvar/inputs/ClinVarVCVRelease_00-latest.xml.gz").exists() }
+                { assert file("$outputDir/results/clinvar/inputs/ClinVarVCVRelease_00-latest.xml.gz").exists() },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/clinvar.jsonl").exists() },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/clinvar.summary.json").exists() },
+                { assert file("$outputDir/results/clinvar/evidence/homo_sapiens/GRCh38/rejections.jsonl").exists() }
             )
         }
     }

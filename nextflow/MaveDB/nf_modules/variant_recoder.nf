@@ -102,7 +102,7 @@ process run_variant_recoder {
   log "vr_start" "na" "attempt=${task.attempt} requested_mem=${task.memory} hgvs_lines=\${HGVS_LINES} registry_sha256=${registryDigest}"
 
   rc=0
-  perl ${bin}/variant_recoder -i ${hgvs} --vcf_string ${reg} > vr.json 2> vr.stderr || rc=\$?
+  perl ${bin}/variant_recoder -i ${hgvs} --format hgvs --vcf_string ${reg} > vr.json 2> vr.stderr || rc=\$?
 
   # always log final size of the output file
   BYTES=\$(wc -c < vr.json 2>/dev/null || echo 0)

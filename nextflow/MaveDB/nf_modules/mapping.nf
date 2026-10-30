@@ -6,7 +6,7 @@ process map_scores_to_HGVSp_variants {
   input:
     tuple val(urn), path(mappings), path(scores), path(metadata), path(vr)
   output:
-    tuple val(urn), path('map_*.tsv')
+    tuple val(urn), path('map_*.tsv'), path('map_*.tsv.skip_reason.txt')
 
   memory { mappings.size() * 4.B + 1.GB }
   
@@ -39,6 +39,16 @@ process map_scores_to_HGVSp_variants {
   if [ ! -f map_${urn}.tsv ]; then
       log "mapper_missing_output"
       exit 1
+  fi
+
+  # The mapper explicitly marks an empty VR result. Other successful empty
+  # mappings have no eligible scores; nonzero exits have already failed above.
+  if [ ! -f map_${urn}.tsv.skip_reason.txt ]; then
+      if [ ! -s map_${urn}.tsv ]; then
+          echo no_eligible_variants > map_${urn}.tsv.skip_reason.txt
+      else
+          : > map_${urn}.tsv.skip_reason.txt
+      fi
   fi
 
   log "stage_complete"

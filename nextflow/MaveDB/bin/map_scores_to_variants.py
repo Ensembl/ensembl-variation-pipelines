@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from vr_output import NoUsableVariants, load_matches, write_empty_vr_mapping
 import urllib.request
 from urllib.parse import urlencode
 import csv
@@ -48,7 +49,12 @@ def main():
   print(mavedb_ids)
 
   if args.vr is not None:
-    hgvsp2vars = load_vr_output(args.vr)
+    try:
+      hgvsp2vars = load_vr_output(args.vr)
+    except NoUsableVariants:
+      write_empty_vr_mapping(args.output)
+      warnings.warn("Expected empty mapping: no_usable_vr_variants")
+      return True
   else:
     hgvsp2vars = None
 
@@ -60,33 +66,8 @@ def main():
   print("Done: MaveDB score mapped to variants!", flush=True)
   return True
 
-def load_vr_output (f):
-  """Load Variant Recoder output"""
-  data = json.load(open(f))
-
-  matches = {}
-  for result in data:
-    for allele in result:
-      info = result[allele]
-
-      if type(info) is list and "Unable to parse" in info[0]:
-        continue
-
-      hgvs = info["input"]
-      for string in info["vcf_string"]:
-        chr, start, ref, alt = string.split('-')
-        end = int(start) + len(alt) - 1
-        dict = OrderedDict([("HGVSp", hgvs),
-                            ("chr",   chr),
-                            ("start", start),
-                            ("end",   end),
-                            ("ref",   ref),
-                            ("alt",   alt)])
-
-        if hgvs not in matches:
-          matches[hgvs] = []
-        matches[hgvs].append(dict)
-  return matches
+def load_vr_output(f):
+  return load_matches(f, warn=warnings.warn)
 
 def load_HGVSp_to_variant_matches (f):
   """Load HGVSp to variant matches"""
@@ -201,6 +182,7 @@ def map_scores_to_variants (scores, mappings, metadata, map_ids, matches=None, r
   }
 
   out = []
+  eligible = 0
   for row in scores:
     # Skip special HGVSp
     if row['hgvs_pro'] in ('_sy', '_wt', 'p.=') or row['hgvs_nt'] in ('_sy', '_wt'):
@@ -209,6 +191,8 @@ def map_scores_to_variants (scores, mappings, metadata, map_ids, matches=None, r
     # Skip missing values
     if row['score'] == "NA" or row['score'] is None:
       continue
+
+    eligible += 1
 
     # Map available information
     if row['accession'] in map_ids:
@@ -229,10 +213,18 @@ def map_scores_to_variants (scores, mappings, metadata, map_ids, matches=None, r
         out += map_variant_to_MaveDB_scores(matches, member, row, extra)
     else:
       out += map_variant_to_MaveDB_scores(matches, mapped_info, row, extra)
+  if not out and eligible:
+    raise ValueError("No usable mappings for eligible score rows")
   return out
 
 def write_variant_mapping (f, map):
   """Write mapping between MaveDB scores and associated variants to output file"""
+
+  if not map:
+    with open(f, 'w'):
+      pass
+    warnings.warn('Expected empty mapping: no eligible variants')
+    return True
 
   with open(f, 'w') as csvfile:
     header = list(map[0].keys())

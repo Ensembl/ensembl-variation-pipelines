@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import urllib.request                     # For making HTTP requests (e.g. to the Ensembl REST API)
+from vr_output import NoUsableVariants, load_matches, write_empty_vr_mapping
+import urllib.request
 from urllib.parse import urlencode        # To URL‐encode query parameters
 import csv                                # For reading/writing CSV/TSV files
 import os
@@ -77,7 +78,12 @@ def main():
 
   # If a Variant Recoder output file is provided, load it; otherwise, set matches to None
   if args.vr is not None:
-    hgvsp2vars = load_vr_output(args.vr)
+    try:
+      hgvsp2vars = load_vr_output(args.vr)
+    except NoUsableVariants:
+      write_empty_vr_mapping(args.output)
+      log("expected_empty_mapping", out=args.output, skip_reason="no_usable_vr_variants")
+      return True
   else:
     hgvsp2vars = None
 
@@ -89,47 +95,8 @@ def main():
   log("done", out=args.output)
   return True
 
-def load_vr_output (f):
-  """
-  Load Variant Recoder output.
-
-  Iterates over each allele in the JSON data, skipping any entries that couldn't be parsed.
-  For each valid allele, splits each VCF string (format: chr-start-ref-alt) and builds an
-  ordered dictionary with variant details. Returns a dictionary mapping HGVS strings to lists of variants.
-  """
-  data = json.load(open(f))
-
-  # Check if file has warnings - may indicate that variant recoder couldn't recode some or all variants
-  if any("warnings" in item for item in data):
-    log("vr_has_warnings", file=f)
-    # If *all* entries are warnings => nothing parseable
-    if all("warnings" in item for item in data):
-      log("vr_only_unable_to_parse", file=f)
-      sys.exit(1)
-
-  matches = {}
-  for result in data:
-    for allele in result:
-      info = result[allele]
-      # Skip and log entries that variant_recoder could not parse
-      if isinstance(info, list) and (info and ("Unable to parse" in info[0] or "skipped" in info[0])):
-        log("vr_unable_to_parse", subid=allele, msg=info[0] if info else "")
-        continue
-      hgvs = info["input"]
-      for string in info["vcf_string"]:
-        chr, start, ref, alt = string.split('-')
-        end = int(start) + len(alt) - 1
-        d = OrderedDict([("HGVSp", hgvs),
-                         ("chr",   chr),
-                         ("start", start),
-                         ("end",   end),
-                         ("ref",   ref),
-                         ("alt",   alt)])
-        if hgvs not in matches:
-          matches[hgvs] = []
-        matches[hgvs].append(d)
-  log("vr_loaded", n=sum(len(v) for v in matches.values()))
-  return matches
+def load_vr_output(f):
+  return load_matches(f, warn=lambda message: log("vr_warning", msg=message))
 
 def load_HGVSp_to_variant_matches (f):
   """Load HGVSp to variant matches from a TSV file."""
@@ -411,6 +378,8 @@ def map_scores_to_variants(scores, mappings, metadata, map_ids, matches=None, ro
       skipped_urn_mismatch=n_urn_mismatch,
       skipped_no_post_mapped=n_no_post)
 
+  if not out and len(scores) > n_skipped_special + n_skipped_na + n_no_post:
+    raise ValueError("No usable mappings for eligible score rows; inspect mapping/recoder warnings")
   return out
 
 def write_variant_mapping (f, map):
@@ -433,8 +402,10 @@ def write_variant_mapping (f, map):
     log("write_done", out=f, rows=len(map))
     return True
   else:
-    log("no_mappings_found", out=f)
-    sys.exit(1)
+    with open(f, 'w'):
+      pass
+    log("expected_empty_mapping", out=str(f), skip_reason="no_eligible_variants")
+    return True
 
 if __name__ == "__main__":
   main()

@@ -1,42 +1,30 @@
 process datacheck_urns {
+  errorStrategy 'terminate'
   tag "datacheck_urns"
-  publishDir "reports", mode: 'copy', overwrite: true
+
+  // Publish the data and index only after validation succeeds.
+  publishDir file(params.output).parent, mode: 'copy', overwrite: true, failOnError: true, pattern: "${file(params.output).name}*"
+  publishDir 'reports', mode: 'copy', overwrite: true, failOnError: true, pattern: '*.{txt,tsv,csv}'
 
   input:
-    tuple path(final_gz), path(urn_file), path(log_csv)
+    tuple path(final_gz), path(final_index), path(urn_file), path(log_csv), val(expected_skips)
 
   output:
+    path("${file(params.output).name}")
+    path("${file(params.output).name}.tbi")
     path("found_urns.txt")
     path("missing_urns.txt")
+    path("unexpected_missing_urns.txt")
+    path("skipped_urns.tsv")
     path("missing_logs.csv")
 
   script:
+  def encoded_skips = groovy.json.JsonOutput.toJson(expected_skips).getBytes('UTF-8').encodeBase64().toString()
   """
   #!/usr/bin/env bash
   set -euo pipefail
-
-  # Extract URNs from the final output (gzip) and sort unique
-  gzip -dc "${final_gz}" | awk -F'\\t' '
-    NR==1 {
-      for (i=1; i<=NF; i++) if (\$i=="urn") { col=i; break }
-      if (!col) { print "ERROR: urn column not found in output header" > "/dev/stderr"; exit 2 }
-      next
-    }
-    col && \$col && \$col!="urn" { print \$col }
-  ' | sort -u > found_urns.txt
-
-  # Sort unique input URNs (ignore blank lines)
-  awk "NF>0" "${urn_file}" | sort -u > input_urns.txt
-
-  # Compute missing URNs (present in input list but absent from output)
-  comm -23 input_urns.txt found_urns.txt > missing_urns.txt
-
-  # Collate logs for missing URNs (if any)
-  if [[ -s missing_urns.txt && -s "${log_csv}" ]]; then
-    (head -n1 "${log_csv}"; grep -F -f missing_urns.txt "${log_csv}") > missing_logs.csv || true
-  else
-    # Fallback header only
-    echo '"file","time","urn","step","reason","subid"' > missing_logs.csv
-  fi
+  test -s "${final_index}"
+  check_urns.py --output "${final_gz}" --urns "${urn_file}" \
+    --logs "${log_csv}" --skips-base64 '${encoded_skips}'
   """
 }

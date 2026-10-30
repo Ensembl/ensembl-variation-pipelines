@@ -76,6 +76,10 @@ workflow {
       .fromPath(params.urn, checkIfExists: true)
       .splitText()
       .map { it.trim() }
+      .filter { it }
+      .unique()
+
+  def licence_skips
 
   // If --from_files is true, use local files instead of downloading via the MaveDB API
   if (params.from_files) {
@@ -84,12 +88,12 @@ workflow {
     // metaChannel outputs tuples of [urn, metadata.json, LICENSE.txt]
     metaChannel = extract_metadata(urn, params.metadata_file)
 
-    // Log removed URNs (those that do NOT have a "CC0" license)
-    metaChannel
-    // Log removed URNs (e.g. - those that do NOT have a "CC0" license)
-    metaChannel
+    licence_skips = metaChannel
         .filter { !params.licences.tokenize(",").contains(it[2].text) }
-        .subscribe { println "NOTE: Discarded ${it[0]} based on license (${it[2].text})" }
+        .map {
+          println "NOTE: Discarded ${it[0]} based on license (${it[2].text})"
+          [it[0], 'licence_excluded']
+        }
 
     // Filter URNs based on license
     filteredMetaChannel = metaChannel.filter { params.licences.tokenize(",").contains(it[2].text) }
@@ -112,8 +116,9 @@ workflow {
   } else {
     // If --from_files is false, download MaveDB data via the API (this option is not advised as it's unreliable)
     licences = params.licences.tokenize(",")
-    urn = filter_by_licence(urn, licences)
-    download_MaveDB_data(urn)
+    filtered_licences = filter_by_licence(urn, licences)
+    licence_skips = filtered_licences.excluded
+    download_MaveDB_data(filtered_licences.filtered)
     files = download_MaveDB_data.out.map { [urn: it[0], mappings: it[1], scores: it[2], metadata: it[3]] }
   }
   
@@ -132,17 +137,25 @@ workflow {
   map_scores_to_HGVSp_variants(run_variant_recoder.out)
 
   // concatenate output files into a single file
-  output_files = liftover_to_hg38.out
-                  .mix(map_scores_to_HGVSp_variants.out)
-                  .collect { it.last() }
+  protein_outputs = map_scores_to_HGVSp_variants.out
+  protein_mappings = protein_outputs.map { urn, mapping, reason -> tuple(urn, mapping) }
+  mapped_outputs = liftover_to_hg38.out.mix(protein_mappings)
+  unmapped_skips = files.unmapped.map { [it[0], 'no_current_mapping'] }
+  genomic_empty_skips = liftover_to_hg38.out.filter { it.last().size() == 0 }.map { [it[0], 'no_eligible_variants'] }
+  protein_empty_skips = protein_outputs.filter { it[1].size() == 0 }.map { [it[0], it[2].text.trim()] }
+  empty_skips = genomic_empty_skips.mix(protein_empty_skips)
+  expected_skips = licence_skips.mix(unmapped_skips).mix(empty_skips).toList()
+  output_files = mapped_outputs.map { it.last() }.toList()
   concatenate_files(output_files)
   def tabix_out = tabix(concatenate_files.out)
 
   // collate logs into a single csv
-  log_collation_input = tabix_out.map { t -> [workflow.workDir.toString(), t] }
+  log_collation_input = tabix_out.data.map { t -> [workflow.workDir.toString(), t] }
   collate_logs(log_collation_input)
 
   // datacheck: compare final URNs against input list and pull logs for any missing URNs
-  datacheck_input = collate_logs.out.map { logs -> tuple(file(params.output), file(params.urn), logs) }
+  wrapped_skips = expected_skips.map { [it] }
+  datacheck_input = tabix_out.data.combine(tabix_out.index).combine(collate_logs.out).combine(wrapped_skips)
+      .map { data, index, logs, skips -> tuple(data, index, file(params.urn), logs, skips) }
   datacheck_urns(datacheck_input)
 }

@@ -1,11 +1,21 @@
 # Create MaveDB plugin data
 
-## Failure handling
+## Failure handling and output validation
 
 Nonzero tool exits and missing required outputs fail the workflow, including
-when a crashed tool leaves a partial file. Resource exits 130, 137 and 140
-are retried by the general process policy. Failed-task diagnostics remain
-in the Nextflow work directory.
+when a crashed tool leaves a partial file. Read errors during concatenation are
+fatal. The final data and index are published only after validation; failed
+runs leave any previously published output in place.
+
+Every requested URN must be mapped or explicitly skipped for licence exclusion,
+no current mapping, no eligible variants, or `no_usable_vr_variants`. Valid but
+unusable VR results produce an empty mapping; malformed JSON and nonzero VR
+exits remain errors. Skip reasons appear in `reports/skipped_urns.tsv`. A run
+with no mapped data at all fails. Failed-task diagnostics remain in `work/`.
+
+Use `-resume` to reuse successful tasks. Old runs may have cached empty
+placeholders after crashes; rerun affected tasks or use a fresh work directory.
+The outer Slurm launcher must also preserve Nextflow's failure status.
 
 ## Score precision
 

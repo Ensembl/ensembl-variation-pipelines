@@ -1,6 +1,6 @@
 # Create MaveDB plugin data
 
-## Failure handling and output validation
+## Failure handling and retries
 
 Nonzero tool exits and missing required outputs fail the workflow, including
 when a crashed tool leaves a partial file. Read errors during concatenation are
@@ -24,6 +24,17 @@ URN while retaining the `#variant` suffix. Published IDs stay unchanged.
 Repeated mapping records for the same original ID prefer a non-null `postMapped`;
 identical mappings are collapsed. Conflicting non-null mappings, distinct IDs
 that collide after normalization, and duplicate score IDs fail.
+
+VR retains the historical memory profile and retries resource exits 130, 137
+and 140, up to three retries and 500 GB. Exit 139 terminates the run. Exit 143
+terminates by default; use `--vr_retry_terminated true` only for known transient
+terminations. Retries retain the highest allocation requested. `--vr_time`
+sets the time limit (default `7d`).
+
+For RefSeq protein HGVS, the registry should include the matching human
+`otherfeatures` database, with the core database supplying DNA sequences.
+VR tasks include a digest of the registry contents as an input, so registry edits
+invalidate cached VR results when resuming.
 
 Use `-resume` to reuse successful tasks. Old runs may have cached empty
 placeholders after crashes; rerun affected tasks or use a fresh work directory.

@@ -13,6 +13,12 @@ unusable VR results produce an empty mapping; malformed JSON and nonzero VR
 exits remain errors. Skip reasons appear in `reports/skipped_urns.tsv`. A run
 with no mapped data at all fails. Failed-task diagnostics remain in `work/`.
 
+Ensembl REST lookups allow five attempts with a 30-second socket timeout,
+retrying HTTP 429/500/502/503/504, connection failures and interrupted reads.
+Backoff is 5, 10, 20 and 40 seconds. `Retry-After` is honoured up to 300 seconds;
+a longer requested wait, permanent HTTP errors, invalid JSON or exhausted
+retries fail the task. Attempts and VR warnings are logged.
+
 Use `-resume` to reuse successful tasks. Old runs may have cached empty
 placeholders after crashes; rerun affected tasks or use a fresh work directory.
 The outer Slurm launcher must also preserve Nextflow's failure status.

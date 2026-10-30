@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from vr_output import NoUsableVariants, load_matches, write_empty_vr_mapping
-import urllib.request
+from rest_retry import load_json_with_retry
 from urllib.parse import urlencode
 import csv
 import os
@@ -95,11 +95,10 @@ def get_chromosome (hgvs):
   """Lookup chromosome name in Ensembl REST API (unless already stored)"""
   global chrom
   if (chrom is None):
-    chrom = hgvs.split(":")[0]
-    url   = f"https://rest.ensembl.org/info/assembly/homo_sapiens/{chrom}?"
+    accession = hgvs.split(":")[0]
+    url   = f"https://rest.ensembl.org/info/assembly/homo_sapiens/{accession}?"
     data  = urlencode({"synonyms": 1, "content-type": "application/json"})
-    res   = urllib.request.urlopen(url + data).read()
-    res   = json.loads(res)
+    res   = load_json_with_retry(url + data, warn=warnings.warn)
     chrom = [each["name"] for each in res["synonyms"] if each['dbname'] == "UCSC"][0]
     chrom = chrom.replace("chr", "")
   return chrom

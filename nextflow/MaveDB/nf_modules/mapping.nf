@@ -15,7 +15,7 @@ process map_scores_to_HGVSp_variants {
   def script_name = params.from_files ? "map_scores_to_variants_fromfiles.py" : "map_scores_to_variants.py"
   """
   #!/usr/bin/env bash
-  set +e
+  set -euo pipefail
 
   export MAVEDB_URN='${urn}'
   export STEP='map_scores_hgvsp'
@@ -23,21 +23,22 @@ process map_scores_to_HGVSp_variants {
 
   log "stage_start"
 
+  rc=0
   ${script_name} --urn ${urn} \\
                  --scores ${scores} \\
                  --mappings ${mappings} \\
                  --metadata ${metadata} \\
                  --vr ${vr} \\
                  ${round} \\
-                 --output map_${urn}.tsv
-  rc=\$?
+                 --output map_${urn}.tsv || rc=\$?
   if [ "\$rc" -ne 0 ]; then
     log "mapper_nonzero_exit" "na" "rc=\$rc"
+    exit "\$rc"
   fi
 
-  if [ ! -s map_${urn}.tsv ]; then
-      : > map_${urn}.tsv
-      log "mapper_empty_output_created"
+  if [ ! -f map_${urn}.tsv ]; then
+      log "mapper_missing_output"
+      exit 1
   fi
 
   log "stage_complete"
@@ -61,7 +62,7 @@ process map_scores_to_HGVSg_variants {
   def script_name = params.from_files ? "map_scores_to_variants_fromfiles.py" : "map_scores_to_variants.py"
   """
   #!/usr/bin/env bash
-  set +e
+  set -euo pipefail
 
   export MAVEDB_URN='${urn}'
   export STEP='map_scores_hgvs_g'
@@ -69,20 +70,21 @@ process map_scores_to_HGVSg_variants {
 
   log "stage_start"
 
+  rc=0
   ${script_name} --urn ${urn} \\
                  --scores ${scores} \\
                  --mappings ${mappings} \\
                  --metadata ${metadata} \\
                  ${round} \\
-                 --output map_${urn}.tsv
-  rc=\$?
+                 --output map_${urn}.tsv || rc=\$?
   if [ "\$rc" -ne 0 ]; then
     log "mapper_nonzero_exit" "na" "rc=\$rc"
+    exit "\$rc"
   fi
 
-  if [ ! -s map_${urn}.tsv ]; then
-      : > map_${urn}.tsv
-      log "mapper_empty_output_created"
+  if [ ! -f map_${urn}.tsv ]; then
+      log "mapper_missing_output"
+      exit 1
   fi
 
   log "stage_complete"

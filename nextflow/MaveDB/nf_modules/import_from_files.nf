@@ -12,7 +12,7 @@ process import_from_files {
   script:
   """
   #!/usr/bin/env bash
-  set +e
+  set -euo pipefail
   export MAVEDB_URN='${urn}'
   export STEP='import_from_files'
 
@@ -23,20 +23,21 @@ process import_from_files {
 
   log "stage_start"
 
-  import_from_files.sh "${urn}" "${params.mappings_path}" "${params.scores_path}"
-  rc=\$?
+  rc=0
+  import_from_files.sh "${urn}" "${params.mappings_path}" "${params.scores_path}" || rc=\$?
   if [ "\$rc" -ne 0 ]; then
     log "stager_nonzero_exit" "na" "rc=\$rc"
+    exit "\$rc"
   fi
 
   if [ ! -s mappings.json ]; then
-    echo "[]" > mappings.json
-    log "missing_mappings_after_staging; wrote empty mapping array"
+    log "missing_or_empty_mappings_after_staging"
+    exit 1
   fi
 
   if [ ! -s scores.csv ]; then
-    : > scores.csv
-    log "missing_scores_after_staging; wrote empty CSV"
+    log "missing_or_empty_scores_after_staging"
+    exit 1
   fi
 
   log "stage_complete"

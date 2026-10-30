@@ -8,7 +8,7 @@ process extract_metadata {
 
   input:
     val urn
-    path metadata_file
+    path metadata_file, stageAs: 'source_metadata.json'
 
   output:
     tuple val(urn), file("metadata.json"), file("LICENCE.txt")
@@ -16,7 +16,7 @@ process extract_metadata {
   script:
   """
   #!/usr/bin/env bash
-  set +e
+  set -euo pipefail
   export MAVEDB_URN='${urn}'
   export STEP='extract_metadata'
 
@@ -27,17 +27,16 @@ process extract_metadata {
 
   log "stage_start" "na" "metadata_file=${metadata_file}"
 
-  extract_metadata.py --metadata_file ${metadata_file} --urn "${urn}"
-  rc=\$?
+  rc=0
+  extract_metadata.py --metadata_file ${metadata_file} --urn "${urn}" || rc=\$?
   if [ "\$rc" -ne 0 ]; then
     log "extractor_nonzero_exit" "na" "rc=\$rc"
+    exit "\$rc"
   fi
 
-  # If metadata.json is missing or empty, create fallback files
-  if [ ! -s metadata.json ]; then
-      echo "{}" > metadata.json
-      echo ""  > LICENCE.txt
-      log "missing_metadata_after_extractor; wrote empty JSON/LICENCE"
+  if [ ! -s metadata.json ] || [ ! -s LICENCE.txt ]; then
+      log "missing_or_empty_metadata_or_licence"
+      exit 1
   fi
 
   meta_bytes=\$(wc -c < metadata.json 2>/dev/null || echo 0)

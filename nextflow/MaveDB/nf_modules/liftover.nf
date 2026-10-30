@@ -4,6 +4,7 @@ process download_chain_files {
 
   shell:
   '''
+  set -euo pipefail
   log() { ts=$(date -Is); >&2 echo "[$ts][MaveDB][URN=na][STEP=download_chain_files][REASON=$1][SUBID=na] ${2:-}"; }
 
   reference="Hg38"
@@ -34,7 +35,7 @@ process liftover_to_hg38 {
 
   """
   #!/usr/bin/env bash
-  set +e
+  set -euo pipefail
   export MAVEDB_URN='${urn}'
   export STEP='liftover'
 
@@ -42,18 +43,18 @@ process liftover_to_hg38 {
 
   log "stage_start" "input=${mapped_variants}"
 
+  rc=0
   liftover.py --metadata ${metadata} \
               --mapped_variants ${mapped_variants} \
-              --reference hg38
-  rc=\$?
+              --reference hg38 || rc=\$?
   if [ "\$rc" -ne 0 ]; then
     log "liftover_nonzero_exit" "na" "rc=\$rc"
+    exit "\$rc"
   fi
 
-  # Ensure an output exists
-  if [ ! -s liftover_map_${urn}.tsv ]; then
-      : > liftover_map_${urn}.tsv
-      log "liftover_empty_output_created"
+  if [ ! -f liftover_map_${urn}.tsv ]; then
+      log "liftover_missing_output"
+      exit 1
   fi
 
   log "stage_complete" "out=liftover_map_${urn}.tsv"

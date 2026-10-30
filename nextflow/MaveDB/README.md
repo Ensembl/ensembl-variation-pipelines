@@ -1,5 +1,12 @@
 # Create MaveDB plugin data
 
+## Failure handling
+
+Nonzero tool exits and missing required outputs fail the workflow, including
+when a crashed tool leaves a partial file. Resource exits 130, 137 and 140
+are retried by the general process policy. Failed-task diagnostics remain
+in the Nextflow work directory.
+
 ## Score precision
 
 Scores retain their input precision by default. Use `--round N` to request

@@ -83,7 +83,7 @@ process run_variant_recoder {
   def reg = params.registry ? "--registry ${params.registry}" : ""
   """
   #!/usr/bin/env bash
-  set +e
+  set -euo pipefail
   export MAVEDB_URN='${urn}'
   export STEP='variant_recoder'
   log() { local ts; ts=\$(date -Is); >&2 echo "[\$ts][MaveDB][URN=\${MAVEDB_URN:-na}][STEP=\${STEP:-na}][REASON=\$1][SUBID=\${2:-na}] \${3:-}"; }
@@ -91,8 +91,8 @@ process run_variant_recoder {
   HGVS_LINES=\$(wc -l < "${hgvs}" 2>/dev/null || echo 0)
   log "vr_start" "na" "attempt=${task.attempt} hgvs_lines=\${HGVS_LINES}"
 
-  perl ${bin}/variant_recoder -i ${hgvs} --vcf_string ${reg} > vr.json 2> vr.stderr
-  rc=\$?
+  rc=0
+  perl ${bin}/variant_recoder -i ${hgvs} --vcf_string ${reg} > vr.json 2> vr.stderr || rc=\$?
 
   # always log final size of the output file
   BYTES=\$(wc -c < vr.json 2>/dev/null || echo 0)
@@ -101,6 +101,7 @@ process run_variant_recoder {
 
   if [ "\$rc" -ne 0 ]; then
     log "vr_exit_nonzero" "na" "rc=\$rc attempt=${task.attempt}"
+    cat vr.stderr >&2
     exit "\$rc"
   fi
 

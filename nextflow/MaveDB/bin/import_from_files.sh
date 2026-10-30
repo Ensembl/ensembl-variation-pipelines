@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 log() {
   local ts; ts="$(date -Is)"
@@ -7,7 +8,7 @@ log() {
 
 log "import_start" "na" "msg=import_from_files-processing-URN:'${1:-na}'"
 
-if [[ $# < 3 ]]
+if (( $# < 3 ))
 then 
       log "bad_args" "na" "got=$# expected>=3"
       exit 1
@@ -24,11 +25,11 @@ export STEP="${STEP:-import_from_files}"
 score_urn=$(echo "${urn}" | sed 's/:/-/g')
 mapping_file="$(
   find "$mappings_path" -type f ! -name '._*' -iname "*${score_urn}.mapped-variants.json" -printf '%T@ %p\n' \
-  | sort -nr | head -1 | cut -d' ' -f2-
+  | sort -nr | sed -n '1p' | cut -d' ' -f2-
 )"
 score_file="$(
   find "$scores_path" -type f ! -name '._*' -iname "*${score_urn}.scores.csv" -printf '%T@ %p\n' \
-  | sort -nr | head -1 | cut -d' ' -f2-
+  | sort -nr | sed -n '1p' | cut -d' ' -f2-
 )"
 
 # Score files are required. Mapping files are optional in the public dump:
@@ -49,7 +50,7 @@ fi
 log "scores_found" "na" "src=${score_file} sanitized=${score_urn}"
 
 # Check if the file contains any lines starting with "tmp:"
-if grep -q '^tmp:' ${score_file}; then
+if grep -q '^tmp:' "${score_file}"; then
 
   log "scores_tmp_ids_detected"
 
@@ -77,7 +78,7 @@ else
 fi
 
 # If contents of pwd is mappings.json and scores.csv, then the files are copied successfully - check
-if [ -f mappings.json ] && [ -f scores.csv ]; then
+if [ -s mappings.json ] && [ -s scores.csv ]; then
   log "stage_ok"
   log "stage_listing" "na" "pwd=$(pwd)"
   ls -l mappings.json scores.csv 1>&2 || true

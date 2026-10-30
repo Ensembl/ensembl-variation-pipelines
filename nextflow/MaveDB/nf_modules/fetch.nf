@@ -1,6 +1,5 @@
 process download_MaveDB_metadata {
   // Download MaveDB metadata
-  errorStrategy 'ignore'
 
   input:  val urn
   output: tuple val(urn), path('metadata.json'), path('LICENCE.txt')

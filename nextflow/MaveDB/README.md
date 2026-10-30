@@ -19,6 +19,12 @@ Backoff is 5, 10, 20 and 40 seconds. `Retry-After` is honoured up to 300 seconds
 a longer requested wait, permanent HTTP errors, invalid JSON or exhausted
 retries fail the task. Attempts and VR warnings are logged.
 
+Temporary IDs in scores and mapping records normalize to the requested score-set
+URN while retaining the `#variant` suffix. Published IDs stay unchanged.
+Repeated mapping records for the same original ID prefer a non-null `postMapped`;
+identical mappings are collapsed. Conflicting non-null mappings, distinct IDs
+that collide after normalization, and duplicate score IDs fail.
+
 Use `-resume` to reuse successful tasks. Old runs may have cached empty
 placeholders after crashes; rerun affected tasks or use a fresh work directory.
 The outer Slurm launcher must also preserve Nextflow's failure status.

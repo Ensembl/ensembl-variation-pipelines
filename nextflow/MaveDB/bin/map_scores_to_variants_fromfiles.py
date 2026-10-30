@@ -9,7 +9,7 @@ import operator                           # (Imported but not used explicitly)
 import warnings                           # For issuing warnings with custom formatting
 from collections import OrderedDict       # To maintain key order in output dictionaries
 from math import isclose                  # (Imported but not used explicitly)
-import re                                 # (Imported but not used explicitly)
+import re                                 # Validate temporary variant identifiers
 import argparse                           # For parsing command-line arguments
 import sys                                # For writing to stderr
 import datetime                           # For timestamping structured logs
@@ -53,7 +53,7 @@ def main():
   # Load the scores (CSV), mappings (JSON), and metadata (JSON) files
   log("load_start", scores=args.scores, mappings=args.mappings, metadata=args.metadata, vr=args.vr)
 
-  scores = load_scores(args.scores)
+  scores = load_scores(args.scores, args.urn)
 
   # Check if the scores file is empty, if so, log an error and exit - don't process this URN
   if not scores:
@@ -71,7 +71,7 @@ def main():
     metadata = json.load(f)
 
   # Public dump mapping files are top-level arrays of mapped variant records.
-  mapped_variants, mapping_dict = load_mapped_variants(mappings)
+  mapped_variants, mapping_dict = load_mapped_variants(mappings, args.urn)
   mavedb_ids = list(mapping_dict.keys())
 
   log("mappings_loaded", n=len(mapped_variants), unique_ids=len(mapping_dict))
@@ -110,9 +110,22 @@ def load_HGVSp_to_variant_matches (f):
       matches[hgvs].append(row)
   return(matches)
 
-def load_scores (f):
+def normalize_variant_id(identifier, urn):
+  """Resolve temporary IDs within this score set without changing variant suffixes."""
+  if not isinstance(identifier, str) or not identifier:
+    raise ValueError("Missing or invalid variant identifier")
+  if not identifier.startswith("tmp:"):
+    return identifier
+  match = re.fullmatch(r"tmp:[^#]+#([0-9]+)", identifier)
+  if match is None or not urn or "#" in urn:
+    raise ValueError(f"Cannot normalize temporary variant ID {identifier!r} for {urn!r}")
+  return f"{urn}#{match.group(1)}"
+
+def load_scores (f, urn):
   """Load MaveDB scores from a CSV file into a list of dictionaries."""
   scores = []
+  seen = set()
+  normalized = 0
   with open(f) as csvfile:
     reader = csv.DictReader(csvfile)
     # Strip whitespace from each header name -- I think only necessary due to the csv viewer adding spacing and then this was cached in a nf run. Consider removing.
@@ -124,22 +137,33 @@ def load_scores (f):
         if clean_key.startswith('scores.'):
           clean_key = clean_key[len('scores.'):]
         clean_row[clean_key] = value.strip() if isinstance(value, str) else value
+      original = clean_row.get('accession')
+      accession = normalize_variant_id(original, urn)
+      if accession in seen:
+        raise ValueError(f"Duplicate score accession after ID normalization: {accession}")
+      seen.add(accession)
+      normalized += accession != original
+      clean_row['accession'] = accession
       scores.append(clean_row)
+  if normalized:
+    log("scores_tmp_ids_normalized", n=normalized, expected_urn=urn)
   log("scores_loaded", n=len(scores))
   return scores
 
-def load_mapped_variants(mappings):
+def load_mapped_variants(mappings, urn):
   """Load mapped variant records.
 
   Public dump mapping files are top-level arrays whose records use
   variantUrn/postMapped. The mapper keeps mavedb_id/post_mapped internally
   so the rest of the mapping code can stay focused on coordinate handling.
+  Temporary variantUrn values use the requested score-set URN for matching,
+  with the original variantUrn retained in each copied record.
   """
   if not isinstance(mappings, list):
     raise ValueError("Mappings JSON must be a top-level array of mapped variant records")
 
-  mapped_variants = []
   mapping_dict = {}
+  normalized = 0
   for record in mappings:
     if not isinstance(record, dict):
       continue
@@ -151,15 +175,28 @@ def load_mapped_variants(mappings):
       log("mapping_without_variant_urn")
       continue
 
+    accession = normalize_variant_id(variant_urn, urn)
+    if accession in mapping_dict:
+      previous = mapping_dict[accession]
+      if previous["variantUrn"] != variant_urn:
+        raise ValueError(f"Duplicate current mapping accession after ID normalization: {accession}")
+      # The dump can pair a successful mapping with a failed mapping of the same ID.
+      if previous["post_mapped"] is not None and record.get("postMapped") is not None:
+        if previous["post_mapped"] != record["postMapped"]:
+          raise ValueError(f"Conflicting current mappings for accession: {accession}")
+      if previous["post_mapped"] is not None or record.get("postMapped") is None:
+        continue
+    normalized += accession != variant_urn
     mapping = dict(record)
-    mapping["mavedb_id"] = variant_urn
+    mapping["mavedb_id"] = accession
     mapping["post_mapped"] = record.get("postMapped")
     mapping["pre_mapped"] = record.get("preMapped")
 
-    mapped_variants.append(mapping)
-    mapping_dict[variant_urn] = mapping
+    mapping_dict[accession] = mapping
 
-  return mapped_variants, mapping_dict
+  if normalized:
+    log("mapping_tmp_ids_normalized", n=normalized, expected_urn=urn)
+  return list(mapping_dict.values()), mapping_dict
 
 # Global variable for caching chromosome name
 chrom = None

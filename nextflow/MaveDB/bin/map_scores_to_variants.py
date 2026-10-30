@@ -163,15 +163,15 @@ def map_variant_to_MaveDB_scores (matches, mapped_info, row, extra):
     # HGVS protein matches
     return match_information(hgvs, matches, row, extra)
 
-def round_float_columns(row, round):
+def round_float_columns(row, digits):
   """Round all values that are float"""
-  if round is not None:
+  if digits is not None:
     for i in row.keys():
       try:
-        rounded = round(float(row[i]), round)
-        # Avoid rounding integers
+        rounded = round(float(row[i]), digits)
+        # Avoid rounding integers
         row[i] = '{0:g}'.format(rounded)
-      except:
+      except (TypeError, ValueError):
         # Not a number
         pass
   return row

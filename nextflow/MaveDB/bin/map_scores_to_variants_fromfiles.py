@@ -285,16 +285,16 @@ def map_variant_to_MaveDB_scores(matches, mapped_info, row, extra):
   else:
     return match_information(hgvs, matches, row, extra)
 
-def round_float_columns(row, round):
+def round_float_columns(row, digits):
   """
   Round all float values in a row to a specified number of decimal places.
   """
-  if round is not None:
+  if digits is not None:
     for i in row.keys():
       try:
-        rounded = round(float(row[i]), round)
+        rounded = round(float(row[i]), digits)
         row[i] = '{0:g}'.format(rounded)
-      except:
+      except (TypeError, ValueError):
         # If the conversion fails, leave the value unchanged
         pass
   return row

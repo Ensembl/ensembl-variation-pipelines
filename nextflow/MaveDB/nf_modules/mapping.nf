@@ -11,7 +11,7 @@ process map_scores_to_HGVSp_variants {
   memory { mappings.size() * 4.B + 1.GB }
   
   script:
-  def round       = params.round ? "--round ${params.round}" : ""
+  def round       = params.round != null ? "--round ${params.round}" : ""
   def script_name = params.from_files ? "map_scores_to_variants_fromfiles.py" : "map_scores_to_variants.py"
   """
   #!/usr/bin/env bash
@@ -57,7 +57,7 @@ process map_scores_to_HGVSg_variants {
   memory { mappings.size() * 2.B + 1.GB }
 
   script:
-  def round       = params.round ? "--round ${params.round}" : ""
+  def round       = params.round != null ? "--round ${params.round}" : ""
   def script_name = params.from_files ? "map_scores_to_variants_fromfiles.py" : "map_scores_to_variants.py"
   """
   #!/usr/bin/env bash

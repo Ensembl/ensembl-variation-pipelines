@@ -1,5 +1,11 @@
 # Create MaveDB plugin data
 
+## Score precision
+
+Scores retain their input precision by default. Use `--round N` to request
+rounding explicitly, including `--round 0` for whole numbers. This preserves
+the previous effective default while correcting the broken rounding function.
+
 This Nextflow pipeline prepares data for the VEP [MaveDB plugin][].
 
 The pipeline input is a list of MaveDB URN IDs and the MaveDB data can be supplied to the plugin in one of two ways:
@@ -70,7 +76,7 @@ nextflow run [path_to]/ensembl-variation/nextflow/MaveDB/main.nf \
 | `--registry`      | Path to Ensembl registry file used for [Variant Recoder][] (default: none)                 |
 | `--vr_memory_hints` | Historical per-URN Variant Recoder memory profile (default: bundled profile)             |
 | `--licences`      | Comma-separated list of accepted licences (default: `CC0`)                                 |
-| `--round`         | Decimal places to round floats in MaveDB data (default: `4`)                               |
+| `--round`         | Optional decimal places for rounding floats (default: no rounding; preserves input precision) |
 | `--from_files`    | Use local files instead of downloading via the MaveDB API (default: true, this is advised) |
 | `--mappings_path` | Path to MaveDB mappings files (one JSON file per URN)                                      |
 | `--scores_path`   | Path to MaveDB scores files (one CSV file per URN)                                         |

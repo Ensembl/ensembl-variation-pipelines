@@ -15,7 +15,7 @@ params.registry = null
 params.vr_memory_hints = "${projectDir}/resources/vr_memory_hints.tsv"
 
 params.licences = "CC0" // Open-access only
-params.round    = 4
+params.round    = null // Preserve input precision unless rounding is explicitly requested.
 
 // Parameters for loading MaveDB from files:
 params.from_files    = true        // Use local files instead of downloading via the MaveDB API
@@ -47,7 +47,7 @@ if (params.help) {
     --scores_path   Path to MaveDB scores files (one CSV file per URN)
     --metadata_file Path to MaveDB metadata file (one collated file, i.e. main.json)
     --licences      Comma-separated list of accepted licences (default: 'CC0')
-    --round         Decimal places to round floats in MaveDB data (default: 4)
+    --round         Decimal places to round floats in MaveDB data (default: no rounding)
   """
   exit 1
 }
@@ -67,7 +67,7 @@ include { collate_logs } from './nf_modules/collate_logs.nf'
 include { datacheck_urns } from './nf_modules/datacheck.nf'
 
 // Main workflow
-print_params('Create MaveDB plugin data for VEP', nullable=['registry'])
+print_params('Create MaveDB plugin data for VEP', nullable=['registry', 'round'])
 check_JVM_mem(min=50.4)
 print_summary()
 

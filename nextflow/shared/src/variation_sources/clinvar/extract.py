@@ -131,6 +131,7 @@ def extract(
 
 
 def main() -> None:
+    """Parse command-line arguments and write shared ClinVar evidence outputs."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rcv-input", required=True, type=Path)
     parser.add_argument("--genome-context", required=True, type=json.loads)

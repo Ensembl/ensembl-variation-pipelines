@@ -5,6 +5,13 @@ from pathlib import Path
 
 
 def database_config(section: str, env_file: str | Path = ".env") -> dict:
+    """Read and validate a named database section from an INI file.
+
+    Return the section settings with port converted to an integer. Require
+    host, port, user and name; preserve additional settings. Raise ValueError
+    for invalid INI, missing settings or a port outside 1 through 65535.
+    File access errors propagate to the caller.
+    """
     path = Path(env_file)
     config = configparser.ConfigParser(interpolation=None)
     try:
@@ -29,6 +36,12 @@ def database_config(section: str, env_file: str | Path = ".env") -> dict:
 
 
 def postgresql_environment(env_file: str | Path = ".env") -> dict[str, str]:
+    """Return PostgreSQL environment variables from the postgresql section.
+
+    Require a schema and include PGPASSWORD only when the password is
+    nonempty. Raise ValueError for invalid or incomplete settings; propagate
+    file access errors.
+    """
     values = database_config("postgresql", env_file)
     if not values.get("schema"):
         raise ValueError(f"Missing [postgresql] schema in {env_file}")

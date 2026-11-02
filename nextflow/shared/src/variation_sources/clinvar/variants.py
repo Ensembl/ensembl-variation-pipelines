@@ -22,13 +22,20 @@ STRUCTURAL_ATTRIBUTE_TYPES = {
 
 
 class RejectedRecord(Exception):
+    """Signal unsupported source evidence with a reason and source_value.
+
+    Extend Exception with structured details for consumer rejection reports.
+    """
+
     def __init__(self, reason: str, source_value: Any = None) -> None:
+        """Store the rejection reason and optional source evidence."""
         super().__init__(reason)
         self.reason = reason
         self.source_value = source_value
 
 
 def text(element: ET.Element | None) -> str | None:
+    """Return stripped element text, or None for missing or blank text."""
     if element is None or element.text is None:
         return None
     value = element.text.strip()
@@ -41,6 +48,11 @@ def integer(
     warnings: list[tuple[str, str | None, str]] | None = None,
     xml_field: str = "",
 ) -> int | None:
+    """Return an integer, or None for absent or invalid numeric text.
+
+    Append an invalid_numeric_attribute diagnostic to warnings when supplied
+    and conversion fails. Use xml_field to identify the source attribute.
+    """
     if value is None:
         return None
     try:
@@ -54,6 +66,7 @@ def integer(
 
 
 def versioned_accession(element: ET.Element | None) -> str | None:
+    """Return Acc with its optional Version suffix, or None when Acc is absent."""
     if element is None:
         return None
     accession = element.get("Acc")
@@ -64,6 +77,11 @@ def versioned_accession(element: ET.Element | None) -> str | None:
 
 
 def unique(values: Iterable[Any]) -> list[Any]:
+    """Return distinct values in first-seen order.
+
+    Compare dictionaries by their sorted JSON representation; other values
+    must be hashable.
+    """
     result = []
     seen = set()
     for value in values:
@@ -80,12 +98,19 @@ def parse_location(
     warnings: list[tuple[str, str | None, str]] | None = None,
     measure_id: str | None = None,
 ) -> dict[str, Any]:
+    """Return source coordinates and alleles from a SequenceLocation element.
+
+    Preserve the reported coordinates without normalization. Convert numeric
+    attributes with integer and append contextual diagnostics to warnings
+    when supplied; measure_id identifies the owning allele in diagnostics.
+    """
     context = (
         f"Measure[@ID={measure_id!r}]/SequenceLocation"
         f"[@Assembly={element.get('Assembly')!r}][@Accession={element.get('Accession')!r}]"
     )
 
     def attribute_integer(attribute: str) -> int | None:
+        """Convert one location attribute and attach its XML context to warnings."""
         return integer(
             element.get(attribute),
             warnings=warnings,
@@ -115,6 +140,7 @@ def parse_location(
 
 
 def preferred_locations(locations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Deduplicate locations and prefer NC_ accessions when any are present."""
     locations = unique(locations)
     nc_locations = [
         location
@@ -127,6 +153,11 @@ def preferred_locations(locations: list[dict[str, Any]]) -> list[dict[str, Any]]
 def reported_allele(
     locations: list[dict[str, Any]],
 ) -> tuple[str | None, bool]:
+    """Return the alternate allele and whether reported allele pairs conflict.
+
+    Compare reference/alternate VCF pairs across locations. Return (None,
+    False) for no locations and (None, True) for multiple distinct pairs.
+    """
     allele_pairs = unique(
         (
             location["reference_allele_vcf"],
@@ -147,6 +178,17 @@ def parse_variant(
     component_accessions: dict[str, str | None] | None = None,
     warnings: list[tuple[str, str | None, str]] | None = None,
 ) -> dict[str, Any]:
+    """Return variant and gene evidence for the requested assembly.
+
+    Interpret the assertion's MeasureSet using shared representation and
+    placement rules. For haplotypes, use component_accessions to resolve
+    allele IDs to individual VCV accessions; fall back to allele identifiers.
+    Append numeric and component-identity diagnostics to warnings if supplied.
+
+    Return reported_genes and reported_variant, keeping haplotype components
+    separate from their parent. Raise RejectedRecord for missing or unsupported
+    representations or absent placements on the requested assembly.
+    """
     measure_set = reference_assertion.find("MeasureSet")
     if measure_set is None:
         genotype_set = reference_assertion.find("GenotypeSet")
@@ -225,6 +267,13 @@ def parse_measure(
     *,
     warnings: list[tuple[str, str | None, str]] | None = None,
 ) -> dict[str, Any]:
+    """Return allele evidence and genes from one Measure on assembly.
+
+    Use reported_identifier as the primary identifier, retain source aliases
+    and structural attributes, and prefer primary RefSeq placements. Append
+    numeric diagnostics to warnings when supplied. Raise RejectedRecord if
+    no location matches the requested assembly.
+    """
     alternative_identifiers = []
     for xref in measure.findall("XRef"):
         database = xref.get("DB")
@@ -285,6 +334,11 @@ def parse_measure(
 
 
 def open_xml(path: Path) -> BinaryIO:
+    """Open an XML file as a binary stream, decompressing a .gz suffix.
+
+    The caller owns the returned stream and must close it. File access and
+    decompression errors propagate to the caller.
+    """
     if path.suffix.lower() == ".gz":
         return gzip.open(path, "rb")
     return path.open("rb")

@@ -4,6 +4,12 @@ import re
 
 
 def validate_genome_context(context: dict) -> dict:
+    """Return a validated genome context with only supported fields.
+
+    Require a positive taxonomy ID and a nonblank production name. Assembly
+    and UUID fields may be null. Raise ValueError for invalid field values.
+    The input dictionary is not modified.
+    """
     if not isinstance(context, dict):
         raise ValueError("GenomeContext must be a JSON object")
     taxon_id = context.get("species_taxonomy_id")
@@ -35,6 +41,11 @@ def validate_genome_context(context: dict) -> dict:
 
 
 def validate_clinvar_context(context: dict) -> dict:
+    """Return a validated human context with a required assembly label.
+
+    Apply genome-context validation and raise ValueError if the species is
+    not homo_sapiens (9606) or the assembly is null.
+    """
     context = validate_genome_context(context)
     if (
         context["species_taxonomy_id"] != 9606

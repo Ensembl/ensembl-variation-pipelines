@@ -35,6 +35,7 @@ ANNOTATION_FIELDS = (
 
 
 def required_text(values: dict, name: str) -> str:
+    """Return a nonblank string field, raising ValueError if absent or invalid."""
     value = values.get(name)
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"Missing or empty {name}")
@@ -42,6 +43,13 @@ def required_text(values: dict, name: str) -> str:
 
 
 def read_metadata(path: Path) -> dict:
+    """Return validated metadata from a nonempty phenotype JSONL snapshot.
+
+    Check the header's source, context, import date and paired filenames and
+    checksums, and require at least one nonblank subsequent line. Raise
+    ValueError for invalid values or an empty snapshot; missing keys, JSON
+    decoding errors and file access errors propagate.
+    """
     with path.open(encoding="utf-8") as handle:
         header = json.loads(handle.readline())
         if not isinstance(header, dict) or not isinstance(header.get("metadata"), dict):
@@ -72,12 +80,19 @@ def read_metadata(path: Path) -> dict:
 
 
 class ClinVarLoader:
+    """Write phenotype records through a caller-owned cursor and transaction.
+
+    Track inserted rows in created. Resolve reusable entities with lookup
+    methods and persist complete associations through record and source_report.
+    """
 
     def __init__(self, cursor: psycopg.Cursor) -> None:
+        """Bind a database cursor and initialize per-table insertion counts."""
         self.cursor = cursor
         self.created: Counter[str] = Counter()
 
     def insert(self, table: str, values: dict[str, Any]) -> int:
+        """Insert a row, count its creation and return its generated primary key."""
         query = sql.SQL("INSERT INTO {} ({}) VALUES ({}) RETURNING {}").format(
             sql.Identifier(table),
             sql.SQL(", ").join(map(sql.Identifier, values)),
@@ -90,6 +105,7 @@ class ClinVarLoader:
 
     @lru_cache(maxsize=CACHE_SIZE)
     def entity(self, identifier: str, entity_type: str, label: str) -> int:
+        """Return an existing or new entity ID, rejecting conflicting entity types."""
         row = self.cursor.execute(
             "SELECT entity_id, type FROM entity WHERE identifier = %s",
             (identifier,),
@@ -106,6 +122,7 @@ class ClinVarLoader:
         self, taxonomy_id: int, production_name: str,
         assembly: str, assembly_uuid: str | None, genome_uuid: str | None,
     ) -> int:
+        """Return an existing or new genome-context ID, matching nullable UUIDs."""
         row = self.cursor.execute(
             """SELECT genome_context_id FROM genome_context
                WHERE species_taxonomy_id = %s
@@ -126,6 +143,7 @@ class ClinVarLoader:
 
     @lru_cache(maxsize=CACHE_SIZE)
     def entity_context(self, entity_id: int, context_id: int) -> int:
+        """Return an existing or new entity-to-genome-context link ID."""
         row = self.cursor.execute(
             """SELECT entity_genome_context_id FROM entity_genome_context
                WHERE entity_id = %s AND genome_context_id = %s""",
@@ -138,6 +156,11 @@ class ClinVarLoader:
         })
 
     def target_entity(self, entity: dict, context_id: int) -> int:
+        """Resolve an entity ID and link it to the snapshot context.
+
+        Raise ValueError if the entity supplies its own genome_contexts or lacks
+        required identifier, type or label text.
+        """
         if "genome_contexts" in entity:
             raise ValueError("Entity contexts must come from metadata.genome_context only")
         entity_id = self.entity(
@@ -152,6 +175,7 @@ class ClinVarLoader:
         self, source_id: int, name: str,
         measurement_type: str | None, measured_entity_id: int | None,
     ) -> int:
+        """Return a source-associated phenotype ID, creating its measurement if needed."""
         row = self.cursor.execute(
             """SELECT p.phenotype_id FROM phenotype p
                JOIN phenotype_association a USING (phenotype_id)
@@ -177,6 +201,7 @@ class ClinVarLoader:
 
     @lru_cache(maxsize=CACHE_SIZE)
     def ontology_term(self, accession: str, source: str, label: str | None) -> int:
+        """Return an existing or new ontology-term ID, rejecting source conflicts."""
         row = self.cursor.execute(
             "SELECT ontology_term_id, source FROM ontology_term WHERE accession = %s",
             (accession,),
@@ -193,6 +218,7 @@ class ClinVarLoader:
     def identified_publication(
         self, source: str, identifier: str, url: str | None,
     ) -> int:
+        """Return an existing or new publication ID for a source and identifier."""
         row = self.cursor.execute(
             "SELECT publication_id FROM publication WHERE source = %s AND identifier = %s",
             (source, identifier),
@@ -202,6 +228,7 @@ class ClinVarLoader:
         })
 
     def annotation(self, annotation: dict | None, **owner: int) -> None:
+        """Insert supported annotation fields for owner when annotation is nonempty."""
         if not annotation:
             return
         values = {name: annotation.get(name) for name in ANNOTATION_FIELDS}
@@ -209,6 +236,7 @@ class ClinVarLoader:
         self.insert("phenotype_annotation", {**owner, **values})
 
     def evidence(self, evidence: dict | None, **owner: int) -> None:
+        """Insert evidence, statistics and distinct publication links for owner."""
         if evidence is None:
             return
         evidence_id = self.insert("phenotype_evidence", {
@@ -245,6 +273,7 @@ class ClinVarLoader:
         self, entity: dict, *, report_id: int | None = None,
         parent_id: int | None = None, ordinal: int | None = None,
     ) -> None:
+        """Insert a reported entity, its locations and its ordered components."""
         reported_id = self.insert("reported_entity", {
             "source_report_id": report_id, "parent_reported_entity_id": parent_id,
             "component_ordinal": ordinal, "identifier": entity.get("identifier"),
@@ -265,6 +294,13 @@ class ClinVarLoader:
             self.reported_entity(component, parent_id=reported_id, ordinal=position)
 
     def record(self, record: dict, source_id: int, run_id: int, context_id: int) -> None:
+        """Validate and load one association record with its source reports.
+
+        Resolve the entity, phenotype, measurement and somatic association in
+        context_id, attaching reports to source_id and run_id. Require nonempty
+        reports and empty harmonisation fields. Validation and database errors
+        propagate; the caller owns the transaction.
+        """
         phenotype = record["phenotype"]
         reports = record["source_reports"]
         if not isinstance(reports, list) or not reports:
@@ -299,6 +335,12 @@ class ClinVarLoader:
     def source_report(
         self, report: dict, association_id: int, source_id: int, run_id: int,
     ) -> None:
+        """Validate and insert a source report with its dependent evidence.
+
+        Attach reported phenotypes, ontology terms, external references, entities,
+        annotations and assessments to the association and import run. Validation
+        and database errors propagate; the caller owns the transaction.
+        """
         reported_phenotypes = report["reported_phenotypes"]
         if not isinstance(reported_phenotypes, list) or not reported_phenotypes:
             raise ValueError("source_report.reported_phenotypes must be a non-empty list")
@@ -372,6 +414,12 @@ class ClinVarLoader:
 
 
 def replace_reports(cursor: psycopg.Cursor, source_id: int) -> dict[str, int]:
+    """Delete a source's reports and remove resulting orphan associations.
+
+    Also remove phenotypes orphaned by those associations. Use a temporary
+    table to track affected rows and return deletion counts. The caller owns
+    the transaction; other sources' reports are retained.
+    """
     cursor.execute(
         """CREATE TEMP TABLE clinvar_previous_associations (
                phenotype_association_id BIGINT, phenotype_id BIGINT
@@ -409,6 +457,18 @@ def replace_reports(cursor: psycopg.Cursor, source_id: int) -> dict[str, int]:
 def load_clinvar(
     input_path: Path, env_file: Path, *, replace: bool = False,
 ) -> dict[str, Any]:
+    """Load a complete phenotype JSONL snapshot in one database transaction.
+
+    Read PostgreSQL settings from env_file and validate input_path metadata.
+    Lock the configured schema against concurrent loaders and require an
+    existing schema. If replace is true, replace all reports for this source;
+    otherwise reject a source that already has reports.
+
+    Return counts after a successful commit and print progress to standard
+    error. Raise ValueError for invalid snapshots, protected or missing
+    schemas, or conflicting loads. File access and database errors propagate;
+    failures within the transaction roll back its changes.
+    """
     input_path = input_path.resolve()
     header = read_metadata(input_path)
     source_name = header["source"]
@@ -517,6 +577,11 @@ def load_clinvar(
 
 
 def main() -> int:
+    """Load the command-line snapshot and write a JSON summary.
+
+    Return one on loading or summary-write failure and zero on success.
+    Report summary-write failures without undoing the committed database load.
+    """
     parser = argparse.ArgumentParser(description='Load phenotypes data into the phenotypes postgresql db\n')
     parser.add_argument("--input", type=Path, required=True, help="Complete source JSONL snapshot")
     parser.add_argument("--env-file", type=Path, default=Path(".env"))

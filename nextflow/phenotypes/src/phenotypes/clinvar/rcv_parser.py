@@ -70,14 +70,17 @@ EXTERNAL_REFERENCE_DATABASES = {
 
 
 def _normalise_name(value: str) -> str:
+    """Collapse whitespace and case-fold a name for comparison."""
     return " ".join(value.split()).casefold()
 
 
 def is_current(status: str | None) -> bool:
+    """Return whether a status is absent, blank or the literal current."""
     return not status or status.strip() in {"", "current"}
 
 
 def format_elapsed(started: float) -> str:
+    """Return elapsed monotonic time since started as hours:minutes:seconds."""
     hours, remainder = divmod(int(monotonic() - started), 3600)
     minutes, seconds = divmod(remainder, 60)
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
@@ -86,6 +89,11 @@ def format_elapsed(started: float) -> str:
 def _normalise_last_evaluated_date(
     value: str | None,
 ) -> tuple[str | None, str | None]:
+    """Return an ISO date and an optional invalid-date warning.
+
+    Accept a date with an optional Z or valid numeric timezone suffix. Return
+    (None, None) for absent input, or (None, warning) for invalid input.
+    """
     if value is None:
         return None, None
 
@@ -114,6 +122,11 @@ def _normalise_last_evaluated_date(
 def _unique_publications(
     publications: Iterable[dict[str, str | None]],
 ) -> list[dict[str, str | None]]:
+    """Deduplicate identified publications and retain unidentified entries.
+
+    Preserve first-seen order and fill a missing URL from later entries with
+    the same source and identifier. Return copies of the publication mappings.
+    """
     result = {}
     for publication in publications:
         if publication["identifier"] is None:
@@ -128,6 +141,7 @@ def _unique_publications(
 
 
 def _normalise_doi(value: str | None) -> str | None:
+    """Return a DOI stripped of whitespace and known prefixes, or None."""
     if value is None:
         return None
     value = re.sub(r"\s+", "", value)
@@ -149,6 +163,12 @@ def _publication_ids(
     warnings: list[tuple[str, str | None, str]] | None = None,
     source_accession: str | None = None,
 ) -> list[dict[str, str | None]]:
+    """Return distinct publication references from citations under parent.
+
+    Within each citation, prefer PubMed over DOI and then a usable HTTP URL.
+    Return an empty list for a missing parent. Append invalid DOI diagnostics
+    to warnings when supplied, using source_accession for attribution.
+    """
     if parent is None:
         return []
     publications = []
@@ -210,6 +230,7 @@ def _observed_in_publication_ids(
     *, warnings: list[tuple[str, str | None, str]] | None = None,
     source_accession: str | None = None,
 ) -> list[dict[str, str | None]]:
+    """Return distinct ObservedIn publications and append requested diagnostics."""
     return _unique_publications(
         publication
         for observed_in in assertion.findall("ObservedIn")
@@ -220,6 +241,7 @@ def _observed_in_publication_ids(
 
 
 def _is_omim_condition_reference(element: ET.Element, accession: str) -> bool:
+    """Return whether an OMIM reference denotes a six-digit condition ID."""
     return (
         element.get("Type", "").casefold() != "allelic variant"
         and re.fullmatch(r"(?:OMIM:)?[0-9]{6}", accession) is not None
@@ -227,6 +249,11 @@ def _is_omim_condition_reference(element: ET.Element, accession: str) -> bool:
 
 
 def _trait_name(trait: ET.Element) -> tuple[str | None, bool]:
+    """Return a preferred trait name and whether an alternate was used.
+
+    Fall back only when there is exactly one distinct alternate name. Return
+    (None, False) when no usable unambiguous name exists.
+    """
     preferred_name = None
     alternate_names = []
     for name in trait.findall("Name"):
@@ -247,6 +274,7 @@ def _trait_name(trait: ET.Element) -> tuple[str | None, bool]:
 
 
 def _trait_reported_phenotype_ontology_terms(trait: ET.Element) -> list[dict[str, Any]]:
+    """Return distinct supported ontology references with normalized prefixes."""
     terms = []
     for reference in trait.iter("XRef"):
         database, accession = reference.get("DB"), reference.get("ID")
@@ -268,6 +296,7 @@ def _trait_reported_phenotype_ontology_terms(trait: ET.Element) -> list[dict[str
 
 
 def _trait_reported_external_references(trait: ET.Element) -> list[dict[str, str]]:
+    """Return distinct supported external phenotype references from a trait."""
     result = []
     for xref in trait.iter("XRef"):
         database, accession = xref.get("DB"), xref.get("ID")
@@ -282,6 +311,12 @@ def _trait_reported_external_references(trait: ET.Element) -> list[dict[str, str
 
 
 def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list[str]]:
+    """Return grouped trait evidence and warning codes from an assertion.
+
+    Normalize placeholder names, merge repeated traits and retain reported
+    names, ontology terms and external references. Raise RejectedRecord for
+    missing or unsupported traits, names or phenotype instructions.
+    """
     trait_set = reference_assertion.find("TraitSet")
     if trait_set is None:
         raise RejectedRecord("missing_trait_set")
@@ -367,6 +402,12 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
 
 
 def _prepare_entity(variant: dict[str, Any]) -> dict[str, Any]:
+    """Return the association entity derived from a reported entity.
+
+    Prefer a single rs identifier for noncompound variants. Otherwise remove
+    the ClinVar prefix and VCV version when applicable; preserve haplotypes
+    as compound entities.
+    """
     compound = bool(variant.get("components"))
     rsids = {
         value for value in variant.get("alternative_identifiers", [])
@@ -389,6 +430,7 @@ def _prepare_entity(variant: dict[str, Any]) -> dict[str, Any]:
 def _combined_assessment_value(
     element: ET.Element, value: str | None, classification_tag: str
 ) -> str | None:
+    """Return the classification value with somatic clinical impact qualifiers."""
     if value is None:
         return None
     if classification_tag != "SomaticClinicalImpact":
@@ -403,6 +445,7 @@ def _combined_assessment_value(
 
 
 def _inheritance_types(assertion: ET.Element) -> list[str]:
+    """Return distinct reported modes of inheritance in source order."""
     return _unique(
         value
         for attribute in assertion.findall("./AttributeSet/Attribute")
@@ -414,6 +457,12 @@ def _inheritance_types(assertion: ET.Element) -> list[str]:
 def _assessment_somatic_status(
     assessment_type: str, default_status: str, inheritance_types: list[str],
 ) -> tuple[str, str | None]:
+    """Return the assessment context and an optional inheritance warning.
+
+    For germline classifications, reinterpret a sole somatic mutation mode as
+    somatic and mixed modes containing it as unspecified. Otherwise retain
+    default_status.
+    """
     modes = {_normalise_name(value) for value in inheritance_types}
     if assessment_type != "germline_classification" or "somatic mutation" not in modes:
         return default_status, None
@@ -425,6 +474,11 @@ def _assessment_somatic_status(
 def _uncertain_context_details(
     clinvar_set: ET.Element, assessments: list[dict[str, Any]],
 ) -> str | None:
+    """Return JSON describing conflicting germline contexts, or None.
+
+    Inspect assessment contexts and sample origins on current assertions.
+    The diagnostic explains why assessments must share an unspecified record.
+    """
     contexts = {
         item["somatic_status"] for item in assessments
         if item["assessment_type"] == "germline_classification"
@@ -472,6 +526,7 @@ def _uncertain_context_details(
 
 
 def _condition_group(trait_set: ET.Element | None) -> str | None:
+    """Return the supported condition grouping inferred from a TraitSet."""
     if trait_set is None:
         return None
     explanation = _normalise_name(trait_set.get("multipleConditionExplanation", ""))
@@ -485,6 +540,7 @@ def _condition_group(trait_set: ET.Element | None) -> str | None:
 
 
 def _condition_set_name(names: list[str], group: str | None) -> str | None:
+    """Join condition names using the group semantics, or return None if empty."""
     if not names:
         return None
     joiner = " OR " if group in OR_CONDITION_GROUPS else "; "
@@ -494,6 +550,7 @@ def _condition_set_name(names: list[str], group: str | None) -> str | None:
 def _combined_traits(
     traits: list[dict[str, Any]], group: str | None,
 ) -> dict[str, Any]:
+    """Combine trait names and deduplicate their external references."""
     references = []
     for trait in traits:
         references.extend(trait["reported_external_references"])
@@ -507,6 +564,7 @@ def _combined_traits(
 
 
 def _publication_evidence(publications: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Wrap publications in the evidence schema, or return None if empty."""
     return {
         "publications": publications, "ega_accessions": [], "statistics": [],
     } if publications else None
@@ -516,6 +574,12 @@ def _aggregate_assessments(
     reference_assertion: ET.Element,
     *, publication_warnings: list[tuple[str, str | None, str]] | None = None,
 ) -> tuple[list[dict[str, Any]], list[str]]:
+    """Return aggregate classifications and warning codes from an assertion.
+
+    Interpret supported classification types, inheritance contexts, dates and
+    publication evidence. Append publication diagnostics to publication_warnings
+    when supplied. Return empty lists if no classifications are present.
+    """
     classifications = reference_assertion.find("Classifications")
     if classifications is None:
         return [], []
@@ -585,6 +649,11 @@ def _aggregate_assessments(
 def _submission_assessments(
     clinvar_set: ET.Element,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, str | None, str]]]:
+    """Return supported current submission assessments and diagnostic tuples.
+
+    Skip noncurrent submissions with warnings. Retain submitters, publication
+    evidence, inheritance annotations and evaluated dates for classifications.
+    """
     assessments = []
     warnings = []
     for assertion in clinvar_set.findall("ClinVarAssertion"):
@@ -657,6 +726,17 @@ def parse_clinvar_set(
     clinvar_set: ET.Element, assembly: str,
     *, component_accessions: dict[str, str | None] | None = None,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, str | None, str]]]:
+    """Return phenotype records and diagnostics from one RCV XML element.
+
+    Use assembly and the optional allele-to-VCV component_accessions lookup
+    for shared variant parsing. Interpret phenotype traits and clinical
+    assessments locally, grouping output by somatic context. Diagnostics are
+    (reason, SCV accession, details) tuples.
+
+    Raise RejectedRecord for noncurrent records, missing identifiers,
+    unsupported phenotypes or classifications, or unusable variant evidence.
+    The caller owns the XML element; this function does not read a file.
+    """
     for path in ("RecordStatus", "ReferenceClinVarAssertion/RecordStatus"):
         status = _text(clinvar_set.find(path))
         if not is_current(status):
@@ -759,6 +839,7 @@ def parse_clinvar_set(
 
 
 def _report_progress(n_records: int, started_at: float, stage: str) -> None:
+    """Print the RCV record count, stage and elapsed time to standard error."""
     print(
         f"[Parsing ClinVar RCV] {stage}: {n_records:,} records processed; "
         f"elapsed {format_elapsed(started_at)}",
@@ -777,6 +858,22 @@ def parse_clinvar(
     pipeline_run_date: str | None = None,
     pipeline_revision: str | None = None,
 ) -> None:
+    """Write phenotype JSONL and diagnostics from paired ClinVar XML files.
+
+    Read vcv_input once for component identifiers, then stream rcv_input for
+    assembly using shared readers. Require source_name from configuration and
+    a matching validated genome_context. Hash both input files for metadata.
+    Default pipeline_run_date to today and pipeline_revision to the checkout's
+    Git revision when omitted.
+
+    Write records_path with a metadata header and accepted records. Write
+    warnings.txt and rejections.txt beside it, logging record rejections and
+    continuing. Warn and continue when RCV and VCV release dates differ.
+    Print progress to standard error and create the output directory as needed.
+
+    Raise ValueError for invalid configuration or release headers. File access
+    and XML parsing errors propagate; output files may then be incomplete.
+    """
     if not isinstance(source_name, str) or not source_name.strip():
         raise ValueError("Source name must come from the source configuration key")
     genome_context = validate_clinvar_context(genome_context)
@@ -882,6 +979,7 @@ def parse_clinvar(
 
 
 def _argument_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser for standalone or staged phenotype parsing."""
     parser = argparse.ArgumentParser(description='Parse ClinVar RCV XML and output an intermediate JSONL file.')
     parser.add_argument("--rcv-input", type=Path, help="Staged RCV XML/XML.GZ; otherwise use the source config input")
     parser.add_argument("--vcv-input", type=Path, help="Staged VCV XML/XML.GZ for component IDs; otherwise use the source config input")
@@ -900,6 +998,7 @@ def _argument_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    """Validate command-line inputs, write phenotype outputs and return zero."""
     parser = _argument_parser()
     args = parser.parse_args()
     try:

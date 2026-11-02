@@ -17,6 +17,7 @@ from variation_sources.clinvar.xml import iter_release
 
 
 def _report_progress(n_records: int, started: float, stage: str) -> None:
+    """Print the VCV record count, stage and elapsed time to standard error."""
     hours, remainder = divmod(int(monotonic() - started), 3600)
     minutes, seconds = divmod(remainder, 60)
     print(

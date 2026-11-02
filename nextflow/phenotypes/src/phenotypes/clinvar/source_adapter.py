@@ -11,12 +11,18 @@ from variation_sources.clinvar.variants import RejectedRecord, parse_variant, te
 
 
 def _identifier(value: str | None) -> str | None:
+    """Render a shared allele identifier in the phenotype AlleleID namespace."""
     if value and value.startswith("ClinVar:Allele:"):
         return value.replace("ClinVar:Allele:", "ClinVar:AlleleID:", 1)
     return value
 
 
 def _reported_entity(variant: dict[str, Any], source: ET.Element) -> dict[str, Any]:
+    """Return the phenotype representation of shared variant evidence.
+
+    Read the preferred label from source and recursively render components
+    in Measure order, retaining shared locations and structural attributes.
+    """
     components = variant["components"]
     return {
         "identifier": _identifier(variant["identifier"]),
@@ -38,6 +44,13 @@ def parse_reported_entity(
     component_accessions: dict[str, str | None] | None = None,
     warnings: list[tuple[str, str | None, str]] | None = None,
 ) -> dict[str, Any]:
+    """Parse shared variant evidence and render a phenotype reported entity.
+
+    Pass assembly, component_accessions and warnings to the shared variant
+    parser. Return reported_genes and reported_entity. Translate shared allele
+    identifiers in entities, new warnings and rejection details to the
+    phenotype namespace; propagate RejectedRecord for unsupported evidence.
+    """
     first_warning = len(warnings) if warnings is not None else 0
     try:
         variant = parse_variant(

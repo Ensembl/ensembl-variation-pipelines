@@ -11,6 +11,11 @@ from pathlib import Path
 
 
 def git_revision(directory: str | Path) -> str | None:
+    """Return the checkout's HEAD commit, or None if Git lookup fails.
+
+    Run Git in directory with a ten-second timeout. Uncommitted changes are
+    not represented in the returned revision.
+    """
     try:
         result = subprocess.run(
             ["git", "-C", str(directory), "rev-parse", "HEAD"],
@@ -25,6 +30,11 @@ def git_revision(directory: str | Path) -> str | None:
 
 
 def input_file_provenance(paths: Iterable[str | Path]) -> dict[str, list[str]]:
+    """Return paired filenames and SHA-256 checksums in input order.
+
+    Hash each file's bytes, including compression when present. Raise
+    ValueError if paths is empty; propagate file access errors.
+    """
     file_names: list[str] = []
     file_checksums: list[str] = []
     for path in paths:

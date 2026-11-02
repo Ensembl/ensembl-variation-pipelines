@@ -11,6 +11,16 @@ DEFAULT_SOURCE_CONFIG = Path(__file__).resolve().parents[2] / "assets/source_con
 
 
 def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
+    """Load source configuration with validated contexts and resolved inputs.
+
+    Resolve nonnull RCV and VCV paths relative to the configuration file and
+    require existing literal files. Return the loaded dictionary with source
+    names, normalized contexts and both input keys populated. Null inputs
+    remain available for workflow downloads.
+
+    Raise ValueError for unsupported sources, invalid settings or duplicate
+    species/assembly contexts. JSON decoding and file access errors propagate.
+    """
     config_path = Path(path).resolve()
     with config_path.open(encoding="utf-8") as handle:
         config = json.load(handle)

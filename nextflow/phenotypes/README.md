@@ -242,11 +242,9 @@ uv sync --locked --project nextflow/phenotypes
 nextflow/phenotypes/.venv/bin/python -m unittest discover -s nextflow/phenotypes/tests -v
 ```
 
-These tests check phenotype associations, source identities, ontology identifiers,
-parser-to-loader metadata compatibility, protected-schema policy and the schema
-application command. Assertions describe the current output model and loading
-behavior. Shared source parsing and database settings have their own tests in
-`nextflow/shared/tests`.
+These tests check phenotype associations, source identities, ontology identifiers
+and parser-to-loader metadata compatibility. Shared source parsing and database
+settings have their own tests in `nextflow/shared/tests`.
 
 With Java 17+, Nextflow 26.04.0 and nf-test 0.9.5 available:
 
@@ -259,6 +257,5 @@ The Nextflow suite checks the phenotype parser module, pipeline publishing and
 the single-context loading guard. Parser integration uses a test configuration
 that disables database loading; loader module tests check staging, output prefixes,
 version reporting and protected-schema rejection without a database connection.
-Full workflow stubs check loader outputs. Schema
-command tests use a fake `psql`, and database calls are intercepted. These tests
-do not exercise a live PostgreSQL server.
+Full workflow stubs check loader outputs. These tests do not exercise a live
+PostgreSQL server.

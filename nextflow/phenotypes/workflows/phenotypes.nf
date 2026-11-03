@@ -9,7 +9,7 @@ workflow PHENOTYPES {
     if (source_config.sources.ClinVar.contexts.size() != 1) {
         error('ClinVar loading currently requires one context per source snapshot; multiple contexts must be loaded together before whole-source replacement can support them.')
     }
-    database_env = file(params.env_file, checkIfExists: true).toAbsolutePath().toString()
+    database_env = file(params.env_file, checkIfExists: true)
     CLINVAR(source_config.sources.ClinVar, database_env, params.replace)
 
     emit:

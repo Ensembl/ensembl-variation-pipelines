@@ -24,10 +24,37 @@ uv sync
 The local `variation-sources` dependency is installed from `../shared`. Keep
 both directories together. Shared source parsing, validation and provenance are
 maintained there; phenotype interpretation and database loading remain here.
-The default local profile uses this virtual environment for parser tasks.
-Parser tasks also support Docker, Singularity and Conda profiles. The loader
-uses the phenotype virtual environment and a native PostgreSQL client runtime;
-the Slurm profile loads `postgresql/16` for that process.
+The default local profile uses this virtual environment for Python tasks.
+The parser and loader declare Conda and container runtimes. The loader uses
+Psycopg's binary distribution, which bundles libpq; it does not require
+`pg_config`, `LD_LIBRARY_PATH`, or a PostgreSQL environment module. The Slurm
+profile selects the executor; provide the Python runtime on workers or combine
+it with Conda/container execution.
+
+The local loader image must be built before using the Docker profile:
+
+```bash
+docker build -t ensembl-phenotypes-clinvar-loader:0.1.0 modules/local/clinvar/load
+```
+
+For Singularity, build a SIF from this image and set `process.container` for
+`LOAD_CLINVAR` to its absolute path in a custom Nextflow config. Alternatively,
+publish the image to your registry and override that process's container with
+the registry URL. No loader image is published by this repository.
+
+`LOAD_CLINVAR` lives in `modules/local/clinvar/load` with dependency declarations,
+metadata and dedicated nf-test tests. It emits dependency versions on the
+`versions` topic, accepts `task.ext.args`, `task.ext.when` and `task.ext.prefix`,
+and stages the database INI file as `database.env`. The pipeline keeps the
+summary filename `clinvar_load_summary.json`. Task caching remains disabled
+because loading changes database state. Replacement remains an explicit input
+controlled by `--replace`.
+
+Database configuration files are staged into task work directories and are not
+published. Use an appropriately protected work directory. Container runs need
+network access to PostgreSQL; `localhost` inside Docker refers to the container.
+If using `.pgpass` authentication, make the file available inside the selected
+runtime.
 
 ## Database connection
 
@@ -230,6 +257,8 @@ nf-test test
 
 The Nextflow suite checks the phenotype parser module, pipeline publishing and
 the single-context loading guard. Parser integration uses a test configuration
-that disables database loading; full workflow stubs check loader outputs. Schema
+that disables database loading; loader module tests check staging, output prefixes,
+version reporting and protected-schema rejection without a database connection.
+Full workflow stubs check loader outputs. Schema
 command tests use a fake `psql`, and database calls are intercepted. These tests
 do not exercise a live PostgreSQL server.

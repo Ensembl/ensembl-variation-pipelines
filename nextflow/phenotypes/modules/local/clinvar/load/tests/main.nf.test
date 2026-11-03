@@ -1,0 +1,89 @@
+nextflow_process {
+    name 'ClinVar phenotype database loading'
+    script 'modules/local/clinvar/load/main.nf'
+    process 'LOAD_CLINVAR'
+    tag 'modules'
+    tag 'modules_local'
+    tag 'clinvar'
+    tag 'clinvar/load'
+
+    test('Reject protected schemas without connecting to a database') {
+        when {
+            process {
+                """
+                def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/modules/local/clinvar/load/tests/data/records.jsonl')]
+                input[1] = file('$baseDir/modules/local/clinvar/load/tests/data/protected.env')
+                input[2] = false
+                input[3] = file('$baseDir/src')
+                input[4] = 'phenotype-test-source'
+                input[5] = file('$baseDir/../shared/src')
+                input[6] = 'shared-test-source'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.failed },
+                { assert (process.stdout + process.stderr).join('\n').contains('Refusing protected schema') }
+            )
+        }
+    }
+
+    test('stub preserves metadata and reports dependency versions') {
+        options '-stub-run'
+        when {
+            process {
+                """
+                def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/modules/local/clinvar/load/tests/data/records.jsonl')]
+                input[1] = file('$baseDir/modules/local/clinvar/load/tests/data/protected.env')
+                input[2] = false
+                input[3] = file('$baseDir/src')
+                input[4] = 'phenotype-test-source'
+                input[5] = file('$baseDir/../shared/src')
+                input[6] = 'shared-test-source'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.summary[0][0].id == 'clinvar' },
+                { assert process.out.summary[0][0].assembly == 'GRCh38' },
+                { assert file(process.out.summary[0][1]).name == 'clinvar_load_summary.json' },
+                { assert file(process.out.summary[0][1]).text.trim() == '{}' },
+                { assert process.out.versions_python[0][2].startsWith('3.') },
+                { assert process.out.versions_loader[0][2] == '0.1.0' },
+                { assert process.out.versions_shared[0][2] ==~ /[0-9]+\.[0-9]+\.[0-9]+.*/ },
+                { assert process.out.versions_psycopg[0][2].startsWith('3.') },
+                { assert process.out.versions_simplejson[0][2] ==~ /[0-9]+\.[0-9]+\.[0-9]+.*/ },
+                { assert process.out.versions_libpq[0][2] ==~ /[0-9]+/ }
+            )
+        }
+    }
+
+    test('stub honours custom output prefix') {
+        options "-stub-run -c $baseDir/modules/local/clinvar/load/tests/prefix.config"
+        when {
+            process {
+                """
+                def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/modules/local/clinvar/load/tests/data/records.jsonl')]
+                input[1] = file('$baseDir/modules/local/clinvar/load/tests/data/protected.env')
+                input[2] = true
+                input[3] = file('$baseDir/src')
+                input[4] = 'phenotype-test-source'
+                input[5] = file('$baseDir/../shared/src')
+                input[6] = 'shared-test-source'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert file(process.out.summary[0][1]).name == 'custom_load_summary.json' }
+            )
+        }
+    }
+}

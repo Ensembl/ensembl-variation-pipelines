@@ -1,0 +1,9 @@
+name: clinvar_load
+channels:
+  - conda-forge
+dependencies:
+  - conda-forge::python=3.14.0
+  - conda-forge::pip=25.2
+  - pip:
+      - psycopg[binary]==3.3.6
+      - simplejson==3.20.2

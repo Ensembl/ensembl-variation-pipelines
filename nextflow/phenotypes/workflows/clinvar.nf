@@ -1,4 +1,4 @@
-include { LOAD_CLINVAR } from '../modules/local/load_clinvar'
+include { LOAD_CLINVAR } from '../modules/local/clinvar/load/main'
 include { CLINVAR_INPUTS } from '../../shared/workflows/clinvar_inputs/main'
 include { source_contents } from '../../shared/lib/source_files'
 include { PARSE_CLINVAR } from '../modules/local/clinvar/phenotypes/main'
@@ -23,7 +23,7 @@ workflow CLINVAR {
     PARSE_CLINVAR(processing_inputs, channel.value(source_settings.source_name), python_source, source_contents(python_source), shared_source, source_contents(shared_source))
 
     parsed_records = PARSE_CLINVAR.out.records.map { meta, records -> tuple(meta.findAll { key, value -> key != 'id' }, records) }
-    LOAD_CLINVAR(parsed_records, channel.value(env_file), channel.value(replace_existing), python_source, source_contents(python_source), shared_source, source_contents(shared_source))
+    LOAD_CLINVAR(PARSE_CLINVAR.out.records, channel.value(env_file), channel.value(replace_existing), python_source, source_contents(python_source), shared_source, source_contents(shared_source))
 
     emit:
     rcv_xml = CLINVAR_INPUTS.out.rcv_xml
@@ -32,5 +32,5 @@ workflow CLINVAR {
     records = parsed_records
     warnings = PARSE_CLINVAR.out.warnings.map { meta, warnings -> tuple(meta.findAll { key, value -> key != 'id' }, warnings) }
     rejections = PARSE_CLINVAR.out.rejections.map { meta, rejections -> tuple(meta.findAll { key, value -> key != 'id' }, rejections) }
-    load_summary = LOAD_CLINVAR.out.summary
+    load_summary = LOAD_CLINVAR.out.summary.map { meta, summary -> tuple(meta.findAll { key, value -> key != 'id' }, summary) }
 }

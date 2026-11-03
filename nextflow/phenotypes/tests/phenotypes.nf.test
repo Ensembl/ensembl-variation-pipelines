@@ -55,7 +55,7 @@ nextflow_pipeline {
         then {
             assertAll(
                 { assert workflow.failed },
-                { assert workflow.stdout.join('\n').contains('requires one context per source snapshot') }
+                { assert (workflow.stdout + workflow.stderr).join('\n').contains('requires one context per source snapshot') }
             )
         }
     }

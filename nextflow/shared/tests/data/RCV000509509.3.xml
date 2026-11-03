@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="299459302">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_004589.4(SCO1):c.769A&gt;C (p.Ile257Leu) AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="1175340" DateLastUpdated="2026-04-12" DateCreated="2017-10-16">
+    <ClinVarAccession Acc="RCV000509509" Version="3" Type="RCV" DateUpdated="2026-04-12" DateCreated="2017-10-16"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>no classification provided</ReviewStatus>
+        <Description SubmissionCount="1">not provided</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>unknown</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+      </Sample>
+      <Method>
+        <Purpose>Validation</Purpose>
+        <Description>Sanger Sequencing</Description>
+        <MethodType>phenotyping only</MethodType>
+      </Method>
+      <ObservedData ID="221414221">
+        <Attribute Type="Description">not provided</Attribute>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="441079" Acc="VCV000441079" Version="3">
+      <Measure Type="single nucleotide variant" ID="434657">
+        <Name>
+          <ElementValue Type="Preferred">NM_004589.4(SCO1):c.769A&gt;C (p.Ile257Leu)</ElementValue>
+        </Name>
+        <CanonicalSPDI>NC_000017.11:10686728:T:G</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Accession="NM_004589" Version="4" Change="c.769A&gt;C" Type="HGVS, coding, RefSeq" MANESelect="true">NM_004589.4:c.769A&gt;C</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_008228" Version="2" Change="g.15840A&gt;C" Type="HGVS, genomic, RefSeqGene">NG_008228.2:g.15840A&gt;C</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000017" Version="11" Change="g.10686729T&gt;G" Type="HGVS, genomic, top level" integerValue="38">NC_000017.11:g.10686729T&gt;G</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000017" Version="10" Change="g.10590046T&gt;G" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000017.10:g.10590046T&gt;G</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_004589" Version="2" Change="c.769A&gt;C" Type="HGVS, previous">NM_004589.2:c.769A&gt;C</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_004580" Version="1" Change="p.Ile257Leu" Type="HGVS, protein, RefSeq">NP_004580.1:p.Ile257Leu</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_004589.4:c.769A&gt;C" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">I257L</Attribute>
+        </AttributeSet>
+        <CytogeneticLocation>17p13.1</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="17" Accession="NC_000017.11" start="10686729" stop="10686729" display_start="10686729" display_stop="10686729" variantLength="1" positionVCF="10686729" referenceAlleleVCF="T" alternateAlleleVCF="G"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="17" Accession="NC_000017.10" start="10590046" stop="10590046" display_start="10590046" display_stop="10590046" variantLength="1" positionVCF="10590046" referenceAlleleVCF="T" alternateAlleleVCF="G"/>
+        <MeasureRelationship Type="within single gene">
+          <Name>
+            <ElementValue Type="Preferred">synthesis of cytochrome C oxidase 1</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">SCO1</ElementValue>
+          </Symbol>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="17" Accession="NC_000017.11" start="10672474" stop="10697533" display_start="10672474" display_stop="10697533" Strand="-"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="17" Accession="NC_000017.10" start="10583648" stop="10600884" display_start="10583648" display_stop="10600884" variantLength="17237" Strand="-"/>
+          <XRef ID="6341" DB="Gene"/>
+          <XRef Type="MIM" ID="603644" DB="OMIM"/>
+          <XRef ID="HGNC:10603" DB="HGNC"/>
+        </MeasureRelationship>
+        <XRef Type="rs" ID="1234427803" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_004589.4(SCO1):c.769A&gt;C (p.Ile257Leu)</ElementValue>
+      </Name>
+      <XRef ID="CA398128474" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="37454">
+      <Trait ID="5548" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Mitochondrial complex IV deficiency, nuclear type 1</ElementValue>
+          <XRef ID="MONDO:0700250" DB="MONDO"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">COX DEFICIENCY</ElementValue>
+          <XRef Type="MIM" ID="220110" DB="OMIM"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Mitochondrial complex IV deficiency</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Complex 4 mitochondrial respiratory chain deficiency</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Deficiency of mitochondrial respiratory chain complex4</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Complex IV deficiency</ElementValue>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">MC4DN1</ElementValue>
+          <XRef Type="MIM" ID="220110" DB="OMIM"/>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="public definition">Mitochondrial complex IV deficiency nuclear type 1 (MC4DN1) is an autosomal recessive metabolic disorder characterized by rapidly progressive neurodegeneration and encephalopathy with loss of motor and cognitive skills between about 5 and 18 months of age after normal early development. Affected individuals show hypotonia, failure to thrive, loss of the ability to sit or walk, poor communication, and poor eye contact. Other features may include oculomotor abnormalities, including slow saccades, strabismus, ophthalmoplegia, and nystagmus, as well as deafness, apneic episodes, ataxia, tremor, and brisk tendon reflexes. Brain imaging shows bilateral symmetric lesions in the basal ganglia, consistent with a clinical diagnosis of Leigh syndrome (see 256000). Some patients may also have abnormalities in the brainstem and cerebellum. Laboratory studies usually show increased serum and CSF lactate and decreased levels and activity of mitochondrial respiratory complex IV in patient tissues. There is phenotypic variability, but death in childhood, often due to central respiratory failure, is common (summary by Tiranti et al., 1998; Tiranti et al., 1999; Teraoka et al., 1999; Poyau et al., 2000)&#13;
+Genetic Heterogeneity of Mitochondrial Complex IV Deficiency&#13;
+Most isolated COX deficiencies are inherited as autosomal recessive disorders caused by mutations in nuclear-encoded genes; mutations in the mtDNA-encoded COX subunit genes are relatively rare (Shoubridge, 2001; Sacconi et al., 2003).&#13;
+Mitochondrial complex IV deficiency caused by mutation in nuclear-encoded genes, in addition to MC4DN1, include MC4DN2 (604377), caused by mutation in the SCO2 gene (604272); MC4DN3 (619046), caused by mutation in the COX10 gene (602125); MC4DN4 (619048), caused by mutation in the SCO1 gene (603664); MC4DN5 (220111), caused by mutation in the LRPPRC gene (607544); MC4DN6 (615119), caused by mutation in the COX15 gene (603646); MC4DN7 (619051), caused by mutation in the COX6B1 gene (124089); MC4DN8 (619052), caused by mutation in the TACO1 gene (612958); MC4DN9 (616500), caused by mutation in the COA5 gene (613920); MC4DN10 (619053), caused by mutation in the COX14 gene (614478); MC4DN11 (619054), caused by mutation in the COX20 gene (614698); MC4DN12 (619055), caused by mutation in the PET100 gene (614770); MC4DN13 (616501), caused by mutation in the COA6 gene (614772); MC4DN14 (619058), caused by mutation in the COA3 gene (614775); MC4DN15 (619059), caused by mutation in the COX8A gene (123870); MC4DN16 (619060), caused by mutation in the COX4I1 gene (123864); MC4DN17 (619061), caused by mutation in the COA8 gene (616003); MC4DN18 (619062), caused by mutation in the COX6A2 gene (602009); MC4DN19 (619063), caused by mutation in the PET117 gene (614771); MC4DN20 (619064), caused by mutation in the COX5A gene (603773); MC4DN21 (619065), caused by mutation in the COXFA4 gene (603883); MC4DN22 (619355), caused by mutation in the COX16 gene (618064); MC4DN23 (620275), caused by mutation in the COX11 gene (603648); and MC4DN24 (621431), caused by mutation in the FASTKD5 gene (614272).&#13;
+Mitochondrial complex IV deficiency has been associated with mutations in several mitochondrial genes, including MTCO1 (516030), MTCO2 (516040), MTCO3 (516050), MTTS1 (590080), MTTL1 (590050), and MTTN (590010).</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="disease mechanism" integerValue="273">loss of function</Attribute>
+          <XRef ID="GTR000521398" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000530224" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000592488" DB="Genetic Testing Registry (GTR)"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="48"/>
+          <XRef ID="48" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="15158"/>
+          <XRef ID="15158" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <Citation Type="review" Abbrev="GeneReviews">
+          <ID Source="PubMed">26425749</ID>
+          <ID Source="BookShelf">NBK320989</ID>
+        </Citation>
+        <XRef ID="MONDO:0700250" DB="MONDO"/>
+        <XRef ID="C5435656" DB="MedGen"/>
+        <XRef Type="MIM" ID="220110" DB="OMIM"/>
+      </Trait>
+      <Trait ID="26002" Type="Finding">
+        <Name>
+          <ElementValue Type="Preferred">Infantile encephalopathy</ElementValue>
+          <XRef ID="HP:0007105" DB="Human Phenotype Ontology"/>
+        </Name>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <XRef ID="C1856408" DB="MedGen"/>
+        <XRef Type="primary" ID="HP:0007105" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0006948" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007309" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007353" DB="Human Phenotype Ontology"/>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="1174332" SubmissionName="GenomeConnect_hg19_81817">
+    <ClinVarSubmissionID localKey="genomeconnect_16216_625" localKeyIsSubmitted="1" submittedAssembly="GRCh37" submitter="GenomeConnect, ClinGen" submitterDate="2024-06-13"/>
+    <ClinVarAccession Acc="SCV000607169" Version="3" Type="SCV" OrgID="506185" OrganizationCategory="other" OrgType="primary" DateUpdated="2025-04-13" DateCreated="2017-10-16"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification>
+      <ReviewStatus>no classification provided</ReviewStatus>
+      <GermlineClassification>not provided</GermlineClassification>
+      <Comment>GenomeConnect assertions are reported exactly as they appear on the patient-provided report from the testing laboratory. GenomeConnect staff make no attempt to reinterpret the clinical significance of the variant.</Comment>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <ExternalID DB="GenomeConnect" ID="genomeconnect_16216_625"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>unknown</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <Age Type="minimum" age_unit="years">0</Age>
+        <Age Type="maximum" age_unit="years">9</Age>
+        <AffectedStatus>unknown</AffectedStatus>
+        <Sex>female</Sex>
+        <Indication Type="Indication">
+          <Trait Type="Finding">
+            <Name>
+              <ElementValue Type="Preferred">Diagnostic</ElementValue>
+            </Name>
+          </Trait>
+        </Indication>
+      </Sample>
+      <Method>
+        <Purpose>validation</Purpose>
+        <Description>Sanger Sequencing</Description>
+        <MethodType>phenotyping only</MethodType>
+        <MethodAttribute>
+          <Attribute Type="TestName">Gene Panel Sequencing|Mito genome plus Mito Nuclear Gene Panel</Attribute>
+        </MethodAttribute>
+        <ObsMethodAttribute>
+          <Attribute Type="TestingLaboratory" dateValue="2017-04-13" integerValue="26957">GeneDx</Attribute>
+          <Comment>Uncertain significance</Comment>
+        </ObsMethodAttribute>
+      </Method>
+      <ObservedData>
+        <Attribute Type="Description">not provided</Attribute>
+      </ObservedData>
+      <TraitSet DateLastEvaluated="2017-04-27" Type="Finding">
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Premature birth</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0001622"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Abnormal delivery</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0001787"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Failure to thrive</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0001508"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Short stature</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0004322"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Hyperthyroidism</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0000836"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Sensorineural hearing impairment</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0000407"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Generalized hypotonia</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0001290"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Cognitive impairment</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0100543"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Pectus carinatum</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0000768"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Abnormality of cardiovascular system morphology</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002564"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Abnormal EKG</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0003115"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Arrhythmia</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0011675"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Abnormality of the lung</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002088"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Asthma</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002099"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Gastrointestinal dysmotility</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002579"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Abnormality of the stomach</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002577"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Feeding difficulties</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0011968"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Immunodeficiency</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002721"/>
+        </Trait>
+      </TraitSet>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_004589.2:c.769A&gt;C</Attribute>
+        </AttributeSet>
+        <MeasureRelationship Type="variant in gene">
+          <Symbol>
+            <ElementValue Type="Preferred">SCO1</ElementValue>
+          </Symbol>
+        </MeasureRelationship>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="Disease" multipleConditionExplanation="Uncertain">
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C0268237" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="CN238762" Type="CUI"/>
+      </Trait>
+    </TraitSet>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

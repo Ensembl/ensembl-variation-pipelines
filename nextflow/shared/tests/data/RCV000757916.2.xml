@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="301544661">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_001267550.2(TTN):c.92812dup (p.Arg30938fs) AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="1735380" DateLastUpdated="2026-04-12" DateCreated="2019-02-23">
+    <ClinVarAccession Acc="RCV000757916" Version="2" Type="RCV" DateUpdated="2026-04-12" DateCreated="2019-02-23"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>no assertion criteria provided</ReviewStatus>
+        <Description DateLastEvaluated="2019-02-11" SubmissionCount="1">Pathogenic</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="ModeOfInheritance" integerValue="263">Autosomal recessive inheritance</Attribute>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>paternal</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>yes</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>research</MethodType>
+      </Method>
+      <ObservedData ID="223007396">
+        <Attribute integerValue="1" Type="VariantAlleles"/>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="619011" Acc="VCV000619011" Version="4">
+      <Measure Type="Duplication" ID="610409">
+        <Name>
+          <ElementValue Type="Preferred">NM_001267550.2(TTN):c.92812dup (p.Arg30938fs)</ElementValue>
+        </Name>
+        <CanonicalSPDI>NC_000002.12:178548813:T:TT</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Accession="NM_001267550" Version="1" Change="c.92812dup" Type="HGVS, coding">NM_001267550.1:c.92812dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_003319" Version="4" Change="c.65617dup" Type="HGVS, coding, RefSeq">NM_003319.4:c.65617dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_133432" Version="3" Change="c.65992dup" Type="HGVS, coding, RefSeq">NM_133432.3:c.65992dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_133437" Version="4" Change="c.66193dup" Type="HGVS, coding, RefSeq">NM_133437.4:c.66193dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_133378" Version="4" Change="c.85108dup" Type="HGVS, coding, RefSeq">NM_133378.4:c.85108dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001256850" Version="1" Change="c.87889dup" Type="HGVS, coding, RefSeq">NM_001256850.1:c.87889dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001267550" Version="2" Change="c.92812dup" Type="HGVS, coding, RefSeq" MANESelect="true">NM_001267550.2:c.92812dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_391" Type="HGVS, genomic, LRG">LRG_391:g.286989dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_011618" Version="3" Change="g.286989dup" Type="HGVS, genomic, RefSeqGene">NG_011618.3:g.286989dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_051363" Version="1" Change="g.30988dup" Type="HGVS, genomic, RefSeqGene">NG_051363.1:g.30988dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000002" Version="12" Change="g.178548814dup" Type="HGVS, genomic, top level" integerValue="38">NC_000002.12:g.178548814dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000002" Version="11" Change="g.179413541dup" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000002.11:g.179413541dup</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="HGVS, protein"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_003310" Version="4" Change="p.Arg21873fs" Type="HGVS, protein, RefSeq">NP_003310.4:p.Arg21873fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_597676" Version="3" Change="p.Arg21998fs" Type="HGVS, protein, RefSeq">NP_597676.3:p.Arg21998fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_597681" Version="4" Change="p.Arg22065fs" Type="HGVS, protein, RefSeq">NP_597681.4:p.Arg22065fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_596869" Version="4" Change="p.Arg28370fs" Type="HGVS, protein, RefSeq">NP_596869.4:p.Arg28370fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001243779" Version="1" Change="p.Arg29297fs" Type="HGVS, protein, RefSeq">NP_001243779.1:p.Arg29297fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001254479" Version="2" Change="p.Arg30938fs" Type="HGVS, protein, RefSeq">NP_001254479.2:p.Arg30938fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">frameshift variant</Attribute>
+          <XRef ID="SO:0001589" DB="Sequence Ontology"/>
+          <XRef ID="NM_001256850.1:c.87889dup" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">frameshift variant</Attribute>
+          <XRef ID="SO:0001589" DB="Sequence Ontology"/>
+          <XRef ID="NM_001267550.2:c.92812dup" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">frameshift variant</Attribute>
+          <XRef ID="SO:0001589" DB="Sequence Ontology"/>
+          <XRef ID="NM_003319.4:c.65617dup" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">frameshift variant</Attribute>
+          <XRef ID="SO:0001589" DB="Sequence Ontology"/>
+          <XRef ID="NM_133378.4:c.85108dup" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">frameshift variant</Attribute>
+          <XRef ID="SO:0001589" DB="Sequence Ontology"/>
+          <XRef ID="NM_133432.3:c.65992dup" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">frameshift variant</Attribute>
+          <XRef ID="SO:0001589" DB="Sequence Ontology"/>
+          <XRef ID="NM_133437.4:c.66193dup" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R21873fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R21998fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R22065fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R28370fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R29297fs</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R30938fs</Attribute>
+        </AttributeSet>
+        <CytogeneticLocation>2q31.2</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="2" Accession="NC_000002.12" start="178548813" stop="178548814" display_start="178548813" display_stop="178548814" variantLength="1" positionVCF="178548813" referenceAlleleVCF="C" alternateAlleleVCF="CT"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="2" Accession="NC_000002.11" start="179413540" stop="179413541" display_start="179413540" display_stop="179413541" variantLength="1" positionVCF="179413540" referenceAlleleVCF="C" alternateAlleleVCF="CT"/>
+        <MeasureRelationship Type="within multiple genes by overlap">
+          <Name>
+            <ElementValue Type="Preferred">TTN antisense RNA 1</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">TTN-AS1</ElementValue>
+          </Symbol>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="2" Accession="NC_000002.12" start="178522827" stop="178620217" display_start="178522827" display_stop="178620217" Strand="+"/>
+          <XRef ID="100506866" DB="Gene"/>
+          <XRef ID="HGNC:44124" DB="HGNC"/>
+        </MeasureRelationship>
+        <MeasureRelationship Type="within multiple genes by overlap">
+          <Name>
+            <ElementValue Type="Preferred">titin</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">TTN</ElementValue>
+          </Symbol>
+          <AttributeSet>
+            <Attribute dateValue="2026-01-05" Type="Haploinsufficiency">Some evidence for dosage pathogenicity</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=TTN</URL>
+            </Citation>
+          </AttributeSet>
+          <AttributeSet>
+            <Attribute dateValue="2026-01-05" Type="Triplosensitivity">No evidence available</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=TTN</URL>
+            </Citation>
+          </AttributeSet>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="2" Accession="NC_000002.12" start="178525989" stop="178807423" display_start="178525989" display_stop="178807423" Strand="-"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="2" Accession="NC_000002.11" start="179390715" stop="179672149" display_start="179390715" display_stop="179672149" variantLength="281435" Strand="-"/>
+          <XRef ID="7273" DB="Gene"/>
+          <XRef Type="MIM" ID="188840" DB="OMIM"/>
+          <XRef ID="HGNC:12403" DB="HGNC"/>
+          <Comment DataSource="ClinVar" Type="public">This gene is cited in the ACMG recommendations of 2021 (SF v3.0; PubMed 34012068) for reporting secondary findings in clinical exome and genome sequencing.</Comment>
+          <Comment DataSource="ClinVar" Type="public">This gene is cited in the ACMG recommendations of 2022 (SF v3.1; PubMed 35802134) for reporting secondary findings in clinical exome and genome sequencing.</Comment>
+        </MeasureRelationship>
+        <XRef Type="rs" ID="1559173391" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_001267550.2(TTN):c.92812dup (p.Arg30938fs)</ElementValue>
+      </Name>
+      <AttributeSet>
+        <Attribute Type="SubmitterVariantId">GDX:3730066</Attribute>
+      </AttributeSet>
+      <XRef ID="CA913189625" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="46411">
+      <Trait ID="5594" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Early-onset myopathy with fatal cardiomyopathy</ElementValue>
+          <XRef ID="MONDO:0012714" DB="MONDO"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">CONGENITAL MYOPATHY 5 WITH CARDIOMYOPATHY</ElementValue>
+          <XRef Type="MIM" ID="611705" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="188840.0012" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="188840.0013" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="188840.0014" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="188840.0015" DB="OMIM"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Salih Myopathy</ElementValue>
+          <XRef ID="NBK83297" DB="GeneReviews"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">CMYO5</ElementValue>
+          <XRef Type="MIM" ID="611705" DB="OMIM"/>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="public definition">Salih myopathy is characterized by muscle weakness (manifesting during the neonatal period or in very early infancy) and delayed motor development; children acquire independent walking between ages 20 months and four years. In the first decade of life, global motor performance is stable or tends to improve. Moderate joint and neck contractures and spinal rigidity may manifest in the first decade but become more obvious in the second decade. Scoliosis develops after age 11 years. Cardiac dysfunction manifests between ages five and 16 years, progresses rapidly, and leads to death between ages eight and 20 years, usually from heart rhythm disturbances.</Attribute>
+          <XRef ID="NBK83297" DB="GeneReviews"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="disease mechanism" integerValue="273">loss of function</Attribute>
+          <XRef ID="GTR000506312" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000509386" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000509454" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000520063" DB="Genetic Testing Registry (GTR)"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="17324"/>
+          <XRef ID="17324" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <Citation Type="review" Abbrev="GeneReviews">
+          <ID Source="PubMed">22238790</ID>
+          <ID Source="BookShelf">NBK83297</ID>
+        </Citation>
+        <XRef ID="MONDO:0012714" DB="MONDO"/>
+        <XRef ID="C2673677" DB="MedGen"/>
+        <XRef ID="289377" DB="Orphanet"/>
+        <XRef Type="MIM" ID="611705" DB="OMIM"/>
+      </Trait>
+      <Trait ID="41413" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Congenital titinopathy</ElementValue>
+        </Name>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="1735349" SubmissionName="SUB5161341">
+    <ClinVarSubmissionID localKey="SUB5161341" submittedAssembly="hg19" submitter="Department of Rehabilitation Medicine, Incheon St. Mary’s Hospital, College of Medicine, The Catholic University of Korea" submitterDate="2019-02-19" title="SUB5161341"/>
+    <ClinVarAccession Acc="SCV000882767" Version="1" Type="SCV" OrgID="506870" OrganizationCategory="clinic" OrgType="primary" DateUpdated="2019-02-23" DateCreated="2019-02-23"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification DateLastEvaluated="2019-02-11">
+      <ReviewStatus>no assertion criteria provided</ReviewStatus>
+      <GermlineClassification>Pathogenic</GermlineClassification>
+      <Comment>The proband has another variant, NG_011618.3: c.26231-1G&gt;C.</Comment>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="ModeOfInheritance">Autosomal recessive inheritance</Attribute>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>paternal</Origin>
+        <Ethnicity/>
+        <GeographicOrigin/>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>yes</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>research</MethodType>
+      </Method>
+      <ObservedData>
+        <Attribute Type="CompoundHeterozygote" integerValue="1"/>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_133378.4:c.85108dup</Attribute>
+        </AttributeSet>
+        <MeasureRelationship Type="variant in gene">
+          <Name>
+            <ElementValue Type="Preferred">titin</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">TTN</ElementValue>
+          </Symbol>
+        </MeasureRelationship>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice">
+      <Trait Type="Disease">
+        <XRef DB="OMIM" ID="611705"/>
+      </Trait>
+      <Trait Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Congenital titinopathy</ElementValue>
+        </Name>
+      </Trait>
+    </TraitSet>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

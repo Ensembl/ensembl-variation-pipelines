@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="280085561">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_020971.3(SPTBN4):c.3949-1G&gt;A AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="1963518" DateLastUpdated="2025-11-02" DateCreated="2019-11-22">
+    <ClinVarAccession Acc="RCV000856570" Version="5" Type="RCV" DateUpdated="2025-11-02" DateCreated="2019-11-22"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>no assertion criteria provided</ReviewStatus>
+        <Description DateLastEvaluated="2019-11-13" SubmissionCount="1">Uncertain significance</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="ModeOfInheritance" integerValue="263">Autosomal recessive inheritance</Attribute>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>germline</Origin>
+        <Ethnicity>Arab</Ethnicity>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>yes</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>clinical testing</MethodType>
+      </Method>
+      <ObservedData ID="205949201">
+        <Attribute integerValue="1" Type="VariantAlleles"/>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="694501" Acc="VCV000694501" Version="4">
+      <Measure Type="single nucleotide variant" ID="682488">
+        <Name>
+          <ElementValue Type="Preferred">NM_020971.3(SPTBN4):c.3949-1G&gt;A</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">chr19:41038531G&gt;A</ElementValue>
+        </Name>
+        <CanonicalSPDI>NC_000019.10:40532623:G:A</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Accession="NM_025213" Version="3" Change="c.-24-1G&gt;A" Type="HGVS, coding, RefSeq">NM_025213.3:c.-24-1G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_020971" Version="3" Change="c.3949-1G&gt;A" Type="HGVS, coding, RefSeq" MANESelect="true">NM_020971.3:c.3949-1G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_029905" Version="1" Change="g.70406G&gt;A" Type="HGVS, genomic, RefSeqGene">NG_029905.1:g.70406G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_029905" Version="2" Change="g.70625G&gt;A" Type="HGVS, genomic, RefSeqGene">NG_029905.2:g.70625G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000019" Version="10" Change="g.40532624G&gt;A" Type="HGVS, genomic, top level" integerValue="38">NC_000019.10:g.40532624G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000019" Version="9" Change="g.41038531G&gt;A" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000019.9:g.41038531G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_020971" Version="2" Change="c.3949-1G&gt;A" Type="HGVS, previous">NM_020971.2:c.3949-1G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="Location">NM_020971.2:intron 18</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">splice acceptor variant</Attribute>
+          <XRef ID="SO:0001574" DB="Sequence Ontology"/>
+          <XRef ID="NM_020971.3:c.3949-1G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">splice acceptor variant</Attribute>
+          <XRef ID="SO:0001574" DB="Sequence Ontology"/>
+          <XRef ID="NM_025213.3:c.-24-1G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <CytogeneticLocation>19q13.2</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="19" Accession="NC_000019.10" start="40532624" stop="40532624" display_start="40532624" display_stop="40532624" variantLength="1" positionVCF="40532624" referenceAlleleVCF="G" alternateAlleleVCF="A"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="19" Accession="NC_000019.9" start="41038531" stop="41038531" display_start="41038531" display_stop="41038531" variantLength="1" positionVCF="41038531" referenceAlleleVCF="G" alternateAlleleVCF="A"/>
+        <MeasureRelationship Type="within single gene">
+          <Name>
+            <ElementValue Type="Preferred">spectrin beta, non-erythrocytic 4</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">SPTBN4</ElementValue>
+          </Symbol>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="19" Accession="NC_000019.10" start="40467001" stop="40576464" display_start="40467001" display_stop="40576464" Strand="+"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="19" Accession="NC_000019.9" start="40973125" stop="41082364" display_start="40973125" display_stop="41082364" variantLength="109240" Strand="+"/>
+          <XRef ID="57731" DB="Gene"/>
+          <XRef Type="MIM" ID="606214" DB="OMIM"/>
+          <XRef ID="HGNC:14896" DB="HGNC"/>
+        </MeasureRelationship>
+        <XRef Type="rs" ID="1599773719" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_020971.3(SPTBN4):c.3949-1G&gt;A</ElementValue>
+      </Name>
+      <XRef ID="CA405919332" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="51380">
+      <Trait ID="17050" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Global developmental delay</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Cognitive delay</ElementValue>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">DD</ElementValue>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="disease mechanism" integerValue="273">loss of function</Attribute>
+          <XRef ID="GTR000520936" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000521543" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000522222" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000553938" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000568239" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000569041" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000592357" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000592358" DB="Genetic Testing Registry (GTR)"/>
+        </AttributeSet>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <Citation Type="general" Abbrev="Retired, AAN/CNS, 2011">
+          <ID Source="PubMed">21956720</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2021">
+          <ID Source="PubMed">34211152</ID>
+        </Citation>
+        <XRef ID="C0557874" DB="MedGen"/>
+        <XRef Type="primary" ID="HP:0001263" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0000754" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001255" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001277" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001292" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0002433" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0002473" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0002532" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0006793" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0006867" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0006885" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0006935" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007005" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007094" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007106" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007174" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007224" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007228" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0007342" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0025356" DB="Human Phenotype Ontology"/>
+      </Trait>
+      <Trait ID="30329" Type="Finding">
+        <Name>
+          <ElementValue Type="Preferred">Delayed myelination</ElementValue>
+          <XRef ID="HP:0012448" DB="Human Phenotype Ontology"/>
+        </Name>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <XRef ID="C1277241" DB="MedGen"/>
+        <XRef Type="primary" ID="HP:0012448" DB="Human Phenotype Ontology"/>
+      </Trait>
+      <Trait ID="33582" Type="Finding">
+        <Name>
+          <ElementValue Type="Preferred">Hypotonia</ElementValue>
+          <XRef ID="HP:0001252" DB="Human Phenotype Ontology"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Muscular hypotonia</ElementValue>
+          <XRef ID="HP:0001252" DB="Human Phenotype Ontology"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">poor muscle tone</ElementValue>
+        </Name>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <XRef ID="C0026827" DB="MedGen"/>
+        <XRef Type="primary" ID="HP:0001252" DB="Human Phenotype Ontology"/>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="1963471" SubmissionName="SUB6540992">
+    <ClinVarSubmissionID localKey="SUB6540992" submittedAssembly="hg19" submitter="Center for Human Genetics and Genomic Medicine, Uniklinik Rwth Aachen" submitterDate="2019-11-20" title="SUB6540992"/>
+    <ClinVarAccession Acc="SCV000998898" Version="3" Type="SCV" OrgID="505336" OrganizationCategory="laboratory" OrgType="primary" DateUpdated="2025-08-03" DateCreated="2019-11-22"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification DateLastEvaluated="2019-11-13">
+      <ReviewStatus>no assertion criteria provided</ReviewStatus>
+      <GermlineClassification>Uncertain significance</GermlineClassification>
+      <Comment Type="public">Two affected siblings of consanguineous parents, both homoygous for the variant.</Comment>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="ModeOfInheritance">Autosomal recessive inheritance</Attribute>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>germline</Origin>
+        <Ethnicity>Arab</Ethnicity>
+        <GeographicOrigin>Middel East</GeographicOrigin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>yes</AffectedStatus>
+        <Sex>female</Sex>
+        <Indication Type="Indication">
+          <Trait Type="Finding">
+            <Name>
+              <ElementValue Type="Preferred">Clinical features observed in this individual</ElementValue>
+            </Name>
+          </Trait>
+        </Indication>
+      </Sample>
+      <Method>
+        <MethodType>clinical testing</MethodType>
+      </Method>
+      <ObservedData>
+        <Attribute Type="Homozygote" integerValue="1"/>
+      </ObservedData>
+      <Comment Type="public">two affected siblings, both homozygous</Comment>
+      <Comment Type="public">"sequence_variant_affecting_splicing" was previously submitted as the functional consequence for NM_020971.2:c.3949-1G&gt;A, but without providing the result of a functional assay.</Comment>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <Name>
+          <ElementValue Type="Alternate">chr19:41038531G&gt;A</ElementValue>
+        </Name>
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_020971.2:c.3949-1G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="Location">NM_020971.2:intron 18</Attribute>
+        </AttributeSet>
+        <MeasureRelationship Type="variant in gene">
+          <Name>
+            <ElementValue Type="Preferred">spectrin beta, non-erythrocytic 4</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">SPTBN4</ElementValue>
+          </Symbol>
+        </MeasureRelationship>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice">
+      <Trait Type="Disease">
+        <XRef DB="HP" ID="HP:0001263"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="HP" ID="HP:0001252"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="HP" ID="HP:0012448"/>
+      </Trait>
+    </TraitSet>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

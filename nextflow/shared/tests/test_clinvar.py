@@ -27,12 +27,17 @@ CONTEXT = {
 }
 
 
-def source_record():
-    return ET.parse(DATA / "rcv.xml").getroot().find("ClinVarSet")
+def source_record(filename="rcv.xml"):
+    return ET.parse(DATA / filename).getroot().find("ClinVarSet")
+
+
+def variant_case(accession):
+    return json.loads((DATA / "rcv_examples.expected.json").read_text())[accession]
 
 
 class ReleaseStreamingTests(unittest.TestCase):
     def test_records_are_ordered_and_cleared_after_consumption(self):
+        # Streaming must preserve source order while releasing XML elements to bound memory usage.
         stream = BytesIO((DATA / "rcv.xml").read_bytes())
         reader = iter_release(stream, "RCV")
         event, header = next(reader)
@@ -50,6 +55,7 @@ class ReleaseStreamingTests(unittest.TestCase):
         self.assertFalse(stream.closed)
 
     def test_closing_reader_clears_borrowed_record(self):
+        # Stopping iteration early must still release the last borrowed XML element.
         reader = iter_release(BytesIO((DATA / "rcv.xml").read_bytes()), "RCV")
         next(reader)
         _, record = next(reader)
@@ -58,6 +64,7 @@ class ReleaseStreamingTests(unittest.TestCase):
         self.assertEqual(len(record), 0)
 
     def test_vcv_root_variants_and_truncated_input(self):
+        # Both supported VCV roots must work; malformed XML and unknown release types must fail.
         for root in ("ClinVarVariationRelease", "ClinVarResult-Set"):
             with self.subTest(root=root):
                 xml = f'<{root} ReleaseDate="2026-01-01"><VariationArchive Accession="VCV000000001"/></{root}>'
@@ -69,6 +76,7 @@ class ReleaseStreamingTests(unittest.TestCase):
             list(iter_release(BytesIO(b"<ReleaseSet/>"), "OTHER"))
 
     def test_invalid_release_headers_are_rejected_by_shared_reader(self):
+        # Reject an incompatible root or missing release date before any records are processed.
         cases = [
             (b"<WrongRoot/>", "RCV", "Expected ReleaseSet root"),
             (b"<ReleaseSet/>", "RCV", "missing required Dated"),
@@ -86,6 +94,7 @@ class VariantEvidenceTests(unittest.TestCase):
         return source_record().find("ReferenceClinVarAssertion")
 
     def test_aliases_are_deduplicated_without_mixing_identifier_namespaces(self):
+        # Repeated rsIDs must merge, while dbVar IDs remain distinct and unrelated references are ignored.
         assertion = self.assertion()
         measure = assertion.find("MeasureSet/Measure")
         for attributes in (
@@ -101,6 +110,7 @@ class VariantEvidenceTests(unittest.TestCase):
         self.assertEqual(variant["alternative_identifiers"], ["rs699", "dbVar:nsv123"])
 
     def test_requested_assembly_and_primary_placement_are_selected(self):
+        # Prefer the requested assembly and its primary chromosome over duplicate or scaffold placements.
         assertion = self.assertion()
         measure = assertion.find("MeasureSet/Measure")
         location = measure.find("SequenceLocation")
@@ -112,13 +122,43 @@ class VariantEvidenceTests(unittest.TestCase):
         self.assertEqual(locations[0]["sequence_accession"], "NC_000001.11")
         self.assertEqual(locations[0]["assembly"], "GRCh38")
 
+        # This insertion has different start/stop coordinates on each assembly.
+        case = variant_case("RCV000757916.2")
+        for assembly, coordinates in case["coordinates"].items():
+            with self.subTest(assembly=assembly):
+                assertion = source_record(f"{case['rcv']}.xml").find("ReferenceClinVarAssertion")
+                warnings = []
+                variant = parse_variant(assertion, assembly, warnings=warnings)["reported_variant"]
+                self.assertEqual(warnings, [])
+                self.assertEqual(len(variant["locations"]), 1)
+                location = variant["locations"][0]
+                self.assertEqual(location["assembly"], assembly)
+                self.assertEqual(location["chromosome"], case["chromosome"])
+                self.assertEqual([location["start"], location["stop"]], coordinates)
+
+    def test_vcf_alleles_are_preserved_for_substitutions_and_insertions(self):
+        # A single-nucleotide substitution and an insertion cover both allele shapes.
+        for accession in ("RCV000755049.9", "RCV000757916.2"):
+            case = variant_case(accession)
+            with self.subTest(rcv=accession):
+                assertion = source_record(f"{case['rcv']}.xml").find("ReferenceClinVarAssertion")
+                variant = parse_variant(assertion, "GRCh38")["reported_variant"]
+                self.assertEqual(variant["identifier"], case["vcv"])
+                self.assertEqual(variant["alternative_identifiers"], [case["rsid"]])
+                locations = variant["locations"]
+                self.assertEqual(locations[0]["reference_allele_vcf"], case["reference_allele"])
+                self.assertEqual(locations[0]["alternate_allele_vcf"], case["alternate_allele"])
+                self.assertEqual(reported_allele(locations), (case["alternate_allele"], False))
+
     def test_scaffold_is_preserved_when_no_primary_placement_exists(self):
+        # A scaffold placement is still useful evidence when no primary chromosome placement exists.
         assertion = self.assertion()
         assertion.find("MeasureSet/Measure/SequenceLocation").set("Accession", "NT_123456.1")
         locations = parse_variant(assertion, "GRCh38")["reported_variant"]["locations"]
         self.assertEqual(locations[0]["sequence_accession"], "NT_123456.1")
 
     def test_invalid_coordinates_are_reported_without_inventing_positions(self):
+        # An invalid numeric attribute must produce a diagnostic and a null value, not a guessed coordinate.
         assertion = self.assertion()
         assertion.find("MeasureSet/Measure/SequenceLocation").set("positionVCF", "unknown")
         warnings = []
@@ -129,6 +169,7 @@ class VariantEvidenceTests(unittest.TestCase):
         self.assertIn("positionVCF", warnings[0][2])
 
     def test_unsupported_representations_have_explicit_rejection_reasons(self):
+        # Distinguish missing fields from unsupported structures so rejected records remain diagnosable.
         cases = (
             ("<ReferenceClinVarAssertion/>", "missing_measure_set"),
             ('<ReferenceClinVarAssertion><MeasureSet/></ReferenceClinVarAssertion>', "missing_measure_set_type"),
@@ -143,6 +184,7 @@ class VariantEvidenceTests(unittest.TestCase):
                 self.assertEqual(error.exception.reason, reason)
 
     def test_conflicting_alleles_are_not_silently_selected(self):
+        # Agreeing placements identify one allele; conflicting placements must remain ambiguous.
         first = {"reference_allele_vcf": "A", "alternate_allele_vcf": "G"}
         second = {"reference_allele_vcf": "A", "alternate_allele_vcf": "T"}
         self.assertEqual(reported_allele([first, first]), ("G", False))
@@ -150,6 +192,7 @@ class VariantEvidenceTests(unittest.TestCase):
         self.assertEqual(reported_allele([]), (None, False))
 
     def test_haplotype_components_are_not_parent_aliases(self):
+        # Resolve each component independently without treating a member rsID as an ID for the haplotype.
         assertion = ET.fromstring("""<ReferenceClinVarAssertion>
           <MeasureSet Type="Haplotype" Acc="VCV000000004" Version="2">
             <Measure ID="21"><XRef DB="dbSNP" Type="rs" ID="1"/>
@@ -201,6 +244,7 @@ class ExtractionTests(unittest.TestCase):
         return rows, rejected, summary
 
     def test_missing_assertions_and_accessions_are_reported_and_processing_continues(self):
+        # Bad records must be logged individually so a later valid record can still be extracted.
         root = ET.Element("ReleaseSet", Dated="2026-01-01")
         ET.SubElement(root, "ClinVarSet")
         missing_accession = source_record()
@@ -214,6 +258,7 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual(rows[1]["rcv_accession"], "RCV000000001.1")
 
     def test_hgvs_remains_attached_to_its_allele_and_is_not_a_parent_alias(self):
+        # Synonym consumers need each HGVS expression linked to its own allele, even without phenotype data.
         root = ET.Element("ReleaseSet", Dated="2026-01-01")
         record = source_record()
         assertion = record.find("ReferenceClinVarAssertion")
@@ -238,6 +283,7 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual(evidence["reported_variant"]["components"][1]["alternative_identifiers"], ["rs999999"])
 
     def test_empty_release_has_metadata_and_zero_counts(self):
+        # An empty release must still record its provenance and emit consistent zero counts.
         rows, rejected, summary = self.run_extract(ET.Element("ReleaseSet", Dated="2026-01-01"))
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["metadata"]["source_version"], "2026-01-01")
@@ -246,6 +292,7 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual(summary, {"n_records_seen": 0, "n_records_emitted": 0, "n_records_rejected": 0, "rejections_by_reason": {}})
 
     def test_extract_keeps_variants_without_phenotypes_and_reports_genotypes(self):
+        # Shared evidence must survive phenotype ineligibility; unsupported genotypes are reported separately.
         with tempfile.TemporaryDirectory() as directory:
             directory = Path(directory)
             summary = extract(
@@ -273,6 +320,7 @@ class ExtractionTests(unittest.TestCase):
             self.assertEqual(rows[0]["metadata"]["source_version"], "2026-01-01")
 
     def test_gzip_and_source_statuses_are_retained(self):
+        # Compressed inputs must retain source statuses and submission provenance for downstream policy.
         with tempfile.TemporaryDirectory() as directory:
             directory = Path(directory)
             root = ET.fromstring((DATA / "rcv.xml").read_bytes())
@@ -299,6 +347,7 @@ class ExtractionTests(unittest.TestCase):
             self.assertEqual(rows[0]["metadata"]["file_names"], ["input.xml.gz"])
 
     def test_assembly_rejections_include_available_placements(self):
+        # A missing requested assembly must report the available assemblies rather than substitute one.
         with tempfile.TemporaryDirectory() as directory:
             directory = Path(directory)
             summary = extract(
@@ -326,6 +375,7 @@ class ExtractionTests(unittest.TestCase):
 
 class VcvIdentityTests(unittest.TestCase):
     def test_vcv_component_mapping_uses_only_unambiguous_direct_current_alleles(self):
+        # Map only direct current alleles; conflicting VCV versions stay ambiguous and nested members are excluded.
         xml = b'''<ClinVarVariationRelease ReleaseDate="2026-01-01">
           <VariationArchive Accession="VCV000000001" VariationID="1" Version="3">
             <ClassifiedRecord><SimpleAllele AlleleID="21" VariationID="1"/></ClassifiedRecord>
@@ -362,11 +412,13 @@ class VcvIdentityTests(unittest.TestCase):
 
 class SourceConfigurationTests(unittest.TestCase):
     def test_nullable_uuid_and_required_assembly_are_preserved(self):
+        # Assembly UUIDs may be absent, but the assembly label is required to select variant placements.
         self.assertIsNone(validate_clinvar_context(CONTEXT)["assembly_uuid"])
         with self.assertRaisesRegex(ValueError, "requires an assembly"):
             validate_clinvar_context({**CONTEXT, "assembly": None})
 
     def test_genome_uuid_is_preserved_and_validated_by_the_shared_context(self):
+        # Preserve valid genome identifiers and reject malformed UUIDs in either context field.
         genome_uuid = "fd7fea38-981a-4d73-a879-6f9daef86f08"
         context = validate_clinvar_context({**CONTEXT, "genome_uuid": genome_uuid})
         self.assertEqual(context["genome_uuid"], genome_uuid)
@@ -376,6 +428,7 @@ class SourceConfigurationTests(unittest.TestCase):
                     validate_clinvar_context({**CONTEXT, field: "invalid"})
 
     def test_source_config_resolves_literal_paths_and_rejects_wildcards(self):
+        # Resolve explicit inputs relative to the configuration; omitted inputs mean download, not wildcard expansion.
         settings = load_source_config(DATA / "source_config.json")["sources"]["ClinVar"]
         self.assertEqual(settings["inputs"]["rcv"], str((DATA / "rcv.xml").resolve()))
         self.assertEqual(settings["source_name"], "ClinVar")

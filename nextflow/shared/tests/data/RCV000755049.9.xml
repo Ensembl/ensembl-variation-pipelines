@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="314979766">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_001127222.2(CACNA1A):c.4988G&gt;A (p.Arg1663Gln) AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="1728993" DateLastUpdated="2026-09-27" DateCreated="2019-02-17">
+    <ClinVarAccession Acc="RCV000755049" Version="9" Type="RCV" DateUpdated="2026-09-27" DateCreated="2019-02-17"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>no assertion criteria provided</ReviewStatus>
+        <Description DateLastEvaluated="2019-02-11" SubmissionCount="1">Pathogenic</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="ModeOfInheritance" integerValue="262">Autosomal dominant inheritance</Attribute>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>de novo</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>yes</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>research</MethodType>
+      </Method>
+      <ObservedData ID="210362901">
+        <Attribute integerValue="1" Type="VariantAlleles"/>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="68432" Acc="VCV000068432" Version="32">
+      <Measure Type="single nucleotide variant" ID="79323">
+        <Name>
+          <ElementValue Type="Preferred">NM_001127222.2(CACNA1A):c.4988G&gt;A (p.Arg1663Gln)</ElementValue>
+        </Name>
+        <CanonicalSPDI>NC_000019.10:13235692:C:T</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Change="c.4991G&gt;A" Accession="NM_001127221" Version="2" Type="HGVS, coding">NM_001127221.2:c.4991G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_7t1" Type="HGVS, coding, LRG">LRG_7t1:c.4991G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001127222" Version="2" Change="c.4988G&gt;A" Type="HGVS, coding, RefSeq" MANESelect="true">NM_001127222.2:c.4988G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001127221" Version="2" Change="c.4991G&gt;A" Type="HGVS, coding, RefSeq" MANEPlusClinical="true">NM_001127221.2:c.4991G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001174080" Version="2" Change="c.4997G&gt;A" Type="HGVS, coding, RefSeq">NM_001174080.2:c.4997G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_000068" Version="4" Change="c.5006G&gt;A" Type="HGVS, coding, RefSeq">NM_000068.4:c.5006G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_023035" Version="3" Change="c.5006G&gt;A" Type="HGVS, coding, RefSeq">NM_023035.3:c.5006G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_7" Type="HGVS, genomic, LRG">LRG_7:g.275768G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_011569" Version="1" Change="g.275768G&gt;A" Type="HGVS, genomic, RefSeqGene">NG_011569.1:g.275768G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000019" Version="10" Change="g.13235693C&gt;T" Type="HGVS, genomic, top level" integerValue="38">NC_000019.10:g.13235693C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000019" Version="9" Change="g.13346507C&gt;T" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000019.9:g.13346507C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_000068" Version="2" Change="c.4991G&gt;A" Type="HGVS, previous">NM_000068.2:c.4991G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001127221" Version="1" Change="c.4991G&gt;A" Type="HGVS, previous">NM_001127221.1:c.4991G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_023035" Version="2" Change="c.5006G&gt;A" Type="HGVS, previous">NM_023035.2:c.5006G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="HGVS, protein"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_7p1" Change="p.Arg1664Gln" Type="HGVS, protein">LRG_7p1:p.Arg1664Gln</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001120694" Version="1" Change="p.Arg1663Gln" Type="HGVS, protein, RefSeq">NP_001120694.1:p.Arg1663Gln</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001120693" Version="1" Change="p.Arg1664Gln" Type="HGVS, protein, RefSeq">NP_001120693.1:p.Arg1664Gln</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001120693" Version="1" Change="p.Arg1664Gln" Type="HGVS, protein, RefSeq">NP_001120693.1:p.Arg1664Gln</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001167551" Version="1" Change="p.Arg1666Gln" Type="HGVS, protein, RefSeq">NP_001167551.1:p.Arg1666Gln</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_000059" Version="3" Change="p.Arg1669Gln" Type="HGVS, protein, RefSeq">NP_000059.3:p.Arg1669Gln</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_075461" Version="2" Change="p.Arg1669Gln" Type="HGVS, protein, RefSeq">NP_075461.2:p.Arg1669Gln</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="Location">NM_001127221.1:exon 32</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_000068.4:c.5006G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001127221.2:c.4991G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001127222.2:c.4988G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001174080.2:c.4997G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_023035.3:c.5006G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R1663Q</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R1664Q</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R1666Q</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">R1669Q</Attribute>
+        </AttributeSet>
+        <CytogeneticLocation>19p13.13</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="19" Accession="NC_000019.10" start="13235693" stop="13235693" display_start="13235693" display_stop="13235693" variantLength="1" positionVCF="13235693" referenceAlleleVCF="C" alternateAlleleVCF="T"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="19" Accession="NC_000019.9" start="13346507" stop="13346507" display_start="13346507" display_stop="13346507" variantLength="1" positionVCF="13346507" referenceAlleleVCF="C" alternateAlleleVCF="T"/>
+        <MeasureRelationship Type="within single gene">
+          <Name>
+            <ElementValue Type="Preferred">calcium voltage-gated channel subunit alpha1 A</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">CACNA1A</ElementValue>
+          </Symbol>
+          <AttributeSet>
+            <Attribute dateValue="2017-05-21" Type="Haploinsufficiency">Sufficient evidence for dosage pathogenicity</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=CACNA1A</URL>
+            </Citation>
+          </AttributeSet>
+          <AttributeSet>
+            <Attribute dateValue="2017-05-21" Type="Triplosensitivity">No evidence available</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=CACNA1A</URL>
+            </Citation>
+          </AttributeSet>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="19" Accession="NC_000019.10" start="13206442" stop="13506479" display_start="13206442" display_stop="13506479" Strand="-"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="19" Accession="NC_000019.9" start="13317255" stop="13617273" display_start="13317255" display_stop="13617273" variantLength="300019" Strand="-"/>
+          <XRef ID="773" DB="Gene"/>
+          <XRef Type="MIM" ID="601011" DB="OMIM"/>
+          <XRef ID="HGNC:1388" DB="HGNC"/>
+        </MeasureRelationship>
+        <XRef ID="VAR_063691" DB="UniProtKB/Swiss-Prot"/>
+        <XRef Type="rs" ID="121908247" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_001127222.2(CACNA1A):c.4988G&gt;A (p.Arg1663Gln)</ElementValue>
+      </Name>
+      <AttributeSet>
+        <Attribute Type="SubmitterVariantId">GDX:694726</Attribute>
+      </AttributeSet>
+      <XRef ID="CA185906" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="46386">
+      <Trait ID="34168" Type="Finding">
+        <Name>
+          <ElementValue Type="Preferred">Ataxia _ Neurologic (child onset)</ElementValue>
+        </Name>
+      </Trait>
+      <Trait ID="41368" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Non-progressive congenital cerebellar ataxia</ElementValue>
+        </Name>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="1728652" SubmissionName="SUB5159006">
+    <ClinVarSubmissionID localKey="SUB5159006" submittedAssembly="hg19" submitter="Department of Rehabilitation Medicine, Incheon St. Mary’s Hospital, College of Medicine, The Catholic University of Korea" submitterDate="2019-02-11" title="SUB5159006"/>
+    <ClinVarAccession Acc="SCV000882749" Version="1" Type="SCV" OrgID="506870" OrganizationCategory="clinic" OrgType="primary" DateUpdated="2019-02-17" DateCreated="2019-02-17"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification DateLastEvaluated="2019-02-11">
+      <ReviewStatus>no assertion criteria provided</ReviewStatus>
+      <GermlineClassification>Pathogenic</GermlineClassification>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="ModeOfInheritance">Autosomal dominant inheritance</Attribute>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>de novo</Origin>
+        <Ethnicity/>
+        <GeographicOrigin/>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>yes</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>research</MethodType>
+      </Method>
+      <ObservedData>
+        <Attribute Type="SingleHeterozygote" integerValue="1"/>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_001127221.1:c.4991G&gt;A</Attribute>
+        </AttributeSet>
+        <MeasureRelationship Type="variant in gene">
+          <Name>
+            <ElementValue Type="Preferred">calcium voltage-gated channel subunit alpha1 A</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">CACNA1A</ElementValue>
+          </Symbol>
+        </MeasureRelationship>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice">
+      <Trait Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Ataxia _ Neurologic (child onset)</ElementValue>
+        </Name>
+        <XRef DB="MedGen" ID="CN232488" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Non-progressive congenital cerebellar ataxia</ElementValue>
+        </Name>
+      </Trait>
+    </TraitSet>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

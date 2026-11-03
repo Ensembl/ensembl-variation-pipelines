@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="267301285">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_000511.6(FUT2):c.461G&gt;A (p.Trp154Ter) AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="5482747" DateLastUpdated="2025-05-25" DateCreated="2022-12-31">
+    <ClinVarAccession Acc="RCV002490360" Version="3" Type="RCV" DateUpdated="2025-05-25" DateCreated="2022-12-31"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>criteria provided, single submitter</ReviewStatus>
+        <Description DateLastEvaluated="2021-08-12" SubmissionCount="1">Benign</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>unknown</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>clinical testing</MethodType>
+      </Method>
+      <ObservedData ID="193113952">
+        <Attribute Type="Description">not provided</Attribute>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="12945" Acc="VCV000012945" Version="4">
+      <Measure Type="single nucleotide variant" ID="27984">
+        <Name>
+          <ElementValue Type="Preferred">NM_000511.6(FUT2):c.461G&gt;A (p.Trp154Ter)</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">W143*</ElementValue>
+          <XRef Type="Allelic variant" ID="182100.0001" DB="OMIM"/>
+        </Name>
+        <CanonicalSPDI>NC_000019.10:48703416:G:A</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Accession="NM_000511" Version="5" Change="c.461G&gt;A" Type="HGVS, coding">NM_000511.5:c.461G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_811t1" Type="HGVS, coding, LRG">LRG_811t1:c.461G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_000511" Version="6" Change="c.461G&gt;A" Type="HGVS, coding, RefSeq" MANESelect="true">NM_000511.6:c.461G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001097638" Version="3" Change="c.461G&gt;A" Type="HGVS, coding, RefSeq">NM_001097638.3:c.461G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_811" Type="HGVS, genomic, LRG">LRG_811:g.12447G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_007511" Version="1" Change="g.12447G&gt;A" Type="HGVS, genomic, RefSeqGene">NG_007511.1:g.12447G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000019" Version="10" Change="g.48703417G&gt;A" Type="HGVS, genomic, top level" integerValue="38">NC_000019.10:g.48703417G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000019" Version="9" Change="g.49206674G&gt;A" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000019.9:g.49206674G&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NR_131188" Version="1" Change="n.432C&gt;T" Type="HGVS, non-coding">NR_131188.1:n.432C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="HGVS, protein"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_811p1" Change="p.Trp154Ter" Type="HGVS, protein">LRG_811p1:p.Trp154Ter</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_000502" Version="4" Change="p.Trp154Ter" Type="HGVS, protein, RefSeq">NP_000502.4:p.Trp154Ter</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001091107" Version="1" Change="p.Trp154Ter" Type="HGVS, protein, RefSeq">NP_001091107.1:p.Trp154Ter</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">non-coding transcript variant</Attribute>
+          <XRef ID="SO:0001619" DB="Sequence Ontology"/>
+          <XRef ID="NR_131188.1:n.432C&gt;T" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">nonsense</Attribute>
+          <XRef ID="SO:0001587" DB="Sequence Ontology"/>
+          <XRef ID="NM_000511.6:c.461G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">nonsense</Attribute>
+          <XRef ID="SO:0001587" DB="Sequence Ontology"/>
+          <XRef ID="NM_001097638.3:c.461G&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">W154*</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange3LetterCode">TRP143TER</Attribute>
+        </AttributeSet>
+        <AlleleFrequencyList>
+          <AlleleFrequency Value="0.32169" Source="1000 Genomes Project"/>
+          <AlleleFrequency Value="0.38942" Source="Exome Aggregation Consortium (ExAC)"/>
+          <AlleleFrequency Value="0.45281" Source="The Genome Aggregation Database (gnomAD)"/>
+          <AlleleFrequency Value="0.44155" Source="The Genome Aggregation Database (gnomAD)"/>
+          <AlleleFrequency Value="0.38285" Source="The Genome Aggregation Database (gnomAD), exomes"/>
+          <AlleleFrequency Value="0.45987" Source="The Genome Aggregation Database (gnomAD), exomes"/>
+          <AlleleFrequency Value="0.44481" Source="Trans-Omics for Precision Medicine (TOPMed)"/>
+          <AlleleFrequency Value="0.33463" Source="1000 Genomes Project 30x"/>
+        </AlleleFrequencyList>
+        <GlobalMinorAlleleFrequency Value="0.32169" Source="1000 Genomes Project" MinorAllele="A"/>
+        <CytogeneticLocation>19q13.33</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="19" Accession="NC_000019.10" start="48703417" stop="48703417" display_start="48703417" display_stop="48703417" variantLength="1" positionVCF="48703417" referenceAlleleVCF="G" alternateAlleleVCF="A"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="19" Accession="NC_000019.9" start="49206674" stop="49206674" display_start="49206674" display_stop="49206674" variantLength="1" positionVCF="49206674" referenceAlleleVCF="G" alternateAlleleVCF="A"/>
+        <MeasureRelationship Type="within multiple genes by overlap">
+          <Name>
+            <ElementValue Type="Preferred">fucosyltransferase 2 (H blood group)</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">FUT2</ElementValue>
+          </Symbol>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="19" Accession="NC_000019.10" start="48695971" stop="48705951" display_start="48695971" display_stop="48705951" Strand="+"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="19" Accession="NC_000019.9" start="49199227" stop="49209190" display_start="49199227" display_stop="49209190" variantLength="9964" Strand="+"/>
+          <XRef ID="2524" DB="Gene"/>
+          <XRef Type="MIM" ID="182100" DB="OMIM"/>
+          <XRef ID="HGNC:4013" DB="HGNC"/>
+        </MeasureRelationship>
+        <MeasureRelationship Type="within multiple genes by overlap">
+          <Name>
+            <ElementValue Type="Preferred">uncharacterized LOC105447645</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">LOC105447645</ElementValue>
+          </Symbol>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="19" Accession="NC_000019.10" start="48702450" stop="48703848" display_start="48702450" display_stop="48703848" Strand="-"/>
+          <XRef ID="105447645" DB="Gene"/>
+        </MeasureRelationship>
+        <XRef Type="Allelic variant" ID="182100.0001" DB="OMIM"/>
+        <XRef Type="rs" ID="601338" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_000511.6(FUT2):c.461G&gt;A (p.Trp154Ter)</ElementValue>
+      </Name>
+      <AttributeSet>
+        <Attribute Type="SubmitterVariantId">d0083058-94bb-4206-aef0-7634fa12316d</Attribute>
+      </AttributeSet>
+      <XRef ID="CA122797" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="82066">
+      <Trait ID="5109" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">VITAMIN B12 PLASMA LEVEL QUANTITATIVE TRAIT LOCUS 1</ElementValue>
+          <XRef Type="MIM" ID="612542" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="182100.0001" DB="OMIM"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">B12QTL1</ElementValue>
+          <XRef Type="MIM" ID="612542" DB="OMIM"/>
+        </Symbol>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <XRef ID="C2674252" DB="MedGen"/>
+        <XRef Type="MIM" ID="612542" DB="OMIM"/>
+      </Trait>
+      <Trait ID="10956" Type="Finding">
+        <Name>
+          <ElementValue Type="Preferred">Bombay phenotype</ElementValue>
+          <XRef ID="MONDO:0014763" DB="MONDO"/>
+        </Name>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <XRef ID="C1859408" DB="MedGen"/>
+        <XRef Type="MIM" ID="616754" DB="OMIM"/>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="5454566" SubmissionName="SUB12390657">
+    <ClinVarSubmissionID localKey="NM_000511.5:c.461G&gt;A|OMIM:612542;616754" submittedAssembly="GRCh37" submitter="Fulgent Genetics, Fulgent Genetics" submitterDate="2022-12-13"/>
+    <ClinVarAccession Acc="SCV002799025" Version="1" Type="SCV" OrgID="500105" OrganizationCategory="laboratory" OrgType="primary" DateUpdated="2022-12-31" DateCreated="2022-12-31"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification DateLastEvaluated="2021-08-12">
+      <ReviewStatus>criteria provided, single submitter</ReviewStatus>
+      <GermlineClassification>Benign</GermlineClassification>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="AssertionMethod">ACMG Guidelines, 2015</Attribute>
+      <Citation>
+        <ID Source="PubMed">25741868</ID>
+      </Citation>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>unknown</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>clinical testing</MethodType>
+      </Method>
+      <ObservedData>
+        <Attribute Type="Description">not provided</Attribute>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_000511.5:c.461G&gt;A</Attribute>
+        </AttributeSet>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice">
+      <Trait Type="Disease">
+        <XRef DB="OMIM" ID="612542" Type="MIM"/>
+      </Trait>
+      <Trait Type="Finding">
+        <XRef DB="OMIM" ID="616754" Type="MIM"/>
+      </Trait>
+    </TraitSet>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

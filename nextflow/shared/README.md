@@ -179,13 +179,21 @@ require database settings.
 ## Tests
 
 Shared tests cover ClinVar streaming, variant identities, assembly selection,
-source evidence, configuration validation and PostgreSQL settings. They run in
+source evidence and source configuration validation. They run in
 the shared environment independently of any consumer:
 
 ```bash
 uv sync --locked --project nextflow/shared
 nextflow/shared/.venv/bin/python -m unittest discover -s nextflow/shared/tests -v
 ```
+
+`tests/data` contains nine supplied RCV XML examples with release date
+`2026-09-28`, preserved unchanged. Tests select fixtures for specific behaviours:
+the insertion record checks GRCh37/GRCh38 placements, and a substitution plus
+the insertion check VCF alleles. Existing synthetic fixtures cover streaming
+and identifier edge cases. Expected variant results are loaded from
+`tests/data/rcv_examples.expected.json`. No Downloads directory or network
+access is needed to run these tests.
 
 With Java 17+, Nextflow 26.04.0 and nf-test 0.9.5 available, run the shared
 module, input-workflow and download/extraction runner tests:

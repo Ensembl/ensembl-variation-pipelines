@@ -28,8 +28,9 @@ The default local profile uses this virtual environment for Python tasks.
 The parser and loader declare Conda and container runtimes. The loader uses
 Psycopg's binary distribution, which bundles libpq; it does not require
 `pg_config`, `LD_LIBRARY_PATH`, or a PostgreSQL environment module. The Slurm
-profile selects the executor; provide the Python runtime on workers or combine
-it with Conda/container execution.
+profile also adds the project virtual environment to `PATH`; create it with
+`uv sync` at a path accessible to compute nodes. Conda/container profiles can
+provide the task runtime instead.
 
 The local loader image must be built before using the Docker profile:
 
@@ -243,8 +244,15 @@ nextflow/phenotypes/.venv/bin/python -m unittest discover -s nextflow/phenotypes
 ```
 
 These tests check phenotype associations, source identities, ontology identifiers
-and parser-to-loader metadata compatibility. Shared source parsing and database
-settings have their own tests in `nextflow/shared/tests`.
+and parser-to-loader metadata compatibility. Shared source parsing and source
+configuration have their own tests in `nextflow/shared/tests`.
+
+The function tests in `tests/test_clinvar.py` select supplied RCV examples from
+`shared/tests/data` for specific behaviours: FUT2 tests mixed disease/finding
+TraitChoice grouping and OMIM filtering; CACNA1A and PTEN test assessments with
+and without evaluation dates; PTEN also tests duplicate ontology references and
+GeneReviews links. Expected phenotype results are loaded from
+`tests/data/rcv_examples.expected.json`.
 
 With Java 17+, Nextflow 26.04.0 and nf-test 0.9.5 available:
 

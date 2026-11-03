@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="248613765">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_014712.3(SETD1A):c.667G&gt;C (p.Asp223His) AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="4105967" DateLastUpdated="2024-12-22" DateCreated="2022-02-26">
+    <ClinVarAccession Acc="RCV001839224" Version="3" Type="RCV" DateUpdated="2024-12-22" DateCreated="2022-02-26"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>criteria provided, single submitter</ReviewStatus>
+        <Description DateLastEvaluated="2021-04-02" SubmissionCount="1">Uncertain significance</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>inherited</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+        <NumberTested>1</NumberTested>
+      </Sample>
+      <Method>
+        <NamePlatform>NovaSeq 6000</NamePlatform>
+        <MethodType>clinical testing</MethodType>
+      </Method>
+      <ObservedData ID="173556333">
+        <Attribute integerValue="1" Type="VariantAlleles"/>
+      </ObservedData>
+      <ObservedData ID="173556333">
+        <Attribute integerValue="0" Type="NumberMosaic"/>
+      </ObservedData>
+      <ObservedData ID="173556333">
+        <Attribute Type="SecondaryFinding">no</Attribute>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="1342473" Acc="VCV001342473" Version="2">
+      <Measure Type="single nucleotide variant" ID="1334050">
+        <Name>
+          <ElementValue Type="Preferred">NM_014712.3(SETD1A):c.667G&gt;C (p.Asp223His)</ElementValue>
+        </Name>
+        <CanonicalSPDI>NC_000016.10:30964120:G:C</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Accession="NM_014712" Version="3" Change="c.667G&gt;C" Type="HGVS, coding, RefSeq" MANESelect="true">NM_014712.3:c.667G&gt;C</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_052948" Version="1" Change="g.11828G&gt;C" Type="HGVS, genomic, RefSeqGene">NG_052948.1:g.11828G&gt;C</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000016" Version="10" Change="g.30964121G&gt;C" Type="HGVS, genomic, top level" integerValue="38">NC_000016.10:g.30964121G&gt;C</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000016" Version="9" Change="g.30975442G&gt;C" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000016.9:g.30975442G&gt;C</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_055527" Version="1" Change="p.Asp223His" Type="HGVS, protein, RefSeq">NP_055527.1:p.Asp223His</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_014712.3:c.667G&gt;C" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">D223H</Attribute>
+        </AttributeSet>
+        <AlleleFrequencyList>
+          <AlleleFrequency Value="0.00001" Source="The Genome Aggregation Database (gnomAD)"/>
+          <AlleleFrequency Value="0.00000" Source="Trans-Omics for Precision Medicine (TOPMed)"/>
+        </AlleleFrequencyList>
+        <CytogeneticLocation>16p11.2</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="16" Accession="NC_000016.10" start="30964121" stop="30964121" display_start="30964121" display_stop="30964121" variantLength="1" positionVCF="30964121" referenceAlleleVCF="G" alternateAlleleVCF="C"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="16" Accession="NC_000016.9" start="30975442" stop="30975442" display_start="30975442" display_stop="30975442" variantLength="1" positionVCF="30975442" referenceAlleleVCF="G" alternateAlleleVCF="C"/>
+        <MeasureRelationship Type="within single gene">
+          <Name>
+            <ElementValue Type="Preferred">SET domain containing 1A, histone lysine methyltransferase</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">SETD1A</ElementValue>
+          </Symbol>
+          <AttributeSet>
+            <Attribute dateValue="2018-02-28" Type="Haploinsufficiency">Sufficient evidence for dosage pathogenicity</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=SETD1A</URL>
+            </Citation>
+          </AttributeSet>
+          <AttributeSet>
+            <Attribute dateValue="2018-02-28" Type="Triplosensitivity">No evidence available</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=SETD1A</URL>
+            </Citation>
+          </AttributeSet>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="16" Accession="NC_000016.10" start="30957754" stop="30984664" display_start="30957754" display_stop="30984664" Strand="+"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="16" Accession="NC_000016.9" start="30968614" stop="30995980" display_start="30968614" display_stop="30995980" variantLength="27367" Strand="+"/>
+          <XRef ID="9739" DB="Gene"/>
+          <XRef Type="MIM" ID="611052" DB="OMIM"/>
+          <XRef ID="HGNC:29010" DB="HGNC"/>
+        </MeasureRelationship>
+        <XRef Type="rs" ID="550270592" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_014712.3(SETD1A):c.667G&gt;C (p.Asp223His)</ElementValue>
+      </Name>
+      <XRef ID="CA395650338" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="73348">
+      <Trait ID="43820" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Epilepsy, early-onset, with or without developmental delay</ElementValue>
+          <XRef ID="MONDO:0030005" DB="MONDO"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Alternate">EPEO2</ElementValue>
+          <XRef Type="MIM" ID="618832" DB="OMIM"/>
+        </Symbol>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <Citation Type="practice guideline" Abbrev="NICE, 2022">
+          <URL>https://www.nice.org.uk/guidance/ng217</URL>
+          <CitationText>UK NICE Guideline NG217, Epilepsies in children, young people and adults, 2022</CitationText>
+        </Citation>
+        <XRef ID="MONDO:0030005" DB="MONDO"/>
+        <XRef ID="C5882670" DB="MedGen"/>
+        <XRef Type="MIM" ID="618832" DB="OMIM"/>
+      </Trait>
+      <Trait ID="54558" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Neurodevelopmental disorder with speech impairment and dysmorphic facies</ElementValue>
+          <XRef ID="MONDO:0033630" DB="MONDO"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Alternate">NEDSID</ElementValue>
+          <XRef Type="MIM" ID="619056" DB="OMIM"/>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="18530"/>
+          <XRef ID="18530" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <XRef ID="MONDO:0033630" DB="MONDO"/>
+        <XRef ID="C5436699" DB="MedGen"/>
+        <XRef Type="MIM" ID="619056" DB="OMIM"/>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="4105531" SubmissionName="SUB11125106">
+    <ClinVarSubmissionID localKey="NM_014712.3:c.667G&gt;C" localKeyIsSubmitted="1" submittedAssembly="GRCh38" submitter="New York Genome Center" submitterDate="2024-12-16"/>
+    <ClinVarAccession Acc="SCV002099183" Version="2" Type="SCV" OrgID="507558" OrganizationCategory="laboratory" OrgType="primary" DateUpdated="2024-12-22" DateCreated="2022-02-26"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification DateLastEvaluated="2021-04-02">
+      <ReviewStatus>criteria provided, single submitter</ReviewStatus>
+      <GermlineClassification>Uncertain significance</GermlineClassification>
+      <Comment>The inherited heterozygous c.667G&gt;C (p.Asp223His) variant identified in the SETD1A gene has not been reported in affected individuals in the literature. The variant has 0.000006577 allele frequency in the gnomAD(v3) database (1 out of 152,056 heterozygous alleles, no homozygotes)suggesting it is not a common benign variant in the populations represented in that database. In silico tools provide conflicting predictions about potential pathogenicity of this variant [REVEL score = 0.399, CADD score = 24.5]. Based on the available evidence, the inherited heterozygous c.667G&gt;C (p.Asp223His) variant identified in the SETD1A gene is reported as a variant of uncertain significance.</Comment>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="AssertionMethod">NYGC Assertion Criteria 2020</Attribute>
+      <Citation>
+        <URL>https://submit.ncbi.nlm.nih.gov/ft/byid/hhfhf6ms/nygc_assertion_criteria_2020.pdf</URL>
+      </Citation>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>inherited</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+        <NumberTested>1</NumberTested>
+      </Sample>
+      <Method>
+        <NamePlatform>NovaSeq 6000</NamePlatform>
+        <MethodType>clinical testing</MethodType>
+        <MethodAttribute>
+          <Attribute Type="TestName">whole genome sequencing</Attribute>
+        </MethodAttribute>
+      </Method>
+      <ObservedData>
+        <Attribute Type="NumberMosaic" integerValue="0"/>
+      </ObservedData>
+      <ObservedData>
+        <Attribute Type="SingleHeterozygote" integerValue="1"/>
+      </ObservedData>
+      <ObservedData>
+        <Attribute Type="SecondaryFinding">no</Attribute>
+      </ObservedData>
+      <TraitSet Type="Finding">
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0001250"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0001249"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0000708"/>
+        </Trait>
+      </TraitSet>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_014712.3:c.667G&gt;C</Attribute>
+        </AttributeSet>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="Disease" multipleConditionExplanation="Uncertain">
+      <Trait Type="Disease">
+        <XRef DB="OMIM" ID="618832" Type="MIM"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="OMIM" ID="619056" Type="MIM"/>
+      </Trait>
+    </TraitSet>
+    <StudyName>CSER-NYCKidSeq</StudyName>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

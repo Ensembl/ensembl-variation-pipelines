@@ -1,7 +1,8 @@
 """Extract reported ClinVar variant evidence without phenotype eligibility rules.
 
-Locations and aliases are source assertions. Canonical matching belongs to the
-consumer. Supported representation and placement policies match phenotypes.
+Source coordinates and aliases are preserved; VCF ends and haplotype parent
+spans may be calculated. Canonical matching belongs to the consumer. Supported
+representation and placement policies match phenotypes.
 """
 
 from __future__ import annotations

@@ -281,6 +281,7 @@ class ClinVarLoader:
             "entity_type": required_text(entity, "entity_type"),
             "label": entity.get("label"),
             "reported_type": entity.get("reported_type"),
+            "focal_allele": entity.get("focal_allele"),
             "structural_attributes": Jsonb(
                 entity.get("structural_attributes", {}), dumps=simplejson.dumps,
             ),
@@ -359,7 +360,6 @@ class ClinVarLoader:
             "phenotype_association_id": association_id, "source_id": source_id,
             "import_run_id": run_id, "source_accession": source_accession,
             "reported_genes": report.get("reported_genes", []),
-            "reported_allele": report.get("reported_allele"),
             "reported_comparison_allele": report.get("reported_comparison_allele"),
             "reported_allele_role": report.get("reported_allele_role"),
             "reported_relationship_type": report.get("reported_relationship_type"),

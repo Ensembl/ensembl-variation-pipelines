@@ -57,7 +57,7 @@ class ClinvarPhenotypeTests(unittest.TestCase):
             report = association["source_reports"][0]
             self.assertEqual(report["source_accession"], "RCV000000001.1")
             self.assertEqual(report["reported_entity"]["identifier"], "VCV000000001.1")
-            self.assertEqual(report["reported_allele"], "G")
+            self.assertEqual(report["reported_entity"]["focal_allele"], "G")
             with (directory / "rejections.txt").open() as handle:
                 rejected = list(csv.DictReader(handle, delimiter="\t"))
             self.assertEqual(

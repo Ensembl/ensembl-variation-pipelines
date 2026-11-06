@@ -107,7 +107,6 @@ CREATE TABLE source_report (
     import_run_id BIGINT NOT NULL REFERENCES import_run (import_run_id) ON DELETE RESTRICT,
     source_accession TEXT,
     reported_genes TEXT[] NOT NULL DEFAULT '{}',
-    reported_allele TEXT,
     reported_comparison_allele TEXT,
     reported_allele_role TEXT,
     reported_relationship_type TEXT,
@@ -124,6 +123,7 @@ CREATE TABLE reported_entity (
     entity_type TEXT NOT NULL,
     label TEXT,
     reported_type TEXT,
+    focal_allele TEXT,
     structural_attributes JSONB NOT NULL DEFAULT '{}',
     UNIQUE (parent_reported_entity_id, component_ordinal),
     CHECK (

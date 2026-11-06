@@ -17,8 +17,8 @@ from variation_sources.clinvar.variants import (
     RejectedRecord, text as _text, integer as _integer,
     versioned_accession as _versioned_accession, unique as _unique,
     reported_allele as _reported_allele, open_xml as _open_xml,
+    parse_variant as _parse_shared_variant,
 )
-from phenotypes.clinvar.source_adapter import parse_reported_entity as _parse_variant
 from phenotypes.clinvar.vcv_parser import read_component_accessions
 from phenotypes.provenance import git_revision, input_file_provenance
 from variation_sources.source_config import (
@@ -401,6 +401,61 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
     )
 
 
+def _identifier(value: str | None) -> str | None:
+    if value and value.startswith("ClinVar:Allele:"):
+        return value.replace("ClinVar:Allele:", "ClinVar:AlleleID:", 1)
+    return value
+
+
+def _reported_entity(variant: dict[str, Any], source: ET.Element) -> dict[str, Any]:
+    components = variant["components"]
+    return {
+        "identifier": _identifier(variant["identifier"]),
+        "alternative_identifiers": [_identifier(value) for value in variant["alternative_identifiers"]],
+        "entity_type": "Haplotype" if components else "Variant",
+        "label": _text(source.find("./Name/ElementValue[@Type='Preferred']")),
+        "reported_type": variant["variant_type"],
+        "focal_allele": None if components else _reported_allele(variant["locations"])[0],
+        "locations": variant["locations"],
+        "structural_attributes": variant["structural_attributes"],
+        "components": [
+            _reported_entity(component, measure)
+            for component, measure in zip(components, source.findall("Measure"), strict=True)
+        ] if components else [],
+    }
+
+
+def _parse_variant(
+    assertion: ET.Element, assembly: str, *,
+    component_accessions: dict[str, str | None] | None = None,
+    warnings: list[tuple[str, str | None, str]] | None = None,
+) -> dict[str, Any]:
+    first_warning = len(warnings) if warnings is not None else 0
+    try:
+        variant = _parse_shared_variant(
+            assertion, assembly, component_accessions=component_accessions,
+            warnings=warnings,
+        )
+    except RejectedRecord as error:
+        if isinstance(error.source_value, dict) and "component_identifier" in error.source_value:
+            error.source_value = {
+                **error.source_value,
+                "component_identifier": _identifier(error.source_value["component_identifier"]),
+            }
+        raise
+    finally:
+        if warnings is not None:
+            for index in range(first_warning, len(warnings)):
+                reason, accession, details = warnings[index]
+                warnings[index] = (reason, accession, details.replace("ClinVar:Allele:", "ClinVar:AlleleID:"))
+    measure_set = assertion.find("MeasureSet")
+    source = measure_set if variant["reported_variant"]["components"] else measure_set.find("Measure")
+    return {
+        "reported_genes": variant["reported_genes"],
+        "reported_entity": _reported_entity(variant["reported_variant"], source),
+    }
+
+
 def _prepare_entity(variant: dict[str, Any]) -> dict[str, Any]:
     """Return the association entity derived from a reported entity.
 
@@ -761,7 +816,7 @@ def parse_clinvar_set(
     )
     reported_entity = variant.pop("reported_entity")
     reported_genes = variant.pop("reported_genes")
-    reported_allele, ambiguous_location = _reported_allele(
+    _, ambiguous_location = _reported_allele(
         reported_entity["locations"]
     )
     for component in reported_entity["components"]:
@@ -823,7 +878,6 @@ def parse_clinvar_set(
                     "reported_phenotypes": trait_set["reported_phenotypes"],
                     "reported_relationship_type": relationship_type,
                     "reported_entity": reported_entity,
-                    "reported_allele": reported_allele,
                     "reported_genes": reported_genes,
                     "reported_external_references": trait["reported_external_references"],
                     "evidence": None,

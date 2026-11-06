@@ -195,7 +195,7 @@ nextflow run "$PIPELINE_DIR/main.nf" \
 | `non_current_submission` | The SCV has a non-current record status, so its assessments are skipped. |
 | `alternate_trait_name_used` | A preferred trait name is missing, so the single available alternate name is used instead. |
 | `duplicate_trait_merged` | A repeated trait is merged using its ClinVar trait ID, or identical XML when no ID is present. Its mappings and references are combined rather than creating another trait. |
-| `ambiguous_primary_location` | Retained placements for the variant or a haplotype component have different VCF reference/alternate allele pairs. Locations remain separate; the parent `reported_allele` is null if its own placements are ambiguous. |
+| `ambiguous_primary_location` | Retained placements for the variant or a haplotype component have different VCF reference/alternate allele pairs. Locations remain separate; the affected reported entity's `focal_allele` is null. Haplotype components carry their own focal alleles; the parent focal allele is null. |
 | `conflicting_inheritance_context` | An assertion reports `Somatic mutation` alongside another inheritance mode. Its context is set to `unspecified`; the classification and reported inheritance values are preserved. |
 | `ambiguous_somatic_context` | Legacy classification contexts conflict or contradict sample origin. All assessments remain together in one unspecified record rather than being split. |
 | `invalid_numeric_attribute` | A supplied coordinate or other numeric location attribute is not a valid integer. That value becomes null; the rest of the record is retained. |

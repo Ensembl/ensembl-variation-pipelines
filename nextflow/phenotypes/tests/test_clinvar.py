@@ -57,7 +57,7 @@ class ClinvarPhenotypeTests(unittest.TestCase):
             report = association["source_reports"][0]
             self.assertEqual(report["source_accession"], "RCV000000001.1")
             self.assertEqual(report["reported_entity"]["identifier"], "VCV000000001.1")
-            self.assertEqual(report["reported_allele"], "G")
+            self.assertEqual(report["reported_entity"]["focal_allele"], "G")
             with (directory / "rejections.txt").open() as handle:
                 rejected = list(csv.DictReader(handle, delimiter="\t"))
             self.assertEqual(
@@ -85,13 +85,12 @@ class ClinvarPhenotypeTests(unittest.TestCase):
             ["ClinVar:AlleleID:10", "ClinVar:AlleleID:11"],
         )
 
-    def test_parse_traits_preserves_names_and_choice_semantics(self):
+    def test_parse_traits_preserves_reported_names(self):
         # Preserve the distinct disease and finding within one TraitChoice.
         case = phenotype_case("RCV002490360.3")
         assertion = source_record(f"{case['rcv']}.xml").find("ReferenceClinVarAssertion")
         traits, warnings = _parse_traits(assertion)
         self.assertEqual(warnings, [])
-        self.assertEqual(traits["condition_group"], "choice")
         self.assertEqual(
             [trait["phenotype"]["phenotype_name"] for trait in traits["traits"]],
             case["reported_names"],

@@ -182,6 +182,39 @@ nextflow run "$PIPELINE_DIR/main.nf" \
 
 ### Notes
 
+#### Multiple conditions
+
+Multiple conditions reported together in an RCV are kept together. The parser
+creates a combined `phenotype_name`, for example
+`Multiple conditions (Muscle weakness ; Sensorimotor neuropathy)`.
+Individual source names and their ontology mappings remain in
+`source_report.reported_phenotypes`.
+
+#### VCF end coordinates
+
+Reported locations preserve ClinVar's original `start`, `stop`, VCF position
+and alleles. The parser also calculates nullable `stop_vcf` as
+`position_vcf + length(reference_allele_vcf) - 1`, including reference anchor
+bases. For the ACKR1 deletion, position 159205718 and a 15-base reference
+sequence give end 159205732; its source start remains 159205719.
+Missing or unsupported VCF representations leave `stop_vcf` null. The loader
+copies the value without calculating coordinates or filling shared EntityLocations.
+
+#### Haplotype spans
+
+The parent haplotype's reported `locations` can contain a calculated interval.
+Its `start` is the earliest component VCF position and its `stop` is the latest
+component `stop_vcf`. For NAT1*10 on GRCh38 chromosome 8, this is
+18223135–18223142. Component locations and alleles remain unchanged; no parent
+VCF position or allele sequence is constructed, and no origin field is added.
+
+Calculation requires one complete VCF interval per component on the same
+assembly, chromosome and reference sequence. Different chromosomes produce
+`haplotype_span_different_chromosomes`; the parent span is unavailable,
+represented by `locations: []`, and the record is retained. Missing or ambiguous
+component intervals also leave parent locations empty. The loader copies any
+calculated interval into reported locations, not shared EntityLocations.
+
 #### Output: `warnings.txt`
 
 - `warnings.txt` is a tab-separated file, with columns `RCV`, `VCV`, `SCV`, `warning` and `details`
@@ -195,12 +228,13 @@ nextflow run "$PIPELINE_DIR/main.nf" \
 | `non_current_submission` | The SCV has a non-current record status, so its assessments are skipped. |
 | `alternate_trait_name_used` | A preferred trait name is missing, so the single available alternate name is used instead. |
 | `duplicate_trait_merged` | A repeated trait is merged using its ClinVar trait ID, or identical XML when no ID is present. Its mappings and references are combined rather than creating another trait. |
-| `ambiguous_primary_location` | Retained placements for the variant or a haplotype component have different VCF reference/alternate allele pairs. Locations remain separate; the parent `reported_allele` is null if its own placements are ambiguous. |
+| `ambiguous_primary_location` | Retained placements for the variant or a haplotype component have different VCF reference/alternate allele pairs. Locations remain separate; the affected reported entity's `focal_allele` is null. Haplotype components carry their own focal alleles; the parent focal allele is null. |
 | `conflicting_inheritance_context` | An assertion reports `Somatic mutation` alongside another inheritance mode. Its context is set to `unspecified`; the classification and reported inheritance values are preserved. |
 | `ambiguous_somatic_context` | Legacy classification contexts conflict or contradict sample origin. All assessments remain together in one unspecified record rather than being split. |
 | `invalid_numeric_attribute` | A supplied coordinate or other numeric location attribute is not a valid integer. That value becomes null; the rest of the record is retained. |
 | `invalid_last_evaluated_date` | The assessment date cannot be read as a valid supported date. It becomes null; the assessment remains. |
 | `invalid_doi` | The selected DOI cannot be recognised after cleaning. The publication remains with a null identifier; a URL is not substituted for the invalid DOI. |
+| `haplotype_span_different_chromosomes` | Component placements include different chromosomes. No parent span is calculated (`locations: []`); the haplotype and its components are retained. |
 | `missing_component_vcv` | No current individual VCV with a version was found for a haplotype component. Keep its original Allele ID. |
 | `ambiguous_component_vcv` | Several different accession/version values were found for one component Allele ID. Keep its original Allele ID rather than choosing one. |
 | `input_release_date_mismatch` | The RCV and VCV release dates differ. Processing continues, but identifiers may come from different snapshots. |

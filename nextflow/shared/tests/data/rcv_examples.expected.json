@@ -15,7 +15,11 @@
       ]
     },
     "reference_allele": "C",
-    "alternate_allele": "T"
+    "alternate_allele": "T",
+    "vcf_stops": {
+      "GRCh38": 13235693,
+      "GRCh37": 13346507
+    }
   },
   "RCV000757916.2": {
     "rcv": "RCV000757916.2",
@@ -33,6 +37,10 @@
       ]
     },
     "reference_allele": "C",
-    "alternate_allele": "CT"
+    "alternate_allele": "CT",
+    "vcf_stops": {
+      "GRCh38": 178548813,
+      "GRCh37": 179413540
+    }
   }
 }

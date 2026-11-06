@@ -190,6 +190,31 @@ creates a combined `phenotype_name`, for example
 Individual source names and their ontology mappings remain in
 `source_report.reported_phenotypes`.
 
+#### VCF end coordinates
+
+Reported locations preserve ClinVar's original `start`, `stop`, VCF position
+and alleles. The parser also calculates nullable `stop_vcf` as
+`position_vcf + length(reference_allele_vcf) - 1`, including reference anchor
+bases. For the ACKR1 deletion, position 159205718 and a 15-base reference
+sequence give end 159205732; its source start remains 159205719.
+Missing or unsupported VCF representations leave `stop_vcf` null. The loader
+copies the value without calculating coordinates or filling shared EntityLocations.
+
+#### Haplotype spans
+
+The parent haplotype's reported `locations` can contain a calculated interval.
+Its `start` is the earliest component VCF position and its `stop` is the latest
+component `stop_vcf`. For NAT1*10 on GRCh38 chromosome 8, this is
+18223135–18223142. Component locations and alleles remain unchanged; no parent
+VCF position or allele sequence is constructed, and no origin field is added.
+
+Calculation requires one complete VCF interval per component on the same
+assembly, chromosome and reference sequence. Different chromosomes produce
+`haplotype_span_different_chromosomes`; the parent span is unavailable,
+represented by `locations: []`, and the record is retained. Missing or ambiguous
+component intervals also leave parent locations empty. The loader copies any
+calculated interval into reported locations, not shared EntityLocations.
+
 #### Output: `warnings.txt`
 
 - `warnings.txt` is a tab-separated file, with columns `RCV`, `VCV`, `SCV`, `warning` and `details`
@@ -209,6 +234,7 @@ Individual source names and their ontology mappings remain in
 | `invalid_numeric_attribute` | A supplied coordinate or other numeric location attribute is not a valid integer. That value becomes null; the rest of the record is retained. |
 | `invalid_last_evaluated_date` | The assessment date cannot be read as a valid supported date. It becomes null; the assessment remains. |
 | `invalid_doi` | The selected DOI cannot be recognised after cleaning. The publication remains with a null identifier; a URL is not substituted for the invalid DOI. |
+| `haplotype_span_different_chromosomes` | Component placements include different chromosomes. No parent span is calculated (`locations: []`); the haplotype and its components are retained. |
 | `missing_component_vcv` | No current individual VCV with a version was found for a haplotype component. Keep its original Allele ID. |
 | `ambiguous_component_vcv` | Several different accession/version values were found for one component Allele ID. Keep its original Allele ID rather than choosing one. |
 | `input_release_date_mismatch` | The RCV and VCV release dates differ. Processing continues, but identifiers may come from different snapshots. |

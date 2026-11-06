@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import re
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
 from pathlib import Path
@@ -100,8 +101,9 @@ def parse_location(
 ) -> dict[str, Any]:
     """Return source coordinates and alleles from a SequenceLocation element.
 
-    Preserve the reported coordinates without normalization. Convert numeric
-    attributes with integer and append contextual diagnostics to warnings
+    Preserve reported coordinates and add the calculated stop_vcf for complete
+    literal VCF alleles. Convert numeric attributes with integer and append
+    contextual diagnostics to warnings
     when supplied; measure_id identifies the owning allele in diagnostics.
     """
     context = (
@@ -117,6 +119,16 @@ def parse_location(
             xml_field=f"{context}/@{attribute}",
         )
 
+    position = attribute_integer("positionVCF")
+    reference = element.get("referenceAlleleVCF")
+    alternate = element.get("alternateAlleleVCF")
+    stop_vcf = (
+        position + len(reference) - 1
+        if position is not None and position > 0
+        and all(allele and re.fullmatch(r"[ACGTNacgtn]+", allele)
+                for allele in (reference, alternate))
+        else None
+    )
     return {
         "assembly": element.get("Assembly"),
         "assembly_accession": element.get("AssemblyAccessionVersion"),
@@ -131,9 +143,10 @@ def parse_location(
         "inner_start": attribute_integer("innerStart"),
         "inner_stop": attribute_integer("innerStop"),
         "outer_stop": attribute_integer("outerStop"),
-        "position_vcf": attribute_integer("positionVCF"),
-        "reference_allele_vcf": element.get("referenceAlleleVCF"),
-        "alternate_allele_vcf": element.get("alternateAlleleVCF"),
+        "position_vcf": position,
+        "stop_vcf": stop_vcf,
+        "reference_allele_vcf": reference,
+        "alternate_allele_vcf": alternate,
         "variant_length": attribute_integer("variantLength"),
         "strand": element.get("Strand"),
     }
@@ -171,6 +184,47 @@ def reported_allele(
         return None, False
 
     return allele_pairs[0][1], False
+
+
+def _haplotype_locations(
+    components: list[dict[str, Any]],
+    warnings: list[tuple[str, str | None, str]] | None,
+) -> list[dict[str, Any]]:
+    chromosomes = sorted({
+        location["chromosome"]
+        for component in components for location in component["locations"]
+        if location["chromosome"]
+    })
+    if len(chromosomes) > 1:
+        if warnings is not None:
+            warnings.append((
+                "haplotype_span_different_chromosomes", None,
+                f"component chromosomes: {', '.join(chromosomes)}; parent span omitted",
+            ))
+        return []
+    if not components or any(len(component["locations"]) != 1 for component in components):
+        return []
+    locations = [component["locations"][0] for component in components]
+    identity = ("assembly", "chromosome", "sequence_accession")
+    reference = tuple(locations[0][name] for name in identity)
+    if not all(reference) or any(
+        tuple(location[name] for name in identity) != reference for location in locations
+    ):
+        return []
+    if any(location["position_vcf"] is None or location["stop_vcf"] is None
+           for location in locations):
+        return []
+    return [{
+        **dict.fromkeys(locations[0]),
+        **dict(zip(identity, reference)),
+        **{
+            name: locations[0][name]
+            if all(location[name] == locations[0][name] for location in locations) else None
+            for name in ("assembly_accession", "assembly_status")
+        },
+        "start": min(location["position_vcf"] for location in locations),
+        "stop": max(location["stop_vcf"] for location in locations),
+    }]
 
 
 def parse_variant(
@@ -253,7 +307,7 @@ def parse_variant(
             "identifier": vcv_accession,
             "alternative_identifiers": [],
             "variant_type": measure_set_type,
-            "locations": [],
+            "locations": _haplotype_locations(components, warnings),
             "structural_attributes": {},
             "components": components,
         },

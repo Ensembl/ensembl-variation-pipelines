@@ -148,6 +148,7 @@ CREATE TABLE reported_entity_location (
     inner_stop BIGINT,
     outer_stop BIGINT,
     position_vcf BIGINT,
+    stop_vcf BIGINT,
     reference_allele_vcf TEXT,
     alternate_allele_vcf TEXT,
     variant_length BIGINT,

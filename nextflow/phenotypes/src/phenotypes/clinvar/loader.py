@@ -25,7 +25,7 @@ PROGRESS_INTERVAL = 100_000
 LOCATION_FIELDS = (
     "assembly", "assembly_accession", "assembly_status", "chromosome",
     "sequence_accession", "start", "stop", "display_start", "display_stop",
-    "outer_start", "inner_start", "inner_stop", "outer_stop", "position_vcf",
+    "outer_start", "inner_start", "inner_stop", "outer_stop", "position_vcf", "stop_vcf",
     "reference_allele_vcf", "alternate_allele_vcf", "variant_length", "strand",
 )
 ANNOTATION_FIELDS = (

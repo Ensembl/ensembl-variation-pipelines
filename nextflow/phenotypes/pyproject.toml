@@ -7,11 +7,16 @@ authors = [
     { name = "Aine Fairbrother-Browne", email = "fairbrot@ebi.ac.uk" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = ["variation-sources", "psycopg[binary]>=3.3,<4", "simplejson>=3.20,<4"]
 
-[project.scripts]
-phenotypes = "phenotypes:main"
+[tool.uv.sources]
+variation-sources = { path = "../shared", editable = true }
 
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

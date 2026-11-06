@@ -1,0 +1,82 @@
+name: clinvar_extract
+description: Extract reported variant evidence independently of phenotype eligibility.
+keywords:
+- clinvar
+- variants
+- source processing
+tools:
+- variation_sources:
+    description: Extract reported variant evidence independently of phenotype eligibility.
+    documentation: https://github.com/Ensembl/ensembl-variation-pipelines
+    licence:
+    - Apache-2.0
+input:
+- - meta:
+      type: map
+      description: Caller metadata with id; passed through unchanged.
+  - rcv_xml:
+      type: file
+      description: RCV XML or XML.GZ.
+      ontologies: []
+  - genome_context:
+      type: map
+      description: Required human genome context with assembly and nullable assembly_uuid.
+- - shared_source:
+      type: directory
+      description: Shared Python src directory, staged as shared_src.
+- - shared_source_contents:
+      type: list
+      description: Sorted shared source filenames and contents for cache invalidation.
+output:
+  records:
+  - - meta:
+        type: map
+        description: Caller metadata with id; passed through unchanged.
+    - '*.jsonl':
+        type: file
+        description: Source metadata header and variant evidence, excluding rejections.jsonl.
+        ontologies: []
+  summary:
+  - - meta:
+        type: map
+        description: Caller metadata with id; passed through unchanged.
+    - '*.summary.json':
+        type: file
+        description: Counts and rejection reasons.
+        ontologies: []
+  rejections:
+  - - meta:
+        type: map
+        description: Caller metadata with id; passed through unchanged.
+    - rejections.jsonl:
+        type: file
+        description: Unsupported source records and explicit reasons.
+        ontologies: []
+  versions_python:
+  - &id001
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - python:
+        type: string
+        description: Tool name.
+    - python --version | sed 's/Python //':
+        type: eval
+        description: Numeric Python version.
+  versions_parser:
+  - &id002
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - variation_sources:
+        type: string
+        description: Shared evidence parser package.
+    - PYTHONPATH=shared_src python -c 'from variation_sources import __version__; print(__version__)':
+        type: eval
+        description: Shared package version.
+topics:
+  versions:
+  - *id001
+  - *id002
+authors: []
+maintainers: []

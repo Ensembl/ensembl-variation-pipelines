@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="228151738">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_015662.3(IFT172):c.2204C&gt;A (p.Ala735Asp) AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="5478977" DateLastUpdated="2024-09-29" DateCreated="2022-12-31">
+    <ClinVarAccession Acc="RCV002483491" Version="1" Type="RCV" DateUpdated="2024-09-29" DateCreated="2022-12-31"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>criteria provided, single submitter</ReviewStatus>
+        <Description DateLastEvaluated="2021-12-30" SubmissionCount="1">Uncertain significance</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>unknown</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>clinical testing</MethodType>
+      </Method>
+      <ObservedData ID="133948187">
+        <Attribute Type="Description">not provided</Attribute>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="476043" Acc="VCV000476043" Version="7">
+      <Measure Type="single nucleotide variant" ID="450794">
+        <Name>
+          <ElementValue Type="Preferred">NM_015662.3(IFT172):c.2204C&gt;A (p.Ala735Asp)</ElementValue>
+        </Name>
+        <CanonicalSPDI>NC_000002.12:27461506:G:T</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Accession="NM_015662" Version="3" Change="c.2204C&gt;A" Type="HGVS, coding, RefSeq" MANESelect="true">NM_015662.3:c.2204C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_034068" Version="1" Change="g.33305C&gt;A" Type="HGVS, genomic, RefSeqGene">NG_034068.1:g.33305C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000002" Version="12" Change="g.27461507G&gt;T" Type="HGVS, genomic, top level" integerValue="38">NC_000002.12:g.27461507G&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000002" Version="11" Change="g.27684374G&gt;T" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000002.11:g.27684374G&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_015662" Version="2" Change="c.2204C&gt;A" Type="HGVS, previous">NM_015662.2:c.2204C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_056477" Version="1" Change="p.Ala735Asp" Type="HGVS, protein, RefSeq">NP_056477.1:p.Ala735Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_015662.3:c.2204C&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">A735D</Attribute>
+        </AttributeSet>
+        <AlleleFrequencyList>
+          <AlleleFrequency Value="0.00002" Source="Exome Aggregation Consortium (ExAC)"/>
+          <AlleleFrequency Value="0.00002" Source="The Genome Aggregation Database (gnomAD), exomes"/>
+          <AlleleFrequency Value="0.00001" Source="Trans-Omics for Precision Medicine (TOPMed)"/>
+        </AlleleFrequencyList>
+        <CytogeneticLocation>2p23.3</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="2" Accession="NC_000002.12" start="27461507" stop="27461507" display_start="27461507" display_stop="27461507" variantLength="1" positionVCF="27461507" referenceAlleleVCF="G" alternateAlleleVCF="T"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="2" Accession="NC_000002.11" start="27684374" stop="27684374" display_start="27684374" display_stop="27684374" variantLength="1" positionVCF="27684374" referenceAlleleVCF="G" alternateAlleleVCF="T"/>
+        <MeasureRelationship Type="within single gene">
+          <Name>
+            <ElementValue Type="Preferred">intraflagellar transport 172</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">IFT172</ElementValue>
+          </Symbol>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="2" Accession="NC_000002.12" start="27444377" stop="27489743" display_start="27444377" display_stop="27489743" Strand="-"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="2" Accession="NC_000002.11" start="27667239" stop="27712570" display_start="27667239" display_stop="27712570" variantLength="45332" Strand="-"/>
+          <XRef ID="26160" DB="Gene"/>
+          <XRef Type="MIM" ID="607386" DB="OMIM"/>
+          <XRef ID="HGNC:30391" DB="HGNC"/>
+        </MeasureRelationship>
+        <XRef Type="rs" ID="773174861" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_015662.3(IFT172):c.2204C&gt;A (p.Ala735Asp)</ElementValue>
+      </Name>
+      <XRef ID="CA1580360" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="81574">
+      <Trait ID="18569" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Short-rib thoracic dysplasia 10 with or without polydactyly</ElementValue>
+          <XRef ID="MONDO:0014284" DB="MONDO"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">SRTD10</ElementValue>
+          <XRef Type="MIM" ID="615630" DB="OMIM"/>
+        </Symbol>
+        <Symbol>
+          <ElementValue Type="Alternate">IFT172</ElementValue>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="15993"/>
+          <XRef ID="15993" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <XRef ID="MONDO:0014284" DB="MONDO"/>
+        <XRef ID="C3810175" DB="MedGen"/>
+        <XRef ID="474" DB="Orphanet"/>
+        <XRef Type="MIM" ID="615630" DB="OMIM"/>
+      </Trait>
+      <Trait ID="33412" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Retinitis pigmentosa 71</ElementValue>
+          <XRef ID="MONDO:0014618" DB="MONDO"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">RP71</ElementValue>
+          <XRef Type="MIM" ID="616394" DB="OMIM"/>
+        </Symbol>
+        <Symbol>
+          <ElementValue Type="Alternate">IFT172</ElementValue>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="16101"/>
+          <XRef ID="16101" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <XRef ID="MONDO:0014618" DB="MONDO"/>
+        <XRef ID="C4225342" DB="MedGen"/>
+        <XRef ID="791" DB="Orphanet"/>
+        <XRef Type="MIM" ID="616394" DB="OMIM"/>
+      </Trait>
+      <Trait ID="60933" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Bardet-Biedl syndrome 20</ElementValue>
+          <XRef ID="MONDO:0014926" DB="MONDO"/>
+          <XRef ID="MONDO:0023670" DB="MONDO"/>
+        </Name>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <XRef ID="MONDO:0023670" DB="MONDO"/>
+        <XRef ID="C4310707" DB="MedGen"/>
+        <XRef Type="MIM" ID="619471" DB="OMIM"/>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="5444655" SubmissionName="SUB12390657">
+    <ClinVarSubmissionID localKey="NM_015662.3:c.2204C&gt;A|OMIM:615630;616394;619471" submittedAssembly="GRCh37" submitter="Fulgent Genetics, Fulgent Genetics" submitterDate="2022-12-13"/>
+    <ClinVarAccession Acc="SCV002790664" Version="1" Type="SCV" OrgID="500105" OrganizationCategory="clinic" OrgType="primary" DateUpdated="2022-12-31" DateCreated="2022-12-31"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification DateLastEvaluated="2021-12-30">
+      <ReviewStatus>criteria provided, single submitter</ReviewStatus>
+      <GermlineClassification>Uncertain significance</GermlineClassification>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <AttributeSet>
+      <Attribute Type="AssertionMethod">ACMG Guidelines, 2015</Attribute>
+      <Citation>
+        <ID Source="PubMed">25741868</ID>
+      </Citation>
+    </AttributeSet>
+    <ObservedIn>
+      <Sample>
+        <Origin>unknown</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+      </Sample>
+      <Method>
+        <MethodType>clinical testing</MethodType>
+      </Method>
+      <ObservedData>
+        <Attribute Type="Description">not provided</Attribute>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_015662.3:c.2204C&gt;A</Attribute>
+        </AttributeSet>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice">
+      <Trait Type="Disease">
+        <XRef DB="OMIM" ID="615630" Type="MIM"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="OMIM" ID="616394" Type="MIM"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="OMIM" ID="619471" Type="MIM"/>
+      </Trait>
+    </TraitSet>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

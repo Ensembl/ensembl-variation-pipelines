@@ -1,0 +1,2 @@
+{"metadata": {"source": "ClinVar", "genome_context": {"species_taxonomy_id": 9606, "species_production_name": "homo_sapiens", "assembly": "GRCh38", "assembly_uuid": null, "genome_uuid": null}, "import_run": {"source_name": "ClinVar", "source_version": "2026-01-01", "file_names": ["rcv.xml", "vcv.xml"], "file_checksums": ["0000000000000000000000000000000000000000000000000000000000000000", "1111111111111111111111111111111111111111111111111111111111111111"], "pipeline_run_date": "2026-01-02", "pipeline_revision": "test"}}}
+{}

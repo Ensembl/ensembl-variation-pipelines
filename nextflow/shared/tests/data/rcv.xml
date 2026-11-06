@@ -1,0 +1,28 @@
+<ReleaseSet Dated="2026-01-01">
+  <ClinVarSet><ReferenceClinVarAssertion>
+    <ClinVarAccession Acc="RCV000000001" Version="1"/>
+    <MeasureSet Type="Variant" Acc="VCV000000001" Version="1">
+      <Measure ID="10" Type="single nucleotide variant">
+        <XRef DB="dbSNP" Type="rs" ID="699"/>
+        <AttributeSet><Attribute Type="HGVS, genomic, top level">NC_000001.11:g.100A&gt;G</Attribute></AttributeSet>
+        <SequenceLocation Assembly="GRCh38" Chr="1" Accession="NC_000001.11" start="100" stop="100" positionVCF="100" referenceAlleleVCF="A" alternateAlleleVCF="G"/>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="Disease"><Trait ID="1" Type="Disease"><Name><ElementValue Type="Preferred">Synthetic condition</ElementValue></Name></Trait></TraitSet>
+    <Classifications><GermlineClassification><Description>Pathogenic</Description></GermlineClassification></Classifications>
+  </ReferenceClinVarAssertion></ClinVarSet>
+  <ClinVarSet><ReferenceClinVarAssertion>
+    <ClinVarAccession Acc="RCV000000002" Version="1"/>
+    <MeasureSet Type="Variant" Acc="VCV000000002" Version="1">
+      <Measure ID="11" Type="single nucleotide variant">
+        <XRef DB="dbSNP" Type="rs" ID="999999"/>
+        <SequenceLocation Assembly="GRCh38" Chr="1" Accession="NC_000001.11" start="200" stop="200" positionVCF="200" referenceAlleleVCF="C" alternateAlleleVCF="T"/>
+      </Measure>
+    </MeasureSet>
+  </ReferenceClinVarAssertion></ClinVarSet>
+  <ClinVarSet><ReferenceClinVarAssertion>
+    <ClinVarAccession Acc="RCV000000003" Version="1"/>
+    <GenotypeSet Type="CompoundHeterozygote" ID="30" Acc="VCV000000003" Version="1"/>
+    <TraitSet Type="Disease"><Trait ID="1" Type="Disease"><Name><ElementValue Type="Preferred">Synthetic condition</ElementValue></Name></Trait></TraitSet>
+  </ReferenceClinVarAssertion></ClinVarSet>
+</ReleaseSet>

@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="310338327">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_000314.8(PTEN):c.377C&gt;T (p.Ala126Val) AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="7351310" DateLastUpdated="2026-08-04" DateCreated="2023-06-17">
+    <ClinVarAccession Acc="RCV003233651" Version="4" Type="RCV" DateUpdated="2026-08-04" DateCreated="2023-06-17"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>no classification provided</ReviewStatus>
+        <Description SubmissionCount="1">not provided</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>de novo</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+        <NumberTested>1</NumberTested>
+      </Sample>
+      <Method>
+        <Description>Exome Sequencing</Description>
+        <MethodType>phenotyping only</MethodType>
+      </Method>
+      <ObservedData ID="230699654">
+        <Attribute integerValue="1" Type="VariantAlleles"/>
+      </ObservedData>
+      <ObservedData ID="230699654">
+        <Attribute Type="SampleLocalID">genomeconnect_28425</Attribute>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="428234" Acc="VCV000428234" Version="15">
+      <Measure Type="single nucleotide variant" ID="419724">
+        <Name>
+          <ElementValue Type="Preferred">NM_000314.8(PTEN):c.377C&gt;T (p.Ala126Val)</ElementValue>
+        </Name>
+        <CanonicalSPDI>NC_000010.11:87933135:C:T</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Change="c.377C&gt;T" Accession="NM_000314" Version="8" Type="HGVS, coding">NM_000314.8:c.377C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_311t1" Type="HGVS, coding, LRG">LRG_311t1:c.377C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001304718" Version="2" Change="c.-374C&gt;T" Type="HGVS, coding, RefSeq">NM_001304718.2:c.-374C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_000314" Version="6" Change="c.377C&gt;T" Type="HGVS, coding, RefSeq">NM_000314.6:c.377C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_000314" Version="8" Change="c.377C&gt;T" Type="HGVS, coding, RefSeq" MANESelect="true">NM_000314.8:c.377C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001304717" Version="5" Change="c.896C&gt;T" Type="HGVS, coding, RefSeq">NM_001304717.5:c.896C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_311" Type="HGVS, genomic, LRG">LRG_311:g.74698C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_007466" Version="2" Change="g.74698C&gt;T" Type="HGVS, genomic, RefSeqGene">NG_007466.2:g.74698C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000010" Version="11" Change="g.87933136C&gt;T" Type="HGVS, genomic, top level" integerValue="38">NC_000010.11:g.87933136C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000010" Version="10" Change="g.89692893C&gt;T" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000010.10:g.89692893C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_000314" Version="4" Change="c.377C&gt;T" Type="HGVS, previous">NM_000314.4:c.377C&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="HGVS, protein"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="HGVS, protein"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_000305" Version="3" Change="p.Ala126Val" Type="HGVS, protein, RefSeq">NP_000305.3:p.Ala126Val</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001291646" Version="4" Change="p.Ala299Val" Type="HGVS, protein, RefSeq">NP_001291646.4:p.Ala299Val</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">5 prime UTR variant</Attribute>
+          <XRef ID="SO:0001623" DB="Sequence Ontology"/>
+          <XRef ID="NM_001304718.2:c.-374C&gt;T" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_000314.8:c.377C&gt;T" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001304717.5:c.896C&gt;T" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">A126V</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">A299V</Attribute>
+        </AttributeSet>
+        <CytogeneticLocation>10q23.31</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="10" Accession="NC_000010.11" start="87933136" stop="87933136" display_start="87933136" display_stop="87933136" variantLength="1" positionVCF="87933136" referenceAlleleVCF="C" alternateAlleleVCF="T"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="10" Accession="NC_000010.10" start="89692893" stop="89692893" display_start="89692893" display_stop="89692893" variantLength="1" positionVCF="89692893" referenceAlleleVCF="C" alternateAlleleVCF="T"/>
+        <MeasureRelationship Type="within single gene">
+          <Name>
+            <ElementValue Type="Preferred">phosphatase and tensin homolog</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">PTEN</ElementValue>
+          </Symbol>
+          <AttributeSet>
+            <Attribute dateValue="2020-06-24" Type="Haploinsufficiency">Sufficient evidence for dosage pathogenicity</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=PTEN</URL>
+            </Citation>
+          </AttributeSet>
+          <AttributeSet>
+            <Attribute dateValue="2020-06-24" Type="Triplosensitivity">No evidence available</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=PTEN</URL>
+            </Citation>
+          </AttributeSet>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="10" Accession="NC_000010.11" start="87863625" stop="87971930" display_start="87863625" display_stop="87971930" Strand="+"/>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="10" Accession="NW_013171807.1" start="79449" stop="187719" display_start="79449" display_stop="187719" Strand="+"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="10" Accession="NC_000010.10" start="89623194" stop="89728531" display_start="89623194" display_stop="89728531" variantLength="105338" Strand="+"/>
+          <XRef ID="5728" DB="Gene"/>
+          <XRef Type="MIM" ID="601728" DB="OMIM"/>
+          <XRef ID="HGNC:9588" DB="HGNC"/>
+          <Comment DataSource="NCBI curation" Type="public">This gene is cited in the ACMG recommendations of 2013 (PubMed 23788249) for reporting incidental findings in exons.</Comment>
+          <Comment DataSource="NCBI curation" Type="public">This gene is cited in the ACMG recommendations of 2016 (PubMed 27854360) for reporting incidental findings in exons.</Comment>
+          <Comment DataSource="ClinVar" Type="public">This gene is cited in the ACMG recommendations of 2021 (SF v3.0; PubMed 34012068) for reporting secondary findings in clinical exome and genome sequencing.</Comment>
+          <Comment DataSource="ClinVar" Type="public">This gene is cited in the ACMG recommendations of 2022 (SF v3.1; PubMed 35802134) for reporting secondary findings in clinical exome and genome sequencing.</Comment>
+        </MeasureRelationship>
+        <XRef Type="rs" ID="1114167656" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_000314.8(PTEN):c.377C&gt;T (p.Ala126Val)</ElementValue>
+      </Name>
+      <AttributeSet>
+        <Attribute Type="SubmitterVariantId">GDX:2103805</Attribute>
+      </AttributeSet>
+      <XRef ID="CA377482302" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="85285">
+      <Trait ID="474" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Autism</ElementValue>
+          <XRef ID="HP:0000717" DB="Human Phenotype Ontology"/>
+          <XRef ID="MONDO:0005260" DB="MONDO"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Autistic disorder</ElementValue>
+          <XRef ID="408856003" DB="SNOMED CT"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Autistic disorder of childhood onset</ElementValue>
+          <XRef ID="D001321" DB="MeSH"/>
+          <XRef ID="43614003" DB="SNOMED CT"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">AUTS</ElementValue>
+        </Symbol>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <Citation Type="general" Abbrev="ISCA, 2010">
+          <ID Source="PubMed">20466091</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2021">
+          <ID Source="PubMed">34131312</ID>
+        </Citation>
+        <Citation Type="practice guideline" Abbrev="NICE, 2021">
+          <URL>https://www.nice.org.uk/guidance/cg142</URL>
+          <CitationText>UK NICE Guideline CG142, Autism spectrum disorder in adults: diagnosis and management, 2021</CitationText>
+        </Citation>
+        <Citation Type="practice guideline" Abbrev="NICE, 2021">
+          <URL>https://www.nice.org.uk/guidance/cg170</URL>
+          <CitationText>UK NICE Guideline CG170, Autism spectrum disorder in under 19s: support and management, 2021</CitationText>
+        </Citation>
+        <XRef ID="MONDO:0005260" DB="MONDO"/>
+        <XRef ID="D001321" DB="MeSH"/>
+        <XRef ID="C0004352" DB="MedGen"/>
+        <XRef Type="MIM" ID="209850" DB="OMIM"/>
+        <XRef Type="primary" ID="HP:0000717" DB="Human Phenotype Ontology"/>
+      </Trait>
+      <Trait ID="4661" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Bannayan-Riley-Ruvalcaba syndrome</ElementValue>
+          <XRef ID="MONDO:0007924" DB="MONDO"/>
+          <XRef ID="109" DB="Orphanet"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">PTEN-Related Bannayan-Riley-Ruvalcaba Syndrome</ElementValue>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">BRRS</ElementValue>
+          <XRef ID="109" DB="Orphanet"/>
+        </Symbol>
+        <Symbol>
+          <ElementValue Type="Alternate">RMSS</ElementValue>
+          <XRef Type="MIM" ID="153480" DB="OMIM"/>
+        </Symbol>
+        <Symbol>
+          <ElementValue Type="Alternate">BZS</ElementValue>
+          <XRef Type="MIM" ID="153480" DB="OMIM"/>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="public definition">PTEN hamartoma tumor syndrome (PHTS) is characterized by skin and mucosal lesions, macrocephaly, gastrointestinal polyps, and a high risk for benign and malignant tumors of the breast, thyroid, and endometrium. There is also an increased risk of renal cell carcinoma, colorectal carcinoma, and melanoma. Some individuals have developmental delay and/or autism spectrum disorder. PHTS includes the following clinical phenotypes: Cowden syndrome (CS), Bannayan-Riley-Ruvalcaba syndrome (BRRS), Proteus-like syndrome, and apparently isolated adult-onset Lhermitte-Duclos disease (LDD). Regardless of clinical phenotype, individuals with a germline PTEN pathogenic variant are thought to have the same cancer risks.</Attribute>
+          <XRef ID="NBK1488" DB="GeneReviews"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="disease mechanism" integerValue="273">loss of function</Attribute>
+          <XRef ID="GTR000551654" DB="Genetic Testing Registry (GTR)"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="5887"/>
+          <XRef ID="5887" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <Citation Type="review" Abbrev="GeneReviews">
+          <ID Source="PubMed">20301661</ID>
+          <ID Source="BookShelf">NBK1488</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2008">
+          <ID Source="pmc">3111012</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2013">
+          <ID Source="PubMed">23788249</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2013">
+          <ID Source="PubMed">23519317</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="NCCN, 2014">
+          <ID Source="PubMed">25190698</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2015">
+          <ID Source="PubMed">25356965</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2016">
+          <ID Source="PubMed">27854360</ID>
+          <ID Source="DOI">10.1038/gim.2016.190</ID>
+        </Citation>
+        <XRef ID="MONDO:0007924" DB="MONDO"/>
+        <XRef ID="C0265326" DB="MedGen"/>
+        <XRef ID="109" DB="Orphanet"/>
+      </Trait>
+      <Trait ID="10363" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">PTEN hamartoma tumor syndrome</ElementValue>
+          <XRef ID="MONDO:0017623" DB="MONDO"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">PTEN Hamartomatous Tumour Syndrome</ElementValue>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">PHTS</ElementValue>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="public definition">PTEN hamartoma tumor syndrome (PHTS) is characterized by skin and mucosal lesions, macrocephaly, gastrointestinal polyps, and a high risk for benign and malignant tumors of the breast, thyroid, and endometrium. There is also an increased risk of renal cell carcinoma, colorectal carcinoma, and melanoma. Some individuals have developmental delay and/or autism spectrum disorder. PHTS includes the following clinical phenotypes: Cowden syndrome (CS), Bannayan-Riley-Ruvalcaba syndrome (BRRS), Proteus-like syndrome, and apparently isolated adult-onset Lhermitte-Duclos disease (LDD). Regardless of clinical phenotype, individuals with a germline PTEN pathogenic variant are thought to have the same cancer risks.</Attribute>
+          <XRef ID="NBK1488" DB="GeneReviews"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="disease mechanism" integerValue="273">loss of function</Attribute>
+          <XRef ID="GTR000551654" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000552245" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000552302" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000552440" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000558503" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000558905" DB="Genetic Testing Registry (GTR)"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="keyword">Neoplasm</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="keyword">Hereditary cancer syndrome</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="keyword">PTEN-related disorders</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="12800"/>
+          <XRef ID="12800" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <Citation Type="review" Abbrev="GeneReviews">
+          <ID Source="PubMed">20301661</ID>
+          <ID Source="BookShelf">NBK1488</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACS, 2007">
+          <ID Source="PubMed">17392385</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2013">
+          <ID Source="PubMed">23788249</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2013">
+          <ID Source="PubMed">23519317</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="NCCN, 2014">
+          <ID Source="PubMed">25190698</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACG, 2015">
+          <ID Source="PubMed">25645574</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2015">
+          <ID Source="PubMed">25356965</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG, 2016">
+          <ID Source="PubMed">27854360</ID>
+          <ID Source="DOI">10.1038/gim.2016.190</ID>
+        </Citation>
+        <Citation Type="Suggested Reading" Abbrev="NCI PDQ, Skin Cancer">
+          <ID Source="PubMed">26389333</ID>
+        </Citation>
+        <Citation Type="Suggested Reading" Abbrev="NCI PDQ, Genetics of Colorectal Cancer">
+          <ID Source="PubMed">26389505</ID>
+        </Citation>
+        <Citation Type="Suggested Reading" Abbrev="NCI PDQ, Breast and Gynecologic Cancers">
+          <ID Source="PubMed">26389210</ID>
+        </Citation>
+        <Citation Type="Suggested Reading" Abbrev="NCI PDQ, Cancer Genetics Counseling">
+          <ID Source="PubMed">26389258</ID>
+        </Citation>
+        <XRef ID="MONDO:0017623" DB="MONDO"/>
+        <XRef ID="D006223" DB="MeSH"/>
+        <XRef ID="C1959582" DB="MedGen"/>
+      </Trait>
+      <Trait ID="21542" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Macrocephaly</ElementValue>
+          <XRef ID="13DG1472" DB="Genomic Medicine Center of Excellence, King Faisal Specialist Hospital and Research Centre"/>
+          <XRef ID="HP:0000256" DB="Human Phenotype Ontology"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Macrocephalus</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">large head</ElementValue>
+        </Name>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <XRef ID="C2243051" DB="MedGen"/>
+        <XRef Type="primary" ID="HP:0000256" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0005491" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0005496" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0200135" DB="Human Phenotype Ontology"/>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="7349035" SubmissionName="BGR GenomeConnect 5.2023 NA">
+    <ClinVarSubmissionID localKey="genomeconnect_28425" localKeyIsSubmitted="1" submittedAssembly="not applicable" submitter="GenomeConnect - Brain Gene Registry" submitterDate="2024-06-13"/>
+    <ClinVarAccession Acc="SCV003931148" Version="3" Type="SCV" OrgID="508359" OrganizationCategory="patient registry" OrgType="primary" DateUpdated="2025-04-13" DateCreated="2023-06-17"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification>
+      <ReviewStatus>no classification provided</ReviewStatus>
+      <GermlineClassification>not provided</GermlineClassification>
+      <Comment>Variant classified as Likely pathogenic and reported on 12-14-2018 by The Children's Hospital of Philadelphia. Assertions are reported exactly as they appear on the patient provided laboratory report. GenomeConnect does not attempt to reinterpret the variant. The IDDRC-CTSA National Brain Gene Registry (BGR) is a study funded by the U.S. National Center for Advancing Translational Sciences (NCATS) and includes 13 Intellectual and Developmental Disability Research Center (IDDRC) institutions. The study is led by Principal Investigator Dr. Philip Payne from Washington University. The BGR is a data commons of gene variants paired with subject clinical information. This database helps scientists learn more about genetic changes and their impact on the brain and behavior. Participation in the Brain Gene Registry requires participation in GenomeConnect. More information about the Brain Gene Registry can be found on the study website - https://braingeneregistry.wustl.edu/.</Comment>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <ExternalID DB="GenomeConnect - Brain Gene Registry" ID="genomeconnect_28425_622"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>de novo</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <Age Type="minimum" age_unit="years">0</Age>
+        <Age Type="maximum" age_unit="years">9</Age>
+        <AffectedStatus>unknown</AffectedStatus>
+        <NumberTested>1</NumberTested>
+        <Sex>female</Sex>
+        <Indication Type="Indication">
+          <Trait Type="Finding">
+            <Name>
+              <ElementValue Type="Preferred">Diagnostic</ElementValue>
+            </Name>
+          </Trait>
+        </Indication>
+      </Sample>
+      <Method>
+        <Description>Exome Sequencing</Description>
+        <MethodType>phenotyping only</MethodType>
+        <ObsMethodAttribute>
+          <Attribute Type="TestingLaboratory" dateValue="2018-12-14" integerValue="165021">Genomic Diagnostic Laboratory, Division of Genomic Diagnostics, Children's Hospital of Philadelphia</Attribute>
+          <Comment>Likely pathogenic</Comment>
+        </ObsMethodAttribute>
+      </Method>
+      <ObservedData>
+        <Attribute Type="SingleHeterozygote" integerValue="1"/>
+      </ObservedData>
+      <ObservedData>
+        <Attribute Type="SampleLocalID">genomeconnect_28425</Attribute>
+      </ObservedData>
+      <TraitSet DateLastEvaluated="2018-10-11" Type="Finding">
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0001324"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0003326"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0001252"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0002786"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0012378"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0003546"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0001508"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <XRef DB="HP" ID="HP:0011968"/>
+        </Trait>
+      </TraitSet>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_000314.6:c.377C&gt;T</Attribute>
+        </AttributeSet>
+        <MeasureRelationship Type="variant in gene">
+          <Symbol>
+            <ElementValue Type="Preferred">PTEN</ElementValue>
+          </Symbol>
+        </MeasureRelationship>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="Disease" multipleConditionExplanation="Uncertain">
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="CN072330" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C0265326" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C1866398" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C0085261" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C1959582" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C2243051" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C0004352" Type="CUI"/>
+      </Trait>
+    </TraitSet>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

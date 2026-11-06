@@ -1,0 +1,61 @@
+nextflow_workflow {
+    name 'Shared ClinVar input resolution'
+    script 'workflows/clinvar_inputs/main.nf'
+    workflow 'CLINVAR_INPUTS'
+    tag 'workflows'
+    tag 'clinvar'
+    tag 'clinvar/download'
+
+    test('Use both supplied local inputs') {
+        when {
+            workflow {
+                """
+                input[0] = [inputs: [rcv: '$baseDir/tests/data/rcv.xml', vcv: '$baseDir/tests/data/vcv.xml']]
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file(workflow.out.rcv_xml[0]).name == 'rcv.xml' },
+                { assert file(workflow.out.vcv_xml[0]).name == 'vcv.xml' }
+            )
+        }
+    }
+
+    test('Download both omitted inputs - stub') {
+        options '-stub-run'
+        when {
+            workflow {
+                """
+                input[0] = [inputs: [:]]
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file(workflow.out.rcv_xml[0]).name == 'ClinVarRCVRelease_00-latest.xml.gz' },
+                { assert file(workflow.out.vcv_xml[0]).name == 'ClinVarVCVRelease_00-latest.xml.gz' }
+            )
+        }
+    }
+
+    test('Download only missing VCV - stub') {
+        options '-stub-run'
+        when {
+            workflow {
+                """
+                input[0] = [inputs: [rcv: '$baseDir/tests/data/rcv.xml']]
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert file(workflow.out.rcv_xml[0]).name == 'rcv.xml' },
+                { assert file(workflow.out.vcv_xml[0]).name == 'ClinVarVCVRelease_00-latest.xml.gz' }
+            )
+        }
+    }
+}

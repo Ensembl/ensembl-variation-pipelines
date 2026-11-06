@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ReleaseSet Type="full" Dated="2026-09-28" xsi:noNamespaceSchemaLocation="http://ftp.ncbi.nlm.nih.gov/pub/clinvar/xsd_public/RCV/ClinVar_RCV_2.3.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<ClinVarSet ID="299459119">
+  <RecordStatus>current</RecordStatus>
+  <Title>NM_000335.5(SCN5A):c.1076C&gt;A (p.Ala359Asp) AND multiple conditions</Title>
+  <ReferenceClinVarAssertion ID="1174973" DateLastUpdated="2026-04-12" DateCreated="2017-10-16">
+    <ClinVarAccession Acc="RCV000509142" Version="3" Type="RCV" DateUpdated="2026-04-12" DateCreated="2017-10-16"/>
+    <RecordStatus>current</RecordStatus>
+    <Classifications>
+      <GermlineClassification>
+        <ReviewStatus>no classification provided</ReviewStatus>
+        <Description SubmissionCount="1">not provided</Description>
+      </GermlineClassification>
+    </Classifications>
+    <Assertion Type="variation to disease"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>unknown</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <AffectedStatus>unknown</AffectedStatus>
+      </Sample>
+      <Method>
+        <Purpose>Validation</Purpose>
+        <Description>Sanger Sequencing</Description>
+        <MethodType>phenotyping only</MethodType>
+      </Method>
+      <ObservedData ID="221787919">
+        <Attribute Type="Description">not provided</Attribute>
+      </ObservedData>
+    </ObservedIn>
+    <MeasureSet Type="Variant" ID="440929" Acc="VCV000440929" Version="3">
+      <Measure Type="single nucleotide variant" ID="434584">
+        <Name>
+          <ElementValue Type="Preferred">NM_000335.5(SCN5A):c.1076C&gt;A (p.Ala359Asp)</ElementValue>
+        </Name>
+        <CanonicalSPDI>NC_000003.12:38606732:G:T</CanonicalSPDI>
+        <AttributeSet>
+          <Attribute Accession="LRG_289t1" Type="HGVS, coding, LRG">LRG_289t1:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_000335" Version="5" Change="c.1076C&gt;A" Type="HGVS, coding, RefSeq" MANESelect="true">NM_000335.5:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001099404" Version="2" Change="c.1076C&gt;A" Type="HGVS, coding, RefSeq" MANEPlusClinical="true">NM_001099404.2:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001099405" Version="2" Change="c.1076C&gt;A" Type="HGVS, coding, RefSeq">NM_001099405.2:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001160160" Version="2" Change="c.1076C&gt;A" Type="HGVS, coding, RefSeq">NM_001160160.2:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001160161" Version="2" Change="c.1076C&gt;A" Type="HGVS, coding, RefSeq">NM_001160161.2:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_001354701" Version="2" Change="c.1076C&gt;A" Type="HGVS, coding, RefSeq">NM_001354701.2:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_198056" Version="3" Change="c.1076C&gt;A" Type="HGVS, coding, RefSeq">NM_198056.3:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_289" Type="HGVS, genomic, LRG">LRG_289:g.47940C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NG_008934" Version="1" Change="g.47940C&gt;A" Type="HGVS, genomic, RefSeqGene">NG_008934.1:g.47940C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000003" Version="12" Change="g.38606733G&gt;T" Type="HGVS, genomic, top level" integerValue="38">NC_000003.12:g.38606733G&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NC_000003" Version="11" Change="g.38648224G&gt;T" Type="HGVS, genomic, top level, previous" integerValue="37">NC_000003.11:g.38648224G&gt;T</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NM_198056" Version="2" Change="c.1076C&gt;A" Type="HGVS, previous">NM_198056.2:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="HGVS, protein"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="LRG_289p1" Change="p.Ala359Asp" Type="HGVS, protein">LRG_289p1:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_000326" Version="2" Change="p.Ala359Asp" Type="HGVS, protein, RefSeq">NP_000326.2:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001092874" Version="1" Change="p.Ala359Asp" Type="HGVS, protein, RefSeq">NP_001092874.1:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001092875" Version="1" Change="p.Ala359Asp" Type="HGVS, protein, RefSeq">NP_001092875.1:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001153632" Version="1" Change="p.Ala359Asp" Type="HGVS, protein, RefSeq">NP_001153632.1:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001153633" Version="1" Change="p.Ala359Asp" Type="HGVS, protein, RefSeq">NP_001153633.1:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_001341630" Version="1" Change="p.Ala359Asp" Type="HGVS, protein, RefSeq">NP_001341630.1:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_932173" Version="1" Change="p.Ala359Asp" Type="HGVS, protein, RefSeq">NP_932173.1:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Accession="NP_932173" Version="1" Change="p.Ala359Asp" Type="HGVS, protein, RefSeq">NP_932173.1:p.Ala359Asp</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_000335.5:c.1076C&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001099404.2:c.1076C&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001099405.2:c.1076C&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001160160.2:c.1076C&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001160161.2:c.1076C&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_001354701.2:c.1076C&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="MolecularConsequence">missense variant</Attribute>
+          <XRef ID="SO:0001583" DB="Sequence Ontology"/>
+          <XRef ID="NM_198056.3:c.1076C&gt;A" DB="RefSeq"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="ProteinChange1LetterCode">A359D</Attribute>
+        </AttributeSet>
+        <CytogeneticLocation>3p22.2</CytogeneticLocation>
+        <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="3" Accession="NC_000003.12" start="38606733" stop="38606733" display_start="38606733" display_stop="38606733" variantLength="1" positionVCF="38606733" referenceAlleleVCF="G" alternateAlleleVCF="T"/>
+        <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="3" Accession="NC_000003.11" start="38648224" stop="38648224" display_start="38648224" display_stop="38648224" variantLength="1" positionVCF="38648224" referenceAlleleVCF="G" alternateAlleleVCF="T"/>
+        <MeasureRelationship Type="within single gene">
+          <Name>
+            <ElementValue Type="Preferred">sodium voltage-gated channel alpha subunit 5</ElementValue>
+          </Name>
+          <Symbol>
+            <ElementValue Type="Preferred">SCN5A</ElementValue>
+          </Symbol>
+          <AttributeSet>
+            <Attribute dateValue="2021-06-08" Type="Haploinsufficiency">Sufficient evidence for dosage pathogenicity</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=SCN5A</URL>
+            </Citation>
+          </AttributeSet>
+          <AttributeSet>
+            <Attribute dateValue="2021-06-08" Type="Triplosensitivity">No evidence available</Attribute>
+            <Citation>
+              <URL>https://www.ncbi.nlm.nih.gov/projects/dbvar/ISCA/isca_gene.cgi?sym=SCN5A</URL>
+            </Citation>
+          </AttributeSet>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" AssemblyStatus="current" Chr="3" Accession="NC_000003.12" start="38548062" stop="38649687" display_start="38548062" display_stop="38649687" Strand="-"/>
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="3" Accession="NC_000003.11" start="38589552" stop="38691163" display_start="38589552" display_stop="38691163" variantLength="101612" Strand="-"/>
+          <XRef ID="6331" DB="Gene"/>
+          <XRef Type="MIM" ID="600163" DB="OMIM"/>
+          <XRef ID="HGNC:10593" DB="HGNC"/>
+          <Comment DataSource="NCBI curation" Type="public">This gene is cited in the ACMG recommendations of 2013 (PubMed 23788249) for reporting incidental findings in exons.</Comment>
+          <Comment DataSource="NCBI curation" Type="public">This gene is cited in the ACMG recommendations of 2016 (PubMed 27854360) for reporting incidental findings in exons.</Comment>
+          <Comment DataSource="ClinVar" Type="public">This gene is cited in the ACMG recommendations of 2021 (SF v3.0; PubMed 34012068) for reporting secondary findings in clinical exome and genome sequencing.</Comment>
+          <Comment DataSource="ClinVar" Type="public">This gene is cited in the ACMG recommendations of 2022 (SF v3.1; PubMed 35802134) for reporting secondary findings in clinical exome and genome sequencing.</Comment>
+        </MeasureRelationship>
+        <XRef Type="rs" ID="1553704925" DB="dbSNP"/>
+      </Measure>
+      <Name>
+        <ElementValue Type="Preferred">NM_000335.5(SCN5A):c.1076C&gt;A (p.Ala359Asp)</ElementValue>
+      </Name>
+      <XRef ID="CA352149511" DB="ClinGen"/>
+    </MeasureSet>
+    <TraitSet Type="TraitChoice" ID="37426">
+      <Trait ID="676" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Primary dilated cardiomyopathy</ElementValue>
+          <XRef ID="195021004" DB="SNOMED CT"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Dilated Cardiomyopathy</ElementValue>
+          <XRef ID="NBK1309" DB="GeneReviews"/>
+          <XRef ID="399020009" DB="SNOMED CT"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">DCM</ElementValue>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="mode of inheritance">Various modes of inheritance</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="221"/>
+          <XRef ID="221" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <Citation Type="review" Abbrev="GeneReviews">
+          <ID Source="PubMed">20301486</ID>
+          <ID Source="BookShelf">NBK1309</ID>
+        </Citation>
+        <Citation Type="review">
+          <ID Source="PubMed">16839424</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="AHRQ, 2013">
+          <ID Source="BookShelf">NBK248310</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="HRS/EHRA, 2012">
+          <ID Source="PubMed">21810866</ID>
+        </Citation>
+        <XRef ID="EFO_0000407" DB="EFO: The Experimental Factor Ontology"/>
+        <XRef ID="MONDO:0005021" DB="MONDO"/>
+        <XRef ID="D002311" DB="MeSH"/>
+        <XRef ID="C0007193" DB="MedGen"/>
+        <XRef Type="primary" ID="HP:0001644" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001725" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0005159" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0200130" DB="Human Phenotype Ontology"/>
+      </Trait>
+      <Trait ID="1082" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Cardiac arrhythmia</ElementValue>
+          <XRef ID="698247007" DB="SNOMED CT"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Arrhythmia</ElementValue>
+          <XRef ID="HP:0011675" DB="Human Phenotype Ontology"/>
+          <XRef ID="248650006" DB="SNOMED CT"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Cardiac rhythm disease</ElementValue>
+          <XRef ID="MONDO:0007263" DB="MONDO"/>
+        </Name>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <XRef ID="EFO_0004269" DB="EFO: The Experimental Factor Ontology"/>
+        <XRef ID="MONDO:0007263" DB="MONDO"/>
+        <XRef ID="C0003811" DB="MedGen"/>
+        <XRef Type="primary" ID="HP:0011675" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001656" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001661" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001665" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001666" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001687" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0001721" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0004351" DB="Human Phenotype Ontology"/>
+        <XRef Type="secondary" ID="HP:0005158" DB="Human Phenotype Ontology"/>
+      </Trait>
+      <Trait ID="6009" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">SUDDEN INFANT DEATH SYNDROME</ElementValue>
+          <XRef ID="EFO_0005303" DB="EFO: The Experimental Factor Ontology"/>
+          <XRef Type="MIM" ID="272120" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="516000.0007" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="516000.0008" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="590050.0009" DB="OMIM"/>
+          <XRef Type="Allelic variant" ID="600163.0024" DB="OMIM"/>
+          <XRef ID="51178009" DB="SNOMED CT"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Sudden Infant Death</ElementValue>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">SIDS</ElementValue>
+          <XRef Type="MIM" ID="272120" DB="OMIM"/>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="7711"/>
+          <XRef ID="7711" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <Citation Type="general" Abbrev="HRS/EHRA, 2012">
+          <ID Source="PubMed">21810866</ID>
+        </Citation>
+        <XRef ID="EFO_0005303" DB="EFO: The Experimental Factor Ontology"/>
+        <XRef ID="D013398" DB="MeSH"/>
+        <XRef ID="C0038644" DB="MedGen"/>
+        <XRef Type="MIM" ID="272120" DB="OMIM"/>
+      </Trait>
+      <Trait ID="16506" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Long QT syndrome</ElementValue>
+          <XRef ID="MONDO:0002442" DB="MONDO"/>
+          <XRef Type="Phenotypic series" ID="PS192500" DB="OMIM"/>
+          <XRef ID="9651007" DB="SNOMED CT"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Preferred">LQTS</ElementValue>
+        </Symbol>
+        <Symbol>
+          <ElementValue Type="Alternate">LQT</ElementValue>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="disease mechanism" integerValue="273">loss of function</Attribute>
+          <XRef ID="GTR000501111" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000515873" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000520063" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000522197" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000522200" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000528497" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000528500" DB="Genetic Testing Registry (GTR)"/>
+          <XRef ID="GTR000592276" DB="Genetic Testing Registry (GTR)"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="mode of inheritance">Various modes of inheritance</Attribute>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="27044"/>
+          <XRef ID="27044" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <Citation Type="review" Abbrev="GeneReviews">
+          <ID Source="PubMed">20301308</ID>
+          <ID Source="BookShelf">NBK1129</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="AHRQ, 2013">
+          <ID Source="BookShelf">NBK248310</ID>
+        </Citation>
+        <Citation Type="Suggested Reading" Abbrev="HRS/EHRA/APHRS, 2013">
+          <ID Source="PubMed">23994779</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="ACMG SF v3.1, 2022">
+          <ID Source="PubMed">35802134</ID>
+          <ID Source="DOI">10.1016/j.gim.2022.04.006</ID>
+        </Citation>
+        <XRef ID="MONDO:0002442" DB="MONDO"/>
+        <XRef ID="D008133" DB="MeSH"/>
+        <XRef ID="C0023976" DB="MedGen"/>
+      </Trait>
+      <Trait ID="16748" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Brugada syndrome</ElementValue>
+          <XRef ID="MONDO:0015263" DB="MONDO"/>
+          <XRef Type="Phenotypic series" ID="PS601144" DB="OMIM"/>
+          <XRef ID="418818005" DB="SNOMED CT"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Sudden unexpected nocturnal death syndrome</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Sudden unexplained nocturnal death syndrome</ElementValue>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Sudden Unexplained Death Syndrome</ElementValue>
+          <XRef ID="D053840" DB="MeSH"/>
+        </Name>
+        <Name>
+          <ElementValue Type="Alternate">Sudden Unexplained Nocturnal Death Syndrome (SUNDS)</ElementValue>
+          <XRef ID="D053840" DB="MeSH"/>
+        </Name>
+        <Symbol>
+          <ElementValue Type="Alternate">SUNDS</ElementValue>
+          <XRef Type="MIM" ID="601144" DB="OMIM"/>
+        </Symbol>
+        <Symbol>
+          <ElementValue Type="Alternate">BrS</ElementValue>
+        </Symbol>
+        <AttributeSet>
+          <Attribute Type="public definition">Brugada syndrome is characterized by cardiac conduction abnormalities (ST segment abnormalities in leads V1-V3 on EKG and a high risk for ventricular arrhythmias) that can result in sudden death. Brugada syndrome presents primarily during adulthood, although age at diagnosis may range from infancy to late adulthood. The mean age of sudden death is approximately 40 years. Clinical presentations may also include sudden infant death syndrome (SIDS; death of a child during the first year of life without an identifiable cause) and sudden unexpected nocturnal death syndrome (SUNDS), a typical presentation in individuals from Southeast Asia. Other conduction defects can include first-degree AV block, intraventricular conduction delay, right bundle branch block, and sick sinus syndrome.</Attribute>
+          <XRef ID="NBK1517" DB="GeneReviews"/>
+        </AttributeSet>
+        <AttributeSet>
+          <Attribute Type="GARD id" integerValue="1030"/>
+          <XRef ID="1030" DB="Office of Rare Diseases"/>
+        </AttributeSet>
+        <TraitRelationship Type="co-occurring condition" ID="70"/>
+        <Citation Type="review" Abbrev="GeneReviews">
+          <ID Source="PubMed">20301690</ID>
+          <ID Source="BookShelf">NBK1517</ID>
+        </Citation>
+        <Citation Type="general" Abbrev="AHRQ, 2013">
+          <ID Source="BookShelf">NBK248310</ID>
+        </Citation>
+        <Citation Type="Suggested Reading" Abbrev="HRS/EHRA/APHRS, 2013">
+          <ID Source="PubMed">23994779</ID>
+        </Citation>
+        <XRef ID="MONDO:0015263" DB="MONDO"/>
+        <XRef ID="C1142166" DB="MedGen"/>
+        <XRef Type="Phenotypic series" ID="PS601144" DB="OMIM"/>
+      </Trait>
+      <Trait ID="18759" Type="Disease">
+        <Name>
+          <ElementValue Type="Preferred">Sick sinus syndrome</ElementValue>
+          <XRef ID="HP:0011704" DB="Human Phenotype Ontology"/>
+          <XRef ID="MONDO:0001823" DB="MONDO"/>
+          <XRef Type="Phenotypic series" ID="PS608567" DB="OMIM"/>
+          <XRef ID="36083008" DB="SNOMED CT"/>
+        </Name>
+        <TraitRelationship Type="Finding member" ID="890"/>
+        <XRef ID="MONDO:0001823" DB="MONDO"/>
+        <XRef ID="C0037052" DB="MedGen"/>
+        <XRef Type="primary" ID="HP:0011704" DB="Human Phenotype Ontology"/>
+      </Trait>
+    </TraitSet>
+  </ReferenceClinVarAssertion>
+  <ClinVarAssertion ID="1174035" SubmissionName="GenomeConnect_hg19_81817">
+    <ClinVarSubmissionID localKey="genomeconnect_15793_622" localKeyIsSubmitted="1" submittedAssembly="GRCh37" submitter="GenomeConnect, ClinGen" submitterDate="2024-06-13"/>
+    <ClinVarAccession Acc="SCV000606873" Version="3" Type="SCV" OrgID="506185" OrganizationCategory="other" OrgType="primary" DateUpdated="2025-04-13" DateCreated="2017-10-16"/>
+    <RecordStatus>current</RecordStatus>
+    <Classification>
+      <ReviewStatus>no classification provided</ReviewStatus>
+      <GermlineClassification>not provided</GermlineClassification>
+      <Comment>GenomeConnect assertions are reported exactly as they appear on the patient-provided report from the testing laboratory. GenomeConnect staff make no attempt to reinterpret the clinical significance of the variant.</Comment>
+    </Classification>
+    <Assertion Type="variation to disease"/>
+    <ExternalID DB="GenomeConnect" ID="genomeconnect_15793_622"/>
+    <ObservedIn>
+      <Sample>
+        <Origin>unknown</Origin>
+        <Species TaxonomyId="9606">human</Species>
+        <Age Type="minimum" age_unit="years">40</Age>
+        <Age Type="maximum" age_unit="years">49</Age>
+        <AffectedStatus>unknown</AffectedStatus>
+        <Sex>female</Sex>
+      </Sample>
+      <Method>
+        <Purpose>validation</Purpose>
+        <Description>Sanger Sequencing</Description>
+        <MethodType>phenotyping only</MethodType>
+        <MethodAttribute>
+          <Attribute Type="TestName">Genome Sequencing|Long QT Syndrome Sequencing and Deletio/Duplication Panel</Attribute>
+        </MethodAttribute>
+        <ObsMethodAttribute>
+          <Attribute Type="TestingLaboratory" dateValue="2015-06-12" integerValue="26957">GeneDx</Attribute>
+          <Comment>Uncertain significance</Comment>
+        </ObsMethodAttribute>
+      </Method>
+      <ObservedData>
+        <Attribute Type="Description">not provided</Attribute>
+      </ObservedData>
+      <TraitSet DateLastEvaluated="2015-06-30" Type="Finding">
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Abnormal delivery</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0001787"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Myopia</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0000545"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Tinnitus</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0000360"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Hyperacusis</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0010780"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Vertigo</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002321"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">EEG abnormality</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002353"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Memory impairment</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0002354"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Anxiety</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0000739"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Depression</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0000716"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Multiple cafe-au-lait spots</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0007565"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Arrhythmia</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0011675"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Abnormal EKG</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0003115"/>
+        </Trait>
+        <Trait ClinicalFeaturesAffectedStatus="present" Type="Finding">
+          <Name>
+            <ElementValue Type="Preferred">Syncope</ElementValue>
+          </Name>
+          <XRef DB="HP" ID="HP:0001279"/>
+        </Trait>
+      </TraitSet>
+    </ObservedIn>
+    <MeasureSet Type="Variant">
+      <Measure Type="Variation">
+        <AttributeSet>
+          <Attribute Type="HGVS">NM_198056.2:c.1076C&gt;A</Attribute>
+        </AttributeSet>
+        <MeasureRelationship Type="variant in gene">
+          <Symbol>
+            <ElementValue Type="Preferred">SCN5A</ElementValue>
+          </Symbol>
+        </MeasureRelationship>
+      </Measure>
+    </MeasureSet>
+    <TraitSet Type="Disease" multipleConditionExplanation="Uncertain">
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C0023976" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C1142166" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="CN001497" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C0003811" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C1963235" Type="CUI"/>
+      </Trait>
+      <Trait Type="Disease">
+        <XRef DB="MedGen" ID="C0038644" Type="CUI"/>
+      </Trait>
+    </TraitSet>
+  </ClinVarAssertion>
+</ClinVarSet>
+</ReleaseSet>

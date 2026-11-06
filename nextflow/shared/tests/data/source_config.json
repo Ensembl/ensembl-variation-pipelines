@@ -1,0 +1,24 @@
+{
+  "sources": {
+    "ClinVar": {
+      "inputs": {
+        "rcv": "rcv.xml",
+        "vcv": "vcv.xml"
+      },
+      "contexts": [
+        {
+          "species_taxonomy_id": 9606,
+          "species_production_name": "homo_sapiens",
+          "assembly": "GRCh38",
+          "assembly_uuid": null
+        },
+        {
+          "species_taxonomy_id": 9606,
+          "species_production_name": "homo_sapiens",
+          "assembly": "GRCh37",
+          "assembly_uuid": null
+        }
+      ]
+    }
+  }
+}

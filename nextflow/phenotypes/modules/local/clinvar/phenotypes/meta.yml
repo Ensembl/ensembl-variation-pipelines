@@ -1,0 +1,107 @@
+name: clinvar_phenotypes
+description: Transform RCV and VCV evidence into phenotype associations.
+keywords:
+- clinvar
+- variants
+- source processing
+tools:
+- phenotypes:
+    description: Transform RCV and VCV evidence into phenotype associations.
+    documentation: https://github.com/Ensembl/ensembl-variation-pipelines
+    licence:
+    - Apache-2.0
+input:
+- - meta:
+      type: map
+      description: Caller metadata with id; passed through unchanged.
+  - rcv_xml:
+      type: file
+      description: RCV XML or XML.GZ.
+      ontologies: []
+  - vcv_xml:
+      type: file
+      description: VCV XML or XML.GZ.
+      ontologies: []
+  - genome_context:
+      type: map
+      description: Required human genome context with assembly and nullable assembly_uuid.
+- - source_name:
+      type: string
+      description: Source name from the validated source configuration.
+- - python_source:
+      type: directory
+      description: Phenotype Python src directory, staged as phenotype_src.
+- - python_source_contents:
+      type: list
+      description: Sorted phenotype source filenames and contents for cache invalidation.
+- - shared_source:
+      type: directory
+      description: Shared Python src directory, staged as shared_src.
+- - shared_source_contents:
+      type: list
+      description: Sorted shared source filenames and contents for cache invalidation.
+output:
+  records:
+  - - meta:
+        type: map
+        description: Caller metadata with id; passed through unchanged.
+    - '*_output.jsonl':
+        type: file
+        description: Variant-phenotype associations with import metadata.
+        ontologies: []
+  warnings:
+  - - meta:
+        type: map
+        description: Caller metadata with id; passed through unchanged.
+    - warnings.txt:
+        type: file
+        description: Tab-separated contextual warnings.
+        ontologies: []
+  rejections:
+  - - meta:
+        type: map
+        description: Caller metadata with id; passed through unchanged.
+    - rejections.txt:
+        type: file
+        description: Tab-separated rejections and reasons.
+        ontologies: []
+  versions_python:
+  - &id001
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - python:
+        type: string
+        description: Tool name.
+    - python --version | sed 's/Python //':
+        type: eval
+        description: Numeric Python version.
+  versions_parser:
+  - &id002
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - phenotypes:
+        type: string
+        description: Phenotype parser package.
+    - 0.1.0:
+        type: string
+        description: Pinned parser version; keep aligned with pyproject.toml.
+  versions_shared:
+  - &id003
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - variation_sources:
+        type: string
+        description: Shared evidence parser package.
+    - PYTHONPATH=shared_src python -c 'from variation_sources import __version__; print(__version__)':
+        type: eval
+        description: Shared package version.
+topics:
+  versions:
+  - *id001
+  - *id002
+  - *id003
+authors: []
+maintainers: []

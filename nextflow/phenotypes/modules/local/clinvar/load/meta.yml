@@ -1,0 +1,124 @@
+name: clinvar_load
+description: Load a complete ClinVar phenotype snapshot into PostgreSQL.
+keywords:
+- clinvar
+- phenotypes
+- postgresql
+tools:
+- phenotypes:
+    description: Transactional loading of ClinVar phenotype source reports.
+    documentation: https://github.com/Ensembl/ensembl-variation-pipelines
+    licence:
+    - Apache-2.0
+input:
+- - meta:
+      type: map
+      description: Caller metadata with id; passed through unchanged.
+  - records:
+      type: file
+      description: Complete phenotype JSONL snapshot with import metadata.
+      ontologies: []
+- - env_file:
+      type: file
+      description: PostgreSQL INI configuration, staged as database.env; never published.
+      ontologies: []
+- - replace_existing:
+      type: boolean
+      description: Explicit authorization to replace all existing reports for the source.
+- - python_source:
+      type: directory
+      description: Phenotype Python src directory, staged as phenotype_src.
+- - python_source_contents:
+      type: list
+      description: Sorted phenotype source filenames and contents.
+- - shared_source:
+      type: directory
+      description: Shared Python src directory, staged as shared_src.
+- - shared_source_contents:
+      type: list
+      description: Sorted shared source filenames and contents.
+output:
+  summary:
+  - - meta:
+        type: map
+        description: Caller metadata with id; passed through unchanged.
+    - '*_load_summary.json':
+        type: file
+        description: Committed source snapshot counts and loading provenance.
+        ontologies: []
+  versions_python:
+  - &versions_python
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - python:
+        type: string
+        description: Tool name.
+    - python --version | sed 's/Python //':
+        type: eval
+        description: Numeric Python version.
+  versions_loader:
+  - &versions_loader
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - phenotypes:
+        type: string
+        description: Tool name.
+    - 0.1.0:
+        type: string
+        description: Pinned consumer version; keep aligned with pyproject.toml.
+  versions_shared:
+  - &versions_shared
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - variation_sources:
+        type: string
+        description: Tool name.
+    - PYTHONPATH=shared_src python -c 'from variation_sources import __version__; print(__version__)':
+        type: eval
+        description: Shared package version.
+  versions_psycopg:
+  - &versions_psycopg
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - psycopg:
+        type: string
+        description: Tool name.
+    - python -c 'import psycopg; print(psycopg.__version__)':
+        type: eval
+        description: PostgreSQL driver version.
+  versions_simplejson:
+  - &versions_simplejson
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - simplejson:
+        type: string
+        description: Tool name.
+    - python -c 'import simplejson; print(simplejson.__version__)':
+        type: eval
+        description: JSON library version.
+  versions_libpq:
+  - &versions_libpq
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - libpq:
+        type: string
+        description: Tool name.
+    - python -c 'from psycopg import pq; print(pq.version())':
+        type: eval
+        description: Runtime libpq version number.
+topics:
+  versions:
+  - *versions_python
+  - *versions_loader
+  - *versions_shared
+  - *versions_psycopg
+  - *versions_simplejson
+  - *versions_libpq
+authors: []
+maintainers: []

@@ -1,0 +1,67 @@
+nextflow_process {
+    name 'ClinVar phenotype transformation'
+    script 'modules/local/clinvar/phenotypes/main.nf'
+    process 'PARSE_CLINVAR'
+    tag 'modules'
+    tag 'modules_local'
+    tag 'clinvar'
+    tag 'clinvar/phenotypes'
+
+    test('Generate phenotype associations and report unsupported records') {
+        when {
+            process {
+                """
+                def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/../shared/tests/data/rcv.xml'), file('$baseDir/../shared/tests/data/vcv.xml'), context]
+                input[1] = 'ClinVar'
+                input[2] = file('$baseDir/src')
+                input[3] = 'phenotype-test-source'
+                input[4] = file('$baseDir/../shared/src')
+                input[5] = 'shared-test-source'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.records[0][0].assembly == 'GRCh38' },
+                { assert file(process.out.records[0][1]).readLines().size() == 2 },
+                { assert file(process.out.records[0][1]).text.contains('"source_reports"') },
+                { assert file(process.out.warnings[0][1]).exists() },
+                { assert file(process.out.rejections[0][1]).text.contains('unsupported_genotype_set') },
+                { assert process.out.versions_python[0][2].startsWith('3.') },
+                { assert process.out.versions_parser[0][2] ==~ /[0-9]+\.[0-9]+\.[0-9]+.*/ },
+                { assert process.out.versions_shared[0][2] ==~ /[0-9]+\.[0-9]+\.[0-9]+.*/ }
+            )
+        }
+    }
+
+    test('stub') {
+        options '-stub-run'
+        when {
+            process {
+                """
+                def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/../shared/tests/data/rcv.xml'), file('$baseDir/../shared/tests/data/vcv.xml'), context]
+                input[1] = 'ClinVar'
+                input[2] = file('$baseDir/src')
+                input[3] = 'phenotype-test-source'
+                input[4] = file('$baseDir/../shared/src')
+                input[5] = 'shared-test-source'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.records[0][0].assembly == 'GRCh38' },
+                { assert file(process.out.records[0][1]).exists() },
+                { assert file(process.out.warnings[0][1]).exists() },
+                { assert file(process.out.rejections[0][1]).exists() },
+                { assert process.out.versions_python[0][2].startsWith('3.') },
+                { assert process.out.versions_parser[0][2] ==~ /[0-9]+\.[0-9]+\.[0-9]+.*/ },
+                { assert process.out.versions_shared[0][2] ==~ /[0-9]+\.[0-9]+\.[0-9]+.*/ }
+            )
+        }
+    }
+}

@@ -1,0 +1,56 @@
+name: clinvar_download
+description: "Download a supplied ClinVar release URL with retries."
+keywords:
+  - clinvar
+  - variants
+  - source processing
+tools:
+  - curl:
+      description: "Download a supplied ClinVar release URL with retries."
+      documentation: https://curl.se/docs/
+      licence: ["curl"]
+input:
+  - - "meta":
+        type: map
+        description: "Caller metadata with id; passed through unchanged."
+    - "release_type":
+        type: string
+        description: "RCV or VCV release label."
+    - "url":
+        type: string
+        description: "Complete release URL; caller selects the release."
+output:
+  xml:
+    - - "meta":
+          type: map
+          description: "Caller metadata with id; passed through unchanged."
+      - "release_type":
+          type: string
+          description: "Input release label."
+      - "*.xml.gz":
+          type: file
+          description: "Downloaded ClinVar XML release."
+          ontologies: []
+  versions_curl:
+    - - "${task.process}":
+          type: string
+          description: "Process name."
+      - "curl":
+          type: string
+          description: "Tool name."
+      - "curl --version | sed -n '1s/^curl \\([^ ]*\\).*/\\1/p'":
+          type: eval
+          description: "Numeric curl version."
+topics:
+  versions:
+    - - "${task.process}":
+          type: string
+          description: "Process name."
+      - "curl":
+          type: string
+          description: "Tool name."
+      - "curl --version | sed -n '1s/^curl \\([^ ]*\\).*/\\1/p'":
+          type: eval
+          description: "Numeric curl version."
+authors: []
+maintainers: []

@@ -1,0 +1,38 @@
+{
+  "RCV000755049.9": {
+    "rcv": "RCV000755049.9",
+    "vcv": "VCV000068432.32",
+    "rsid": "rs121908247",
+    "chromosome": "19",
+    "coordinates": {
+      "GRCh38": [
+        13235693,
+        13235693
+      ],
+      "GRCh37": [
+        13346507,
+        13346507
+      ]
+    },
+    "reference_allele": "C",
+    "alternate_allele": "T"
+  },
+  "RCV000757916.2": {
+    "rcv": "RCV000757916.2",
+    "vcv": "VCV000619011.4",
+    "rsid": "rs1559173391",
+    "chromosome": "2",
+    "coordinates": {
+      "GRCh38": [
+        178548813,
+        178548814
+      ],
+      "GRCh37": [
+        179413540,
+        179413541
+      ]
+    },
+    "reference_allele": "C",
+    "alternate_allele": "CT"
+  }
+}

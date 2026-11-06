@@ -1,0 +1,72 @@
+{
+  "RCV000755049.9": {
+    "rcv": "RCV000755049.9",
+    "phenotype_name": "Ataxia _ Neurologic (child onset) OR Non-progressive congenital cerebellar ataxia",
+    "reported_names": [
+      "Ataxia _ Neurologic (child onset)",
+      "Non-progressive congenital cerebellar ataxia"
+    ],
+    "somatic_status": "germline",
+    "classification": "Pathogenic",
+    "scv": "SCV000882749.1",
+    "last_evaluated_date": "2019-02-11"
+  },
+  "RCV002490360.3": {
+    "rcv": "RCV002490360.3",
+    "phenotype_name": "VITAMIN B12 PLASMA LEVEL QUANTITATIVE TRAIT LOCUS 1 OR Bombay phenotype",
+    "reported_names": [
+      "VITAMIN B12 PLASMA LEVEL QUANTITATIVE TRAIT LOCUS 1",
+      "Bombay phenotype"
+    ],
+    "somatic_status": "germline",
+    "classification": "Benign",
+    "scv": "SCV002799025.1",
+    "last_evaluated_date": "2021-08-12",
+    "ontology_accessions": {
+      "VITAMIN B12 PLASMA LEVEL QUANTITATIVE TRAIT LOCUS 1": [
+        "OMIM:612542",
+        "MedGen:C2674252"
+      ],
+      "Bombay phenotype": [
+        "MONDO:0014763",
+        "MedGen:C1859408",
+        "OMIM:616754"
+      ]
+    },
+    "excluded_ontology_accessions": [
+      "OMIM:182100.0001"
+    ]
+  },
+  "RCV003233651.4": {
+    "rcv": "RCV003233651.4",
+    "phenotype_name": "Autism OR Bannayan-Riley-Ruvalcaba syndrome OR PTEN hamartoma tumor syndrome OR Macrocephaly",
+    "reported_names": [
+      "Autism",
+      "Bannayan-Riley-Ruvalcaba syndrome",
+      "PTEN hamartoma tumor syndrome",
+      "Macrocephaly"
+    ],
+    "somatic_status": "germline",
+    "classification": "not provided",
+    "scv": "SCV003931148.3",
+    "last_evaluated_date": null,
+    "ontology_accessions": {
+      "Autism": [
+        "HP:0000717",
+        "MONDO:0005260",
+        "SNOMEDCT:408856003",
+        "MeSH:D001321",
+        "SNOMEDCT:43614003",
+        "MedGen:C0004352",
+        "OMIM:209850"
+      ]
+    },
+    "external_references": [
+      {
+        "database": "GeneReviews",
+        "accession": "NBK1488",
+        "reference_subject": "phenotype"
+      }
+    ]
+  }
+}

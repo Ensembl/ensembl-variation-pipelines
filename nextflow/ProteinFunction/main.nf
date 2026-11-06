@@ -8,6 +8,7 @@ nextflow.enable.dsl=2
 params.help       = false
 params.outdir     = "outdir"
 params.gtf        = null
+params.gff        = null
 params.fasta      = null
 params.translated = null
 params.species    = "homo_sapiens"
@@ -44,10 +45,11 @@ if (params.help) {
       --sift_run_type FULL --blastdb /path/to/sift_database --offline true
 
   General options:
-    --gtf FILE           Comma-separated list of annotation GTF files; requires
-                         FASTA files
-    --fasta FILE         Comma-separated list of FASTA files with genomic
-                         sequences; requires GTF files
+    --gtf FILE           Annotation GTF file; requires --fasta
+    --gff FILE           Annotation GFF3 file; requires --fasta;
+                         mutually exclusive with --gtf
+    --fasta FILE         FASTA file with genomic sequences; requires
+                         --gtf or --gff
     --translated FILE    Comma-separated list of FASTA files with peptide
                          sequence; skips sequence translation with GTF and FASTA
     --outdir VAL         Name of output dir (default: outdir)
@@ -90,8 +92,8 @@ if (params.help) {
 }
 
 // Module imports
-include { decompress }                from './nf_modules/utils.nf'
-include { translate_fasta }           from './nf_modules/translations.nf'
+include { translate_fasta;
+          dedup_translations }        from './nf_modules/translations.nf'
 include { clear_assemblies;
           store_assemblies;
           drop_translation_mapping; 
@@ -105,11 +107,14 @@ check_JVM_mem(min=4)
 print_summary()
 
 // Check input data
+annotation = params.gtf ?: params.gff
 if (!params.translated) {
-  if (!params.fasta && !params.gtf) {
-    exit 1, "ERROR: arguments --fasta/--gtf or --translated are mandatory"
-  } else if (!params.fasta || !params.gtf ) {
-    exit 1, "ERROR: both --fasta and --gtf need to be defined"
+  if (params.gtf && params.gff) {
+    exit 1, "ERROR: --gtf and --gff are mutually exclusive"
+  } else if (!params.fasta && !annotation) {
+    exit 1, "ERROR: arguments --fasta with --gtf/--gff, or --translated, are mandatory"
+  } else if (!params.fasta || !annotation ) {
+    exit 1, "ERROR: --fasta and one of --gtf/--gff need to be defined"
   }
 }
 
@@ -150,7 +155,7 @@ log.info """
   Predict protein function using SIFT and PolyPhen-2
   --------------------------------------------------
   species    : ${params.species}
-  GTF        : ${params.gtf}
+  annotation : ${annotation}
   FASTA      : ${params.fasta}
   translated : ${params.translated}
   outdir     : ${params.outdir}
@@ -167,30 +172,81 @@ log.info """
   PPH2 data  : ${params.pph_data}
   """
 
+def run_meta () {
+  /*
+    Rows describing the run itself for the SQLite meta table: what went in,
+    which predictors ran over it, and when.
+
+    Null params are dropped, so a run driven by --translated records no
+    gtf/gff3/fasta and a run that translates records no translated, rather
+    than storing empty strings that read as though a file was given.
+    workflow.start is the pipeline's own start time, not the time the merge
+    task happened to run.
+  */
+  rows = ["species":       params.species,
+          "gtf":           params.gtf,
+          "gff3":          params.gff,
+          "fasta":         params.fasta,
+          "translated":    params.translated,
+          "blastdb":       params.blastdb,
+          "sift_run_type": params.sift_run_type,
+          "pph_run_type":  params.pph_run_type,
+          "run_date":      workflow.start.format("yyyy-MM-dd'T'HH:mm:ssXXX")]
+  rows.findAll { it.value != null }
+      .collect { key, value -> "${key}=${value}" }
+}
+
 def getFiles (files) {
   Channel.fromPath( files.tokenize(','), checkIfExists: true )
+}
+
+def getFile (arg, option) {
+  /*
+    Channel for a single file.
+
+    Translation takes one annotation and one genome. Sharding by sequence
+    region supplies the parallelism that a list of files used to, and a list
+    here cannot be checked for consistency: nothing ties entry N of --gtf to
+    entry N of --fasta, so a mismatch would silently translate the wrong
+    pairing or drop work altogether.
+  */
+  paths = arg.tokenize(',')
+  if (paths.size() > 1) {
+    exit 1, "ERROR: --${option} takes a single file but ${paths.size()} were given; " +
+            "concatenate them first if the annotation or genome is split"
+  }
+  Channel.fromPath( paths, checkIfExists: true )
 }
 
 workflow {
   // Translate transcripts from GTF and FASTA if no translation FASTA is given
   if (!params.translated) {
-    translate_fasta(getFiles(params.gtf), getFiles(params.fasta))
+    translate_fasta(getFile(annotation, params.gtf ? 'gtf' : 'gff'),
+                    getFile(params.fasta, 'fasta'))
     translated = translate_fasta.out
   } else {
     translated = getFiles(params.translated)
   }
-  files = translated
+  // collect() gives a value channel, so the same files feed both the
+  // deduplication task and store_assemblies without consuming a queue twice.
+  files = translated.collect()
 
-  // Parse translation FASTA file
-  translated = translated
+  /*
+    Deduplicate and build the translation mapping in a task rather than with
+    channel operators. Stable ID normalisation, stop-codon removal and MD5
+    hashing all happen in bin/dedup_translations.pl, which streams and keeps
+    only hashes, so the head node never holds the proteome.
+  */
+  dedup_translations( files )
+
+  // One record per unique sequence; already normalised and stop-stripped, so
+  // the MD5 here matches the one written to translation_mapping.tsv.
+  translated = dedup_translations.out.unique
                  .splitFasta(record: [id: true, seqString: true, text: true])
-                 .unique() // remove duplicated entries
                  .map{ it -> [id: it.id,
-                              // Remove stop codon (asterisk)
-                              text: it.text.replaceAll(/\*/, ""),
-                              seqString: it.seqString.replaceAll(/\*/, ""),
-                              // Add MD5 hashes for the translation sequences
-                              md5: it.seqString.replaceAll(/\*/, "").md5() ]}
+                              text: it.text,
+                              seqString: it.seqString,
+                              md5: it.seqString.md5() ]}
 
   // Write translation mapping with transcript ID and MD5 hashes to database
   if ( !params.offline && params.sift_run_type == "FULL" && params.pph_run_type == "FULL" ) {
@@ -202,37 +258,35 @@ workflow {
     translation_mapping_wait = "ready"
     assemblies_wait = "ready"
   }
-  translation_mapping = translated.collectFile(
-                          name: "translation_mapping.tsv",
-                          storeDir: params.outdir,
-                          newLine: true) { it.id + "\t" + it.md5 }
+  translation_mapping = dedup_translations.out.mapping
 
   if (!params.offline) {
     store_translation_mapping(translation_mapping, translation_mapping_wait)
-    store_assemblies(files.collect(), assemblies_wait)
+    store_assemblies(files, assemblies_wait)
   }
-
-  // Get unique translations based on MD5 hashes of their sequences
-  translated = translated.unique { it.md5 }
 
   // Run protein function prediction
   errors = Channel.of("# failure reasons")
   sqlite_files = Channel.empty()
+  // key=value rows describing the run, written to the SQLite meta table.
+  sqlite_meta = params.sqlite ? Channel.fromList(run_meta()) : Channel.empty()
 
   if ( params.sift_run_type != "NONE" ) {
     sift_result = run_sift_pipeline(translated)
     errors = errors.concat(sift_result.errors)
     sqlite_files = sqlite_files.mix(sift_result.sqlite)
+    sqlite_meta = sqlite_meta.mix(sift_result.meta)
   }
 
   if ( params.pph_run_type  != "NONE" ) {
     pph_result = run_pph2_pipeline(translated)
     errors = errors.concat(pph_result.errors)
     sqlite_files = sqlite_files.mix(pph_result.sqlite)
+    sqlite_meta = sqlite_meta.mix(pph_result.meta)
   }
 
   if ( params.sqlite ) {
-    postprocess_sqlite_db(sqlite_files.toList())
+    postprocess_sqlite_db(sqlite_files.toList(), sqlite_meta.toList())
   }
 
   errors

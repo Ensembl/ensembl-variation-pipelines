@@ -85,13 +85,12 @@ class ClinvarPhenotypeTests(unittest.TestCase):
             ["ClinVar:AlleleID:10", "ClinVar:AlleleID:11"],
         )
 
-    def test_parse_traits_preserves_names_and_choice_semantics(self):
+    def test_parse_traits_preserves_reported_names(self):
         # Preserve the distinct disease and finding within one TraitChoice.
         case = phenotype_case("RCV002490360.3")
         assertion = source_record(f"{case['rcv']}.xml").find("ReferenceClinVarAssertion")
         traits, warnings = _parse_traits(assertion)
         self.assertEqual(warnings, [])
-        self.assertEqual(traits["condition_group"], "choice")
         self.assertEqual(
             [trait["phenotype"]["phenotype_name"] for trait in traits["traits"]],
             case["reported_names"],

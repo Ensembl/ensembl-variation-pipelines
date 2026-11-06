@@ -182,6 +182,14 @@ nextflow run "$PIPELINE_DIR/main.nf" \
 
 ### Notes
 
+#### Multiple conditions
+
+Multiple conditions reported together in an RCV are kept together. The parser
+creates a combined `phenotype_name`, for example
+`Multiple conditions (Muscle weakness ; Sensorimotor neuropathy)`.
+Individual source names and their ontology mappings remain in
+`source_report.reported_phenotypes`.
+
 #### Output: `warnings.txt`
 
 - `warnings.txt` is a tab-separated file, with columns `RCV`, `VCV`, `SCV`, `warning` and `details`

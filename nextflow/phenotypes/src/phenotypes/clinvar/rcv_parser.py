@@ -40,7 +40,6 @@ PLACEHOLDER_PHENOTYPE_NAMES = {
     ".",
 }
 
-OR_CONDITION_GROUPS = {"choice", "uncertain"}
 PROGRESS_INTERVAL = 100_000
 
 CLASSIFICATION_TYPES = {
@@ -390,12 +389,10 @@ def _parse_traits(reference_assertion: ET.Element) -> tuple[dict[str, Any], list
 
     if not traits:
         raise RejectedRecord("missing_supported_traits")
-    condition_group = _condition_group(trait_set)
     return (
         {
             "traits": traits,
             "reported_phenotypes": reported_phenotypes,
-            "condition_group": condition_group,
         },
         warnings,
     )
@@ -580,40 +577,14 @@ def _uncertain_context_details(
     }, ensure_ascii=False)
 
 
-def _condition_group(trait_set: ET.Element | None) -> str | None:
-    """Return the supported condition grouping inferred from a TraitSet."""
-    if trait_set is None:
-        return None
-    explanation = _normalise_name(trait_set.get("multipleConditionExplanation", ""))
-    if trait_set.get("Type") == "TraitChoice":
-        if explanation in {"", "uncertain"}:
-            return explanation or "choice"
-        return "condition set"
-    if explanation == "uncertain":
-        return explanation
-    return None
-
-
-def _condition_set_name(names: list[str], group: str | None) -> str | None:
-    """Join condition names using the group semantics, or return None if empty."""
-    if not names:
-        return None
-    joiner = " OR " if group in OR_CONDITION_GROUPS else "; "
-    return joiner.join(names)
-
-
-def _combined_traits(
-    traits: list[dict[str, Any]], group: str | None,
-) -> dict[str, Any]:
+def _combined_traits(traits: list[dict[str, Any]]) -> dict[str, Any]:
     """Combine trait names and deduplicate their external references."""
     references = []
     for trait in traits:
         references.extend(trait["reported_external_references"])
-    name = _condition_set_name(
-        [trait["phenotype"]["phenotype_name"] for trait in traits], group,
-    )
+    names = " ; ".join(trait["phenotype"]["phenotype_name"] for trait in traits)
     return {
-        "phenotype": {"phenotype_name": name},
+        "phenotype": {"phenotype_name": f"Multiple conditions ({names})"},
         "reported_external_references": _unique(references),
     }
 
@@ -843,7 +814,7 @@ def parse_clinvar_set(
     aggregate_inheritance_types = _inheritance_types(reference_assertion)
 
     if len(aggregate_traits) > 1:
-        trait = _combined_traits(aggregate_traits, trait_set["condition_group"])
+        trait = _combined_traits(aggregate_traits)
     else:
         trait = aggregate_traits[0]
     entity = _prepare_entity(reported_entity)

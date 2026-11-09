@@ -10,8 +10,7 @@ from datetime import date, datetime
 from pathlib import Path
 from time import monotonic
 
-from variation_sources.context import validate_g2p_context
-from variation_sources.source_config import load_source_config
+from phenotypes.source_config import load_source_config, validate_g2p_context
 from variation_sources.provenance import git_revision, input_file_provenance
 
 

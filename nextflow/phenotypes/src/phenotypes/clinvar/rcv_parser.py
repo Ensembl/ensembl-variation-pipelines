@@ -21,10 +21,10 @@ from variation_sources.clinvar.variants import (
 )
 from phenotypes.clinvar.vcv_parser import read_component_accessions
 from phenotypes.provenance import git_revision, input_file_provenance
-from variation_sources.source_config import load_source_config, validate_clinvar_context
+from phenotypes.source_config import DEFAULT_SOURCE_CONFIG, load_source_config
+from variation_sources.context import validate_clinvar_context
 
 
-DEFAULT_SOURCE_CONFIG = Path(__file__).resolve().parents[3] / "assets/phenotypes_config.json"
 PHENOTYPE_NOT_SPECIFIED = "ClinVar: phenotype not specified"
 PLACEHOLDER_PHENOTYPE_NAMES = {
     "none",

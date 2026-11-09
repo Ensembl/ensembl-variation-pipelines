@@ -6,7 +6,7 @@ include { source_contents } from '../../shared/lib/source_files'
 
 workflow PHENOTYPES {
     main:
-    source_config = read_source_config(params.source_config, "${projectDir}/.venv/bin/python")
+    source_config = read_source_config(params.source_config, "${projectDir}/.venv/bin/python", 'phenotypes.source_config')
     source_config.sources.each { source_name, settings ->
         if (settings.contexts.size() != 1) {
             error("${source_name} loading requires one context per source snapshot; multiple contexts must be loaded together before whole-source replacement can support them.")

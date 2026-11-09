@@ -37,7 +37,7 @@ process LOAD_CLINVAR {
     def replace_argument = replace_existing ? '--replace' : ''
     """
     PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="${python_source}:${shared_source}" \\
-    python -m phenotypes.clinvar.loader \\
+    python -m phenotypes.loader \\
         ${args} \\
         --input "${records}" \\
         --env-file "${env_file}" \\

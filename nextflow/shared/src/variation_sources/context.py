@@ -1,4 +1,4 @@
-"""Validate genome and ClinVar processing contexts."""
+"""Validate genome and source processing contexts."""
 
 import re
 
@@ -56,4 +56,14 @@ def validate_clinvar_context(context: dict) -> dict:
         )
     if context["assembly"] is None:
         raise ValueError("ClinVar requires an assembly to select source placements")
+    return context
+
+
+def validate_g2p_context(context: dict) -> dict:
+    context = validate_genome_context(context)
+    if (
+        context["species_taxonomy_id"] != 9606
+        or context["species_production_name"] != "homo_sapiens"
+    ):
+        raise ValueError("G2P/HGNC inputs require human context: 9606 and homo_sapiens")
     return context

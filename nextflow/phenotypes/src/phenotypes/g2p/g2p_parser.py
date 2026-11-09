@@ -10,7 +10,7 @@ from datetime import date, datetime
 from pathlib import Path
 from time import monotonic
 
-from variation_sources.context import validate_genome_context
+from variation_sources.source_config import load_source_config
 from variation_sources.provenance import git_revision, input_file_provenance
 
 
@@ -53,39 +53,13 @@ def _check_columns(reader: csv.DictReader, required: set[str]) -> None:
 
 
 def read_source_config(path: Path) -> tuple[str, dict, dict, str | None]:
-    path = path.resolve()
-    with path.open(encoding="utf-8") as handle:
-        config = json.load(handle)
-    sources = config.get("sources") if isinstance(config, dict) else None
-    if not isinstance(sources, dict) or len(sources) != 1:
-        raise ValueError("Standalone G2P parsing requires exactly one source")
-    source_name, settings = next(iter(sources.items()))
-    if not source_name.strip() or not isinstance(settings, dict):
-        raise ValueError("Invalid source configuration")
-    contexts = settings.get("contexts")
-    if not isinstance(contexts, list) or len(contexts) != 1 or not isinstance(contexts[0], dict):
+    settings = load_source_config(path)["sources"].get("G2P")
+    if settings is None:
+        raise ValueError("Source configuration must contain G2P")
+    if len(settings["contexts"]) != 1:
         raise ValueError("Standalone G2P parsing requires exactly one context")
-    context = validate_genome_context(contexts[0])
-    if (
-        context["species_taxonomy_id"] != 9606
-        or context["species_production_name"] != "homo_sapiens"
-    ):
-        raise ValueError("G2P/HGNC inputs require human context: 9606 and homo_sapiens")
-    inputs = settings.get("inputs")
-    if not isinstance(inputs, dict):
-        raise ValueError("Source configuration requires inputs")
-    paths = {}
-    for field in ("data", "gene_id_mapping"):
-        value = inputs.get(field)
-        if not isinstance(value, str) or not value.strip():
-            raise ValueError(f"Missing input path: {field}")
-        paths[field] = (path.parent / value).resolve()
-        if not paths[field].is_file():
-            raise ValueError(f"Input file not found: {paths[field]}")
-    version = settings.get("source_version")
-    if version is not None and (not isinstance(version, str) or not version.strip()):
-        raise ValueError("source_version must be a non-empty string or null")
-    return source_name, paths, context, version
+    inputs = {name: Path(value) for name, value in settings["inputs"].items()}
+    return settings["source_name"], inputs, settings["contexts"][0], settings.get("source_version")
 
 
 def read_gene_mapping(path: Path) -> dict[str, set[str]]:

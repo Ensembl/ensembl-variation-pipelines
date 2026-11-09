@@ -1,12 +1,13 @@
-process LOAD_CLINVAR {
+process LOAD_PHENOTYPES {
     tag "${meta.id}"
 
     label 'process_medium'
     // Database state cannot be restored from a cached task result.
     cache false
+    maxForks 1
 
     conda "${moduleDir}/environment.yml"
-    container 'ensembl-phenotypes-clinvar-loader:0.1.0'
+    container 'ensembl-phenotypes-loader:0.1.0'
 
     input:
     tuple val(meta), path(records)

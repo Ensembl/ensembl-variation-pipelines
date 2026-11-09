@@ -10,6 +10,7 @@ from datetime import date, datetime
 from pathlib import Path
 from time import monotonic
 
+from variation_sources.context import validate_g2p_context
 from variation_sources.source_config import load_source_config
 from variation_sources.provenance import git_revision, input_file_provenance
 
@@ -182,13 +183,25 @@ def parse_record(row: dict, gene_mapping: dict) -> tuple[dict, list[tuple[str, s
     }, warnings
 
 
-def parse_g2p(config_path: Path, outdir: Path) -> None:
+def parse_g2p(
+    data_path: Path, gene_id_mapping: Path, records_path: Path, *,
+    source_name: str, genome_context: dict, source_version: str | None = None,
+    pipeline_directory: Path | None = None,
+) -> None:
     started = monotonic()
-    run_date = date.today().isoformat()
-    source, inputs, context, version = read_source_config(config_path)
-    outputs = [outdir / name for name in ("g2p_output.jsonl", "warnings.txt", "rejections.txt")]
-    if {p.resolve() for p in outputs} & {config_path.resolve(), Path(__file__).resolve(), *inputs.values()}:
+    context = validate_g2p_context(genome_context)
+    if not isinstance(source_name, str) or not source_name.strip():
+        raise ValueError("Source name must be a non-empty string")
+    if source_version is not None and (
+        not isinstance(source_version, str) or not source_version.strip()
+    ):
+        raise ValueError("Source version must be a non-empty string or null")
+    source = source_name
+    inputs = {"data": data_path, "gene_id_mapping": gene_id_mapping}
+    outputs = [records_path, records_path.parent / "warnings.txt", records_path.parent / "rejections.txt"]
+    if {p.resolve() for p in outputs} & {Path(__file__).resolve(), *(p.resolve() for p in inputs.values())}:
         raise ValueError("Output paths must not overwrite an input or the parser")
+    run_date = date.today().isoformat()
     print(f"[Parsing {source}] Starting: {inputs['data']}", file=sys.stderr, flush=True)
     print(f"[Parsing {source}] Reading gene mapping: {inputs['gene_id_mapping']}", file=sys.stderr, flush=True)
     gene_mapping = read_gene_mapping(inputs["gene_id_mapping"])
@@ -197,17 +210,17 @@ def parse_g2p(config_path: Path, outdir: Path) -> None:
         "source": source,
         "genome_context": context,
         "import_run": {
-            "source_name": source, "source_version": version,
+            "source_name": source, "source_version": source_version,
             **input_files,
             "pipeline_run_date": run_date,
-            "pipeline_revision": git_revision(Path(__file__).resolve().parent),
+            "pipeline_revision": git_revision(pipeline_directory or Path(__file__).resolve().parent),
         },
     }
     n_seen = n_accepted = n_rejected = n_warnings = 0
     with inputs["data"].open(encoding="utf-8-sig", newline="") as input_handle:
         reader = csv.DictReader(input_handle, strict=True)
         _check_columns(reader, G2P_COLUMNS)
-        outdir.mkdir(parents=True, exist_ok=True)
+        records_path.parent.mkdir(parents=True, exist_ok=True)
         with (
             outputs[0].open("w", encoding="utf-8") as records_handle,
             outputs[1].open("w", encoding="utf-8", newline="") as warnings_handle,
@@ -255,11 +268,39 @@ def parse_g2p(config_path: Path, outdir: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Parse G2P CSV into intermediate phenotype JSONL.")
-    parser.add_argument("--source-config", type=Path, required=True)
-    parser.add_argument("--outdir", type=Path, required=True)
+    context = parser.add_mutually_exclusive_group(required=True)
+    context.add_argument("--source-config", type=Path)
+    context.add_argument("--genome-context", type=json.loads)
+    parser.add_argument("--data", type=Path)
+    parser.add_argument("--gene-id-mapping", type=Path)
+    parser.add_argument("--source-name")
+    parser.add_argument("--source-version")
+    parser.add_argument("--pipeline-directory", type=Path)
+    output = parser.add_mutually_exclusive_group(required=True)
+    output.add_argument("--outdir", type=Path)
+    output.add_argument("--records", type=Path)
     args = parser.parse_args()
     try:
-        parse_g2p(args.source_config, args.outdir)
+        if args.source_config:
+            if args.source_name is not None or args.source_version is not None:
+                raise ValueError("Use the source name/version from --source-config, or supply --genome-context")
+            source, inputs, context, version = read_source_config(args.source_config)
+        else:
+            source, inputs, context, version = args.source_name, {}, args.genome_context, args.source_version
+        data_path = args.data or inputs.get("data")
+        gene_id_mapping = args.gene_id_mapping or inputs.get("gene_id_mapping")
+        if data_path is None or gene_id_mapping is None:
+            raise ValueError("Supply --data and --gene-id-mapping, or set them in --source-config")
+        records_path = args.records or args.outdir / "g2p_output.jsonl"
+        if args.source_config and args.source_config.resolve() in {
+            p.resolve() for p in (records_path, records_path.parent / "warnings.txt", records_path.parent / "rejections.txt")
+        }:
+            raise ValueError("Output paths must not overwrite the source config")
+        parse_g2p(
+            data_path, gene_id_mapping, records_path,
+            source_name=source, genome_context=context, source_version=version,
+            pipeline_directory=args.pipeline_directory,
+        )
     except (OSError, ValueError, csv.Error) as error:
         print(f"[Parsing G2P] Failed: {error}", file=sys.stderr)
         return 1

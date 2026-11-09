@@ -1,11 +1,11 @@
 nextflow_process {
     name 'ClinVar phenotype transformation'
-    script 'modules/local/clinvar/phenotypes/main.nf'
+    script 'modules/local/clinvar/parse/main.nf'
     process 'PARSE_CLINVAR'
     tag 'modules'
     tag 'modules_local'
     tag 'clinvar'
-    tag 'clinvar/phenotypes'
+    tag 'clinvar/parse'
 
     test('Generate phenotype associations and report unsupported records') {
         when {

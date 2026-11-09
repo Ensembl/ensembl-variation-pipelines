@@ -1,4 +1,4 @@
-name: clinvar_load
+name: phenotypes_load
 channels:
   - conda-forge
 dependencies:

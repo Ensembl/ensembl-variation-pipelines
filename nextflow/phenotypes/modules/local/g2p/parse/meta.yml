@@ -1,33 +1,33 @@
-name: clinvar_phenotypes
-description: Transform RCV and VCV evidence into phenotype associations.
+name: g2p_parse
+description: Parse G2P gene-disease assertions and map HGNC IDs using a supplied file.
 keywords:
-- clinvar
-- variants
+- g2p
+- genes
 - source processing
 tools:
 - phenotypes:
-    description: Transform RCV and VCV evidence into phenotype associations.
+    description: Parse G2P gene-disease assertions and map HGNC IDs using a supplied file.
     documentation: https://github.com/Ensembl/ensembl-variation-pipelines
     licence:
     - Apache-2.0
 input:
 - - meta:
       type: map
-      description: Caller metadata with id; passed through unchanged.
-  - rcv_xml:
+      description: Caller metadata with id, source_name and processing context; passed through unchanged.
+  - data_file:
       type: file
-      description: RCV XML or XML.GZ.
+      description: G2P all-records CSV.
       ontologies: []
-  - vcv_xml:
+  - gene_id_mapping:
       type: file
-      description: VCV XML or XML.GZ.
+      description: HGNC complete-set TSV containing HGNC and Ensembl gene IDs.
       ontologies: []
   - genome_context:
       type: map
-      description: Required human genome context with assembly and nullable assembly_uuid.
-- - source_name:
-      type: string
-      description: Source name from the validated source configuration.
+      description: Human processing context; assembly, assembly_uuid and genome_uuid may be null.
+- - source_metadata:
+      type: map
+      description: Source name and optional source_version from the validated configuration.
 - - python_source:
       type: directory
       description: Phenotype Python src directory, staged as phenotype_src.
@@ -44,15 +44,15 @@ output:
   records:
   - - meta:
         type: map
-        description: Caller metadata with id; passed through unchanged.
+        description: Caller metadata with id, source_name and processing context; passed through unchanged.
     - '*_output.jsonl':
         type: file
-        description: Variant-phenotype associations with import metadata.
+        description: Gene-disease associations with import metadata.
         ontologies: []
   warnings:
   - - meta:
         type: map
-        description: Caller metadata with id; passed through unchanged.
+        description: Caller metadata with id, source_name and processing context; passed through unchanged.
     - warnings.txt:
         type: file
         description: Tab-separated contextual warnings.
@@ -60,7 +60,7 @@ output:
   rejections:
   - - meta:
         type: map
-        description: Caller metadata with id; passed through unchanged.
+        description: Caller metadata with id, source_name and processing context; passed through unchanged.
     - rejections.txt:
         type: file
         description: Tab-separated rejections and reasons.

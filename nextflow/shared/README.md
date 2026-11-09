@@ -53,7 +53,7 @@ uv sync --locked --project nextflow/shared
 nextflow run nextflow/shared --outdir results/shared
 ```
 
-The default asset sets both inputs to null, so this downloads the latest RCV
+With both ClinVar inputs null, the default run downloads the latest RCV
 and VCV releases. Downloads are copied to `results/shared/clinvar/inputs/`.
 The runner prints the resolved input paths and calls `EXTRACT_CLINVAR` once per
 configured genome context. RCV evidence is written under
@@ -85,17 +85,18 @@ nextflow run nextflow/shared \
     --outdir results/shared-test
 ```
 
-Both the shared runner and phenotypes default to the single asset at
-`nextflow/shared/assets/source_config.json`, selected by the common Nextflow
-include `conf/source.config`. Standalone Python parsing uses
-that same default. Consumers import the loader, default path and ClinVar context
-validator directly from `variation_sources.source_config`; there is no phenotype
-configuration wrapper. The common asset retains the phenotype
-pipeline's GRCh38 assembly UUID. Run-specific settings can still be supplied
-with `--source_config`; relative input paths resolve against that file.
-All callers use the same shared Python validator;
+The shared reader defaults to `assets/source_config.json` and supports ClinVar.
+ClinVar requires human species and an assembly. Null inputs allow downloads;
+supplied paths must exist. Duplicate species/assembly contexts are rejected.
+
+Consumers pass their own `source_rules` to
+`variation_sources.source_config.load_source_config`: a mapping of source names
+to `(input names, context validator)`. Phenotypes owns G2P validation in
+`phenotypes.source_config`; see its [README](../phenotypes/README.md).
+
 Nextflow callers can import `read_source_config` from `lib/source_config.nf`,
-passing a configuration path and their environment's Python executable.
+passing the config path and Python executable. An optional third argument
+selects the config module (default: `variation_sources.source_config`).
 The reusable `CLINVAR_INPUTS` workflow receives validated settings explicitly
 and does not read any pipeline's assets itself.
 
@@ -132,8 +133,8 @@ reconciliation, Parquet staging and datastore loading remain consumer work.
 `variation_sources.clinvar.xml` owns bounded-memory XML streaming;
 `variation_sources.clinvar.variants` owns common variant/location/allele parsing;
 `variation_sources.clinvar.vcv` maps direct VCV alleles to their own component accessions;
-`variation_sources.context` owns context validation;
-`variation_sources.source_config` owns configuration and literal input validation;
+`variation_sources.context` validates genome and ClinVar contexts;
+`variation_sources.source_config` validates configs and file paths; defaults to ClinVar;
 `variation_sources.provenance` owns input hashing and Git revision lookup.
 Phenotypes depends on this local package through its `pyproject.toml` and lockfile.
 Other Python consumers can install this directory or declare the same local dependency.

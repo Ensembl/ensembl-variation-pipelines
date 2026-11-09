@@ -552,7 +552,7 @@ def load_phenotypes(
                     except (ValueError, KeyError, TypeError, AttributeError, psycopg.Error) as error:
                         reports = record.get("source_reports") if isinstance(record, dict) else None
                         accession = ", ".join(
-                            report.get("source_accession") or "unknown source accession"
+                            str(report.get("source_accession") or "unknown source accession")
                             for report in reports if isinstance(report, dict)
                         ) if isinstance(reports, list) else "unknown source accession"
                         raise ValueError(

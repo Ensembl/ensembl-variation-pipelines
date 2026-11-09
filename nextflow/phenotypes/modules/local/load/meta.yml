@@ -28,15 +28,9 @@ input:
 - - python_source:
       type: directory
       description: Phenotype Python src directory, staged as phenotype_src.
-- - python_source_contents:
-      type: list
-      description: Sorted phenotype source filenames and contents.
 - - shared_source:
       type: directory
       description: Shared Python src directory, staged as shared_src.
-- - shared_source_contents:
-      type: list
-      description: Sorted shared source filenames and contents.
 output:
   summary:
   - - meta:

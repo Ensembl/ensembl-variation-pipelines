@@ -14,13 +14,13 @@ from urllib.parse import urlsplit
 
 from variation_sources.clinvar.xml import iter_release
 from variation_sources.clinvar.variants import (
-    RejectedRecord, text as _text, integer as _integer,
+    RejectedRecord, text as _text,
     versioned_accession as _versioned_accession, unique as _unique,
     reported_allele as _reported_allele, open_xml as _open_xml,
     parse_variant as _parse_shared_variant,
 )
-from phenotypes.clinvar.vcv_parser import read_component_accessions
-from phenotypes.provenance import git_revision, input_file_provenance
+from variation_sources.clinvar.vcv import read_component_accessions
+from variation_sources.provenance import git_revision, input_file_provenance
 from phenotypes.source_config import DEFAULT_SOURCE_CONFIG, load_source_config
 from variation_sources.context import validate_clinvar_context
 
@@ -912,9 +912,15 @@ def parse_clinvar(
     if pipeline_revision is None:
         pipeline_revision = git_revision(Path(__file__).resolve().parent)
     records_path = Path(records_path)
-    records_path.parent.mkdir(parents=True, exist_ok=True)
     warnings_path = records_path.parent / "warnings.txt"
     rejections_path = records_path.parent / "rejections.txt"
+    outputs = [records_path, warnings_path, rejections_path]
+    resolved_outputs = {path.resolve() for path in outputs}
+    if len(resolved_outputs) != len(outputs):
+        raise ValueError("Records, warnings and rejections must have different output paths")
+    if resolved_outputs & {rcv_input.resolve(), vcv_input.resolve(), Path(__file__).resolve()}:
+        raise ValueError("Output paths must not overwrite an input or the parser")
+    records_path.parent.mkdir(parents=True, exist_ok=True)
     n_records = 0
     print(
         "[Recording ClinVar inputs] Calculating SHA-256 checksums (RCV, VCV)",

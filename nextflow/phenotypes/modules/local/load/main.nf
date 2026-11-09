@@ -14,9 +14,7 @@ process LOAD_PHENOTYPES {
     path env_file, stageAs: 'database.env'
     val replace_existing
     path python_source, stageAs: 'phenotype_src'
-    val python_source_contents
     path shared_source, stageAs: 'shared_src'
-    val shared_source_contents
 
     output:
     tuple val(meta), path("${task.ext.prefix ?: meta.id}_load_summary.json"), emit: summary

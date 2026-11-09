@@ -2,7 +2,6 @@ include { CLINVAR } from './clinvar'
 include { G2P } from './g2p'
 include { LOAD_PHENOTYPES } from '../modules/local/load/main'
 include { read_source_config } from '../../shared/lib/source_config'
-include { source_contents } from '../../shared/lib/source_files'
 
 workflow PHENOTYPES {
     main:
@@ -32,7 +31,7 @@ workflow PHENOTYPES {
         parsed_rejections = parsed_rejections.mix(G2P.out.rejections)
     }
 
-    LOAD_PHENOTYPES(parsed_records, channel.value(database_env), channel.value(params.replace), python_source, source_contents(python_source), shared_source, source_contents(shared_source))
+    LOAD_PHENOTYPES(parsed_records, channel.value(database_env), channel.value(params.replace), python_source, shared_source)
 
     emit:
     records = parsed_records.map { meta, records -> tuple(meta.findAll { key, value -> key != 'id' && key != 'source_name' }, records) }

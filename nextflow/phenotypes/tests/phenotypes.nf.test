@@ -3,7 +3,7 @@ nextflow_pipeline {
     script 'main.nf'
     tag 'pipeline'
     tag 'clinvar'
-    tag 'clinvar/phenotypes'
+    tag 'clinvar/parse'
 
     test('Parse local evidence with database loading disabled by test configuration') {
         options "-c $baseDir/tests/skip_load.config"
@@ -24,10 +24,11 @@ nextflow_pipeline {
         }
     }
 
-    test('Default common asset supports phenotype parsing and loading - stub') {
+    test('Configured ClinVar source supports phenotype parsing and loading - stub') {
         options '-stub-run'
         when {
             params {
+                source_config = "$baseDir/tests/data/source_config.json"
                 env_file = "$baseDir/tests/data/database.env"
                 outdir = "$outputDir/results"
             }

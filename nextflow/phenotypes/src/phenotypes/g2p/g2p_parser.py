@@ -198,7 +198,10 @@ def parse_g2p(
     source = source_name
     inputs = {"data": data_path, "gene_id_mapping": gene_id_mapping}
     outputs = [records_path, records_path.parent / "warnings.txt", records_path.parent / "rejections.txt"]
-    if {p.resolve() for p in outputs} & {Path(__file__).resolve(), *(p.resolve() for p in inputs.values())}:
+    resolved_outputs = {path.resolve() for path in outputs}
+    if len(resolved_outputs) != len(outputs):
+        raise ValueError("Records, warnings and rejections must have different output paths")
+    if resolved_outputs & {Path(__file__).resolve(), *(path.resolve() for path in inputs.values())}:
         raise ValueError("Output paths must not overwrite an input or the parser")
     run_date = date.today().isoformat()
     print(f"[Parsing {source}] Starting: {inputs['data']}", file=sys.stderr, flush=True)

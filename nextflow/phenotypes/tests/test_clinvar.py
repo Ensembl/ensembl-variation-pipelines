@@ -8,7 +8,7 @@ import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from phenotypes.clinvar.loader import read_metadata
+from phenotypes.loader import read_metadata
 from phenotypes.clinvar.rcv_parser import (
     _aggregate_assessments, _parse_traits, _submission_assessments,
     _trait_reported_external_references, _trait_reported_phenotype_ontology_terms,

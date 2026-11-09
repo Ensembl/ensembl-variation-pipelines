@@ -1,0 +1,56 @@
+name: g2p_download
+description: "Download a G2P CSV or HGNC mapping file with retries."
+keywords:
+  - g2p
+  - genes
+  - source processing
+tools:
+  - curl:
+      description: "Download a G2P CSV or HGNC mapping file with retries."
+      documentation: https://curl.se/docs/
+      licence: ["curl"]
+input:
+  - - "meta":
+        type: map
+        description: "Caller metadata with id and extension; passed through unchanged."
+    - "input_name":
+        type: string
+        description: "Input key, either data or gene_id_mapping."
+    - "url":
+        type: string
+        description: "Complete URL for the selected input file."
+output:
+  files:
+    - - "meta":
+          type: map
+          description: "Caller metadata with id and extension; passed through unchanged."
+      - "input_name":
+          type: string
+          description: "Input key identifying the downloaded file."
+      - "*.{csv,txt}":
+          type: file
+          description: "Downloaded CSV or TSV input file."
+          ontologies: []
+  versions_curl:
+    - - "${task.process}":
+          type: string
+          description: "Process name."
+      - "curl":
+          type: string
+          description: "Tool name."
+      - "curl --version | sed -n '1s/^curl \\([^ ]*\\).*/\\1/p'":
+          type: eval
+          description: "Numeric curl version."
+topics:
+  versions:
+    - - "${task.process}":
+          type: string
+          description: "Process name."
+      - "curl":
+          type: string
+          description: "Tool name."
+      - "curl --version | sed -n '1s/^curl \\([^ ]*\\).*/\\1/p'":
+          type: eval
+          description: "Numeric curl version."
+authors: []
+maintainers: []

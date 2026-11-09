@@ -58,7 +58,7 @@ def read_source_config(path: Path) -> tuple[str, dict, dict, str | None]:
         raise ValueError("Source configuration must contain G2P")
     if len(settings["contexts"]) != 1:
         raise ValueError("Standalone G2P parsing requires exactly one context")
-    inputs = {name: Path(value) for name, value in settings["inputs"].items()}
+    inputs = {name: Path(value) for name, value in settings["inputs"].items() if value is not None}
     return settings["source_name"], inputs, settings["contexts"][0], settings.get("source_version")
 
 
@@ -292,7 +292,7 @@ def main() -> int:
         data_path = args.data or inputs.get("data")
         gene_id_mapping = args.gene_id_mapping or inputs.get("gene_id_mapping")
         if data_path is None or gene_id_mapping is None:
-            raise ValueError("Supply --data and --gene-id-mapping, or set them in --source-config")
+            raise ValueError("Standalone parsing requires G2P data and an HGNC mapping file; supply both paths or use Nextflow to download missing inputs")
         records_path = args.records or args.outdir / "g2p_output.jsonl"
         if args.source_config and args.source_config.resolve() in {
             p.resolve() for p in (records_path, records_path.parent / "warnings.txt", records_path.parent / "rejections.txt")

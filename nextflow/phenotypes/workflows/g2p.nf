@@ -1,3 +1,4 @@
+include { DOWNLOAD_G2P } from '../modules/local/g2p/download/main'
 include { PARSE_G2P } from '../modules/local/g2p/parse/main'
 include { source_contents } from '../../shared/lib/source_files'
 
@@ -8,10 +9,21 @@ workflow G2P {
     main:
     python_source = file("${projectDir}/src", checkIfExists: true)
     shared_source = file("${projectDir}/../shared/src", checkIfExists: true)
-    data_file = file(source_settings.inputs.data, checkIfExists: true)
-    gene_id_mapping = file(source_settings.inputs.gene_id_mapping, checkIfExists: true)
+    downloads = [
+        tuple([id: 'g2p_all', extension: 'csv'], 'data', 'https://www.ebi.ac.uk/gene2phenotype/api/panel/all/download/'),
+        tuple([id: 'hgnc_complete_set', extension: 'txt'], 'gene_id_mapping', 'https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt'),
+    ].findAll { meta, input_name, url -> source_settings.inputs[input_name] == null }
+    if (downloads) {
+        DOWNLOAD_G2P(channel.fromList(downloads))
+    }
+    g2p_data = source_settings.inputs.data ? channel.value(file(source_settings.inputs.data, checkIfExists: true)) :
+        DOWNLOAD_G2P.out.files.filter { meta, input_name, input_file -> input_name == 'data' }.map { meta, input_name, input_file -> input_file }.first()
+    hgnc_mapping = source_settings.inputs.gene_id_mapping ? channel.value(file(source_settings.inputs.gene_id_mapping, checkIfExists: true)) :
+        DOWNLOAD_G2P.out.files.filter { meta, input_name, input_file -> input_name == 'gene_id_mapping' }.map { meta, input_name, input_file -> input_file }.first()
     processing_inputs = channel.fromList(source_settings.contexts)
-        .map { context ->
+        .combine(g2p_data)
+        .combine(hgnc_mapping)
+        .map { context, data_file, gene_id_mapping ->
             def assembly_suffix = context.assembly ? "_${context.assembly}" : ''
             def meta = [id: "g2p_${context.species_production_name}${assembly_suffix}".toString(), source_name: source_settings.source_name] + context
             tuple(meta, data_file, gene_id_mapping, context)

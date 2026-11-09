@@ -24,9 +24,6 @@ def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
     })
     settings = config["sources"].get("G2P")
     if settings is not None:
-        missing = [name for name, value in settings["inputs"].items() if value is None]
-        if missing:
-            raise ValueError(f"Source G2P requires supplied input files: {', '.join(missing)}")
         version = settings.get("source_version")
         if version is not None and (not isinstance(version, str) or not version.strip()):
             raise ValueError("G2P source_version must be a non-empty string or null")

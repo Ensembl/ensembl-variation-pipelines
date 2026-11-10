@@ -121,7 +121,7 @@ def get_source_header(api_file: str) -> dict:
 
     header_content = source_header["source"]
     _, source_info_line = header_content.split('" ', 1)
-    source_info = dict(re.findall('(.+?)="(.+?)"\s*', source_info_line))
+    source_info = dict(re.findall(r'(.+?)="(.+?)"\s*', source_info_line))
 
     return source_info
 

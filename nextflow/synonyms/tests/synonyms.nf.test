@@ -1,0 +1,62 @@
+nextflow_pipeline {
+    name 'ClinVar source evidence to variant synonyms'
+    script 'main.nf'
+    tag 'pipeline'
+    tag 'clinvar'
+    tag 'clinvar/synonyms'
+
+    test('Extract reported HGVS, SPDI and dbSNP IDs for each assembly context') {
+        when {
+            params {
+                source_config = "$baseDir/tests/data/source_config.json"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assert workflow.success
+            // One real CACNA1A record exercises SPDI, HGVS and rsID provenance.
+            for (assembly in ['GRCh38', 'GRCh37']) {
+                def directory = "$outputDir/results/clinvar/homo_sapiens/$assembly"
+                def rows = file("$directory/synonyms/clinvar.synonyms.jsonl").readLines()
+                def parser = new groovy.json.JsonSlurper()
+                def header = parser.parseText(rows[0]).metadata
+                def record = parser.parseText(rows[1])
+                assert rows.size() == 2
+                assert header.genome_context.assembly == assembly
+                assert header.source_version == '2026-09-28'
+                assert header.artifact_kind == 'source_evidence'
+                assert header.synonym_schema_version == 1
+                assert record.source_report.rcv_accession == 'RCV000755049.9'
+                assert record.source_report.source_version == '2026-09-28'
+                assert record.synonyms.every {
+                    it.resolution.state == 'source_only' &&
+                    it.resolution.variant_id == null && it.resolution.variant_allele_id == null
+                }
+                assert record.synonyms.any { it.type == 'SPDI' && it.value == 'NC_000019.10:13235692:C:T' }
+                assert record.synonyms.any { it.type == 'HGVS' && it.value == 'NM_001127222.2:c.4988G>A' }
+                assert record.synonyms.any { it.source == 'dbSNP' && it.value == 'rs121908247' }
+                assert file("$directory/evidence/clinvar.jsonl").exists()
+                assert file("$directory/synonyms/rejections.jsonl").text == ''
+            }
+        }
+    }
+
+    test('stub preserves both extraction stages and contexts') {
+        options '-stub-run'
+        when {
+            params {
+                source_config = "$baseDir/tests/data/source_config.json"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assert workflow.success
+            for (assembly in ['GRCh38', 'GRCh37']) {
+                def directory = "$outputDir/results/clinvar/homo_sapiens/$assembly"
+                assert file("$directory/evidence/clinvar.jsonl").exists()
+                assert file("$directory/synonyms/clinvar.synonyms.jsonl").exists()
+                assert file("$directory/synonyms/clinvar.summary.json").exists()
+            }
+        }
+    }
+}

@@ -1,0 +1,68 @@
+nextflow_process {
+    name 'ClinVar synonym extraction'
+    script 'modules/local/clinvar/synonyms/main.nf'
+    process 'EXTRACT_CLINVAR_SYNONYMS'
+    tag 'modules'
+    tag 'modules_local'
+    tag 'clinvar'
+    tag 'clinvar/synonyms'
+
+    test('Extract synonyms with source provenance and a configured prefix') {
+        options "-c $baseDir/modules/local/clinvar/synonyms/tests/prefix.config"
+        when {
+            process {
+                """
+                def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/tests/data/clinvar_evidence.jsonl')]
+                input[1] = file('$baseDir/src')
+                input[2] = 'synonym-test-source'
+                input[3] = file('$baseDir/../shared/src')
+                input[4] = 'shared-test-source'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert process.out.records[0][0].assembly == 'GRCh38' },
+                { assert file(process.out.records[0][1]).name == 'custom.synonyms.jsonl' },
+                { assert file(process.out.records[0][1]).readLines().size() == 3 },
+                { assert file(process.out.records[0][1]).text.contains('"source": "dbSNP"') },
+                { assert file(process.out.records[0][1]).text.contains('rs999999') },
+                { assert file(process.out.records[0][1]).text.contains('"artifact_kind": "source_evidence"') },
+                { assert file(process.out.records[0][1]).text.contains('"state": "source_only"') },
+                { assert file(process.out.records[0][1]).text.contains('"variant_allele_id": null') },
+                { assert file(process.out.summary[0][1]).text.contains('"synonyms_emitted": 7') },
+                { assert file(process.out.rejections[0][1]).text == '' },
+                { assert process.out.versions_python[0][2].startsWith('3.') },
+                { assert process.out.versions_consumer[0][2] == '0.1.0' },
+                { assert process.out.versions_shared[0][2] == '0.1.0' }
+            )
+        }
+    }
+
+    test('stub') {
+        options '-stub-run'
+        when {
+            process {
+                """
+                def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/tests/data/clinvar_evidence.jsonl')]
+                input[1] = file('$baseDir/src')
+                input[2] = 'synonym-test-source'
+                input[3] = file('$baseDir/../shared/src')
+                input[4] = 'shared-test-source'
+                """
+            }
+        }
+        then {
+            assertAll(
+                { assert process.success },
+                { assert file(process.out.records[0][1]).exists() },
+                { assert file(process.out.summary[0][1]).exists() },
+                { assert file(process.out.rejections[0][1]).exists() },
+                { assert process.out.versions_consumer[0][2] == '0.1.0' }
+            )
+        }
+    }
+}

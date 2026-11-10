@@ -1,4 +1,7 @@
-// Convert exported metadata to the format used by downstream steps.
+// extractMetadata parses and grabs the URN ID's entry from the pre-downloaded maveDB main.json file,
+// which contains metadata for all URN ID's.
+// It then reformats it to match the JSON format expected by the rest of the pipeline which 
+// was originally written to handle a different JSON structure. It uses extract_metadata.py to do this. 
 process extract_metadata {
   tag { urn }
   // publishDir "${params.output}", mode: 'copy', overwrite: true

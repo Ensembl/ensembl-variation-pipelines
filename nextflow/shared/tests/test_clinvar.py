@@ -100,7 +100,10 @@ class VariantEvidenceTests(unittest.TestCase):
                 measure_set = assertion.find("MeasureSet")
                 measure_set.set("Type", representation)
                 ET.SubElement(measure_set, "XRef", DB="ClinGen", ID="CA100")
+                ET.SubElement(measure_set, "XRef", DB="RefSeq", ID="NC_000001.11:g.100A>G")
                 measure = measure_set.find("Measure")
+                ET.SubElement(measure, "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
+                ET.SubElement(measure.find("AttributeSet"), "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
                 ET.SubElement(measure, "XRef", DB="OMIM", ID="103600.0054", Type="Allelic variant")
                 ET.SubElement(ET.SubElement(measure, "Name"), "ElementValue", Type="Preferred").text = "allele name"
                 ET.SubElement(measure.find("Name"), "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
@@ -114,9 +117,7 @@ class VariantEvidenceTests(unittest.TestCase):
                     "ordinal": 1,
                     "allele_id": "10",
                     "omim_ids": ["103600.0054"],
-                    "cross_references": [{
-                        "source": "RefSeq", "value": "NM_000001.1:c.100A>G", "type": None,
-                    }],
+                    "cross_references": [],
                     "names": [{"type": "Preferred", "value": "allele name"}],
                     "spdi": ["NC_000001.11:99:A:G"],
                     "hgvs": [{

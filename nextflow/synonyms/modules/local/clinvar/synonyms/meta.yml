@@ -1,5 +1,5 @@
 name: clinvar_synonyms
-description: Extract source-aware variant synonyms from shared ClinVar evidence.
+description: Extract source-aware variant synonyms directly from ClinVar RCV XML.
 keywords:
 - clinvar
 - synonyms
@@ -14,10 +14,13 @@ input:
 - - meta:
       type: map
       description: Caller metadata with id; passed through unchanged.
-  - evidence:
+  - rcv_xml:
       type: file
-      description: Shared ClinVar evidence JSONL, including a metadata header.
+      description: Full ClinVar RCV XML or XML.GZ input.
       ontologies: []
+  - genome_context:
+      type: map
+      description: Species and assembly context passed to the shared parser.
 - - python_source:
       type: directory
       description: Synonym Python src directory, staged as synonym_src.

@@ -1,5 +1,5 @@
 nextflow_pipeline {
-    name 'ClinVar source evidence to variant synonyms'
+    name 'ClinVar XML to variant synonyms'
     script 'main.nf'
     tag 'pipeline'
     tag 'clinvar'
@@ -25,7 +25,7 @@ nextflow_pipeline {
                 assert header.genome_context.assembly == assembly
                 assert header.source_version == '2026-09-28'
                 assert header.artifact_kind == 'source_evidence'
-                assert header.synonym_schema_version == 1
+                assert header.synonym_schema_version == 2
                 assert record.source_report.rcv_accession == 'RCV000755049.9'
                 assert record.source_report.source_version == '2026-09-28'
                 assert record.synonyms.every {
@@ -35,13 +35,13 @@ nextflow_pipeline {
                 assert record.synonyms.any { it.type == 'SPDI' && it.value == 'NC_000019.10:13235692:C:T' }
                 assert record.synonyms.any { it.type == 'HGVS' && it.value == 'NM_001127222.2:c.4988G>A' }
                 assert record.synonyms.any { it.source == 'dbSNP' && it.value == 'rs121908247' }
-                assert file("$directory/evidence/clinvar.jsonl").exists()
+                assert !file("$directory/evidence").exists()
                 assert file("$directory/synonyms/rejections.jsonl").text == ''
             }
         }
     }
 
-    test('stub preserves both extraction stages and contexts') {
+    test('stub preserves direct synonym extraction and contexts') {
         options '-stub-run'
         when {
             params {
@@ -53,7 +53,7 @@ nextflow_pipeline {
             assert workflow.success
             for (assembly in ['GRCh38', 'GRCh37']) {
                 def directory = "$outputDir/results/clinvar/homo_sapiens/$assembly"
-                assert file("$directory/evidence/clinvar.jsonl").exists()
+                assert !file("$directory/evidence").exists()
                 assert file("$directory/synonyms/clinvar.synonyms.jsonl").exists()
                 assert file("$directory/synonyms/clinvar.summary.json").exists()
             }

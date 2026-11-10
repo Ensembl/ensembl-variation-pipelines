@@ -13,7 +13,7 @@ nextflow_process {
             process {
                 """
                 def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
-                input[0] = [[id: 'clinvar'] + context, file('$baseDir/tests/data/clinvar_evidence.jsonl')]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/../shared/tests/data/rcv.xml'), context]
                 input[1] = file('$baseDir/src')
                 input[2] = 'synonym-test-source'
                 input[3] = file('$baseDir/../shared/src')
@@ -32,8 +32,8 @@ nextflow_process {
                 { assert file(process.out.records[0][1]).text.contains('"artifact_kind": "source_evidence"') },
                 { assert file(process.out.records[0][1]).text.contains('"state": "source_only"') },
                 { assert file(process.out.records[0][1]).text.contains('"variant_allele_id": null') },
-                { assert file(process.out.summary[0][1]).text.contains('"synonyms_emitted": 7') },
-                { assert file(process.out.rejections[0][1]).text == '' },
+                { assert file(process.out.summary[0][1]).text.contains('"synonyms_emitted": 9') },
+                { assert file(process.out.rejections[0][1]).text.contains('unsupported_genotype_set') },
                 { assert process.out.versions_python[0][2].startsWith('3.') },
                 { assert process.out.versions_consumer[0][2] == '0.1.0' },
                 { assert process.out.versions_shared[0][2] == '0.1.0' }
@@ -47,7 +47,7 @@ nextflow_process {
             process {
                 """
                 def context = [species_taxonomy_id: 9606, species_production_name: 'homo_sapiens', assembly: 'GRCh38', assembly_uuid: null]
-                input[0] = [[id: 'clinvar'] + context, file('$baseDir/tests/data/clinvar_evidence.jsonl')]
+                input[0] = [[id: 'clinvar'] + context, file('$baseDir/../shared/tests/data/rcv.xml'), context]
                 input[1] = file('$baseDir/src')
                 input[2] = 'synonym-test-source'
                 input[3] = file('$baseDir/../shared/src')

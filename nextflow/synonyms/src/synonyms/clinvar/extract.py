@@ -1,4 +1,4 @@
-"""Map shared ClinVar evidence to synonyms without re-reading source XML."""
+"""Stream ClinVar RCV XML directly into reported variant synonyms."""
 
 from __future__ import annotations
 
@@ -6,12 +6,27 @@ import argparse
 import json
 import re
 from collections import Counter
+from contextlib import closing
 from pathlib import Path
 
 from synonyms import __version__
+from variation_sources.clinvar.extract import iter_evidence
 from variation_sources.clinvar.variants import RejectedRecord
 from variation_sources.context import validate_clinvar_context
-from variation_sources.provenance import git_revision, input_file_provenance
+from variation_sources.provenance import git_revision
+
+
+def hgvs_reported_type(annotation_type: str | None, value: str | None) -> str | None:
+    """Reduce an HGVS annotation to a category, retaining unclassified values."""
+    for token in (annotation_type or "").split(","):
+        category = token.strip().lower()
+        if category in {"genomic", "coding", "protein"}:
+            return category
+    # Historical HGVS attributes may omit the category from their annotation.
+    match = re.search(r":([gcmp])\.", value or "")
+    if match:
+        return {"g": "genomic", "m": "genomic", "c": "coding", "p": "protein"}[match[1]]
+    return None
 
 
 def reported_synonyms(
@@ -30,20 +45,18 @@ def reported_synonyms(
         if not isinstance(value, str) or not value.strip():
             return
         value = value.strip()
-        key = value, kind, source
-        item = result.setdefault(key, {
-            "value": value, "type": kind, "source": source, "reported_types": [],
+        key = value, kind, source, reported_type
+        result.setdefault(key, {
+            "value": value, "type": kind, "source": source, "reported_type": reported_type,
             "resolution": {
                 "state": "source_only", "variant_id": None, "variant_allele_id": None,
             },
         })
-        if reported_type and reported_type not in item["reported_types"]:
-            item["reported_types"].append(reported_type)
 
     add(variant["identifier"], "ClinVar", "ClinVar")
     add(rcv_accession, "ClinVar", "ClinVar")
     for xref in [*(cross_references or []), *(allele.get("cross_references", []) if allele else [])]:
-        if xref["source"] in {"ClinGen", "RefSeq"}:
+        if xref["source"] == "ClinGen":
             add(xref["value"], xref["source"], xref["source"], xref.get("type"))
     for identifier in variant["alternative_identifiers"]:
         if re.fullmatch(r"rs[0-9]+", identifier):
@@ -60,7 +73,8 @@ def reported_synonyms(
         for name in allele.get("names", []):
             add(name["value"], "name", "ClinVar", name.get("type"))
         for hgvs in allele.get("hgvs", []):
-            add(hgvs["value"], "HGVS", "ClinVar", hgvs.get("type"))
+            add(hgvs["value"], "HGVS", "ClinVar",
+                hgvs_reported_type(hgvs.get("type"), hgvs["value"]))
         for spdi in allele.get("spdi", []):
             add(spdi, "SPDI", "ClinVar", "CanonicalSPDI")
     return list(result.values())
@@ -116,57 +130,63 @@ def synonym_records(
     return records
 
 
-def extract_synonyms(evidence_path: Path, records_path: Path, summary_path: Path) -> dict:
-    """Stream shared JSONL into synonym records and contextual diagnostics."""
-    evidence_path, records_path, summary_path = map(Path, (evidence_path, records_path, summary_path))
+def extract_synonyms(
+    rcv_input: Path, genome_context: dict, records_path: Path, summary_path: Path,
+) -> dict:
+    """Read the entire RCV input and emit synonyms without an evidence file."""
+    rcv_input, records_path, summary_path = map(Path, (rcv_input, records_path, summary_path))
     rejections_path = summary_path.parent / "rejections.jsonl"
-    paths = [evidence_path.resolve(), records_path.resolve(), summary_path.resolve(), rejections_path.resolve()]
+    paths = [rcv_input.resolve(), records_path.resolve(), summary_path.resolve(), rejections_path.resolve()]
     if len(set(paths)) != len(paths):
-        raise ValueError("Evidence, records, summary and rejection paths must be distinct")
+        raise ValueError("RCV input, records, summary and rejection paths must be distinct")
+    context = validate_clinvar_context(genome_context)
     counts, reasons = Counter(), Counter()
-    with evidence_path.open(encoding="utf-8") as input_handle:
-        header = json.loads(input_handle.readline())["metadata"]
-        if header["schema_version"] != 1 or header["source"] != "ClinVar":
-            raise ValueError("Expected ClinVar shared evidence schema version 1")
-        context = validate_clinvar_context(header["genome_context"])
-        metadata = {
-            **header,
-            "schema": "variant_synonyms",
-            "synonym_schema_version": 1,
-            "artifact_kind": "source_evidence",
-            "consumer_version": __version__,
-            "genome_context": context,
-            "evidence_input": input_file_provenance([evidence_path]),
-            "pipeline_revision": git_revision(Path(__file__).resolve().parent),
-        }
-        for path in (records_path, summary_path):
-            path.parent.mkdir(parents=True, exist_ok=True)
-        with (records_path.open("w", encoding="utf-8") as output,
-              rejections_path.open("w", encoding="utf-8") as rejected):
-            output.write(json.dumps({"metadata": metadata}, ensure_ascii=False) + "\n")
-            for line in input_handle:
-                if not line.strip():
-                    continue
-                evidence = json.loads(line)
-                counts["source_records_seen"] += 1
-                try:
-                    records = synonym_records(
-                        evidence, header["source"], header.get("source_version"),
-                    )
-                except RejectedRecord as error:
-                    reasons[error.reason] += 1
-                    rejected.write(json.dumps({
-                        "rcv_accession": evidence.get("rcv_accession"),
-                        "reason": error.reason, "details": error.source_value,
-                        "source": header["source"],
-                        "source_version": header.get("source_version"),
-                        "evidence": evidence,
-                    }) + "\n")
-                    continue
-                for record in records:
-                    output.write(json.dumps(record, ensure_ascii=False) + "\n")
-                    counts["variant_records_emitted"] += 1
-                    counts["synonyms_emitted"] += len(record["synonyms"])
+    for path in (records_path, summary_path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+    with (
+        closing(iter_evidence(rcv_input, context)) as events,
+        records_path.open("w", encoding="utf-8") as output,
+        rejections_path.open("w", encoding="utf-8") as rejected,
+    ):
+        for event, evidence in events:
+            if event == "metadata":
+                header = evidence
+                metadata = {
+                    **header,
+                    "schema": "variant_synonyms",
+                    "synonym_schema_version": 2,
+                    "artifact_kind": "source_evidence",
+                    "consumer_version": __version__,
+                    "pipeline_revision": git_revision(Path(__file__).resolve().parent),
+                }
+                output.write(json.dumps({"metadata": metadata}, ensure_ascii=False) + "\n")
+                continue
+            counts["source_records_seen"] += 1
+            if event == "rejection":
+                reasons[evidence["reason"]] += 1
+                rejected.write(json.dumps({
+                    **evidence, "source": header["source"],
+                    "source_version": header.get("source_version"),
+                }) + "\n")
+                continue
+            try:
+                records = synonym_records(
+                    evidence, header["source"], header.get("source_version"),
+                )
+            except RejectedRecord as error:
+                reasons[error.reason] += 1
+                rejected.write(json.dumps({
+                    "rcv_accession": evidence.get("rcv_accession"),
+                    "reason": error.reason, "details": error.source_value,
+                    "source": header["source"],
+                    "source_version": header.get("source_version"),
+                    "evidence": evidence,
+                }) + "\n")
+                continue
+            for record in records:
+                output.write(json.dumps(record, ensure_ascii=False) + "\n")
+                counts["variant_records_emitted"] += 1
+                counts["synonyms_emitted"] += len(record["synonyms"])
     summary = {
         **{key: counts[key] for key in (
             "source_records_seen", "variant_records_emitted", "synonyms_emitted",
@@ -181,11 +201,12 @@ def extract_synonyms(evidence_path: Path, records_path: Path, summary_path: Path
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--evidence", required=True, type=Path)
+    parser.add_argument("--rcv-input", required=True, type=Path)
+    parser.add_argument("--genome-context", required=True, type=json.loads)
     parser.add_argument("--records", required=True, type=Path)
     parser.add_argument("--summary", required=True, type=Path)
     args = parser.parse_args()
-    extract_synonyms(args.evidence, args.records, args.summary)
+    extract_synonyms(args.rcv_input, args.genome_context, args.records, args.summary)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,8 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter
+from collections.abc import Iterator
+from contextlib import closing
 from pathlib import Path
 
 from variation_sources import __version__
@@ -20,45 +22,29 @@ from variation_sources.context import validate_clinvar_context
 from variation_sources.provenance import input_file_provenance
 
 
-def extract(
-    rcv_input: str | Path, genome_context: dict, records: Path, summary: Path
-) -> dict:
-    """Retain source identifiers and statuses without inferring equivalence.
+def iter_evidence(
+    rcv_input: str | Path, genome_context: dict,
+) -> Iterator[tuple[str, dict]]:
+    """Yield metadata, record and rejection events directly from the RCV XML.
 
-    Assembly selection and supported MeasureSet representations use the same
-    variant parser as phenotypes. Unsupported evidence is explicitly reported.
+    Records are ordinary dictionaries; no intermediate file is required.
+    XML elements are released after each record by the shared release reader.
     """
     context = validate_clinvar_context(genome_context)
     rcv_input = Path(rcv_input)
-    counts = Counter()
-    rejected_counts = Counter()
     provenance = input_file_provenance([rcv_input])
-    for output_path in (records, summary):
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-    with (
-        open_xml(rcv_input) as stream,
-        records.open("w", encoding="utf-8") as output,
-        (summary.parent / "rejections.jsonl").open("w", encoding="utf-8") as rejected,
-    ):
+    with open_xml(rcv_input) as stream:
         for event, element in iter_release(stream, "RCV"):
             if event == "release":
-                output.write(
-                    json.dumps(
-                        {
-                            "metadata": {
-                                "schema_version": 1,
-                                "parser_version": __version__,
-                                "source": "ClinVar",
-                                "source_version": element.get("Dated"),
-                                "genome_context": context,
-                                **provenance,
-                            }
-                        }
-                    )
-                    + "\n"
-                )
+                yield "metadata", {
+                    "schema_version": 1,
+                    "parser_version": __version__,
+                    "source": "ClinVar",
+                    "source_version": element.get("Dated"),
+                    "genome_context": context,
+                    **provenance,
+                }
                 continue
-            counts["seen"] += 1
             assertion = element.find("ReferenceClinVarAssertion")
             rcv = versioned_accession(
                 assertion.find("ClinVarAccession") if assertion is not None else None
@@ -89,20 +75,39 @@ def extract(
                     ],
                     "warnings": warnings,
                 }
-                output.write(json.dumps(evidence, ensure_ascii=False) + "\n")
-                counts["emitted"] += 1
+                yield "record", evidence
             except RejectedRecord as error:
-                rejected_counts[error.reason] += 1
-                rejected.write(
-                    json.dumps(
-                        {
-                            "rcv_accession": rcv,
-                            "reason": error.reason,
-                            "details": error.source_value,
-                        }
-                    )
-                    + "\n"
-                )
+                yield "rejection", {
+                    "rcv_accession": rcv,
+                    "reason": error.reason,
+                    "details": error.source_value,
+                }
+
+
+def extract(
+    rcv_input: str | Path, genome_context: dict, records: Path, summary: Path
+) -> dict:
+    """Write standalone shared evidence using the same in-memory iterator."""
+    counts = Counter()
+    rejected_counts = Counter()
+    for output_path in (records, summary):
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+    with (
+        closing(iter_evidence(rcv_input, genome_context)) as events,
+        records.open("w", encoding="utf-8") as output,
+        (summary.parent / "rejections.jsonl").open("w", encoding="utf-8") as rejected,
+    ):
+        for event, data in events:
+            if event == "metadata":
+                output.write(json.dumps({"metadata": data}) + "\n")
+                continue
+            counts["seen"] += 1
+            if event == "rejection":
+                rejected_counts[data["reason"]] += 1
+                rejected.write(json.dumps(data) + "\n")
+            else:
+                output.write(json.dumps(data, ensure_ascii=False) + "\n")
+                counts["emitted"] += 1
     result = {
         "n_records_seen": counts["seen"],
         "n_records_emitted": counts["emitted"],

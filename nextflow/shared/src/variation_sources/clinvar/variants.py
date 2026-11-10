@@ -218,7 +218,7 @@ def parse_variant(
         variant_cross_references["variant_cross_references"] = unique(
             {"source": xref.get("DB"), "value": xref.get("ID"), "type": xref.get("Type")}
             for xref in measure_set.findall("XRef")
-            if xref.get("DB") in {"ClinGen", "RefSeq"} and xref.get("ID")
+            if xref.get("DB") == "ClinGen" and xref.get("ID")
         )
 
     if measure_set_type == "Variant":
@@ -314,7 +314,7 @@ def parse_measure(
             alternative_identifiers.append(f"dbVar:{identifier}")
         elif include_allele_evidence and database == "OMIM":
             omim_ids.append(identifier)
-        elif include_allele_evidence and database in {"ClinGen", "RefSeq"}:
+        elif include_allele_evidence and database == "ClinGen":
             cross_references.append({
                 "source": database, "value": identifier, "type": xref.get("Type"),
             })
@@ -371,7 +371,7 @@ def parse_measure(
         cross_references.extend(
             {"source": xref.get("DB"), "value": xref.get("ID"), "type": xref.get("Type")}
             for xref in measure.findall("AttributeSet/XRef")
-            if xref.get("DB") in {"ClinGen", "RefSeq"} and xref.get("ID")
+            if xref.get("DB") == "ClinGen" and xref.get("ID")
         )
         for name in measure.findall("Name"):
             names.extend(
@@ -382,7 +382,7 @@ def parse_measure(
             cross_references.extend(
                 {"source": xref.get("DB"), "value": xref.get("ID"), "type": xref.get("Type")}
                 for xref in name.findall("XRef")
-                if xref.get("DB") in {"ClinGen", "RefSeq"} and xref.get("ID")
+                if xref.get("DB") == "ClinGen" and xref.get("ID")
             )
         result["allele_evidence"] = [{
             "ordinal": 1,

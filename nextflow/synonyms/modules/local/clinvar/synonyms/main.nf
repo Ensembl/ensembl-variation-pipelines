@@ -1,12 +1,13 @@
 process EXTRACT_CLINVAR_SYNONYMS {
     tag "${meta.id}"
     label 'process_medium'
+    cache false
 
     conda "${moduleDir}/environment.yml"
     container 'python:3.14.0'
 
     input:
-    tuple val(meta), path(evidence)
+    tuple val(meta), path(rcv_xml), val(genome_context)
     path python_source, stageAs: 'synonym_src'
     val python_source_contents
     path shared_source, stageAs: 'shared_src'
@@ -26,11 +27,13 @@ process EXTRACT_CLINVAR_SYNONYMS {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: meta.id
+    def context_argument = "'" + groovy.json.JsonOutput.toJson(genome_context).replace("'", "'\"'\"'") + "'"
     """
     PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="${python_source}:${shared_source}" \\
     python -m synonyms.clinvar.extract \\
         ${args} \\
-        --evidence "${evidence}" \\
+        --rcv-input "${rcv_xml}" \\
+        --genome-context ${context_argument} \\
         --records '${prefix}.synonyms.jsonl' \\
         --summary '${prefix}.summary.json'
     """

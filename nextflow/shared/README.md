@@ -127,6 +127,11 @@ loading the synonyms datastore. The extraction JSONL is not a canonical synonym
 table or a Parquet loader. Canonical variant matching, somatic-status policy,
 reconciliation, Parquet staging and datastore loading remain consumer work.
 
+The [synonyms consumer](../synonyms/README.md) now provides that extraction
+adapter and a workflow: shared RCV evidence becomes source-aware synonym JSONL,
+with HGVS, canonical SPDI, variant names and dbSNP identifiers where reported.
+Its output is an extraction artifact; no database loader is included.
+
 ## Python package and evidence
 
 `variation_sources.clinvar.xml` owns bounded-memory XML streaming;
@@ -140,7 +145,8 @@ Other Python consumers can install this directory or declare the same local depe
 
 `python -m variation_sources.clinvar.extract` streams RCV XML/XML.GZ and writes a
 JSONL metadata header followed by variant evidence. It retains release date,
-input checksum, source statuses, RCV/VCV identifiers, allele IDs, reported HGVS,
+input checksum, source statuses, RCV/VCV identifiers, allele IDs, reported names,
+HGVS and canonical SPDI (in each record's `allele_evidence`),
 dbSNP/dbVar references, requested-assembly placements, genes, haplotype components
 and SCV accessions. It applies no phenotype or classification eligibility filter.
 It does not generate HGVS/SPDI, lift coordinates, resolve dbSNP merge chains,

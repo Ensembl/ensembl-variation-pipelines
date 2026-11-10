@@ -257,8 +257,8 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual([row["reason"] for row in rejected], ["missing_reference_assertion", "missing_rcv_accession"])
         self.assertEqual(rows[1]["rcv_accession"], "RCV000000001.1")
 
-    def test_hgvs_remains_attached_to_its_allele_and_is_not_a_parent_alias(self):
-        # Synonym consumers need each HGVS expression linked to its own allele, even without phenotype data.
+    def test_reported_names_hgvs_and_spdi_remain_attached_to_their_allele(self):
+        # Each representation belongs to its allele, even when phenotype data is absent.
         root = ET.Element("ReleaseSet", Dated="2026-01-01")
         record = source_record()
         assertion = record.find("ReferenceClinVarAssertion")
@@ -266,10 +266,15 @@ class ExtractionTests(unittest.TestCase):
         assertion.remove(assertion.find("Classifications"))
         measure_set = assertion.find("MeasureSet")
         measure_set.set("Type", "Haplotype")
+        first = measure_set.find("Measure")
+        ET.SubElement(ET.SubElement(first, "Name"), "ElementValue", Type="Alternate").text = "first allele"
+        ET.SubElement(first, "CanonicalSPDI").text = "NC_000001.11:99:A:G"
         second = copy.deepcopy(measure_set.find("Measure"))
         second.set("ID", "11")
         second.find("XRef").set("ID", "999999")
         second.find("AttributeSet/Attribute").text = "NM_000001.1:c.200C>T"
+        second.find("Name/ElementValue").text = "second allele"
+        second.find("CanonicalSPDI").text = "NC_000001.11:199:C:T"
         measure_set.append(second)
         root.append(record)
         rows, rejected, summary = self.run_extract(root)
@@ -280,6 +285,9 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual([allele["allele_id"] for allele in evidence["allele_evidence"]], ["10", "11"])
         self.assertEqual([allele["ordinal"] for allele in evidence["allele_evidence"]], [1, 2])
         self.assertEqual(evidence["allele_evidence"][1]["hgvs"][0]["value"], "NM_000001.1:c.200C>T")
+        self.assertEqual(evidence["allele_evidence"][0]["spdi"], ["NC_000001.11:99:A:G"])
+        self.assertEqual(evidence["allele_evidence"][1]["spdi"], ["NC_000001.11:199:C:T"])
+        self.assertEqual(evidence["allele_evidence"][1]["names"], [{"type": "Alternate", "value": "second allele"}])
         self.assertEqual(evidence["reported_variant"]["components"][1]["alternative_identifiers"], ["rs999999"])
 
     def test_empty_release_has_metadata_and_zero_counts(self):

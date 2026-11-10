@@ -82,6 +82,15 @@ def extract(
                         {
                             "ordinal": ordinal,
                             "allele_id": measure.get("ID"),
+                            "names": [
+                                {"type": name.get("Type"), "value": value}
+                                for name in measure.findall("Name/ElementValue")
+                                if (value := text(name)) is not None
+                            ],
+                            "spdi": [
+                                value for element in measure.findall("CanonicalSPDI")
+                                if (value := text(element)) is not None
+                            ],
                             "hgvs": [
                                 {
                                     "type": attribute.get("Type"),

@@ -22,7 +22,7 @@ nodes must be able to access it. Conda and container profiles are also available
 For `-profile docker`, build the image used by both parsers and the loader:
 
 ```bash
-docker build -t ensembl-phenotypes-loader:0.1.0 modules/local/load
+docker build -t ensembl-phenotypes:0.1.0 modules/local/load
 ```
 
 For Singularity, convert this image to a SIF and set its absolute path as the
@@ -150,7 +150,8 @@ parsing results. Database loading always runs again.
 
 `<species>` is `species_production_name`. G2P adds an assembly directory when
 one is configured. Each parser also writes `warnings.txt` and `rejections.txt`.
-Downloaded G2P inputs are copied to `<outdir>/g2p/inputs/`.
+Downloaded inputs are copied to `<outdir>/clinvar/inputs/` or
+`<outdir>/g2p/inputs/`.
 
 The first JSONL line contains shared `metadata`: source, genome context and
 import provenance, including both input filenames/checksums, pipeline date and

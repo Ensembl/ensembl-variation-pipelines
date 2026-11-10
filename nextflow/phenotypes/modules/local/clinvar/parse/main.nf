@@ -3,7 +3,7 @@ process PARSE_CLINVAR {
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
-    container 'ensembl-phenotypes-loader:0.1.0'
+    container 'ensembl-phenotypes:0.1.0'
 
     input:
     tuple val(meta), path(rcv_xml), path(vcv_xml), val(genome_context)

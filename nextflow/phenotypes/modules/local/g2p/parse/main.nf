@@ -3,7 +3,7 @@ process PARSE_G2P {
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
-    container 'ensembl-phenotypes-loader:0.1.0'
+    container 'ensembl-phenotypes:0.1.0'
 
     input:
     tuple val(meta), path(data_file), path(gene_id_mapping), val(genome_context)

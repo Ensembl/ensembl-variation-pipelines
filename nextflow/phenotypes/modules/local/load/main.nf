@@ -7,7 +7,7 @@ process LOAD_PHENOTYPES {
     maxForks 1
 
     conda "${moduleDir}/environment.yml"
-    container 'ensembl-phenotypes-loader:0.1.0'
+    container 'ensembl-phenotypes:0.1.0'
 
     input:
     tuple val(meta), path(records)

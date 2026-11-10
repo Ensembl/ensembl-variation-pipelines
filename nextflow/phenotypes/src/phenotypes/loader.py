@@ -82,8 +82,8 @@ def read_metadata(path: Path) -> dict:
 class PhenotypeLoader:
     """Write phenotype records through a caller-owned cursor and transaction.
 
-    Track inserted rows in created. Resolve reusable entities with lookup
-    methods and persist complete associations through record and source_report.
+    Track inserted rows in created. Reuse database rows by exact lookup keys
+    and insert associations through record and source_report.
     """
 
     def __init__(self, cursor: psycopg.Cursor) -> None:
@@ -156,7 +156,7 @@ class PhenotypeLoader:
         })
 
     def target_entity(self, entity: dict, context_id: int) -> int:
-        """Resolve an entity ID and link it to the snapshot context.
+        """Find or create an entity row by its supplied identifier and link its context.
 
         Raise ValueError if the entity supplies its own genome_contexts or lacks
         required identifier, type or label text.
@@ -297,8 +297,8 @@ class PhenotypeLoader:
     def record(self, record: dict, source_id: int, run_id: int, context_id: int) -> None:
         """Validate and load one association record with its source reports.
 
-        Resolve the entity, phenotype, measurement and somatic association in
-        context_id, attaching reports to source_id and run_id. Require nonempty
+        Reuse or insert rows for the supplied entity, phenotype, measurement
+        and somatic association, attaching their context and source reports. Require nonempty
         reports and empty harmonisation fields. Validation and database errors
         propagate; the caller owns the transaction.
         """

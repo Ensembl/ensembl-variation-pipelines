@@ -93,6 +93,42 @@ class VariantEvidenceTests(unittest.TestCase):
     def assertion(self):
         return source_record().find("ReferenceClinVarAssertion")
 
+    def test_allele_evidence_is_optional_for_all_supported_representations(self):
+        for representation in ("Variant", "Haplotype", "Haplotype, single variant"):
+            with self.subTest(representation=representation):
+                assertion = self.assertion()
+                measure_set = assertion.find("MeasureSet")
+                measure_set.set("Type", representation)
+                ET.SubElement(measure_set, "XRef", DB="ClinGen", ID="CA100")
+                measure = measure_set.find("Measure")
+                ET.SubElement(measure, "XRef", DB="OMIM", ID="103600.0054", Type="Allelic variant")
+                ET.SubElement(ET.SubElement(measure, "Name"), "ElementValue", Type="Preferred").text = "allele name"
+                ET.SubElement(measure.find("Name"), "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
+                ET.SubElement(measure, "CanonicalSPDI").text = "NC_000001.11:99:A:G"
+                ET.SubElement(measure, "CanonicalSPDI")
+                ET.SubElement(ET.SubElement(measure, "Name"), "ElementValue")
+                default = parse_variant(assertion, "GRCh38")
+                self.assertNotIn("allele_evidence", default)
+                enriched = parse_variant(assertion, "GRCh38", include_allele_evidence=True)
+                self.assertEqual(enriched.pop("allele_evidence"), [{
+                    "ordinal": 1,
+                    "allele_id": "10",
+                    "omim_ids": ["103600.0054"],
+                    "cross_references": [{
+                        "source": "RefSeq", "value": "NM_000001.1:c.100A>G", "type": None,
+                    }],
+                    "names": [{"type": "Preferred", "value": "allele name"}],
+                    "spdi": ["NC_000001.11:99:A:G"],
+                    "hgvs": [{
+                        "type": "HGVS, genomic, top level",
+                        "value": "NC_000001.11:g.100A>G",
+                    }],
+                }])
+                self.assertEqual(enriched.pop("variant_cross_references"), [{
+                    "source": "ClinGen", "value": "CA100", "type": None,
+                }])
+                self.assertEqual(enriched, default)
+
     def test_aliases_are_deduplicated_without_mixing_identifier_namespaces(self):
         # Repeated rsIDs must merge, while dbVar IDs remain distinct and unrelated references are ignored.
         assertion = self.assertion()

@@ -40,10 +40,13 @@ class ClinvarSynonymTests(unittest.TestCase):
         self.assertEqual(synonyms["SPDI", "NC_000019.10:13235692:C:T"], "ClinVar")
         self.assertEqual(synonyms["HGVS", "NM_001127222.2:c.4988G>A"], "ClinVar")
         self.assertEqual(synonyms["dbSNP", "rs121908247"], "dbSNP")
+        self.assertEqual(synonyms["ClinGen", "CA185906"], "ClinGen")
+        self.assertEqual(synonyms["RefSeq", "NM_001127222.2:c.4988G>A"], "RefSeq")
         self.assertIn(("name", "NM_001127222.2(CACNA1A):c.4988G>A (p.Arg1663Gln)"), synonyms)
         self.assertEqual(record["source_report"]["rcv_accession"], "RCV000755049.9")
         self.assertEqual(record["source_report"]["source"], "ClinVar")
-        self.assertNotIn(("ClinVar", "RCV000755049.9"), synonyms)
+        self.assertEqual(synonyms["ClinVar", "RCV000755049.9"], "ClinVar")
+        self.assertFalse(any(item["value"].startswith("SCV") for item in record["synonyms"]))
 
     def test_duplicate_values_merge_reported_types_without_losing_source(self):
         # The same reported HGVS may appear under multiple annotation types.
@@ -58,27 +61,60 @@ class ClinvarSynonymTests(unittest.TestCase):
         self.assertEqual(len(hgvs), 1)
         self.assertEqual(hgvs[0]["reported_types"], ["HGVS, genomic, top level", "HGVS, genomic, RefSeq"])
 
+  
     def test_component_synonyms_do_not_become_haplotype_aliases(self):
         # Components must keep separate identifiers and representations under one parent.
         root = ET.parse(SOURCE_DATA / "rcv.xml").getroot()
         measure_set = root.find("ClinVarSet/ReferenceClinVarAssertion/MeasureSet")
         measure_set.set("Type", "Haplotype")
         first = measure_set.find("Measure")
+        ET.SubElement(measure_set, "XRef", DB="ClinGen", ID="CA100")
+        ET.SubElement(measure_set, "XRef", DB="ClinGen", ID="CA100")
+        ET.SubElement(measure_set, "XRef", DB="ClinGen")
+        ET.SubElement(measure_set, "XRef", DB="RefSeq", ID=" ")
+        ET.SubElement(first, "XRef", DB="ClinGen", ID="CA101")
+        ET.SubElement(first, "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
+        ET.SubElement(first, "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
+        ET.SubElement(first, "XRef", DB="OMIM", ID="103600.0054", Type="Allelic variant")
+        ET.SubElement(first, "XRef", DB="OMIM", ID="103600.0054", Type="Allelic variant")
+        ET.SubElement(first, "XRef", DB="OMIM")
+        ET.SubElement(first, "XRef", DB="OMIM", ID=" ")
         ET.SubElement(first, "CanonicalSPDI").text = "NC_000001.11:99:A:G"
         second = copy.deepcopy(first)
         second.set("ID", "12")
         second.find("XRef").set("ID", "12345")
+        for xref in second.findall("XRef[@DB='OMIM']"):
+            xref.set("ID", "103600.0055")
+        second.find("XRef[@DB='ClinGen']").set("ID", "CA102")
+        for xref in second.findall("XRef[@DB='RefSeq']"):
+            xref.set("ID", "NM_000001.1:c.200C>T")
         second.find("AttributeSet/Attribute").text = "NM_000001.1:c.200C>T"
         second.find("CanonicalSPDI").text = "NC_000001.11:199:C:T"
         measure_set.append(second)
         _, rows = self.extract_evidence(root=root)
         parent, first, second = synonym_records(rows[1], "ClinVar")
-        self.assertEqual([item["value"] for item in parent["synonyms"]], ["VCV000000001.1"])
+        self.assertEqual([item["value"] for item in parent["synonyms"]], ["VCV000000001.1", "RCV000000001.1", "CA100"])
         self.assertEqual(second["variant_identifier"], "ClinVar:Allele:12")
         self.assertEqual(second["parent_variant_identifier"], parent["variant_identifier"])
         self.assertEqual(second["component_ordinal"], 2)
         first_values = {item["value"] for item in first["synonyms"]}
         second_values = {item["value"] for item in second["synonyms"]}
+        self.assertNotIn("RCV000000001.1", first_values)
+        self.assertNotIn("RCV000000001.1", second_values)
+        self.assertIn("CA101", first_values)
+        self.assertNotIn("CA101", second_values)
+        self.assertIn("CA102", second_values)
+        self.assertNotIn("CA102", first_values)
+        self.assertNotIn("CA100", first_values | second_values)
+        self.assertIn("NM_000001.1:c.100A>G", first_values)
+        self.assertNotIn("NM_000001.1:c.100A>G", second_values)
+        self.assertEqual(sum(item["source"] == "RefSeq" for item in first["synonyms"]), 1)
+        self.assertIn("103600.0054", first_values)
+        self.assertNotIn("103600.0054", second_values)
+        self.assertIn("103600.0055", second_values)
+        self.assertNotIn("103600.0055", first_values)
+        self.assertEqual(sum(item["source"] == "OMIM" for item in first["synonyms"]), 1)
+        self.assertEqual(sum(item["source"] == "OMIM" for item in second["synonyms"]), 1)
         self.assertIn("NC_000001.11:99:A:G", first_values)
         self.assertNotIn("NC_000001.11:99:A:G", second_values)
         self.assertIn("NC_000001.11:199:C:T", second_values)
@@ -92,7 +128,7 @@ class ClinvarSynonymTests(unittest.TestCase):
         evidence["reported_variant"]["alternative_identifiers"] = []
         record = synonym_records(evidence, "ClinVar")[0]
         self.assertEqual({item["type"] for item in record["synonyms"]}, {"ClinVar"})
-        self.assertEqual(len(record["synonyms"]), 2)  # VCV accession and allele ID.
+        self.assertEqual(len(record["synonyms"]), 3)  # VCV, RCV and allele ID.
 
     def test_extract_synonyms_preserves_metadata_and_phenotype_ineligible_records(self):
         # The second shared fixture record has no phenotype but retains synonym evidence.

@@ -149,6 +149,12 @@ input checksum, source statuses, RCV/VCV identifiers, allele IDs, reported names
 HGVS and canonical SPDI (in each record's `allele_evidence`),
 dbSNP/dbVar references, requested-assembly placements, genes, haplotype components
 and SCV accessions. It applies no phenotype or classification eligibility filter.
+The extractor enables `parse_variant(..., include_allele_evidence=True)` to
+collect names, SPDI, HGVS and direct Measure OMIM cross-reference IDs during
+the existing Measure traversal. It also retains ClinGen and RefSeq
+cross-references from MeasureSet and allele-level XRef elements, including
+those under Name and AttributeSet. This option
+defaults to false, so phenotype callers omit the extra extraction and output.
 It does not generate HGVS/SPDI, lift coordinates, resolve dbSNP merge chains,
 or establish biological equivalence. Non-current statuses are retained as
 evidence for downstream policy. Unsupported representations and absent assembly

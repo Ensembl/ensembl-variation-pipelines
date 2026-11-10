@@ -14,7 +14,10 @@ from variation_sources.context import validate_clinvar_context
 from variation_sources.provenance import git_revision, input_file_provenance
 
 
-def reported_synonyms(variant: dict, allele: dict | None) -> list[dict]:
+def reported_synonyms(
+    variant: dict, allele: dict | None, *, rcv_accession: str | None = None,
+    cross_references: list[dict] | None = None,
+) -> list[dict]:
     """Retain source spellings and namespaces; deduplicate within one variant.
 
     ClinVar reports the names, HGVS and canonical SPDI. Cross-references retain
@@ -38,6 +41,10 @@ def reported_synonyms(variant: dict, allele: dict | None) -> list[dict]:
             item["reported_types"].append(reported_type)
 
     add(variant["identifier"], "ClinVar", "ClinVar")
+    add(rcv_accession, "ClinVar", "ClinVar")
+    for xref in [*(cross_references or []), *(allele.get("cross_references", []) if allele else [])]:
+        if xref["source"] in {"ClinGen", "RefSeq"}:
+            add(xref["value"], xref["source"], xref["source"], xref.get("type"))
     for identifier in variant["alternative_identifiers"]:
         if re.fullmatch(r"rs[0-9]+", identifier):
             add(identifier, "dbSNP", "dbSNP")
@@ -48,6 +55,8 @@ def reported_synonyms(variant: dict, allele: dict | None) -> list[dict]:
     if allele is not None:
         if allele.get("allele_id"):
             add(f"ClinVar:Allele:{allele['allele_id']}", "ClinVar", "ClinVar")
+        for identifier in allele.get("omim_ids", []):
+            add(identifier, "OMIM", "OMIM")
         for name in allele.get("names", []):
             add(name["value"], "name", "ClinVar", name.get("type"))
         for hgvs in allele.get("hgvs", []):
@@ -62,8 +71,8 @@ def synonym_records(
 ) -> list[dict]:
     """Keep allele synonyms on their own entity, including haplotype members.
 
-    RCV and SCV accessions describe evidence, not variant aliases. Preserve
-    statuses so downstream loading can apply its own current-record policy.
+    Include the reference RCV accession on the reported entity, keeping it off
+    haplotype members. Preserve statuses for downstream current-record policy.
     """
     variant = evidence["reported_variant"]
     alleles = evidence["allele_evidence"]
@@ -90,7 +99,11 @@ def synonym_records(
             "component_ordinal": allele["ordinal"] if allele and parent else None,
             "parent_variant_identifier": parent,
             "locations": entity["locations"],
-            "synonyms": reported_synonyms(entity, allele),
+            "synonyms": reported_synonyms(
+                entity, allele,
+                rcv_accession=evidence["rcv_accession"] if parent is None else None,
+                cross_references=evidence.get("variant_cross_references", []) if parent is None else None,
+            ),
             "source_report": source_report,
         }
 

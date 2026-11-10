@@ -70,40 +70,14 @@ def extract(
                     raise RejectedRecord("missing_rcv_accession")
                 warnings = []
                 variant = parse_variant(
-                    assertion, context["assembly"], warnings=warnings
+                    assertion, context["assembly"], warnings=warnings,
+                    include_allele_evidence=True,
                 )
-                measures = assertion.findall("MeasureSet/Measure")
                 evidence = {
                     "rcv_accession": rcv,
                     "record_status": text(element.find("RecordStatus")),
                     "assertion_status": text(assertion.find("RecordStatus")),
                     **variant,
-                    "allele_evidence": [
-                        {
-                            "ordinal": ordinal,
-                            "allele_id": measure.get("ID"),
-                            "names": [
-                                {"type": name.get("Type"), "value": value}
-                                for name in measure.findall("Name/ElementValue")
-                                if (value := text(name)) is not None
-                            ],
-                            "spdi": [
-                                value for element in measure.findall("CanonicalSPDI")
-                                if (value := text(element)) is not None
-                            ],
-                            "hgvs": [
-                                {
-                                    "type": attribute.get("Type"),
-                                    "value": text(attribute),
-                                }
-                                for attribute in measure.findall(
-                                    "AttributeSet/Attribute"
-                                )
-                                if (attribute.get("Type") or "").startswith("HGVS")
-                            ],
-                        }
-                        for ordinal, measure in enumerate(measures, start=1)
-                    ],
                     "submissions": [
                         {
                             "scv_accession": versioned_accession(

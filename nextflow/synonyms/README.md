@@ -98,12 +98,16 @@ Reported synonyms include:
 | `SPDI` | ClinVar | Reported `CanonicalSPDI` values |
 | `dbSNP` | dbSNP | Reported rsIDs, such as `rs121908247` |
 | `name` | ClinVar | Preferred and alternate variant names |
-| `ClinVar` | ClinVar | Source variant and allele identifiers |
+| `ClinVar` | ClinVar | Source variant and allele identifiers, plus the reference assertion's versioned RCV accession |
+| `OMIM` | OMIM | IDs from direct `Measure/XRef` elements with `DB="OMIM"` |
+| `ClinGen` | ClinGen | IDs from `MeasureSet/XRef`, `Measure/XRef`, `Measure/Name/XRef` or `Measure/AttributeSet/XRef` with `DB="ClinGen"` |
+| `RefSeq` | RefSeq | IDs from the same paths with `DB="RefSeq"`, retaining the full reported variant description |
 | `dbVar` | dbVar | Reported dbVar cross-references, when present |
 
 The enclosing `source_report.source` identifies ClinVar as the evidence
-provider even for a dbSNP cross-reference. RCV and SCV accessions are provenance,
-not variant synonyms. Equal value/type/source triples are deduplicated within
+provider even for a dbSNP or OMIM cross-reference. The reference RCV accession
+is also a synonym of the reported variant (the parent for haplotypes); SCV
+accessions remain provenance. Equal value/type/source triples are deduplicated within
 each entity, retaining distinct annotation types. Observations from different
 RCVs remain separate, preserving their provenance.
 
@@ -117,7 +121,12 @@ HGVS and SPDI are retained as reported, including transcript or assembly
 accessions that differ from the requested placement context. They are not
 generated, normalised, lifted or asserted to be equivalent. Missing optional
 representations produce no placeholder synonyms. Haplotype member HGVS, SPDI
-and rsIDs stay on the member and are never assigned to the parent.
+and rsIDs stay on the member and are never assigned to the parent. OMIM IDs
+also stay on their member. Gene and disease OMIM cross-references are excluded.
+ClinGen and RefSeq cross-references on a MeasureSet stay on the parent;
+cross-references on a Measure, its Name or its AttributeSet stay on the allele. HGVS attributes
+remain separate ClinVar observations even when a RefSeq cross-reference has
+the same text. RefSeq sequence accessions in placements are not variant synonyms.
 
 Non-current source statuses are retained for downstream policy. Unsupported
 XML representations are reported by shared extraction; unusable identifiers or

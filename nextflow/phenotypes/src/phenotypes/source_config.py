@@ -18,13 +18,7 @@ def validate_g2p_context(context: dict) -> dict:
 
 
 def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
-    config = _load_source_config(path, source_rules={
+    return _load_source_config(path, source_rules={
         "ClinVar": (("rcv", "vcv"), validate_clinvar_context),
         "G2P": (("data", "gene_id_mapping"), validate_g2p_context),
     })
-    settings = config["sources"].get("G2P")
-    if settings is not None:
-        version = settings.get("source_version")
-        if version is not None and (not isinstance(version, str) or not version.strip()):
-            raise ValueError("G2P source_version must be a non-empty string or null")
-    return config

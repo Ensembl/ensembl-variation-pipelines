@@ -10,7 +10,7 @@ workflow G2P {
     python_source = file("${projectDir}/src", checkIfExists: true)
     shared_source = file("${projectDir}/../shared/src", checkIfExists: true)
     downloads = [
-        tuple([id: 'g2p_all', extension: 'csv'], 'data', 'https://www.ebi.ac.uk/gene2phenotype/api/panel/all/download/'),
+        tuple([id: 'allG2P', extension: 'csv.gz'], 'data', 'https://ftp.ebi.ac.uk/pub/databases/gene2phenotype/G2P_data_downloads/'),
         tuple([id: 'hgnc_complete_set', extension: 'txt'], 'gene_id_mapping', 'https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt'),
     ].findAll { meta, input_name, url -> source_settings.inputs[input_name] == null }
     if (downloads) {
@@ -28,8 +28,7 @@ workflow G2P {
             def meta = [id: "g2p_${context.species_production_name}${assembly_suffix}".toString(), source_name: source_settings.source_name] + context
             tuple(meta, data_file, gene_id_mapping, context)
         }
-    source_metadata = [source_name: source_settings.source_name, source_version: source_settings.get('source_version')]
-    PARSE_G2P(processing_inputs, channel.value(source_metadata), python_source, source_contents(python_source), shared_source, source_contents(shared_source))
+    PARSE_G2P(processing_inputs, channel.value(source_settings.source_name), python_source, source_contents(python_source), shared_source, source_contents(shared_source))
 
     emit:
     records = PARSE_G2P.out.records

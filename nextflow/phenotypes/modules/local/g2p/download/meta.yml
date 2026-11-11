@@ -1,12 +1,12 @@
 name: g2p_download
-description: "Download a G2P CSV or HGNC mapping file with retries."
+description: "Download the latest dated G2P release or an HGNC mapping file with retries."
 keywords:
   - g2p
   - genes
   - source processing
 tools:
   - curl:
-      description: "Download a G2P CSV or HGNC mapping file with retries."
+      description: "Download the latest dated G2P release or an HGNC mapping file with retries."
       documentation: https://curl.se/docs/
       licence: ["curl"]
 input:
@@ -18,7 +18,7 @@ input:
         description: "Input key, either data or gene_id_mapping."
     - "url":
         type: string
-        description: "Complete URL for the selected input file."
+        description: "G2P release-directory URL for data, or complete HGNC file URL for gene_id_mapping."
 output:
   files:
     - - "meta":
@@ -27,9 +27,9 @@ output:
       - "input_name":
           type: string
           description: "Input key identifying the downloaded file."
-      - "*.{csv,txt}":
+      - "*.{csv.gz,txt}":
           type: file
-          description: "Downloaded CSV or TSV input file."
+          description: "Dated G2P CSV.GZ or HGNC TSV input file."
           ontologies: []
   versions_curl:
     - - "${task.process}":

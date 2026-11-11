@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import gzip
 import json
 import re
 import sys
@@ -52,14 +53,14 @@ def _check_columns(reader: csv.DictReader, required: set[str]) -> None:
         raise ValueError("Duplicate CSV column names")
 
 
-def read_source_config(path: Path) -> tuple[str, dict, dict, str | None]:
+def read_source_config(path: Path) -> tuple[str, dict, dict]:
     settings = load_source_config(path)["sources"].get("G2P")
     if settings is None:
         raise ValueError("Source configuration must contain G2P")
     if len(settings["contexts"]) != 1:
         raise ValueError("Standalone G2P parsing requires exactly one context")
     inputs = {name: Path(value) for name, value in settings["inputs"].items() if value is not None}
-    return settings["source_name"], inputs, settings["contexts"][0], settings.get("source_version")
+    return settings["source_name"], inputs, settings["contexts"][0]
 
 
 def read_gene_mapping(path: Path) -> dict[str, set[str]]:
@@ -184,17 +185,15 @@ def parse_record(row: dict, gene_mapping: dict) -> tuple[dict, list[tuple[str, s
 
 def parse_g2p(
     data_path: Path, gene_id_mapping: Path, records_path: Path, *,
-    source_name: str, genome_context: dict, source_version: str | None = None,
+    source_name: str, genome_context: dict,
     pipeline_directory: Path | None = None,
 ) -> None:
     started = monotonic()
     context = validate_g2p_context(genome_context)
     if not isinstance(source_name, str) or not source_name.strip():
         raise ValueError("Source name must be a non-empty string")
-    if source_version is not None and (
-        not isinstance(source_version, str) or not source_version.strip()
-    ):
-        raise ValueError("Source version must be a non-empty string or null")
+    version = re.fullmatch(r"allG2P_(\d{4}-\d{2}-\d{2})\.csv\.gz", data_path.name)
+    source_version = date.fromisoformat(version[1]).isoformat() if version else None
     source = source_name
     inputs = {"data": data_path, "gene_id_mapping": gene_id_mapping}
     outputs = [records_path, records_path.parent / "warnings.txt", records_path.parent / "rejections.txt"]
@@ -205,6 +204,12 @@ def parse_g2p(
         raise ValueError("Output paths must not overwrite an input or the parser")
     run_date = date.today().isoformat()
     print(f"[Parsing {source}] Starting: {inputs['data']}", file=sys.stderr, flush=True)
+    if re.fullmatch(r"G2P_all_\d{4}-\d{2}-\d{2}\.csv(?:\.gz)?", data_path.name):
+        print(
+            f"[Parsing {source}] WARNING: {data_path.name} is a website download and "
+            "does not provide a dated release version; source_version will be null.",
+            file=sys.stderr, flush=True,
+        )
     print(f"[Parsing {source}] Reading gene mapping: {inputs['gene_id_mapping']}", file=sys.stderr, flush=True)
     gene_mapping = read_gene_mapping(inputs["gene_id_mapping"])
     input_files = input_file_provenance(inputs.values())
@@ -219,7 +224,8 @@ def parse_g2p(
         },
     }
     n_seen = n_accepted = n_rejected = n_warnings = 0
-    with inputs["data"].open(encoding="utf-8-sig", newline="") as input_handle:
+    open_data = gzip.open if data_path.suffix == ".gz" else open
+    with open_data(data_path, "rt", encoding="utf-8-sig", newline="") as input_handle:
         reader = csv.DictReader(input_handle, strict=True)
         _check_columns(reader, G2P_COLUMNS)
         records_path.parent.mkdir(parents=True, exist_ok=True)
@@ -276,7 +282,6 @@ def main() -> int:
     parser.add_argument("--data", type=Path)
     parser.add_argument("--gene-id-mapping", type=Path)
     parser.add_argument("--source-name")
-    parser.add_argument("--source-version")
     parser.add_argument("--pipeline-directory", type=Path)
     output = parser.add_mutually_exclusive_group(required=True)
     output.add_argument("--outdir", type=Path)
@@ -284,11 +289,11 @@ def main() -> int:
     args = parser.parse_args()
     try:
         if args.source_config:
-            if args.source_name is not None or args.source_version is not None:
-                raise ValueError("Use the source name/version from --source-config, or supply --genome-context")
-            source, inputs, context, version = read_source_config(args.source_config)
+            if args.source_name is not None:
+                raise ValueError("Use the source name from --source-config, or supply --genome-context")
+            source, inputs, context = read_source_config(args.source_config)
         else:
-            source, inputs, context, version = args.source_name, {}, args.genome_context, args.source_version
+            source, inputs, context = args.source_name, {}, args.genome_context
         data_path = args.data or inputs.get("data")
         gene_id_mapping = args.gene_id_mapping or inputs.get("gene_id_mapping")
         if data_path is None or gene_id_mapping is None:
@@ -300,7 +305,7 @@ def main() -> int:
             raise ValueError("Output paths must not overwrite the source config")
         parse_g2p(
             data_path, gene_id_mapping, records_path,
-            source_name=source, genome_context=context, source_version=version,
+            source_name=source, genome_context=context,
             pipeline_directory=args.pipeline_directory,
         )
     except (OSError, ValueError, csv.Error) as error:

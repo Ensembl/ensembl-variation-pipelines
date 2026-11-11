@@ -16,7 +16,7 @@ input:
       description: Caller metadata with id, source_name and processing context; passed through unchanged.
   - data_file:
       type: file
-      description: G2P all-records CSV.
+      description: G2P CSV or CSV.GZ; only allG2P_YYYY-MM-DD.csv.gz supplies a release version.
       ontologies: []
   - gene_id_mapping:
       type: file
@@ -25,9 +25,9 @@ input:
   - genome_context:
       type: map
       description: Human processing context; assembly, assembly_uuid and genome_uuid may be null.
-- - source_metadata:
-      type: map
-      description: Source name and optional source_version from the validated configuration.
+- - source_name:
+      type: string
+      description: Source name from the validated configuration.
 - - python_source:
       type: directory
       description: Phenotype Python src directory, staged as phenotype_src.

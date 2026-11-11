@@ -7,7 +7,7 @@ process PARSE_G2P {
 
     input:
     tuple val(meta), path(data_file), path(gene_id_mapping), val(genome_context)
-    val source_metadata
+    val source_name
     path python_source, stageAs: 'phenotype_src'
     val python_source_contents
     path shared_source, stageAs: 'shared_src'
@@ -27,9 +27,8 @@ process PARSE_G2P {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: meta.id
-    def source_argument = "'" + source_metadata.source_name.replace("'", "'\"'\"'") + "'"
+    def source_argument = "'" + source_name.replace("'", "'\"'\"'") + "'"
     def context_argument = "'" + groovy.json.JsonOutput.toJson(genome_context).replace("'", "'\"'\"'") + "'"
-    def version_argument = source_metadata.source_version == null ? '' : "--source-version '" + source_metadata.source_version.replace("'", "'\"'\"'") + "'"
     """
     PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="${python_source}:${shared_source}" \\
     python -m phenotypes.g2p.g2p_parser \\
@@ -38,7 +37,6 @@ process PARSE_G2P {
         --gene-id-mapping "${gene_id_mapping}" \\
         --source-name ${source_argument} \\
         --genome-context ${context_argument} \\
-        ${version_argument} \\
         --records '${prefix}_output.jsonl'
     """
 

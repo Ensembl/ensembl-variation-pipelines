@@ -286,12 +286,21 @@ Example G2P-only config; null inputs download both files:
 
 | Input | Default download |
 | --- | --- |
-| `data` | [G2P all-records CSV](https://www.ebi.ac.uk/gene2phenotype/api/panel/all/download/) |
+| `data` | [Latest dated G2P CSV.GZ](https://ftp.ebi.ac.uk/pub/databases/gene2phenotype/G2P_data_downloads/) |
 | `gene_id_mapping` | [HGNC complete-set TSV](https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt) |
 
 Either input can use a local path while the other downloads. G2P requires a
-human context; assembly and UUIDs are optional. Supply `source_version` only
-when a real dataset version is known.
+human context; assembly and UUIDs are optional.
+
+The downloader selects the newest dated FTP directory and keeps the filename,
+for example `2026_10_28/allG2P_2026-10-28.csv.gz`. The parser accepts CSV and
+CSV.GZ. Only FTP filenames matching `allG2P_YYYY-MM-DD.csv.gz` supply a release
+version: `allG2P_2026-10-28.csv.gz` gives `import_run.source_version = "2026-10-28"`.
+The parent directory is not used. Website downloads such as
+`G2P_all_2026-11-11.csv` produce a log warning and a null version; their filename
+date is not a release version. Other filenames also give a null version.
+No manual version setting is needed. `-resume` reuses the previously downloaded
+release; start a new run without it to select a newer release.
 
 The parser keeps one report per G2P assertion, including disputed/refuted
 confidence. It uses HGNC IDs to map genes and retains disease names/mappings,

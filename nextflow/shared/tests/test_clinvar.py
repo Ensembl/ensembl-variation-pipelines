@@ -93,6 +93,43 @@ class VariantEvidenceTests(unittest.TestCase):
     def assertion(self):
         return source_record().find("ReferenceClinVarAssertion")
 
+    def test_allele_evidence_is_optional_for_all_supported_representations(self):
+        for representation in ("Variant", "Haplotype", "Haplotype, single variant"):
+            with self.subTest(representation=representation):
+                assertion = self.assertion()
+                measure_set = assertion.find("MeasureSet")
+                measure_set.set("Type", representation)
+                ET.SubElement(measure_set, "XRef", DB="ClinGen", ID="CA100")
+                ET.SubElement(measure_set, "XRef", DB="RefSeq", ID="NC_000001.11:g.100A>G")
+                measure = measure_set.find("Measure")
+                ET.SubElement(measure, "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
+                ET.SubElement(measure.find("AttributeSet"), "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
+                ET.SubElement(measure, "XRef", DB="OMIM", ID="103600.0054", Type="Allelic variant")
+                ET.SubElement(ET.SubElement(measure, "Name"), "ElementValue", Type="Preferred").text = "allele name"
+                ET.SubElement(measure.find("Name"), "XRef", DB="RefSeq", ID="NM_000001.1:c.100A>G")
+                ET.SubElement(measure, "CanonicalSPDI").text = "NC_000001.11:99:A:G"
+                ET.SubElement(measure, "CanonicalSPDI")
+                ET.SubElement(ET.SubElement(measure, "Name"), "ElementValue")
+                default = parse_variant(assertion, "GRCh38")
+                self.assertNotIn("allele_evidence", default)
+                enriched = parse_variant(assertion, "GRCh38", include_allele_evidence=True)
+                self.assertEqual(enriched.pop("allele_evidence"), [{
+                    "ordinal": 1,
+                    "allele_id": "10",
+                    "omim_ids": ["103600.0054"],
+                    "cross_references": [],
+                    "names": [{"type": "Preferred", "value": "allele name"}],
+                    "spdi": ["NC_000001.11:99:A:G"],
+                    "hgvs": [{
+                        "type": "HGVS, genomic, top level",
+                        "value": "NC_000001.11:g.100A>G",
+                    }],
+                }])
+                self.assertEqual(enriched.pop("variant_cross_references"), [{
+                    "source": "ClinGen", "value": "CA100", "type": None,
+                }])
+                self.assertEqual(enriched, default)
+
     def test_aliases_are_deduplicated_without_mixing_identifier_namespaces(self):
         # Repeated rsIDs must merge, while dbVar IDs remain distinct and unrelated references are ignored.
         assertion = self.assertion()
@@ -257,8 +294,8 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual([row["reason"] for row in rejected], ["missing_reference_assertion", "missing_rcv_accession"])
         self.assertEqual(rows[1]["rcv_accession"], "RCV000000001.1")
 
-    def test_hgvs_remains_attached_to_its_allele_and_is_not_a_parent_alias(self):
-        # Synonym consumers need each HGVS expression linked to its own allele, even without phenotype data.
+    def test_reported_names_hgvs_and_spdi_remain_attached_to_their_allele(self):
+        # Each representation belongs to its allele, even when phenotype data is absent.
         root = ET.Element("ReleaseSet", Dated="2026-01-01")
         record = source_record()
         assertion = record.find("ReferenceClinVarAssertion")
@@ -266,10 +303,15 @@ class ExtractionTests(unittest.TestCase):
         assertion.remove(assertion.find("Classifications"))
         measure_set = assertion.find("MeasureSet")
         measure_set.set("Type", "Haplotype")
+        first = measure_set.find("Measure")
+        ET.SubElement(ET.SubElement(first, "Name"), "ElementValue", Type="Alternate").text = "first allele"
+        ET.SubElement(first, "CanonicalSPDI").text = "NC_000001.11:99:A:G"
         second = copy.deepcopy(measure_set.find("Measure"))
         second.set("ID", "11")
         second.find("XRef").set("ID", "999999")
         second.find("AttributeSet/Attribute").text = "NM_000001.1:c.200C>T"
+        second.find("Name/ElementValue").text = "second allele"
+        second.find("CanonicalSPDI").text = "NC_000001.11:199:C:T"
         measure_set.append(second)
         root.append(record)
         rows, rejected, summary = self.run_extract(root)
@@ -280,6 +322,9 @@ class ExtractionTests(unittest.TestCase):
         self.assertEqual([allele["allele_id"] for allele in evidence["allele_evidence"]], ["10", "11"])
         self.assertEqual([allele["ordinal"] for allele in evidence["allele_evidence"]], [1, 2])
         self.assertEqual(evidence["allele_evidence"][1]["hgvs"][0]["value"], "NM_000001.1:c.200C>T")
+        self.assertEqual(evidence["allele_evidence"][0]["spdi"], ["NC_000001.11:99:A:G"])
+        self.assertEqual(evidence["allele_evidence"][1]["spdi"], ["NC_000001.11:199:C:T"])
+        self.assertEqual(evidence["allele_evidence"][1]["names"], [{"type": "Alternate", "value": "second allele"}])
         self.assertEqual(evidence["reported_variant"]["components"][1]["alternative_identifiers"], ["rs999999"])
 
     def test_empty_release_has_metadata_and_zero_counts(self):

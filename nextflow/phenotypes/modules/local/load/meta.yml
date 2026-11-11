@@ -1,19 +1,19 @@
-name: clinvar_load
-description: Load a complete ClinVar phenotype snapshot into PostgreSQL.
+name: phenotypes_load
+description: Load a complete source phenotype snapshot into PostgreSQL.
 keywords:
-- clinvar
+- source snapshot
 - phenotypes
 - postgresql
 tools:
 - phenotypes:
-    description: Transactional loading of ClinVar phenotype source reports.
+    description: Transactional loading of phenotype source reports, one source at a time.
     documentation: https://github.com/Ensembl/ensembl-variation-pipelines
     licence:
     - Apache-2.0
 input:
 - - meta:
       type: map
-      description: Caller metadata with id; passed through unchanged.
+      description: Caller metadata with id, source_name and processing context; passed through unchanged.
   - records:
       type: file
       description: Complete phenotype JSONL snapshot with import metadata.
@@ -28,20 +28,14 @@ input:
 - - python_source:
       type: directory
       description: Phenotype Python src directory, staged as phenotype_src.
-- - python_source_contents:
-      type: list
-      description: Sorted phenotype source filenames and contents.
 - - shared_source:
       type: directory
       description: Shared Python src directory, staged as shared_src.
-- - shared_source_contents:
-      type: list
-      description: Sorted shared source filenames and contents.
 output:
   summary:
   - - meta:
         type: map
-        description: Caller metadata with id; passed through unchanged.
+        description: Caller metadata with id, source_name and processing context; passed through unchanged.
     - '*_load_summary.json':
         type: file
         description: Committed source snapshot counts and loading provenance.

@@ -1,21 +1,20 @@
-process LOAD_CLINVAR {
+process LOAD_PHENOTYPES {
     tag "${meta.id}"
 
     label 'process_medium'
     // Database state cannot be restored from a cached task result.
     cache false
+    maxForks 1
 
     conda "${moduleDir}/environment.yml"
-    container 'ensembl-phenotypes-clinvar-loader:0.1.0'
+    container 'ensembl-phenotypes:0.1.0'
 
     input:
     tuple val(meta), path(records)
     path env_file, stageAs: 'database.env'
     val replace_existing
     path python_source, stageAs: 'phenotype_src'
-    val python_source_contents
     path shared_source, stageAs: 'shared_src'
-    val shared_source_contents
 
     output:
     tuple val(meta), path("${task.ext.prefix ?: meta.id}_load_summary.json"), emit: summary
@@ -37,7 +36,7 @@ process LOAD_CLINVAR {
     def replace_argument = replace_existing ? '--replace' : ''
     """
     PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="${python_source}:${shared_source}" \\
-    python -m phenotypes.clinvar.loader \\
+    python -m phenotypes.loader \\
         ${args} \\
         --input "${records}" \\
         --env-file "${env_file}" \\

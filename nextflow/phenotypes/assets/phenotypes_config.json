@@ -1,0 +1,34 @@
+{
+	"sources": {
+		"ClinVar": {
+			"inputs": {
+				"rcv": null,
+				"vcv": null
+			},
+			"contexts": [
+				{
+					"species_taxonomy_id": 9606,
+					"species_production_name": "homo_sapiens",
+					"assembly": "GRCh38",
+					"assembly_uuid": null,
+					"genome_uuid": null
+				}
+			]
+		},
+		"G2P": {
+			"inputs": {
+				"data": null,
+				"gene_id_mapping": null
+			},
+			"contexts": [
+				{
+					"species_taxonomy_id": 9606,
+					"species_production_name": "homo_sapiens",
+					"assembly": null,
+					"assembly_uuid": null,
+					"genome_uuid": null
+				}
+			]
+		}
+	}
+}

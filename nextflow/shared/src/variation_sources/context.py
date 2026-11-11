@@ -1,4 +1,4 @@
-"""Validate genome and ClinVar processing contexts."""
+"""Validate genome and source processing contexts."""
 
 import re
 

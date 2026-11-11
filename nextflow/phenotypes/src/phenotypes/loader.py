@@ -17,7 +17,7 @@ from psycopg import sql
 from psycopg.types.json import Jsonb
 
 from variation_sources.database import database_config, postgresql_connection_args
-from variation_sources.source_config import validate_clinvar_context
+from variation_sources.context import validate_genome_context
 
 
 CACHE_SIZE = 10_000
@@ -56,7 +56,7 @@ def read_metadata(path: Path) -> dict:
             raise ValueError(f"{path}: first JSONL line must contain metadata")
         metadata = header["metadata"]
         required_text(metadata, "source")
-        validate_clinvar_context(metadata["genome_context"])
+        validate_genome_context(metadata["genome_context"])
         run = metadata["import_run"]
         if not isinstance(run, dict):
             raise ValueError(f"{path}: import_run must be an object")
@@ -79,11 +79,11 @@ def read_metadata(path: Path) -> dict:
     return metadata
 
 
-class ClinVarLoader:
+class PhenotypeLoader:
     """Write phenotype records through a caller-owned cursor and transaction.
 
-    Track inserted rows in created. Resolve reusable entities with lookup
-    methods and persist complete associations through record and source_report.
+    Track inserted rows in created. Reuse database rows by exact lookup keys
+    and insert associations through record and source_report.
     """
 
     def __init__(self, cursor: psycopg.Cursor) -> None:
@@ -120,13 +120,13 @@ class ClinVarLoader:
 
     def context(
         self, taxonomy_id: int, production_name: str,
-        assembly: str, assembly_uuid: str | None, genome_uuid: str | None,
+        assembly: str | None, assembly_uuid: str | None, genome_uuid: str | None,
     ) -> int:
-        """Return an existing or new genome-context ID, matching nullable UUIDs."""
+        """Return an existing or new genome-context ID, matching nullable assembly and UUIDs."""
         row = self.cursor.execute(
             """SELECT genome_context_id FROM genome_context
                WHERE species_taxonomy_id = %s
-                 AND species_production_name = %s AND assembly = %s
+                 AND species_production_name = %s AND assembly IS NOT DISTINCT FROM %s
                  AND assembly_uuid IS NOT DISTINCT FROM %s
                  AND genome_uuid IS NOT DISTINCT FROM %s
                LIMIT 1""",
@@ -156,7 +156,7 @@ class ClinVarLoader:
         })
 
     def target_entity(self, entity: dict, context_id: int) -> int:
-        """Resolve an entity ID and link it to the snapshot context.
+        """Find or create an entity row by its supplied identifier and link its context.
 
         Raise ValueError if the entity supplies its own genome_contexts or lacks
         required identifier, type or label text.
@@ -297,8 +297,8 @@ class ClinVarLoader:
     def record(self, record: dict, source_id: int, run_id: int, context_id: int) -> None:
         """Validate and load one association record with its source reports.
 
-        Resolve the entity, phenotype, measurement and somatic association in
-        context_id, attaching reports to source_id and run_id. Require nonempty
+        Reuse or insert rows for the supplied entity, phenotype, measurement
+        and somatic association, attaching their context and source reports. Require nonempty
         reports and empty harmonisation fields. Validation and database errors
         propagate; the caller owns the transaction.
         """
@@ -307,7 +307,7 @@ class ClinVarLoader:
         if not isinstance(reports, list) or not reports:
             raise ValueError("source_reports must be a non-empty list")
         if phenotype["mapped_terms"] != [] or phenotype["ontology_accessions"] != []:
-            raise ValueError("ClinVar ingestion requires empty harmonisation fields")
+            raise ValueError("Source ingestion requires empty harmonisation fields")
         name = required_text(phenotype, "phenotype_name")
         entity_id = self.target_entity(record["entity"], context_id)
         measurement_type = measured_entity_id = None
@@ -421,12 +421,12 @@ def replace_reports(cursor: psycopg.Cursor, source_id: int) -> dict[str, int]:
     the transaction; other sources' reports are retained.
     """
     cursor.execute(
-        """CREATE TEMP TABLE clinvar_previous_associations (
+        """CREATE TEMP TABLE previous_source_associations (
                phenotype_association_id BIGINT, phenotype_id BIGINT
            ) ON COMMIT DROP""",
     )
     cursor.execute(
-        """INSERT INTO pg_temp.clinvar_previous_associations
+        """INSERT INTO pg_temp.previous_source_associations
            SELECT DISTINCT a.phenotype_association_id, a.phenotype_id
            FROM phenotype_association a JOIN source_report r
              USING (phenotype_association_id) WHERE r.source_id = %s""",
@@ -436,7 +436,7 @@ def replace_reports(cursor: psycopg.Cursor, source_id: int) -> dict[str, int]:
     removed = {"n_source_reports_replaced": cursor.rowcount}
     cursor.execute(
         """DELETE FROM phenotype_association a
-           USING pg_temp.clinvar_previous_associations old
+           USING pg_temp.previous_source_associations old
            WHERE a.phenotype_association_id = old.phenotype_association_id
              AND NOT EXISTS (
                SELECT 1 FROM source_report r
@@ -445,7 +445,7 @@ def replace_reports(cursor: psycopg.Cursor, source_id: int) -> dict[str, int]:
     removed["n_orphan_associations_removed"] = cursor.rowcount
     cursor.execute(
         """DELETE FROM phenotype p
-           USING pg_temp.clinvar_previous_associations old
+           USING pg_temp.previous_source_associations old
            WHERE p.phenotype_id = old.phenotype_id
              AND NOT EXISTS (
                SELECT 1 FROM phenotype_association a WHERE a.phenotype_id = p.phenotype_id)""",
@@ -454,7 +454,7 @@ def replace_reports(cursor: psycopg.Cursor, source_id: int) -> dict[str, int]:
     return removed
 
 
-def load_clinvar(
+def load_phenotypes(
     input_path: Path, env_file: Path, *, replace: bool = False,
 ) -> dict[str, Any]:
     """Load a complete phenotype JSONL snapshot in one database transaction.
@@ -478,7 +478,7 @@ def load_clinvar(
         raise ValueError(f"Refusing protected schema {schema}")
     connection_args = postgresql_connection_args(settings)
     print(
-        f"[Loading ClinVar] Target: {settings['host']} / {settings['name']} / {schema}",
+        f"[Loading {source_name}] Target: {settings['host']} / {settings['name']} / {schema}",
         file=sys.stderr, flush=True,
     )
     started = monotonic()
@@ -505,7 +505,7 @@ def load_clinvar(
             ).fetchone()[0]
             if not locked:
                 raise ValueError("Another loader is using this schema; try again later")
-            loader = ClinVarLoader(cursor)
+            loader = PhenotypeLoader(cursor)
             row = cursor.execute(
                 "SELECT source_id FROM source WHERE name = %s", (source_name,),
             ).fetchone()
@@ -516,15 +516,15 @@ def load_clinvar(
             if existing:
                 if not replace:
                     raise ValueError(
-                        f"{existing:,} ClinVar reports already exist. Use --replace only "
+                        f"{existing:,} {source_name} reports already exist. Use --replace only "
                         "with the complete intended source snapshot.",
                     )
                 print(
-                    f"[Loading ClinVar] Replacing {existing:,} reports for the whole source",
+                    f"[Loading {source_name}] Replacing {existing:,} reports for the whole source",
                     file=sys.stderr, flush=True,
                 )
                 summary.update(replace_reports(cursor, source_id))
-            print(f"[Loading ClinVar] Reading {input_path}", file=sys.stderr, flush=True)
+            print(f"[Loading {source_name}] Reading {input_path}", file=sys.stderr, flush=True)
             run = header["import_run"]
             run_id = loader.insert("import_run", {
                 "source_name": run["source_name"],
@@ -536,7 +536,7 @@ def load_clinvar(
             context = header["genome_context"]
             context_id = loader.context(
                 context["species_taxonomy_id"], context["species_production_name"],
-                context["assembly"], context.get("assembly_uuid"),
+                context.get("assembly"), context.get("assembly_uuid"),
                 context.get("genome_uuid"),
             )
             with input_path.open(encoding="utf-8") as handle:
@@ -552,16 +552,16 @@ def load_clinvar(
                     except (ValueError, KeyError, TypeError, AttributeError, psycopg.Error) as error:
                         reports = record.get("source_reports") if isinstance(record, dict) else None
                         accession = ", ".join(
-                            report.get("source_accession") or "unknown RCV"
+                            str(report.get("source_accession") or "unknown source accession")
                             for report in reports if isinstance(report, dict)
-                        ) if isinstance(reports, list) else "unknown RCV"
+                        ) if isinstance(reports, list) else "unknown source accession"
                         raise ValueError(
                             f"{input_path}:{line_number} ({accession}): {error}",
                         ) from error
                     summary["n_records_loaded"] += 1
                     if summary["n_records_loaded"] % PROGRESS_INTERVAL == 0:
                         print(
-                            f"[Loading ClinVar] {summary['n_records_loaded']:,} records "
+                            f"[Loading {source_name}] {summary['n_records_loaded']:,} records "
                             f"written, not yet committed; elapsed {monotonic() - started:.0f}s",
                             file=sys.stderr, flush=True,
                         )
@@ -569,7 +569,7 @@ def load_clinvar(
                 raise ValueError("Refusing to commit an empty source snapshot")
             summary["n_rows_created_by_table"] = dict(sorted(loader.created.items()))
     print(
-        f"[Loading ClinVar] Committed {summary['n_records_loaded']:,} records; "
+        f"[Loading {source_name}] Committed {summary['n_records_loaded']:,} records; "
         f"elapsed {monotonic() - started:.0f}s",
         file=sys.stderr, flush=True,
     )
@@ -582,25 +582,25 @@ def main() -> int:
     Return one on loading or summary-write failure and zero on success.
     Report summary-write failures without undoing the committed database load.
     """
-    parser = argparse.ArgumentParser(description='Load phenotypes data into the phenotypes postgresql db\n')
+    parser = argparse.ArgumentParser(description="Load a phenotype source JSONL snapshot into PostgreSQL.")
     parser.add_argument("--input", type=Path, required=True, help="Complete source JSONL snapshot")
     parser.add_argument("--env-file", type=Path, default=Path(".env"))
-    parser.add_argument("--replace", action="store_true", help="Replace ALL existing ClinVar reports")
-    parser.add_argument("--summary", type=Path, default=Path("clinvar_load_summary.json"))
+    parser.add_argument("--replace", action="store_true", help="Replace ALL existing reports for the input source")
+    parser.add_argument("--summary", type=Path, default=Path("phenotypes_load_summary.json"))
     args = parser.parse_args()
     if args.summary.resolve() in {args.env_file.resolve(), args.input.resolve()}:
         parser.error("--summary must not overwrite an input file or .env")
     try:
-        summary = load_clinvar(args.input, args.env_file, replace=args.replace)
+        summary = load_phenotypes(args.input, args.env_file, replace=args.replace)
     except (OSError, ValueError, KeyError, TypeError, psycopg.Error) as error:
-        print(f"[Loading ClinVar] Failed: {error}", file=sys.stderr)
+        print(f"[Loading phenotypes] Failed: {error}", file=sys.stderr)
         return 1
     try:
         args.summary.parent.mkdir(parents=True, exist_ok=True)
         args.summary.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     except OSError as error:
         print(
-            f"[Loading ClinVar] Database committed, but summary could not be written: {error}",
+            f"[Loading {summary['source']}] Database committed, but summary could not be written: {error}",
             file=sys.stderr,
         )
         return 1

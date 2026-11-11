@@ -34,13 +34,21 @@ input:
       type: list
       description: Sorted shared source filenames and contents for cache invalidation.
 output:
-  records:
+  variant_records:
   - - meta:
         type: map
         description: Caller metadata; passed through unchanged.
-    - '*.synonyms.jsonl':
+    - '*.variant_synonyms.jsonl':
         type: file
-        description: Source-only synonym evidence with null internal identities, release provenance and component ownership.
+        description: Variant-level identifiers with source provenance and component links, without locations.
+        ontologies: []
+  allele_records:
+  - - meta:
+        type: map
+        description: Caller metadata; passed through unchanged.
+    - '*.variant_allele_synonyms.jsonl':
+        type: file
+        description: Allele identifiers and names with reported reference/alternate VCF sequences and source links.
         ontologies: []
   summary:
   - - meta:

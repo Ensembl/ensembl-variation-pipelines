@@ -18,7 +18,8 @@ workflow CLINVAR_SYNONYMS {
     EXTRACT_CLINVAR_SYNONYMS(extraction_inputs, python_source, source_contents(python_source), shared_source, source_contents(shared_source))
 
     emit:
-    records = EXTRACT_CLINVAR_SYNONYMS.out.records
+    variant_records = EXTRACT_CLINVAR_SYNONYMS.out.variant_records
+    allele_records = EXTRACT_CLINVAR_SYNONYMS.out.allele_records
     summary = EXTRACT_CLINVAR_SYNONYMS.out.summary
     rejections = EXTRACT_CLINVAR_SYNONYMS.out.rejections
 }

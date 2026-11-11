@@ -17,24 +17,34 @@ nextflow_pipeline {
             // One real CACNA1A record exercises SPDI, HGVS and rsID provenance.
             for (assembly in ['GRCh38', 'GRCh37']) {
                 def directory = "$outputDir/results/clinvar/homo_sapiens/$assembly"
-                def rows = file("$directory/synonyms/clinvar.synonyms.jsonl").readLines()
+                def rows = file("$directory/synonyms/clinvar.variant_synonyms.jsonl").readLines()
                 def parser = new groovy.json.JsonSlurper()
                 def header = parser.parseText(rows[0]).metadata
                 def record = parser.parseText(rows[1])
+                def alleleRows = file("$directory/synonyms/clinvar.variant_allele_synonyms.jsonl").readLines()
+                def allele = parser.parseText(alleleRows[1])
+                assert alleleRows.size() == 2
+                assert parser.parseText(alleleRows[0]).metadata.target_level == 'allele'
                 assert rows.size() == 2
                 assert header.genome_context.assembly == assembly
                 assert header.source_version == '2026-09-28'
                 assert header.artifact_kind == 'source_evidence'
-                assert header.synonym_schema_version == 2
+                assert header.synonym_schema_version == 1
                 assert record.source_report.rcv_accession == 'RCV000755049.9'
                 assert record.source_report.source_version == '2026-09-28'
                 assert record.synonyms.every {
                     it.resolution.state == 'source_only' &&
                     it.resolution.variant_id == null && it.resolution.variant_allele_id == null
                 }
-                assert record.synonyms.any { it.type == 'SPDI' && it.value == 'NC_000019.10:13235692:C:T' }
-                assert record.synonyms.any { it.type == 'HGVS' && it.value == 'NM_001127222.2:c.4988G>A' }
+                assert allele.synonyms.any { it.type == 'SPDI' && it.value == 'NC_000019.10:13235692:C:T' }
+                assert allele.synonyms.any { it.type == 'HGVS' && it.value == 'NM_001127222.2:c.4988G>A' }
                 assert record.synonyms.any { it.source == 'dbSNP' && it.value == 'rs121908247' }
+                assert !record.synonyms.any { it.source == 'ClinGen' }
+                assert allele.synonyms.any { it.source == 'ClinGen' && it.value == 'CA185906' }
+                assert allele.affected_allele.alternate == 'T'
+                assert !record.containsKey('locations')
+                assert !allele.containsKey('locations')
+                assert !allele.containsKey('component_ordinal')
                 assert !file("$directory/evidence").exists()
                 assert file("$directory/synonyms/rejections.jsonl").text == ''
             }
@@ -54,7 +64,8 @@ nextflow_pipeline {
             for (assembly in ['GRCh38', 'GRCh37']) {
                 def directory = "$outputDir/results/clinvar/homo_sapiens/$assembly"
                 assert !file("$directory/evidence").exists()
-                assert file("$directory/synonyms/clinvar.synonyms.jsonl").exists()
+                assert file("$directory/synonyms/clinvar.variant_synonyms.jsonl").exists()
+                assert file("$directory/synonyms/clinvar.variant_allele_synonyms.jsonl").exists()
                 assert file("$directory/synonyms/clinvar.summary.json").exists()
             }
         }

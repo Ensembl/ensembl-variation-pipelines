@@ -47,7 +47,8 @@ To run the Python extractor directly:
 uv run --project nextflow/synonyms python -m synonyms.clinvar.extract \
     --rcv-input /absolute/path/to/ClinVarRCVRelease.xml.gz \
     --genome-context '{"species_taxonomy_id":9606,"species_production_name":"homo_sapiens","assembly":"GRCh38","assembly_uuid":null}' \
-    --records "$PWD/synonyms/clinvar.synonyms.jsonl" \
+    --variant-records "$PWD/synonyms/clinvar.variant_synonyms.jsonl" \
+    --allele-records "$PWD/synonyms/clinvar.variant_allele_synonyms.jsonl" \
     --summary "$PWD/synonyms/clinvar.summary.json"
 ```
 
@@ -57,38 +58,15 @@ Each context is published under:
 
 ```text
 <outdir>/clinvar/<species>/<assembly>/
-  synonyms/clinvar.synonyms.jsonl
+  synonyms/clinvar.variant_synonyms.jsonl
+  synonyms/clinvar.variant_allele_synonyms.jsonl
   synonyms/clinvar.summary.json
   synonyms/rejections.jsonl
 ```
 
-
-
-- `variant_identifier`: an external source identifier, such as a versioned VCV
-  accession or shared component allele identifier; never an internal variant ID.
-- `variant_type`, `allele_id`, `locations`: reported entity and requested-context
-  placements.
-- `parent_variant_identifier`, `component_ordinal`: component ownership; null
-  for a top-level variant or haplotype.
-- `synonyms`: objects with `value`, `type`, `source`, `reported_type` and
-  `resolution`. Each resolution has `state: source_only`, `variant_id: null`
-  and `variant_allele_id: null`. Matching has not run; do not interpret these
-  records as failed matches or resolved variant/allele associations.
-- `source_report`: reporting source, source release/version, versioned RCV
-  accession, record/assertion statuses, SCV accessions/statuses and upstream warnings.
-
-Reported synonyms include:
-
-| Type | Source | Values |
-|---|---|---|
-| `HGVS` | ClinVar | Reported HGVS attributes, with their annotation types |
-| `SPDI` | ClinVar | Reported `CanonicalSPDI` values |
-| `dbSNP` | dbSNP | Reported rsIDs, such as `rs121908247` |
-| `name` | ClinVar | Preferred and alternate variant names |
-| `ClinVar` | ClinVar | Source variant and allele identifiers, plus the reference assertion's versioned RCV accession |
-| `OMIM` | OMIM | IDs from direct `Measure/XRef` elements with `DB="OMIM"` |
-| `ClinGen` | ClinGen | IDs from `MeasureSet/XRef`, `Measure/XRef`, `Measure/Name/XRef` or `Measure/AttributeSet/XRef` with `DB="ClinGen"` |
-| `dbVar` | dbVar | Reported dbVar cross-references, when present |
+The summary reports variant and allele record counts and synonym counts
+separately, plus total source counts and rejections. Unsupported XML and invalid
+source entities go to `rejections.jsonl`. 
 
 
 ## Tests

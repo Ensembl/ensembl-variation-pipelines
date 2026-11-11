@@ -24,14 +24,19 @@ nextflow_process {
         then {
             assertAll(
                 { assert process.success },
-                { assert process.out.records[0][0].assembly == 'GRCh38' },
-                { assert file(process.out.records[0][1]).name == 'custom.synonyms.jsonl' },
-                { assert file(process.out.records[0][1]).readLines().size() == 3 },
-                { assert file(process.out.records[0][1]).text.contains('"source": "dbSNP"') },
-                { assert file(process.out.records[0][1]).text.contains('rs999999') },
-                { assert file(process.out.records[0][1]).text.contains('"artifact_kind": "source_evidence"') },
-                { assert file(process.out.records[0][1]).text.contains('"state": "source_only"') },
-                { assert file(process.out.records[0][1]).text.contains('"variant_allele_id": null') },
+                { assert process.out.variant_records[0][0].assembly == 'GRCh38' },
+                { assert file(process.out.variant_records[0][1]).name == 'custom.variant_synonyms.jsonl' },
+                { assert file(process.out.variant_records[0][1]).readLines().size() == 3 },
+                { assert file(process.out.allele_records[0][1]).name == 'custom.variant_allele_synonyms.jsonl' },
+                { assert file(process.out.allele_records[0][1]).readLines().size() == 3 },
+                { assert file(process.out.allele_records[0][1]).text.contains('"affected_allele"') },
+                { assert !file(process.out.variant_records[0][1]).text.contains('"locations"') },
+                { assert !file(process.out.allele_records[0][1]).text.contains('"component_ordinal"') },
+                { assert file(process.out.variant_records[0][1]).text.contains('"source": "dbSNP"') },
+                { assert file(process.out.variant_records[0][1]).text.contains('rs999999') },
+                { assert file(process.out.variant_records[0][1]).text.contains('"artifact_kind": "source_evidence"') },
+                { assert file(process.out.variant_records[0][1]).text.contains('"state": "source_only"') },
+                { assert file(process.out.variant_records[0][1]).text.contains('"variant_allele_id": null') },
                 { assert file(process.out.summary[0][1]).text.contains('"synonyms_emitted": 9') },
                 { assert file(process.out.rejections[0][1]).text.contains('unsupported_genotype_set') },
                 { assert process.out.versions_python[0][2].startsWith('3.') },
@@ -58,7 +63,8 @@ nextflow_process {
         then {
             assertAll(
                 { assert process.success },
-                { assert file(process.out.records[0][1]).exists() },
+                { assert file(process.out.variant_records[0][1]).exists() },
+                { assert file(process.out.allele_records[0][1]).exists() },
                 { assert file(process.out.summary[0][1]).exists() },
                 { assert file(process.out.rejections[0][1]).exists() },
                 { assert process.out.versions_consumer[0][2] == '0.1.0' }

@@ -78,7 +78,6 @@ process tabix {
     path "${file(params.output).name}.tbi", emit: index
 
   script:
-  def name = file(params.output).baseName
   def gzip = file(params.output).name
   """
   set -euo pipefail
@@ -87,10 +86,8 @@ process tabix {
   # remove LRG and chromosome patches
   awk 'NR > 1 && !/^#/ && !/^LRG/ && !/^CHR_/' "${out}" > tmp.tsv
 
-  # sort file by position
-  (head -n1 "${out}" | sed 's/^/#/'; sort -k1,1 -k2,2n -k3,3n tmp.tsv | uniq) > ${name}
-
-  bgzip "${name}"
+  # Sort and compress directly, preserving the staged input for any output name.
+  (head -n1 "${out}" | sed 's/^/#/'; sort -k1,1 -k2,2n -k3,3n tmp.tsv | uniq) | bgzip -c > "${gzip}"
   tabix -s1 -b2 -e3 "${gzip}"
   rm tmp.tsv
   """

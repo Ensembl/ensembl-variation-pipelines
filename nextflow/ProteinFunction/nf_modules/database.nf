@@ -148,13 +148,17 @@ process postprocess_sqlite_db {
 
   input:
     path databases, stageAs: 'shards/part??/*'
+    val meta
 
   output:
     path "${file(params.sqlite_db).name}"
 
   script:
-  def output = "'" + file(params.sqlite_db).name.replace("'", "'\"'\"'") + "'"
+  def quote = { value -> "'" + value.toString().replace("'", "'\"'\"'") + "'" }
+  def output = quote(file(params.sqlite_db).name)
+  // Each entry is a key=value row for the database's own meta table.
+  def rows = meta.collect(quote).join(' ')
   """
-  merge_prediction_databases.pl ${output}
+  merge_prediction_databases.pl ${output} ${rows}
   """
 }

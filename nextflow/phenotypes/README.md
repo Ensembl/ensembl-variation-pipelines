@@ -1,65 +1,38 @@
 # Phenotypes pipeline
 
-Pipeline to download, parse, load and harmonise phenotype data into PostgreSQL.
-
-```bash
-module load nextflow/26.04.0
-```
+Download, parse and load phenotype data into PostgreSQL.
 
 ## Project setup
 
-Create the Python environment in the project directory:
+Requires Nextflow 26.04.0 and Python 3.14. Create the Python environment:
 
 ```bash
+module load nextflow/26.04.0
 cd ensembl-variation-pipelines/nextflow/phenotypes
 PIPELINE_DIR="$PWD"
-```
-
-The Python project requires Python 3.14 and uses `uv`. Create or update the virtual environment with:
-
-```bash
 uv sync
 ```
 
-The local `variation-sources` dependency is installed from `../shared`. Keep
-both directories together. Shared source parsing, validation and provenance are
-maintained there; phenotype interpretation and database loading remain here.
-The default local profile uses this virtual environment for Python tasks.
-The parser and loader declare Conda and container runtimes. The loader uses
-Psycopg's binary distribution, which bundles libpq; it does not require
-`pg_config`, `LD_LIBRARY_PATH`, or a PostgreSQL environment module. The Slurm
-profile also adds the project virtual environment to `PATH`; create it with
-`uv sync` at a path accessible to compute nodes. Conda/container profiles can
-provide the task runtime instead.
+Keep `../shared` alongside this pipeline: it supplies common parsing,
+configuration and provenance code. Local and Slurm tasks use `.venv`; compute
+nodes must be able to access it. Conda and container profiles are also available.
 
-The local loader image must be built before using the Docker profile:
+### Optional container execution
+
+For `-profile docker`, build the image used by both parsers and the loader:
 
 ```bash
-docker build -t ensembl-phenotypes-clinvar-loader:0.1.0 modules/local/clinvar/load
+docker build -t ensembl-phenotypes:0.1.0 modules/local/load
 ```
 
-For Singularity, build a SIF from this image and set `process.container` for
-`LOAD_CLINVAR` to its absolute path in a custom Nextflow config. Alternatively,
-publish the image to your registry and override that process's container with
-the registry URL. No loader image is published by this repository.
-
-`LOAD_CLINVAR` lives in `modules/local/clinvar/load` with dependency declarations,
-metadata and dedicated nf-test tests. It emits dependency versions on the
-`versions` topic, accepts `task.ext.args`, `task.ext.when` and `task.ext.prefix`,
-and stages the database INI file as `database.env`. The pipeline keeps the
-summary filename `clinvar_load_summary.json`. Task caching remains disabled
-because loading changes database state. Replacement remains an explicit input
-controlled by `--replace`.
-
-Database configuration files are staged into task work directories and are not
-published. Use an appropriately protected work directory. Container runs need
-network access to PostgreSQL; `localhost` inside Docker refers to the container.
-If using `.pgpass` authentication, make the file available inside the selected
-runtime.
+For Singularity, convert this image to a SIF and set its absolute path as the
+container for `PARSE_CLINVAR`, `PARSE_G2P` and `LOAD_PHENOTYPES` in a custom config.
+A registry URL can also be supplied; this repository does not publish the image.
+Containers need database network access and access to `.pgpass` if used.
 
 ## Database connection
 
-Copy `.env` to the run directory:
+Create `.env` in the run directory:
 
 ```bash
 cd /path/to/run-directory
@@ -67,8 +40,7 @@ cp -n "$PIPELINE_DIR/../shared/assets/.env.example" .env
 chmod 600 .env
 ```
 
-Set the PostgreSQL connection details in `.env`, including the required
-consumer schema (`phenotypes` here):
+Set the connection and target schema:
 
 ```ini
 [postgresql]
@@ -81,11 +53,9 @@ password=
 ```
 
 Leave `password` empty to use `.pgpass` or the `psql` password prompt.
-
-The shared `variation_sources.database` module validates these settings and
-builds both loader connection arguments and PostgreSQL client environment
-variables. The schema helper uses the same parser through the Python environment
-created by `uv sync`. Phenotype SQL and loading policies remain in this pipeline.
+The loader and schema helper use these same settings. `.env` is staged in task
+work directories but is not published; protect the work directory accordingly.
+For native Psycopg library problems, see [the workaround below](#native-hpc-workaround).
 
 # First time only set-up **(first time only)**
 
@@ -137,48 +107,75 @@ SET search_path TO phenotypes;
 \dt
 ```
 
-# Data sources
+## Run the pipeline
 
-## ClinVar
+The workflow runs **download → parse → load** for every source in the selected
+config. The default, `assets/phenotypes_config.json`, contains ClinVar and G2P.
+Supply a config containing only one source to update that source alone.
 
-- By default, the pipeline downloads the current ClinVar XML releases:
-  - RCV: https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz
-  - VCV: https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarVCVRelease_00-latest.xml.gz
-- Failed download attempts are retried three times, separately for each file
-- To use pre-downloaded files, set `sources.ClinVar.inputs.rcv` and
-  `sources.ClinVar.inputs.vcv` in the source configuration (`../shared/assets/source_config.json`).
-- The source key (`ClinVar`) supplies the source name in the JSONL metadata and database; no separate name setting is needed.
-  A missing or null value downloads that file only; an incorrect supplied path is an error
-- The parser reads VCV first to map haplotype component Allele IDs to versioned
-  VCV accessions, then parses associations from RCV. VCV does not change phenotype
-  grouping, classifications or which SCVs belong to an RCV
-- Species and assembly also come from the `source_config.json` file
-- ClinVar requires a human context and an assembly for its location filter, `assembly_uuid` is optional
-- Both phenotypes and the shared runner use `nextflow/shared/assets/source_config.json` by default, but an alternative can be provided by using:
+For each input, a missing or null path triggers a download. Supplied paths must
+exist and are resolved relative to the config file. Downloads retry failures
+three times, wait ten seconds between retries, and rename `.part` files only
+after success. Each source currently supports one processing context per run.
 
-```bash
-nextflow run "$PIPELINE_DIR/main.nf" --source_config /path/to/source_config.json
-```
-
-- The intermediate JSONL is published to `<outdir>/clinvar/<species_production_name>/<assembly>/`
-- The first JSONL line contains `metadata` shared across all records, subsequent lines are the records themselves
-- Each record follows `PhenotypeAssociation`: `phenotype`, `entity`, `somatic_status` and `source_reports`. Assessments belong inside each source report; publications belong inside each assessment's evidence
-- Shared source, import-run and genome-context objects remain in the header rather than being repeated in each record
-- Parser outputs are `clinvar_output.jsonl`, `warnings.txt` and `rejections.txt`.
-
-### Run the pipeline
-
-The workflow runs download → parse → load. Create the database tables first,
-then run from the directory containing `.env`:
+Create the database tables first, then run from the directory containing `.env`:
 
 ```bash
 module load nextflow/26.04.0
 nextflow run "$PIPELINE_DIR/main.nf" \
-    --source_config /path/to/source_config.json \
+    --source_config /path/to/phenotypes_config.json \
     --outdir output
 ```
 
-- If ClinVar is already loaded, the loader refuses to overwrite it unless `--replace` is supplied. Replacement covers **all existing reports for that source**, not just the configured assembly
+Omit `--source_config` to use the default. Use `--env_file /path/to/.env` to
+select a different database config. The source key supplies its name in the
+JSONL and database.
+
+If a source is already loaded, loading stops unless `--replace` is supplied.
+Replacement covers **all reports for each configured source**, across assemblies.
+Loads run one at a time, each in its own transaction: a failed load rolls back that
+source, while other committed sources remain loaded. The pipeline stops on
+failure.
+
+Use `-resume` with the original Nextflow cache and work directory to reuse
+completed download and parser tasks. Parser code changes invalidate cached
+parsing results. Database loading always runs again.
+
+## Pipeline outputs
+
+| Source | Output directory | Association file | Load summary |
+| --- | --- | --- | --- |
+| ClinVar | `<outdir>/clinvar/<species>/<assembly>/` | `clinvar_output.jsonl` | `clinvar_load_summary.json` |
+| G2P | `<outdir>/g2p/<species>/` | `g2p_output.jsonl` | `g2p_load_summary.json` |
+
+`<species>` is `species_production_name`. G2P adds an assembly directory when
+one is configured. Each parser also writes `warnings.txt` and `rejections.txt`.
+Downloaded inputs are copied to `<outdir>/clinvar/inputs/` or
+`<outdir>/g2p/inputs/`.
+
+The first JSONL line contains shared `metadata`: source, genome context and
+import provenance, including both input filenames/checksums, pipeline date and
+revision. Subsequent lines contain `phenotype`, `entity`, `somatic_status` and
+`source_reports`. Assessments are nested within reports; evidence belongs to
+its report or assessment.
+
+# Data sources
+
+## ClinVar
+
+Set `sources.ClinVar.inputs.rcv` and `sources.ClinVar.inputs.vcv` to local files
+or null:
+
+| Input | Default download |
+| --- | --- |
+| `rcv` | [RCV XML](https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/RCV_release/ClinVarRCVRelease_00-latest.xml.gz) |
+| `vcv` | [VCV XML](https://ftp.ncbi.nlm.nih.gov/pub/clinvar/xml/ClinVarVCVRelease_00-latest.xml.gz) |
+
+ClinVar requires a human context and an assembly to select locations;
+`assembly_uuid` is optional. VCV is read first to map haplotype component Allele
+IDs to versioned VCV accessions. Associations come from RCV; VCV does not change
+phenotype grouping, classifications or SCV membership. The XML release date
+becomes `import_run.source_version`.
 
 ### Notes
 
@@ -266,6 +263,81 @@ calculated interval into reported locations, not shared EntityLocations.
 
 - For example, `RCV000677106.1` has only a GRCh37 placement and is rejected with `missing_requested_assembly_location` when GRCh38 is requested
 
+## G2P
+
+Example G2P-only config; null inputs download both files:
+
+```json
+{
+  "sources": {
+    "G2P": {
+      "inputs": {
+        "data": null,
+        "gene_id_mapping": null
+      },
+      "contexts": [{
+        "species_taxonomy_id": 9606,
+        "species_production_name": "homo_sapiens"
+      }]
+    }
+  }
+}
+```
+
+| Input | Default download |
+| --- | --- |
+| `data` | [Latest dated G2P CSV.GZ](https://ftp.ebi.ac.uk/pub/databases/gene2phenotype/G2P_data_downloads/) |
+| `gene_id_mapping` | [HGNC complete-set TSV](https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt) |
+
+Either input can use a local path while the other downloads. G2P requires a
+human context; assembly and UUIDs are optional.
+
+The downloader selects the newest dated FTP directory and keeps the filename,
+for example `2026_10_28/allG2P_2026-10-28.csv.gz`. The parser accepts CSV and
+CSV.GZ. Only FTP filenames matching `allG2P_YYYY-MM-DD.csv.gz` supply a release
+version: `allG2P_2026-10-28.csv.gz` gives `import_run.source_version = "2026-10-28"`.
+The parent directory is not used. Website downloads such as
+`G2P_all_2026-11-11.csv` produce a log warning and a null version; their filename
+date is not a release version. Other filenames also give a null version.
+No manual version setting is needed. `-resume` reuses the previously downloaded
+release; start a new run without it to select a newer release.
+
+The parser keeps one report per G2P assertion, including disputed/refuted
+confidence. It uses HGNC IDs to map genes and retains disease names/mappings,
+allelic requirements, consequences, mechanisms and reviewed publications.
+Gene coordinates and harmonisation fields remain unpopulated.
+
+G2P rules live in `src/phenotypes/source_config.py`; shared ClinVar consumers
+keep their own ClinVar-only config. Standalone Python parsing needs both local
+files; downloading is handled by Nextflow.
+
+## Loading parsed JSONL
+
+Both sources use `phenotypes.loader`, which copies parser-prepared values into
+the database without lookups, coordinate calculations or harmonisation. To
+load an existing JSONL directly:
+
+```bash
+"$PIPELINE_DIR/.venv/bin/python" -m phenotypes.loader \
+    --input /path/to/g2p_output.jsonl \
+    --env-file /path/to/.env \
+    --summary g2p_load_summary.json
+```
+
+The command also accepts ClinVar JSONL. Without `--summary`, it writes
+`phenotypes_load_summary.json`. The same whole-source `--replace` policy and
+transaction protection apply. A schema-wide lock prevents concurrent loads.
+
+### Native HPC workaround
+
+If Psycopg crashes because of native library conflicts, run this before Python
+or Nextflow:
+
+```bash
+module load postgresql/16
+export PSYCOPG_IMPL=python
+export LD_LIBRARY_PATH="$(pg_config --libdir)${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+```
 
 ## Tests
 

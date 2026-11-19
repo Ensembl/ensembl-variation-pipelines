@@ -135,6 +135,7 @@ class VariantEvidenceTests(unittest.TestCase):
                 self.assertEqual(location["assembly"], assembly)
                 self.assertEqual(location["chromosome"], case["chromosome"])
                 self.assertEqual([location["start"], location["stop"]], coordinates)
+                self.assertEqual(location["stop_vcf"], case["vcf_stops"][assembly])
 
     def test_vcf_alleles_are_preserved_for_substitutions_and_insertions(self):
         # A single-nucleotide substitution and an insertion cover both allele shapes.
@@ -148,6 +149,7 @@ class VariantEvidenceTests(unittest.TestCase):
                 locations = variant["locations"]
                 self.assertEqual(locations[0]["reference_allele_vcf"], case["reference_allele"])
                 self.assertEqual(locations[0]["alternate_allele_vcf"], case["alternate_allele"])
+                self.assertEqual(locations[0]["stop_vcf"], case["vcf_stops"]["GRCh38"])
                 self.assertEqual(reported_allele(locations), (case["alternate_allele"], False))
 
     def test_scaffold_is_preserved_when_no_primary_placement_exists(self):
@@ -164,6 +166,7 @@ class VariantEvidenceTests(unittest.TestCase):
         warnings = []
         variant = parse_variant(assertion, "GRCh38", warnings=warnings)["reported_variant"]
         self.assertIsNone(variant["locations"][0]["position_vcf"])
+        self.assertIsNone(variant["locations"][0]["stop_vcf"])
         self.assertEqual(warnings[0][0], "invalid_numeric_attribute")
         self.assertIn("Measure[@ID='10']", warnings[0][2])
         self.assertIn("positionVCF", warnings[0][2])

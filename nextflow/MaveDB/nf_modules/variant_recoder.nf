@@ -27,7 +27,23 @@ def load_vr_memory_hints(path) {
   return hints
 }
 
+def registry_digest(path) {
+  if (!path) { return 'none' }
+  return java.security.MessageDigest.getInstance('SHA-256')
+    .digest(file(path, checkIfExists: true).bytes).encodeHex().toString()
+}
+
 def vrMemoryHints = load_vr_memory_hints(params.vr_memory_hints)
+// Scoped to this workflow invocation; keep retries from undoing a memory increase.
+def vrMemoryRequests = new java.util.concurrent.ConcurrentHashMap()
+
+def reserve_vr_memory(requests, urn, proposed) {
+  synchronized (requests) {
+    def memory = [proposed, requests[urn] ?: proposed].max()
+    requests[urn] = memory
+    return memory
+  }
+}
 
 process run_variant_recoder {
   // Run Variant Recoder on a file with HGVS identifiers
@@ -35,6 +51,7 @@ process run_variant_recoder {
 
   input:
     tuple val(urn), path(mappings), path(scores), path(metadata), path(hgvs)
+    val registryDigest
   output:
     tuple val(urn), path(mappings), path(scores), path(metadata), path('vr.json')
 
@@ -62,20 +79,13 @@ process run_variant_recoder {
       base = [[hintedGb.GB, 8.GB].max(), 300.GB].min()
     }
 
-    if (task.attempt == 1) {
-      return base
+    def proposed = base
+    if (task.attempt > 1 && task.exitStatus in [130, 137, 140]) {
+      proposed = task.attempt == 2 ? [base * 2, fallback].max() :
+                 task.attempt == 3 ? [base * 4, fallback * 2, 200.GB].max() :
+                                    500.GB
     }
-
-    if (!(task.exitStatus in [130, 137, 140])) {
-      return base
-    }
-
-    def escalated =
-      task.attempt == 2 ? [base * 2, fallback].max() :
-      task.attempt == 3 ? [base * 4, fallback * 2, 200.GB].max() :
-                          500.GB
-
-    [escalated, 500.GB].min()
+    reserve_vr_memory(vrMemoryRequests, urn, [proposed, 500.GB].min())
   }
 
   script:
@@ -89,10 +99,10 @@ process run_variant_recoder {
   log() { local ts; ts=\$(date -Is); >&2 echo "[\$ts][MaveDB][URN=\${MAVEDB_URN:-na}][STEP=\${STEP:-na}][REASON=\$1][SUBID=\${2:-na}] \${3:-}"; }
 
   HGVS_LINES=\$(wc -l < "${hgvs}" 2>/dev/null || echo 0)
-  log "vr_start" "na" "attempt=${task.attempt} hgvs_lines=\${HGVS_LINES}"
+  log "vr_start" "na" "attempt=${task.attempt} requested_mem=${task.memory} hgvs_lines=\${HGVS_LINES} registry_sha256=${registryDigest}"
 
   rc=0
-  perl ${bin}/variant_recoder -i ${hgvs} --vcf_string ${reg} > vr.json 2> vr.stderr || rc=\$?
+  perl ${bin}/variant_recoder -i ${hgvs} --format hgvs --vcf_string ${reg} > vr.json 2> vr.stderr || rc=\$?
 
   # always log final size of the output file
   BYTES=\$(wc -c < vr.json 2>/dev/null || echo 0)

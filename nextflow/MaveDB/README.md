@@ -1,6 +1,6 @@
 # Create MaveDB plugin data
 
-## Failure handling and output validation
+## Failure handling and retries
 
 Nonzero tool exits and missing required outputs fail the workflow, including
 when a crashed tool leaves a partial file. Read errors during concatenation are
@@ -12,6 +12,29 @@ no current mapping, no eligible variants, or `no_usable_vr_variants`. Valid but
 unusable VR results produce an empty mapping; malformed JSON and nonzero VR
 exits remain errors. Skip reasons appear in `reports/skipped_urns.tsv`. A run
 with no mapped data at all fails. Failed-task diagnostics remain in `work/`.
+
+Ensembl REST lookups allow five attempts with a 30-second socket timeout,
+retrying HTTP 429/500/502/503/504, connection failures and interrupted reads.
+Backoff is 5, 10, 20 and 40 seconds. `Retry-After` is honoured up to 300 seconds;
+a longer requested wait, permanent HTTP errors, invalid JSON or exhausted
+retries fail the task. Attempts and VR warnings are logged.
+
+Temporary IDs in scores and mapping records normalize to the requested score-set
+URN while retaining the `#variant` suffix. Published IDs stay unchanged.
+Repeated mapping records for the same original ID prefer a non-null `postMapped`;
+identical mappings are collapsed. Conflicting non-null mappings, distinct IDs
+that collide after normalization, and duplicate score IDs fail.
+
+VR retains the historical memory profile and retries resource exits 130, 137
+and 140, up to three retries and 500 GB. Exit 139 terminates the run. Exit 143
+terminates by default; use `--vr_retry_terminated true` only for known transient
+terminations. Retries retain the highest allocation requested. `--vr_time`
+sets the time limit (default `7d`).
+
+For RefSeq protein HGVS, the registry should include the matching human
+`otherfeatures` database, with the core database supplying DNA sequences.
+VR tasks include a digest of the registry contents as an input, so registry edits
+invalidate cached VR results when resuming.
 
 Use `-resume` to reuse successful tasks. Old runs may have cached empty
 placeholders after crashes; rerun affected tasks or use a fresh work directory.

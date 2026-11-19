@@ -186,6 +186,43 @@ workflow {{ concatenate_files(Channel.empty().toList()) }}
         self.assertIn("missing without an expected skip", result.stdout + result.stderr)
         self.assert_no_mavedb_publication()
 
+    def test_mavedb_output_basename_collision_preserves_staged_input(self):
+        self.require_htslib()
+        mapping = self.prepare_mavedb_output()
+        original = mapping.read_bytes()
+        combined = self.path / "combined.tsv"
+        combined.write_bytes(original)
+        source = f"""
+params.output = "${{projectDir}}/published/combined.tsv.gz"
+include {{ tabix }} from '{NF}/MaveDB/nf_modules/output.nf'
+include {{ datacheck_urns }} from '{NF}/MaveDB/nf_modules/datacheck.nf'
+workflow {{
+  tabix(file("${{projectDir}}/combined.tsv"))
+  def inputs = tabix.out.data.combine(tabix.out.index)
+    .map {{ data, index -> tuple(data, index, file("${{projectDir}}/requested"), file("${{projectDir}}/logs.csv"), []) }}
+  datacheck_urns(inputs)
+}}
+"""
+        self.run_nf(source)
+        self.assertEqual(combined.read_bytes(), original)
+        published = self.path / "published/combined.tsv.gz"
+        with gzip.open(published, "rt") as handle:
+            self.assertEqual(
+                handle.read().splitlines(),
+                [
+                    "#chr\tstart\tend\tref\talt\turn\tscore",
+                    "1\t10\t10\tA\tG\tA\t0.234567891",
+                    "1\t20\t20\tC\tT\tA\t0.123456789",
+                ],
+            )
+        index = subprocess.run(
+            ["tabix", "-l", str(published)],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertEqual(index.stdout.strip(), "1")
+
     def test_safe_vcf_sorting_both_modules(self):
         self.require_htslib()
         header = "##fileformat=VCFv4.2\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n"

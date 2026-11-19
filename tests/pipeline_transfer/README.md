@@ -12,7 +12,7 @@ Python 3.10+ tests use the standard library. Integration checks also need
 Nextflow with the legacy parser, pandas, bgzip/tabix, Perl DBI/DBD::SQLite and
 the Ensembl Perl APIs. Missing dependencies cause skips; inspect the test summary.
 The restored-output checks were validated with Nextflow 24.04.3 on Java 17;
-all 14 tests passed without skips.
+the suite passed without skips.
 
 Tests use temporary directories, disable containers and notifications, and set
 `NXF_SYNTAX_PARSER=v1` and `NXF_OFFLINE=true`. Fake tools replace live liftover and
@@ -24,6 +24,8 @@ mapping failures, failed indexing even with a global `ignore` policy, and
 publication only after validation succeeds. A stale published file checks that
 validation consumes the generated task output directly. Successful output is
 sorted, deduplicated, compressed and indexed without changing the input mapping.
+An output named `combined.tsv.gz` also checks that compression preserves the
+staged `combined.tsv` input when its name matches the output's uncompressed name.
 
 Ruff does not scan `.nf` files. Extract and dedent the Python bodies in MaveDB's
 `fetch.nf` and `output.nf` to check them separately, and preserve Nextflow escaping.

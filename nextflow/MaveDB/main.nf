@@ -13,6 +13,8 @@ params.ensembl  = "${ENSEMBL_ROOT_DIR}"
 params.output   = "output/MaveDB_variants.tsv.gz"
 params.registry = null
 params.vr_memory_hints = "${projectDir}/resources/vr_memory_hints.tsv"
+params.vr_time = '7d'
+params.vr_retry_terminated = false
 
 params.licences = "CC0" // Open-access only
 params.round    = null // Preserve input precision unless rounding is explicitly requested.
@@ -42,6 +44,8 @@ if (params.help) {
     --registry      Path to Ensembl registry
     --vr_memory_hints
                     Historical Variant Recoder memory profile (default: bundled profile)
+    --vr_time       Variant Recoder time limit (default: 7d)
+    --vr_retry_terminated Retry exit 143 only for known transient terminations (default: false)
     --from_files    Use local files instead of downloading via the MaveDB API (default: true, this is advised)
     --mappings_path Path to MaveDB mappings files (one JSON file per URN)
     --scores_path   Path to MaveDB scores files (one CSV file per URN)
@@ -56,7 +60,7 @@ if (params.help) {
 include { filter_by_licence } from './subworkflows/filter.nf'
 include { download_MaveDB_data } from './nf_modules/fetch.nf'
 include { split_by_mapping_type } from './subworkflows/split.nf'
-include { run_variant_recoder } from './nf_modules/variant_recoder.nf'
+include { run_variant_recoder; registry_digest } from './nf_modules/variant_recoder.nf'
 include { map_scores_to_HGVSp_variants; map_scores_to_HGVSg_variants } from './nf_modules/mapping.nf'
 include { download_chain_files; liftover_to_hg38 } from './nf_modules/liftover.nf'
 include { concatenate_files; tabix } from './nf_modules/output.nf'
@@ -133,7 +137,7 @@ workflow {
   // prepare HGVSp mappings
   hgvsp = files.hgvs_pro
       .filter { it.last().size() > 0 }
-  run_variant_recoder(hgvsp)
+  run_variant_recoder(hgvsp, registry_digest(params.registry))
   map_scores_to_HGVSp_variants(run_variant_recoder.out)
 
   // concatenate output files into a single file

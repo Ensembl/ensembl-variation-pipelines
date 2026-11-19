@@ -1,6 +1,6 @@
 process collate_logs {
   tag "collate_logs"
-  publishDir "reports", mode: 'copy', overwrite: true
+  publishDir "reports", mode: 'copy', overwrite: true, failOnError: true
 
   input:
     tuple val(workdir), val(trigger)

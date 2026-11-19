@@ -10,14 +10,16 @@ workflow filter_by_licence {
     data = download_MaveDB_metadata.out
              .map { [ urn: it[0], metadata: it[1], licence: it[2] ] }
 
-    data.
-      filter { !licences.contains(it.licence.text) }.
-      subscribe {
+    excluded = data
+      .filter { !licences.contains(it.licence.text) }
+      .map {
         println "NOTE: Discarded ${it.urn} based on licence ${it.licence.text}"
+        [it.urn, 'licence_excluded']
       }
 
     // Return files with matching licences
     filtered = data.filter { licences.contains(it.licence.text) }
   emit:
-    filtered
+    filtered = filtered
+    excluded = excluded
 }

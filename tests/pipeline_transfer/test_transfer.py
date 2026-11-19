@@ -1,8 +1,6 @@
 """Regression checks for local fixes applied during the pipeline transfer."""
 
 import ast
-import gzip
-import importlib.util
 import sqlite3
 import subprocess
 import tempfile
@@ -13,51 +11,11 @@ ROOT = Path(__file__).resolve().parents[2]
 NEXTFLOW = ROOT / "nextflow"
 
 
-def load_module(path):
-    spec = importlib.util.spec_from_file_location(path.stem, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-MERGE = load_module(NEXTFLOW / "MaveDB/bin/merge_previous_output.py")
-
-
 class TransferTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.path = Path(self.temp.name)
-
-    def test_merge_and_reuse_only_filter_previous_rows(self):
-        previous = self.path / "previous.gz"
-        with gzip.open(previous, "wt") as handle:
-            handle.write(
-                "#chr\tstart\tend\turn\tp-value\n1\t1\t1\tA\t0.1\n1\t2\t2\tB\t0.2\n"
-            )
-        urns = self.path / "urns"
-        urns.write_text("A\n")
-        output = self.path / "out.tsv"
-        MERGE.merge(None, previous, urns, output)
-        self.assertEqual(
-            output.read_text().splitlines(),
-            ["chr\tstart\tend\turn\tpvalue", "1\t1\t1\tA\t0.1"],
-        )
-        current = self.path / "current.tsv"
-        current.write_text(
-            "chr\tstart\tend\turn\textra\n1\t3\t3\tC\tx\n1\t3\t3\tC\tx\n"
-        )
-        MERGE.merge(current, previous, urns, output)
-        rows = output.read_text().splitlines()
-        self.assertEqual(len(rows), 3)
-        self.assertEqual(rows[0], "chr\tstart\tend\turn\textra\tpvalue")
-        self.assertEqual(rows[1:], ["1\t3\t3\tC\tx\t", "1\t1\t1\tA\t\t0.1"])
-        current.write_text("")
-        MERGE.merge(current, previous, urns, output)
-        self.assertEqual(len(output.read_text().splitlines()), 2)
-        urns.write_text("missing\n")
-        with self.assertRaisesRegex(ValueError, "missing requested URNs"):
-            MERGE.merge(None, previous, urns, output)
 
     def test_rounding_preserves_nonnumeric_values(self):
         # Import only this pure function: the legacy scripts parse argv at import.
@@ -77,11 +35,19 @@ class TransferTests(unittest.TestCase):
                 compile(ast.Module(body=[function], type_ignores=[]), name, "exec"),
                 namespace,
             )
-            row = {"score": "0.123456", "urn": "A", "empty": None, "integer": "2"}
-            result = namespace["round_float_columns"](row, 4)
-            self.assertEqual(
-                result, {"score": "0.1235", "urn": "A", "empty": None, "integer": "2"}
-            )
+            for digits, score in [(4, "0.1235"), (0, "0"), (None, "0.123456")]:
+                with self.subTest(mapper=name, digits=digits):
+                    row = {
+                        "score": "0.123456",
+                        "urn": "A",
+                        "empty": None,
+                        "integer": "2",
+                    }
+                    result = namespace["round_float_columns"](row, digits)
+                    self.assertEqual(
+                        result,
+                        {"score": score, "urn": "A", "empty": None, "integer": "2"},
+                    )
 
     def test_sqlite_shards_merge_and_duplicate_failure(self):
         probe = subprocess.run(

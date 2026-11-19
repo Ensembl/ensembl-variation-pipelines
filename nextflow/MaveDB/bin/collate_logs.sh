@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 if (( $# < 1 || $# > 2 )); then
   echo "Usage: $0 <work_dir> [output_csv]" >&2
@@ -13,7 +14,10 @@ out_dir=$(dirname "$out_csv")
 mkdir -p "$out_dir"
 
 # Gather all .command.log files
-mapfile -d '' LOGS < <(find "$work_dir" -type f -name '.command.log' -print0 2>/dev/null || true)
+tmp_logs=$(mktemp)
+trap 'rm -f "$tmp_logs"' EXIT
+find "$work_dir" -type f -name '.command.log' -print0 > "$tmp_logs"
+mapfile -d '' LOGS < "$tmp_logs"
 
 if ((${#LOGS[@]}==0)); then
   echo "No .command.log files found under: $work_dir" >&2
@@ -22,14 +26,14 @@ if ((${#LOGS[@]}==0)); then
 fi
 
 tmp_keys="$(mktemp)"
-trap 'rm -f "$tmp_keys"' EXIT
+trap 'rm -f "$tmp_keys" "$tmp_logs"' EXIT
 
 # discover all dynamic key names
 gawk '
   function get_keys(rest,    m2,key) {
     while (match(rest, /[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=("([^"]*)"|[^[:space:]]+)/, m2)) {
       key = m2[1]
-      if (!(key in seen)) { print key; seen[key]=1 }
+      if (key != "file" && key != "urn" && !(key in seen)) { print key; seen[key]=1 }
       rest = substr(rest, RSTART + RLENGTH)
     }
   }

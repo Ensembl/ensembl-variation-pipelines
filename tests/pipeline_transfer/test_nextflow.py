@@ -71,33 +71,120 @@ class NextflowTests(unittest.TestCase):
         if not all(shutil.which(tool) for tool in ["bgzip", "tabix"]):
             self.skipTest("bgzip and tabix required")
 
-    def test_mavedb_reuse_and_plan_isolation(self):
-        self.require_htslib()
-        with gzip.open(self.path / "previous.tsv.gz", "wt") as handle:
-            handle.write("#chr\tstart\tend\turn\n1\t1\t1\tA\n1\t2\t2\tB\n")
-        (self.path / "requested").write_text("A\n")
-        (self.path / "prior").write_text("A\nB\n")
-        source = f"""
-include {{ build_run_plan }} from '{NF}/MaveDB/nf_modules/planning.nf'
-include {{ reuse_previous_output }} from '{NF}/MaveDB/nf_modules/merge_previous_output.nf'
-include {{ tabix }} from '{NF}/MaveDB/nf_modules/output.nf'
+    def prepare_mavedb_output(self, requested="A\n"):
+        probe = subprocess.run(["python3", "-c", "import pandas"], capture_output=True)
+        if probe.returncode:
+            self.skipTest("pandas required")
+        with self.config.open("a") as handle:
+            handle.write(
+                "process.errorStrategy = 'ignore'\n"
+                "process { withName: concatenate_files { memory = '256 MB' } }\n"
+            )
+        mapping = self.path / "map_A.tsv"
+        mapping.write_text(
+            "chr\tstart\tend\tref\talt\turn\tscore\n"
+            "1\t20\t20\tC\tT\tA\t0.123456789\n"
+            "1\t10\t10\tA\tG\tA\t0.234567891\n"
+            "1\t10\t10\tA\tG\tA\t0.234567891\n"
+        )
+        (self.path / "requested").write_text(requested)
+        (self.path / "logs.csv").write_text("file,urn,reason\nf,A,done\n")
+        return mapping
+
+    def mavedb_output_workflow(self):
+        return f"""
 params.output = "${{projectDir}}/published/result.tsv.gz"
+include {{ concatenate_files; tabix }} from '{NF}/MaveDB/nf_modules/output.nf'
+include {{ datacheck_urns }} from '{NF}/MaveDB/nf_modules/datacheck.nf'
 workflow {{
-  def opts = [urn: "${{projectDir}}/requested", previous_urn: "${{projectDir}}/prior", previous_output: "${{projectDir}}/previous.tsv.gz"]
-  def first = build_run_plan(opts, workflow.workDir)
-  def second = build_run_plan(opts, workflow.workDir)
-  assert first.reuse_only
-  assert first.skipped_urns_file != second.skipped_urns_file
-  def reused = reuse_previous_output(file(opts.previous_output), first.skipped_urns_file)
-  tabix(reused)
+  concatenate_files(Channel.of(file("${{projectDir}}/map_A.tsv")).toList())
+  tabix(concatenate_files.out)
+  def inputs = tabix.out.data.combine(tabix.out.index)
+    .map {{ data, index -> tuple(data, index, file("${{projectDir}}/requested"), file("${{projectDir}}/logs.csv"), []) }}
+  datacheck_urns(inputs)
 }}
 """
-        self.run_nf(source)
-        with gzip.open(self.path / "published/result.tsv.gz", "rt") as handle:
+
+    def assert_no_mavedb_publication(self):
+        self.assertFalse((self.path / "published/result.tsv.gz").exists())
+        self.assertFalse((self.path / "published/result.tsv.gz.tbi").exists())
+
+    def test_mavedb_empty_output_fails_with_global_ignore(self):
+        self.prepare_mavedb_output()
+        source = f"""
+include {{ concatenate_files }} from '{NF}/MaveDB/nf_modules/output.nf'
+workflow {{ concatenate_files(Channel.empty().toList()) }}
+"""
+        result = self.run_nf(source, success=False)
+        self.assertIn("No mapped variants available", result.stdout + result.stderr)
+        self.assert_no_mavedb_publication()
+
+    def test_mavedb_header_only_output_fails_with_global_ignore(self):
+        self.require_htslib()
+        mapping = self.prepare_mavedb_output()
+        mapping.write_text(mapping.read_text().splitlines()[0] + "\n")
+        result = self.run_nf(self.mavedb_output_workflow(), success=False)
+        self.assertIn("No mapped variants available", result.stdout + result.stderr)
+        self.assert_no_mavedb_publication()
+
+    def test_mavedb_malformed_mapping_fails_with_global_ignore(self):
+        self.require_htslib()
+        mapping = self.prepare_mavedb_output()
+        mapping.write_text(mapping.read_text().splitlines()[0] + '\n"unterminated\n')
+        result = self.run_nf(self.mavedb_output_workflow(), success=False)
+        self.assertIn("ParserError", result.stdout + result.stderr)
+        self.assert_no_mavedb_publication()
+
+    def test_mavedb_index_failure_fails_with_global_ignore(self):
+        self.require_htslib()
+        self.prepare_mavedb_output()
+        (self.path / "bin").mkdir()
+        tool = self.path / "bin/tabix"
+        tool.write_text("#!/bin/bash\necho synthetic-index-failure >&2\nexit 42\n")
+        tool.chmod(0o755)
+        result = self.run_nf(self.mavedb_output_workflow(), success=False)
+        self.assertIn("exit status (42)", result.stdout + result.stderr)
+        self.assertIn("synthetic-index-failure", result.stdout + result.stderr)
+        self.assert_no_mavedb_publication()
+
+    def test_mavedb_generated_output_is_validated_and_published(self):
+        self.require_htslib()
+        mapping = self.prepare_mavedb_output()
+        original = mapping.read_bytes()
+        published = self.path / "published"
+        published.mkdir()
+        # A datacheck reading the published path would encounter this stale file.
+        (published / "result.tsv.gz").write_bytes(b"stale published output")
+        self.run_nf(self.mavedb_output_workflow())
+        self.assertEqual(mapping.read_bytes(), original)
+        with gzip.open(published / "result.tsv.gz", "rt") as handle:
             self.assertEqual(
-                handle.read().splitlines(), ["#chr\tstart\tend\turn", "1\t1\t1\tA"]
+                handle.read().splitlines(),
+                [
+                    "#chr\tstart\tend\tref\talt\turn\tscore",
+                    "1\t10\t10\tA\tG\tA\t0.234567891",
+                    "1\t20\t20\tC\tT\tA\t0.123456789",
+                ],
             )
-        self.assertTrue((self.path / "published/result.tsv.gz.tbi").exists())
+        self.assertTrue((published / "result.tsv.gz.tbi").is_file())
+        index = subprocess.run(
+            ["tabix", "-l", str(published / "result.tsv.gz")],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertEqual(index.stdout.strip(), "1")
+        self.assertEqual((self.path / "reports/found_urns.txt").read_text(), "A\n")
+        self.assertEqual(
+            (self.path / "reports/unexpected_missing_urns.txt").read_text(), ""
+        )
+
+    def test_mavedb_incomplete_output_is_not_published(self):
+        self.require_htslib()
+        self.prepare_mavedb_output(requested="A\nB\n")
+        result = self.run_nf(self.mavedb_output_workflow(), success=False)
+        self.assertIn("missing without an expected skip", result.stdout + result.stderr)
+        self.assert_no_mavedb_publication()
 
     def test_safe_vcf_sorting_both_modules(self):
         self.require_htslib()

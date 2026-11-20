@@ -1,0 +1,108 @@
+name: clinvar_synonyms
+description: Extract source-aware variant synonyms directly from ClinVar RCV XML.
+keywords:
+- clinvar
+- synonyms
+- variants
+tools:
+- synonyms:
+    description: Retain reported variant names, HGVS, SPDI and identifier sources.
+    documentation: https://github.com/Ensembl/ensembl-variation-pipelines
+    licence:
+    - Apache-2.0
+input:
+- - meta:
+      type: map
+      description: Caller metadata with id; passed through unchanged.
+  - rcv_xml:
+      type: file
+      description: Full ClinVar RCV XML or XML.GZ input.
+      ontologies: []
+  - genome_context:
+      type: map
+      description: Species and assembly context passed to the shared parser.
+- - python_source:
+      type: directory
+      description: Synonym Python src directory, staged as synonym_src.
+- - python_source_contents:
+      type: list
+      description: Sorted synonym source filenames and contents for cache invalidation.
+- - shared_source:
+      type: directory
+      description: Shared Python src directory, staged as shared_src.
+- - shared_source_contents:
+      type: list
+      description: Sorted shared source filenames and contents for cache invalidation.
+output:
+  variant_records:
+  - - meta:
+        type: map
+        description: Caller metadata; passed through unchanged.
+    - '*.variant_synonyms.jsonl':
+        type: file
+        description: Variant-level identifiers with source provenance and component links, without locations.
+        ontologies: []
+  allele_records:
+  - - meta:
+        type: map
+        description: Caller metadata; passed through unchanged.
+    - '*.variant_allele_synonyms.jsonl':
+        type: file
+        description: Allele identifiers and names with reported reference/alternate VCF sequences and source links.
+        ontologies: []
+  summary:
+  - - meta:
+        type: map
+        description: Caller metadata; passed through unchanged.
+    - '*.summary.json':
+        type: file
+        description: Source record, variant, synonym and source-only resolution counts.
+        ontologies: []
+  rejections:
+  - - meta:
+        type: map
+        description: Caller metadata; passed through unchanged.
+    - 'rejections.jsonl':
+        type: file
+        description: Unsupported synonym evidence with source RCV, release, reason and original evidence for reprocessing.
+        ontologies: []
+  versions_python:
+  - &versions_python
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - python:
+        type: string
+        description: Tool name.
+    - python --version | sed 's/Python //':
+        type: eval
+        description: Runtime tool version.
+  versions_consumer:
+  - &versions_consumer
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - synonyms:
+        type: string
+        description: Tool name.
+    - PYTHONPATH=synonym_src python -c 'from synonyms import __version__; print(__version__)':
+        type: eval
+        description: Runtime tool version.
+  versions_shared:
+  - &versions_shared
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - variation_sources:
+        type: string
+        description: Tool name.
+    - PYTHONPATH=shared_src python -c 'from variation_sources import __version__; print(__version__)':
+        type: eval
+        description: Runtime tool version.
+topics:
+  versions:
+  - *versions_python
+  - *versions_consumer
+  - *versions_shared
+authors: []
+maintainers: []

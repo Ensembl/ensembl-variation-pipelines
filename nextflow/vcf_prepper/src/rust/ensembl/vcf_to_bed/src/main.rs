@@ -82,7 +82,11 @@ const VARIANTGROUP : [(&str, u8); 45] = [
     ("intergenic_variant", 5)
 ];
 
-const SV_VARIANTGROUP : [(&str, u8); 32] = [
+// keyed by VEP VARIANT_CLASS (variety), not by consequence - see where variant_group is
+// overwritten for SVs below. Symbolic alleles get their class from %SO_TERMS
+// (ensembl-variation Utils/Config.pm); sequence alleles from SO_variation_class
+// (Utils/Sequence.pm), which can also yield SNV, substitution and sequence_alteration.
+const SV_VARIANTGROUP : [(&str, u8); 34] = [
     ("Alu_deletion", 11),
     ("Alu_insertion", 13),
     ("HERV_deletion", 11),
@@ -113,8 +117,10 @@ const SV_VARIANTGROUP : [(&str, u8); 32] = [
     ("tandem_duplication", 13),
     ("translocation", 12),
     ("deletion", 11),
+    ("insertion", 13),
     ("indel", 15),
-    ("insertion", 13)
+    ("substitution", 15),
+    ("sequence_alteration", 16)
 ];
 
 struct WritableFields {
@@ -222,7 +228,7 @@ impl Line {
 fn gen_csq_info_idx(header: &VCFHeader) -> HashMap<&str, usize> {
     let csq_info_desc = match header.info("CSQ".as_bytes()) {
         Some(csq_info) => {
-            match str::from_utf8(csq_info.description) {
+            match std::str::from_utf8(csq_info.description) {
                 Ok(desc) => desc,
                 Err(_) => {
                     println!("[ERROR] cannot parse header to get INFO/CSQ");
@@ -478,9 +484,13 @@ fn main() -> Result<(), VCFError> {
         
             // end in bed is exclusive
             let mut end = start + ref_len;
+            // insertion is a zero-length feature after the anchor base; track it so the
+            // SV block below does not shift the position a second time
+            let mut shifted_to_point = false;
             if variety.eq(&String::from("insertion")) {
                 start += 1;
                 end = start;
+                shifted_to_point = true;
             }
 
             /*
@@ -550,8 +560,10 @@ fn main() -> Result<(), VCFError> {
                 }
 
                 // for insertions and breakpoints the variant is on single point
-                if variety.ends_with(&String::from("insertion")) || 
-                        variety.ends_with(&String::from("breakpoint")) {
+                // (plain "insertion" has already been shifted above)
+                if !shifted_to_point && (
+                        variety.ends_with(&String::from("insertion")) ||
+                        variety.ends_with(&String::from("breakpoint"))) {
                     start += 1;
                     end = start;
                 }

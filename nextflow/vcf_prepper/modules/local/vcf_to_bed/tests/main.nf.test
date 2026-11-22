@@ -135,6 +135,61 @@ nextflow_process {
 		}
 	}
 
+<<<<<<< Updated upstream
+	test("vcf_to_bed - --structural_variant for non-symbolic insertions") {
+=======
+	test("vcf_to_bed - --structural_variant group for sequence-allele classes") {
+>>>>>>> Stashed changes
+
+        when {
+            params {
+                bed_fields = "${projectDir}/assets/structural_variant_bedfields.json"
+                structural_variant = true
+            }
+            process {
+                """
+                input[0] = "${projectDir}/assets/variation_consequnce_rank.json"
+                input[1] = tuple([:], file("${moduleDir}/tests/testdata/test_vcftobed.vcf.gz"))
+                """
+            }
+        }
+
+		then {
+			assert process.success
+
+            def output_file = process.out.get(0).get(0).get(1)
+            def lines = file(output_file).readLines()
+<<<<<<< Updated upstream
+            def by_id = lines.collectEntries { line -> [(line.split(" ")[3]): line] }
+
+            // insertions must be a zero-length feature right after the anchor base
+            // the start must not be shifted twice in SV mode
+            assert by_id["rs2088361900"] == "KI270521.1 1784 1784 rs2088361900 insertion G GTGAT 13 intergenic_variant 4"
+            assert by_id["rs1555257542"] == "chr13 57932508 57932508 rs1555257542 insertion T TATATATATACACAC 13 intergenic_variant 14"
+            assert by_id["rs1555257544"] == "chr13 57932508 57932508 rs1555257544 insertion T TATATATATATACACACACACACAC 13 intergenic_variant 24"
+            assert (
+              by_id["rs4023573"] == "GL000214.1 39434 39434 rs4023573 insertion C CTTT,CTTTTTTTTT 13 intergenic_variant 9" ||
+              by_id["rs4023573"] == "GL000214.1 39434 39434 rs4023573 insertion C CTTTTTTTTT,CTTT 13 intergenic_variant 9"
+            )
+=======
+            // id -> [variety, group]
+            def by_id = lines.collectEntries { line ->
+                def f = line.split(" ")
+                [(f[3]): [f[4], f[7]]]
+            }
+
+            // SV group comes from VARIANT_CLASS; sequence-allele classes must not fall back to 0
+            assert by_id["rs1260281513"] == ["SNV", "15"]
+            assert by_id["rs869033224"] == ["substitution", "15"]
+            assert by_id["rs768019142"] == ["sequence_alteration", "15"]
+            // existing classes unchanged
+            assert by_id["rs1377973775"] == ["deletion", "11"]
+            assert by_id["rs2088361900"] == ["insertion", "13"]
+            assert by_id["rs71287572"] == ["indel", "15"]
+>>>>>>> Stashed changes
+		}
+	}
+
 	test("vcf_to_bed - --structural_variant not given for symbolic alts") {
 
         when {

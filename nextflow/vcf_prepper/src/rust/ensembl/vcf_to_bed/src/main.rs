@@ -228,7 +228,7 @@ impl Line {
 fn gen_csq_info_idx(header: &VCFHeader) -> HashMap<&str, usize> {
     let csq_info_desc = match header.info("CSQ".as_bytes()) {
         Some(csq_info) => {
-            match str::from_utf8(csq_info.description) {
+            match std::str::from_utf8(csq_info.description) {
                 Ok(desc) => desc,
                 Err(_) => {
                     println!("[ERROR] cannot parse header to get INFO/CSQ");

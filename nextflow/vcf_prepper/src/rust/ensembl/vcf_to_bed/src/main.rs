@@ -82,7 +82,11 @@ const VARIANTGROUP : [(&str, u8); 45] = [
     ("intergenic_variant", 5)
 ];
 
-const SV_VARIANTGROUP : [(&str, u8); 32] = [
+// keyed by VEP VARIANT_CLASS (variety), not by consequence - see where variant_group is
+// overwritten for SVs below. Symbolic alleles get their class from %SO_TERMS
+// (ensembl-variation Utils/Config.pm); sequence alleles from SO_variation_class
+// (Utils/Sequence.pm), which can also yield SNV, substitution and sequence_alteration.
+const SV_VARIANTGROUP : [(&str, u8); 34] = [
     ("Alu_deletion", 11),
     ("Alu_insertion", 13),
     ("HERV_deletion", 11),
@@ -113,8 +117,10 @@ const SV_VARIANTGROUP : [(&str, u8); 32] = [
     ("tandem_duplication", 13),
     ("translocation", 12),
     ("deletion", 11),
+    ("insertion", 13),
     ("indel", 15),
-    ("insertion", 13)
+    ("substitution", 15),
+    ("sequence_alteration", 16)
 ];
 
 struct WritableFields {

@@ -58,7 +58,7 @@ def parse_args(args=None):
         dest="dataset_type",
         type=str,
         default="short_variants",
-        help="dataset type, accepted values: 'short_variants' or 'structural_variant'; Default is 'short_variants'",
+        help="dataset type, accepted values: 'short_variants' or 'structural_variants'; Default is 'short_variants'",
     )
     parser.add_argument(
         "--release",
@@ -284,7 +284,7 @@ def main(args=None):
     """Collect statistics from api VCFs and submit or print payloads.
 
     Iterates over genomes in the API output directory, computes counts/attributes for
-    either 'short_variants' or 'structural_variant' dataset types, and either prints aggregated payloads
+    either 'short_variants' or 'structural_variants' dataset types, and either prints aggregated payloads
     (debug mode) or submits them to the provided endpoint.
 
     Args:
@@ -338,21 +338,21 @@ def main(args=None):
             source = source_unparsed.replace("%20", " ").replace("%2F", "/")
 
             if dataset_type == "short_variants":
-                file_prefix = "variant"
-            elif dataset_type == "structural_variant":
-                file_prefix = "structural_variants"
+                track_prefix = "variant"
+            elif dataset_type == "structural_variants":
+                track_prefix = "structural_variants"
 
-            api_vcf = os.path.join(api_outdir, genome_uuid, f"{file_prefix}_{source_unparsed.lower()}.vcf.gz")
+            api_vcf = os.path.join(api_outdir, genome_uuid, f"{dataset_type}_{source_unparsed.lower()}.vcf.gz")
             if not os.path.isfile(api_vcf):
                 print(f"[WARN] file not found - {api_vcf}")
                 continue
 
 
-            track_bb = os.path.join(tracks_outdir, genome_uuid, f"{file_prefix}-{source_unparsed.lower()}-details.bb")
+            track_bb = os.path.join(tracks_outdir, genome_uuid, f"{track_prefix}-{source_unparsed.lower()}-details.bb")
             if not os.path.isfile(track_bb):
                 print(f"[WARN] file not found - {track_bb}")
                 continue
-            track_bw = os.path.join(tracks_outdir, genome_uuid, f"{file_prefix}-{source_unparsed.lower()}-summary.bw")
+            track_bw = os.path.join(tracks_outdir, genome_uuid, f"{track_prefix}-{source_unparsed.lower()}-summary.bw")
             if not os.path.isfile(track_bw):
                 print(f"[WARN] file not found - {track_bw}")
                 continue
@@ -402,7 +402,7 @@ def main(args=None):
                 attribute = {}
                 if dataset_type == "short_variants":
                     attribute["name"] = "variation.stats.short_variants"
-                elif dataset_type == "structural_variant":
+                elif dataset_type == "structural_variants":
                     attribute["name"] = "variation.stats.structural_variants"
                 attribute["value"] = str(variant_count)
                 dataset_attribute.append(attribute)
@@ -411,7 +411,7 @@ def main(args=None):
                 attribute = {}
                 if dataset_type == "short_variants":
                     attribute["name"] = "variation.sample_variant"
-                elif dataset_type == "structural_variant":
+                elif dataset_type == "structural_variants":
                     attribute["name"] = "variation.sample_structural_variants"
                 attribute["value"] = variant_example
                 dataset_attribute.append(attribute)

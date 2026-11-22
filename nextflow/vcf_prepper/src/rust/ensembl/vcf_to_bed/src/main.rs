@@ -478,9 +478,13 @@ fn main() -> Result<(), VCFError> {
         
             // end in bed is exclusive
             let mut end = start + ref_len;
+            // insertion is a zero-length feature after the anchor base; track it so the
+            // SV block below does not shift the position a second time
+            let mut shifted_to_point = false;
             if variety.eq(&String::from("insertion")) {
                 start += 1;
                 end = start;
+                shifted_to_point = true;
             }
 
             /*
@@ -550,8 +554,10 @@ fn main() -> Result<(), VCFError> {
                 }
 
                 // for insertions and breakpoints the variant is on single point
-                if variety.ends_with(&String::from("insertion")) || 
-                        variety.ends_with(&String::from("breakpoint")) {
+                // (plain "insertion" has already been shifted above)
+                if !shifted_to_point && (
+                        variety.ends_with(&String::from("insertion")) ||
+                        variety.ends_with(&String::from("breakpoint"))) {
                     start += 1;
                     end = start;
                 }

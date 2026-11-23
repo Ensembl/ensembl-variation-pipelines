@@ -9,9 +9,7 @@
 				{
 					"species_taxonomy_id": 9606,
 					"species_production_name": "homo_sapiens",
-					"assembly": "GRCh38",
-					"assembly_uuid": null,
-					"genome_uuid": null
+					"assembly": "GRCh38"
 				}
 			]
 		},
@@ -23,10 +21,20 @@
 			"contexts": [
 				{
 					"species_taxonomy_id": 9606,
+					"species_production_name": "homo_sapiens"
+				}
+			]
+		},
+		"GWAS_Catalog": {
+			"inputs": {
+				"data": null,
+				"study_builds": null
+			},
+			"contexts": [
+				{
+					"species_taxonomy_id": 9606,
 					"species_production_name": "homo_sapiens",
-					"assembly": null,
-					"assembly_uuid": null,
-					"genome_uuid": null
+					"assembly": "GRCh38"
 				}
 			]
 		}

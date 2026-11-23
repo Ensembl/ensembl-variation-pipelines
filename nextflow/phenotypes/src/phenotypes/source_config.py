@@ -17,8 +17,20 @@ def validate_g2p_context(context: dict) -> dict:
     return context
 
 
+def validate_gwascatalog_context(context: dict) -> dict:
+    context = validate_genome_context(context)
+    if (
+        context["species_taxonomy_id"] != 9606
+        or context["species_production_name"] != "homo_sapiens"
+        or context["assembly"] != "GRCh38"
+    ):
+        raise ValueError("GWAS Catalog mappings require human GRCh38: 9606 and homo_sapiens")
+    return context
+
+
 def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
     return _load_source_config(path, source_rules={
         "ClinVar": (("rcv", "vcv"), validate_clinvar_context),
         "G2P": (("data", "gene_id_mapping"), validate_g2p_context),
+        "GWAS_Catalog": (("data", "study_builds"), validate_gwascatalog_context),
     })

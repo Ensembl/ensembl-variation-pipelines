@@ -19,14 +19,15 @@ nodes must be able to access it. Conda and container profiles are also available
 
 ### Optional container execution
 
-For `-profile docker`, build the image used by both parsers and the loader:
+For `-profile docker`, build the image used by the parsers and loader:
 
 ```bash
 docker build -t ensembl-phenotypes:0.1.0 modules/local/load
 ```
 
 For Singularity, convert this image to a SIF and set its absolute path as the
-container for `PARSE_CLINVAR`, `PARSE_G2P` and `LOAD_PHENOTYPES` in a custom config.
+container for `PARSE_CLINVAR`, `PARSE_G2P`, `PARSE_GWASCATALOG` and
+`LOAD_PHENOTYPES` in a custom config.
 A registry URL can also be supplied; this repository does not publish the image.
 Containers need database network access and access to `.pgpass` if used.
 
@@ -110,7 +111,8 @@ SET search_path TO phenotypes;
 ## Run the pipeline
 
 The workflow runs **download → parse → load** for every source in the selected
-config. The default, `assets/phenotypes_config.json`, contains ClinVar and G2P.
+config. The default, `assets/phenotypes_config.json`, contains ClinVar, G2P
+and GWAS Catalog.
 Supply a config containing only one source to update that source alone.
 
 For each input, a missing or null path triggers a download. Supplied paths must
@@ -147,11 +149,12 @@ parsing results. Database loading always runs again.
 | --- | --- | --- | --- |
 | ClinVar | `<outdir>/clinvar/<species>/<assembly>/` | `clinvar_output.jsonl` | `clinvar_load_summary.json` |
 | G2P | `<outdir>/g2p/<species>/` | `g2p_output.jsonl` | `g2p_load_summary.json` |
+| GWAS Catalog | `<outdir>/gwascatalog/<species>/GRCh38/` | `gwascatalog_output.jsonl` | `gwascatalog_load_summary.json` |
 
 `<species>` is `species_production_name`. G2P adds an assembly directory when
 one is configured. Each parser also writes `warnings.txt` and `rejections.txt`.
-Downloaded inputs are copied to `<outdir>/clinvar/inputs/` or
-`<outdir>/g2p/inputs/`.
+Downloaded inputs are copied to `<outdir>/<source>/inputs/`, using the source
+directory names in the table.
 
 The first JSONL line contains shared `metadata`: source, genome context and
 import provenance, including both input filenames/checksums, pipeline date and
@@ -311,9 +314,49 @@ G2P rules live in `src/phenotypes/source_config.py`; shared ClinVar consumers
 keep their own ClinVar-only config. Standalone Python parsing needs both local
 files; downloading is handled by Nextflow.
 
+## GWAS Catalog
+
+Use the `GWAS_Catalog` entry in `assets/phenotypes_config.json`. Its inputs are
+`data` (association TSV, TSV.GZ or ZIP) and `study_builds`
+([Catalog study-build reference](https://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/sumstats_harm_status/Harm_sumstats_status.db)).
+Either can be a local path or null to download. Null `data` selects the newest
+dated directory under the [FTP releases](https://ftp.ebi.ac.uk/pub/databases/gwas/releases/)
+and downloads `gwas-catalog-associations_ontology-annotated-full.zip`.
+The downloaded filename retains `rYYYY-MM-DD` for `source_version`; generic
+local filenames have an unknown version. Both inputs are checksummed.
+
+The context must be human/GRCh38, the Catalog's mapped coordinate system;
+another assembly cannot be selected. Study-build metadata filters unmapped
+coordinate-style identifiers known to use GRCh37. If it explicitly says
+GRCh38, a plain `chrN:position` or `N:position` supplies a fallback reported
+location when no complete mapping exists. Partial mappings must agree with
+the identifier. `location_from_identifier` warnings record this fallback;
+conflicting partial mappings produce `identifier_location_conflict` instead.
+Unknown builds retain their identifiers without deriving coordinates.
+
+Haplotypes and interactions retain component focal alleles and coordinates.
+Groups lacking either are rejected; haplotypes crossing chromosomes are also
+rejected. Stop coordinates and parent spans remain null. Mapped genes alone
+are retained, and rows differing only in author-reported genes are combined.
+Ontology labels are recovered only from unambiguous rows in the same file.
+
+Statistics retain source text: `p_value.value` holds minus log10(p), frequency
+ranges use their minimum with a warning, and an unsupported effect type stays
+null. No classification assessments, lookups or harmonisation are added.
+Warnings and rejections identify the input row, study accession and variants.
+
+Standalone parsing uses the same packaged code, without downloads:
+
+```bash
+"$PIPELINE_DIR/.venv/bin/python" -m phenotypes.gwascatalog.gwascatalog_parser \
+    --data /path/to/associations.tsv \
+    --study-builds /path/to/Harm_sumstats_status.db \
+    --outdir /path/to/fresh-output-directory
+```
+
 ## Loading parsed JSONL
 
-Both sources use `phenotypes.loader`, which copies parser-prepared values into
+All sources use `phenotypes.loader`, which copies parser-prepared values into
 the database without lookups, coordinate calculations or harmonisation. To
 load an existing JSONL directly:
 
@@ -324,8 +367,8 @@ load an existing JSONL directly:
     --summary g2p_load_summary.json
 ```
 
-The command also accepts ClinVar JSONL. Without `--summary`, it writes
-`phenotypes_load_summary.json`. The same whole-source `--replace` policy and
+The command accepts JSONL from every supported source. Without `--summary`,
+it writes `phenotypes_load_summary.json`. The same whole-source `--replace` policy and
 transaction protection apply. A schema-wide lock prevents concurrent loads.
 
 ### Native HPC workaround

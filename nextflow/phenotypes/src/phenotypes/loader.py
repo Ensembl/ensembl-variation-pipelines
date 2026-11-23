@@ -159,14 +159,18 @@ class PhenotypeLoader:
         """Find or create an entity row by its supplied identifier and link its context.
 
         Raise ValueError if the entity supplies its own genome_contexts or lacks
-        required identifier, type or label text.
+        required type or label text. Unidentified entities are inserted separately.
         """
         if "genome_contexts" in entity:
             raise ValueError("Entity contexts must come from metadata.genome_context only")
-        entity_id = self.entity(
-            required_text(entity, "identifier"), required_text(entity, "type"),
-            required_text(entity, "label"),
-        )
+        entity_type = required_text(entity, "type")
+        label = required_text(entity, "label")
+        if entity.get("identifier") is None:
+            entity_id = self.insert("entity", {
+                "identifier": None, "type": entity_type, "label": label,
+            })
+        else:
+            entity_id = self.entity(required_text(entity, "identifier"), entity_type, label)
         self.entity_context(entity_id, context_id)
         return entity_id
 
@@ -245,7 +249,10 @@ class PhenotypeLoader:
         for statistic in evidence["statistics"]:
             self.insert("phenotype_statistic", {
                 "phenotype_evidence_id": evidence_id,
-                "statistic_type": required_text(statistic, "statistic_type"),
+                "statistic_type": (
+                    required_text(statistic, "statistic_type")
+                    if statistic.get("statistic_type") is not None else None
+                ),
                 **{name: statistic.get(name) for name in (
                     "value", "unit", "direction", "reported_value",
                 )},
@@ -364,6 +371,7 @@ class PhenotypeLoader:
             "reported_allele_role": report.get("reported_allele_role"),
             "reported_relationship_type": report.get("reported_relationship_type"),
             "reported_biological_context": report.get("reported_biological_context"),
+            "reported_analysis_context": report.get("reported_analysis_context"),
         })
         if reported_entity is not None:
             self.reported_entity(reported_entity, report_id=report_id)

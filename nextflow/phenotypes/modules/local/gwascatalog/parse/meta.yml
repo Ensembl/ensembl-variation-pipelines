@@ -1,0 +1,107 @@
+name: gwascatalog_parse
+description: Parse GWAS Catalog associations using a supplied study-build reference.
+keywords:
+- gwascatalog
+- variants
+- source processing
+tools:
+- phenotypes:
+    description: Parse GWAS Catalog associations using a supplied study-build reference.
+    documentation: https://github.com/Ensembl/ensembl-variation-pipelines
+    licence:
+    - Apache-2.0
+input:
+- - meta:
+      type: map
+      description: Caller metadata with id, source_name and processing context; passed through unchanged.
+  - data_file:
+      type: file
+      description: Association TSV, TSV.GZ or ZIP; an rYYYY-MM-DD filename supplies a release date.
+      ontologies: []
+  - study_builds:
+      type: file
+      description: Catalog Harm_sumstats_status.db, opened read-only.
+      ontologies: []
+  - genome_context:
+      type: map
+      description: Fixed human GRCh38 context; assembly_uuid and genome_uuid may be null.
+- - source_name:
+      type: string
+      description: Source name from the validated configuration.
+- - python_source:
+      type: directory
+      description: Phenotype Python src directory, staged as phenotype_src.
+- - python_source_contents:
+      type: list
+      description: Sorted phenotype source filenames and contents for cache invalidation.
+- - shared_source:
+      type: directory
+      description: Shared Python src directory, staged as shared_src.
+- - shared_source_contents:
+      type: list
+      description: Sorted shared source filenames and contents for cache invalidation.
+output:
+  records:
+  - - meta:
+        type: map
+        description: Caller metadata with id, source_name and processing context; passed through unchanged.
+    - '*_output.jsonl':
+        type: file
+        description: GWAS associations with import metadata.
+        ontologies: []
+  warnings:
+  - - meta:
+        type: map
+        description: Caller metadata with id, source_name and processing context; passed through unchanged.
+    - warnings.txt:
+        type: file
+        description: Tab-separated contextual warnings.
+        ontologies: []
+  rejections:
+  - - meta:
+        type: map
+        description: Caller metadata with id, source_name and processing context; passed through unchanged.
+    - rejections.txt:
+        type: file
+        description: Tab-separated rejections and reasons.
+        ontologies: []
+  versions_python:
+  - &id001
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - python:
+        type: string
+        description: Tool name.
+    - python --version | sed 's/Python //':
+        type: eval
+        description: Numeric Python version.
+  versions_parser:
+  - &id002
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - phenotypes:
+        type: string
+        description: Phenotype parser package.
+    - 0.1.0:
+        type: string
+        description: Pinned parser version; keep aligned with pyproject.toml.
+  versions_shared:
+  - &id003
+    - ${task.process}:
+        type: string
+        description: Process name.
+    - variation_sources:
+        type: string
+        description: Shared evidence parser package.
+    - PYTHONPATH=shared_src python -c 'from variation_sources import __version__; print(__version__)':
+        type: eval
+        description: Shared package version.
+topics:
+  versions:
+  - *id001
+  - *id002
+  - *id003
+authors: []
+maintainers: []

@@ -57,8 +57,8 @@ def parse_args(args=None):
         "--dataset_type",
         dest="dataset_type",
         type=str,
-        default="all",
-        help="dataset type, accepted values: 'short_variants', 'evidence' or 'all'; Default is 'all'",
+        default="short_variants",
+        help="dataset type, accepted values: 'short_variants' or 'structural_variants'; Default is 'short_variants'",
     )
     parser.add_argument(
         "--release",
@@ -284,7 +284,7 @@ def main(args=None):
     """Collect statistics from api VCFs and submit or print payloads.
 
     Iterates over genomes in the API output directory, computes counts/attributes for
-    either 'short_variants' or 'evidence' dataset types, and either prints aggregated payloads
+    either 'short_variants' or 'structural_variants' dataset types, and either prints aggregated payloads
     (debug mode) or submits them to the provided endpoint.
 
     Args:
@@ -303,10 +303,7 @@ def main(args=None):
     api_outdir = os.path.join(pipeline_outdir, "api")
     tracks_outdir = os.path.join(pipeline_outdir, "tracks")
 
-    if args.dataset_type == "all" or args.dataset_type == None:
-        dataset_types = ["short_variants", "evidence"]
-    else:
-        dataset_types = [args.dataset_type]
+    dataset_types = [args.dataset_type]
 
     if not debug and endpoint is None:
         print(
@@ -340,16 +337,22 @@ def main(args=None):
             
             source = source_unparsed.replace("%20", " ").replace("%2F", "/")
 
-            api_vcf = os.path.join(api_outdir, genome_uuid, "variation.vcf.gz")
+            if dataset_type == "short_variants":
+                track_prefix = "variant"
+            elif dataset_type == "structural_variants":
+                track_prefix = "structural_variants"
+
+            api_vcf = os.path.join(api_outdir, genome_uuid, f"{dataset_type}_{source_unparsed.lower()}.vcf.gz")
             if not os.path.isfile(api_vcf):
                 print(f"[WARN] file not found - {api_vcf}")
                 continue
 
-            track_bb = os.path.join(tracks_outdir, genome_uuid, f"variant-{source_unparsed.lower()}-details.bb")
+
+            track_bb = os.path.join(tracks_outdir, genome_uuid, f"{track_prefix}-{source_unparsed.lower()}-details.bb")
             if not os.path.isfile(track_bb):
                 print(f"[WARN] file not found - {track_bb}")
                 continue
-            track_bw = os.path.join(tracks_outdir, genome_uuid, f"variant-{source_unparsed.lower()}-summary.bw")
+            track_bw = os.path.join(tracks_outdir, genome_uuid, f"{track_prefix}-{source_unparsed.lower()}-summary.bw")
             if not os.path.isfile(track_bw):
                 print(f"[WARN] file not found - {track_bw}")
                 continue
@@ -369,6 +372,9 @@ def main(args=None):
             else:
                 version = source_version
             payload["label"] = version
+            description = source_meta.get("description", "")
+            if description:
+                payload["description"] = description
             payload["dataset_type"] = dataset_type
 
             dataset_source = {}
@@ -391,45 +397,24 @@ def main(args=None):
 
             dataset_attribute = []
 
-            if dataset_type == "short_variants":
-                variant_count = get_variant_count(api_vcf)
-                if variant_count is not None:
-                    attribute = {}
+            variant_count = get_variant_count(api_vcf)
+            if variant_count is not None:
+                attribute = {}
+                if dataset_type == "short_variants":
                     attribute["name"] = "variation.stats.short_variants"
-                    attribute["value"] = str(variant_count)
-                    dataset_attribute.append(attribute)
+                elif dataset_type == "structural_variants":
+                    attribute["name"] = "variation.stats.structural_variants"
+                attribute["value"] = str(variant_count)
+                dataset_attribute.append(attribute)
 
                 variant_example = get_variant_example(api_vcf, species)
                 attribute = {}
-                attribute["name"] = "variation.sample_variant"
+                if dataset_type == "short_variants":
+                    attribute["name"] = "variation.sample_variant"
+                elif dataset_type == "structural_variants":
+                    attribute["name"] = "variation.sample_structural_variants"
                 attribute["value"] = variant_example
                 dataset_attribute.append(attribute)
-            else:
-                phenotype_count = get_evidence_count(api_vcf, "PHENOTYPES")
-                if phenotype_count is not None:
-                    attribute = {}
-                    attribute["name"] = (
-                        "variation.stats.short_variants_with_phenotype_assertions"
-                    )
-                    attribute["value"] = phenotype_count
-                    dataset_attribute.append(attribute)
-
-                publication_count = get_evidence_count(api_vcf, "PUBMED")
-                if publication_count is not None:
-                    attribute = {}
-                    attribute["name"] = (
-                        "variation.stats.short_variants_with_publications"
-                    )
-                    attribute["value"] = publication_count
-                    dataset_attribute.append(attribute)
-
-                if species == "homo_sapiens" or species == "homo_sapiens_37":
-                    attribute = {}
-                    attribute["name"] = (
-                        "variation.stats.short_variants_frequency_studies"
-                    )
-                    attribute["value"] = 1
-                    dataset_attribute.append(attribute)
 
             payload["dataset_attribute"] = dataset_attribute
 

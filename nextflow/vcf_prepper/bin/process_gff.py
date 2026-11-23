@@ -196,7 +196,7 @@ def main(args=None):
                 f"[ERROR] Could not retrieve last genebuild udpate date for genome uuid - {genome_uuid} and release id - {release_id}"
             )
         last_geneset_update = last_geneset_update.replace("-", "_")
-        last_geneset_update = re.sub("[\-\s]", "_", last_geneset_update)
+        last_geneset_update = re.sub(r"[\-\s]", "_", last_geneset_update)
 
         source_gff = os.path.join(
             GFF_FASTA_BASE_DIR,

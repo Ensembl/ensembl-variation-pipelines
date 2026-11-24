@@ -89,6 +89,8 @@ This is a json configuration file containing the source file information. You ha
 }
 ```
 
+For variants imported from EVA, the output VCF preserves the comma-separated study IDs supplied in `INFO/SID`.
+
 - `output_dir` : (optional) Give the full path of the dir where the outputs will be generated, default: `/nfs/production/flicek/ensembl/variation/new_website`
 
 The generated VEP VCF and track files will be stored there. The directory structure would be - 

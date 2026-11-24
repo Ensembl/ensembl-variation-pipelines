@@ -49,6 +49,56 @@ nextflow_process {
 
     }
 
+    test("Retains single and multiple study IDs for EVA variants") {
+        when {
+            process {
+                def fixture = "${baseDir}/tests/data/test_eva_study_ids.vcf"
+                def vcf = "${outputDir}/eva.vcf.gz"
+                def compress = ["bcftools", "view", "-Oz", "-o", vcf, fixture].execute()
+                assert compress.waitFor() == 0 : compress.err.text
+                def index = ["bcftools", "index", vcf].execute()
+                assert index.waitFor() == 0 : index.err.text
+
+                """
+                input[0] = Channel.of("EVA", "MULTIPLE", "dbSNP").map { source ->
+                    def meta = [
+                        source: source,
+                        synonym_file: "${baseDir}/tests/data/homo_sapiens_grch38.synonyms"
+                    ]
+                    if (source == "MULTIPLE") {
+                        meta.sources = "EVA,dbSNP"
+                    }
+                    [meta, file("${vcf}"), file("${vcf}.csi")]
+                }
+                """
+            }
+        }
+
+        then {
+            assert process.success
+            def outputs = process.out.get(0).collectEntries { meta, vcf ->
+                [(meta.source): path(vcf).linesGzip]
+            }
+            def sidHeader = '##INFO=<ID=SID,Number=.,Type=String,Description="Identifiers of studies that report a variant">'
+            assert outputs.EVA.contains(sidHeader)
+            assert outputs.MULTIPLE.contains(sidHeader)
+            assert !outputs.dbSNP.any { it.startsWith("##INFO=<ID=SID,") }
+
+            def info = { source ->
+                outputs[source].findAll { !it.startsWith("#") }.collect { it.split("\t")[7] }
+            }
+            def evaInfo = [
+                "SOURCE=EVA;SID=PRJEB24044",
+                "SOURCE=EVA;SID=PRJEB23751,PRJEB24044",
+                "SOURCE=EVA",
+                "SOURCE=EVA"
+            ]
+            assert info("EVA") == evaInfo + ["SOURCE=EVA;SID=other-study"]
+            assert info("MULTIPLE") == evaInfo + ["SOURCE=dbSNP"]
+            assert info("dbSNP") == ["SOURCE=dbSNP"] * 5
+        }
+    }
+
     test("Source clinvar") {
 
         when {

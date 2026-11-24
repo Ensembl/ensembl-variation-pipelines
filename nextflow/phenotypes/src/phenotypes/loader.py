@@ -21,6 +21,7 @@ from variation_sources.context import validate_genome_context
 
 
 CACHE_SIZE = 10_000
+INSERT_BATCH_SIZE = 500
 PROGRESS_INTERVAL = 100_000
 LOCATION_FIELDS = (
     "assembly", "assembly_accession", "assembly_status", "chromosome",
@@ -90,15 +91,38 @@ class PhenotypeLoader:
         """Bind a database cursor and initialize per-table insertion counts."""
         self.cursor = cursor
         self.created: Counter[str] = Counter()
+        self._insert_statements = {}
+
+    def insert_statement(
+        self, table: str, columns: tuple[str, ...], rows: int = 1, *, returning: bool = False,
+    ) -> str:
+        key = (table, columns, rows, returning)
+        if key not in self._insert_statements:
+            placeholders = sql.SQL("({})").format(
+                sql.SQL(", ").join(sql.Placeholder() for _ in columns),
+            )
+            query = sql.SQL("INSERT INTO {} ({}) VALUES {}").format(
+                sql.Identifier(table), sql.SQL(", ").join(map(sql.Identifier, columns)),
+                sql.SQL(", ").join([placeholders] * rows),
+            )
+            if returning:
+                query += sql.SQL(" RETURNING {}").format(sql.Identifier(f"{table}_id"))
+            self._insert_statements[key] = query.as_string(self.cursor.connection)
+        return self._insert_statements[key]
+
+    def insert_many(self, table: str, rows: list[dict[str, Any]]) -> None:
+        if not rows:
+            return
+        columns = tuple(rows[0])
+        for start in range(0, len(rows), INSERT_BATCH_SIZE):
+            batch = rows[start:start + INSERT_BATCH_SIZE]
+            query = self.insert_statement(table, columns, len(batch))
+            self.cursor.execute(query, [row[column] for row in batch for column in columns])
+            self.created[table] += len(batch)
 
     def insert(self, table: str, values: dict[str, Any]) -> int:
         """Insert a row, count its creation and return its generated primary key."""
-        query = sql.SQL("INSERT INTO {} ({}) VALUES ({}) RETURNING {}").format(
-            sql.Identifier(table),
-            sql.SQL(", ").join(map(sql.Identifier, values)),
-            sql.SQL(", ").join(sql.Placeholder() for _ in values),
-            sql.Identifier(f"{table}_id"),
-        )
+        query = self.insert_statement(table, tuple(values), returning=True)
         row_id = self.cursor.execute(query, tuple(values.values())).fetchone()[0]
         self.created[table] += 1
         return row_id
@@ -237,7 +261,7 @@ class PhenotypeLoader:
             return
         values = {name: annotation.get(name) for name in ANNOTATION_FIELDS}
         values["inheritance_types"] = annotation.get("inheritance_types", [])
-        self.insert("phenotype_annotation", {**owner, **values})
+        self.insert_many("phenotype_annotation", [{**owner, **values}])
 
     def evidence(self, evidence: dict | None, **owner: int) -> None:
         """Insert evidence, statistics and distinct publication links for owner."""
@@ -246,18 +270,18 @@ class PhenotypeLoader:
         evidence_id = self.insert("phenotype_evidence", {
             **owner, "ega_accessions": evidence["ega_accessions"],
         })
-        for statistic in evidence["statistics"]:
-            self.insert("phenotype_statistic", {
-                "phenotype_evidence_id": evidence_id,
-                "statistic_type": (
-                    required_text(statistic, "statistic_type")
-                    if statistic.get("statistic_type") is not None else None
-                ),
-                **{name: statistic.get(name) for name in (
-                    "value", "unit", "direction", "reported_value",
-                )},
-            })
+        self.insert_many("phenotype_statistic", [{
+            "phenotype_evidence_id": evidence_id,
+            "statistic_type": (
+                required_text(statistic, "statistic_type")
+                if statistic.get("statistic_type") is not None else None
+            ),
+            **{name: statistic.get(name) for name in (
+                "value", "unit", "direction", "reported_value",
+            )},
+        } for statistic in evidence["statistics"]])
         linked = set()
+        publications = []
         for publication in evidence["publications"]:
             source = required_text(publication, "source")
             identifier, url = publication.get("identifier"), publication.get("url")
@@ -268,13 +292,11 @@ class PhenotypeLoader:
             else:
                 publication_id = self.identified_publication(source, identifier, url)
             if publication_id not in linked:
-                self.cursor.execute(
-                    """INSERT INTO evidence_publication
-                       (phenotype_evidence_id, publication_id) VALUES (%s, %s)""",
-                    (evidence_id, publication_id),
-                )
-                self.created["evidence_publication"] += 1
+                publications.append({
+                    "phenotype_evidence_id": evidence_id, "publication_id": publication_id,
+                })
                 linked.add(publication_id)
+        self.insert_many("evidence_publication", publications)
 
     def reported_entity(
         self, entity: dict, *, report_id: int | None = None,
@@ -293,11 +315,10 @@ class PhenotypeLoader:
                 entity.get("structural_attributes", {}), dumps=simplejson.dumps,
             ),
         })
-        for location in entity.get("locations", []):
-            self.insert("reported_entity_location", {
-                "reported_entity_id": reported_id,
-                **{name: location.get(name) for name in LOCATION_FIELDS},
-            })
+        self.insert_many("reported_entity_location", [{
+            "reported_entity_id": reported_id,
+            **{name: location.get(name) for name in LOCATION_FIELDS},
+        } for location in entity.get("locations", [])])
         for position, component in enumerate(entity.get("components", []), 1):
             self.reported_entity(component, parent_id=reported_id, ordinal=position)
 
@@ -383,26 +404,24 @@ class PhenotypeLoader:
                 "name": reported["name"],
             })
             linked_terms = set()
+            terms = []
             for term in reported["reported_phenotype_ontology_terms"]:
                 term_id = self.ontology_term(
                     required_text(term, "accession"), required_text(term, "source"), term.get("label"),
                 )
                 if term_id not in linked_terms:
-                    self.cursor.execute(
-                        """INSERT INTO reported_phenotype_ontology_term
-                           (reported_phenotype_id, ontology_term_id) VALUES (%s, %s)""",
-                        (reported_id, term_id),
-                    )
-                    self.created["reported_phenotype_ontology_term"] += 1
+                    terms.append({
+                        "reported_phenotype_id": reported_id, "ontology_term_id": term_id,
+                    })
                     linked_terms.add(term_id)
-        for reference in references:
-            self.insert("external_reference", {
-                "source_report_id": report_id,
-                "accession": required_text(reference, "accession"),
-                "database": required_text(reference, "database"),
-                "reference_subject": required_text(reference, "reference_subject"),
-                "url": reference.get("url"),
-            })
+            self.insert_many("reported_phenotype_ontology_term", terms)
+        self.insert_many("external_reference", [{
+            "source_report_id": report_id,
+            "accession": required_text(reference, "accession"),
+            "database": required_text(reference, "database"),
+            "reference_subject": required_text(reference, "reference_subject"),
+            "url": reference.get("url"),
+        } for reference in references])
         assessments = report["assessments"]
         if not isinstance(assessments, list):
             raise ValueError("source_report.assessments must be a list")

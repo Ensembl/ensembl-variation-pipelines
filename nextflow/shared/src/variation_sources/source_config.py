@@ -10,17 +10,22 @@ __all__ = ["DEFAULT_SOURCE_CONFIG", "load_source_config", "validate_clinvar_cont
 DEFAULT_SOURCE_CONFIG = Path(__file__).resolve().parents[2] / "assets/source_config.json"
 
 
-def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
+def load_source_config(
+    path: str | Path = DEFAULT_SOURCE_CONFIG, *, source_rules: dict | None = None,
+) -> dict:
     """Load source configuration with validated contexts and resolved inputs.
 
-    Resolve nonnull RCV and VCV paths relative to the configuration file and
-    require existing literal files. Return the loaded dictionary with source
-    names, normalized contexts and both input keys populated. Null inputs
-    remain available for workflow downloads.
+    Resolve input paths relative to the configuration file and require existing
+    literal files. Return source names, validated contexts and input keys.
+    By default, accept ClinVar with optional RCV/VCV inputs for downloads.
+    Consumers can supply source_rules mapping each supported source name to
+    (input names, context validator); additional source rules belong there.
 
     Raise ValueError for unsupported sources, invalid settings or duplicate
     species/assembly contexts. JSON decoding and file access errors propagate.
     """
+    if source_rules is None:
+        source_rules = {"ClinVar": (("rcv", "vcv"), validate_clinvar_context)}
     config_path = Path(path).resolve()
     with config_path.open(encoding="utf-8") as handle:
         config = json.load(handle)
@@ -28,8 +33,10 @@ def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
     if not isinstance(sources, dict) or not sources:
         raise ValueError("Source configuration must contain a non-empty sources object")
     for source, settings in sources.items():
-        if source != "ClinVar":
-            raise ValueError(f"No workflow is implemented for source {source!r}")
+        if source not in source_rules:
+            allowed = " or ".join(source_rules)
+            raise ValueError(f"Unsupported source {source!r}; expected {allowed}")
+        input_names, validate_context = source_rules[source]
         contexts = settings.get("contexts") if isinstance(settings, dict) else None
         if not isinstance(contexts, list) or not contexts:
             raise ValueError(
@@ -38,10 +45,11 @@ def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
         inputs = settings.get("inputs", {})
         if not isinstance(inputs, dict):
             raise ValueError(f"Source {source!r} inputs must be an object")
-        resolved_inputs = {"rcv": None, "vcv": None}
+        resolved_inputs = dict.fromkeys(input_names)
         for name, input_path in inputs.items():
-            if name not in {"rcv", "vcv"}:
-                raise ValueError(f"Unknown ClinVar input {name!r}; use 'rcv' or 'vcv'")
+            if name not in input_names:
+                allowed = " or ".join(repr(name) for name in input_names)
+                raise ValueError(f"Unknown {source} input {name!r}; use {allowed}")
             if input_path is None:
                 resolved_inputs[name] = None
                 continue
@@ -64,7 +72,7 @@ def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
         seen = set()
         validated = []
         for context in contexts:
-            context = validate_clinvar_context(context)
+            context = validate_context(context)
             key = (context["species_production_name"], context["assembly"])
             if key in seen:
                 raise ValueError(

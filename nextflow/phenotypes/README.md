@@ -332,7 +332,9 @@ GRCh38, a plain `chrN:position` or `N:position` supplies a fallback reported
 location when no complete mapping exists. Partial mappings must agree with
 the identifier. `location_from_identifier` warnings record this fallback;
 conflicting partial mappings produce `identifier_location_conflict` instead.
-Unknown builds retain their identifiers without deriving coordinates.
+Coordinate-style identifiers without a complete mapping are rejected as
+`source_assembly_unknown` when study-build metadata is missing or unknown.
+Single rsID records without coordinates are still retained.
 
 Haplotypes and interactions retain component focal alleles and coordinates.
 Groups lacking either are rejected; haplotypes crossing chromosomes are also

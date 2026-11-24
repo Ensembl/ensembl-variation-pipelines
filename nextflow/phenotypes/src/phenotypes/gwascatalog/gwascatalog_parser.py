@@ -461,7 +461,7 @@ def parse_entities(row: dict, builds: dict, warnings: list) -> tuple[dict, dict]
                             f"SNPS={identifier}; Catalog Raw_genome_build=GRCh38",
                         ))
             else:
-                warnings.append(("source_assembly_unknown", f"{identifier}; Catalog Raw_genome_build={build!r}"))
+                raise RejectedRecord("source_assembly_unknown", f"{identifier}; Catalog Raw_genome_build={build!r}")
         if not known:
             warnings.append(("unresolved_entity_identity", identifier))
         return {"identifier": identifier if known else None, "type": "Variant", "label": identifier}, reported

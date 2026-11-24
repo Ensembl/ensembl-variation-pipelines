@@ -148,6 +148,21 @@ or establish biological equivalence. Non-current statuses are retained as
 evidence for downstream policy. Unsupported representations and absent assembly
 placements are reported in `rejections.jsonl`, with counts in the summary.
 
+Each location includes nullable `stop_vcf`, calculated as
+`position_vcf + length(reference_allele_vcf) - 1` for a positive VCF position
+and complete literal REF/ALT sequences (A/C/G/T/N, case-insensitive).
+Source start/stop, alleles and length remain unchanged. Missing or unsupported
+VCF representations leave `stop_vcf` null; the record is retained.
+
+A haplotype parent's `locations` may contain a calculated interval: minimum
+component `position_vcf` to maximum component `stop_vcf`, stored as parent
+`start`/`stop`. This requires one complete VCF interval per component on the
+same assembly, chromosome and reference sequence. Parent VCF position and
+alleles remain null. Components are unchanged; no origin field is added.
+Different chromosomes produce `haplotype_span_different_chromosomes`. Missing,
+ambiguous or incompatible intervals leave parent locations empty without
+rejecting an otherwise supported record.
+
 The supported MeasureSet types remain `Variant`, `Haplotype`, and
 `Haplotype, single variant`; GenotypeSet is explicitly rejected. The inherited
 placement policy prefers primary RefSeq `NC_` locations when present. Haplotype

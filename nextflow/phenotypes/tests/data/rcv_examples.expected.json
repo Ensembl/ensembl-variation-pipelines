@@ -1,7 +1,7 @@
 {
   "RCV000755049.9": {
     "rcv": "RCV000755049.9",
-    "phenotype_name": "Ataxia _ Neurologic (child onset) OR Non-progressive congenital cerebellar ataxia",
+    "phenotype_name": "Multiple conditions (Ataxia _ Neurologic (child onset) ; Non-progressive congenital cerebellar ataxia)",
     "reported_names": [
       "Ataxia _ Neurologic (child onset)",
       "Non-progressive congenital cerebellar ataxia"
@@ -13,7 +13,7 @@
   },
   "RCV002490360.3": {
     "rcv": "RCV002490360.3",
-    "phenotype_name": "VITAMIN B12 PLASMA LEVEL QUANTITATIVE TRAIT LOCUS 1 OR Bombay phenotype",
+    "phenotype_name": "Multiple conditions (VITAMIN B12 PLASMA LEVEL QUANTITATIVE TRAIT LOCUS 1 ; Bombay phenotype)",
     "reported_names": [
       "VITAMIN B12 PLASMA LEVEL QUANTITATIVE TRAIT LOCUS 1",
       "Bombay phenotype"
@@ -39,7 +39,7 @@
   },
   "RCV003233651.4": {
     "rcv": "RCV003233651.4",
-    "phenotype_name": "Autism OR Bannayan-Riley-Ruvalcaba syndrome OR PTEN hamartoma tumor syndrome OR Macrocephaly",
+    "phenotype_name": "Multiple conditions (Autism ; Bannayan-Riley-Ruvalcaba syndrome ; PTEN hamartoma tumor syndrome ; Macrocephaly)",
     "reported_names": [
       "Autism",
       "Bannayan-Riley-Ruvalcaba syndrome",

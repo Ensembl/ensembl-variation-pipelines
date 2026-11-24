@@ -28,6 +28,9 @@ META = """##fileformat=VCFv4.4
 ##INFO=<ID=SVLEN,Number=.,Type=String,Description="Difference in length between REF and ALT alleles">
 ##INFO=<ID=NODEID,Number=1,Type=String,Description="Identifier of the nodes this variant belong to">
 """
+EVA_STUDY_HEADER = (
+    '##INFO=<ID=SID,Number=.,Type=String,Description="Identifiers of studies that report a variant">\n'
+)
 HEADER = """#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO
 """
 VARIATION_SOURCE_DUMP_FILENAME = "variation_source.txt"
@@ -183,6 +186,9 @@ def main(args=None):
         format_id = lambda x: "." if x is None else x
 
     meta = format_meta(META, chromosomes, synonyms)
+    retain_eva_study_ids = source == "EVA" or (source == "MULTIPLE" and "EVA" in sources)
+    if retain_eva_study_ids:
+        meta += EVA_STUDY_HEADER
 
     # get metadata information for all sources and dump that to a dictionary
     sources_meta = get_sources_meta_info(sources_meta_file)
@@ -239,6 +245,11 @@ def main(args=None):
             for info_field in retainable_info:
                 if variant.INFO.get(info_field):
                     info_fields += f";{info_field}={variant.INFO[info_field]}"
+
+            if retain_eva_study_ids and variant_source == "EVA":
+                study_ids = variant.INFO.get("SID")
+                if study_ids and study_ids != ".":
+                    info_fields += f";SID={study_ids}"
 
             o_file.write(
                 "\t".join(

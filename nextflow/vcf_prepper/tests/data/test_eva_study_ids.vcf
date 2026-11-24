@@ -1,0 +1,12 @@
+##fileformat=VCFv4.2
+##contig=<ID=Pltd>
+##INFO=<ID=SID,Number=.,Type=String,Description="Identifiers of studies that report a variant">
+##INFO=<ID=SOURCE,Number=1,Type=String,Description="Source of the variation data">
+##INFO=<ID=SS_VALIDATED,Number=1,Type=Integer,Description="Number of validated submitted variants">
+##INFO=<ID=VC,Number=1,Type=String,Description="Variant class">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+Pltd	1604	rs3024529647	A	T	.	.	SID=PRJEB24044;SS_VALIDATED=0;VC=SO:0001483;SOURCE=EVA
+Pltd	1605	rs3042975581	A	T	.	.	SID=PRJEB23751,PRJEB24044;SS_VALIDATED=0;VC=SO:0001483;SOURCE=EVA
+Pltd	1617	rs3018797331	C	T	.	.	SOURCE=EVA
+Pltd	1626	rs3044061363	A	T	.	.	SID=.;SOURCE=EVA
+Pltd	1632	rs3044573213	G	A	.	.	SID=other-study;SOURCE=dbSNP

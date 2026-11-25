@@ -22,6 +22,7 @@ from variation_sources.context import validate_genome_context
 
 CACHE_SIZE = 10_000
 INSERT_BATCH_SIZE = 500
+INITIAL_ANALYZE_RECORDS = 1_000
 PROGRESS_INTERVAL = 100_000
 LOCATION_FIELDS = (
     "assembly", "assembly_accession", "assembly_status", "chromosome",
@@ -92,6 +93,14 @@ class PhenotypeLoader:
         self.cursor = cursor
         self.created: Counter[str] = Counter()
         self._insert_statements = {}
+        self._phenotypes = {}
+
+    def analyze(self, schema: str) -> None:
+        """Refresh statistics for this load's tables without committing its transaction."""
+        if self.created:
+            self.cursor.execute(sql.SQL("ANALYZE {}").format(
+                sql.SQL(", ").join(sql.Identifier(schema, table) for table in self.created),
+            ))
 
     def insert_statement(
         self, table: str, columns: tuple[str, ...], rows: int = 1, *, returning: bool = False,
@@ -198,25 +207,30 @@ class PhenotypeLoader:
         self.entity_context(entity_id, context_id)
         return entity_id
 
-    @lru_cache(maxsize=CACHE_SIZE)
     def phenotype(
         self, source_id: int, name: str,
         measurement_type: str | None, measured_entity_id: int | None,
     ) -> int:
-        """Return a source-associated phenotype ID, creating its measurement if needed."""
-        row = self.cursor.execute(
-            """SELECT p.phenotype_id FROM phenotype p
-               JOIN phenotype_association a USING (phenotype_id)
-               JOIN source_report r USING (phenotype_association_id)
-               LEFT JOIN phenotype_measurement m USING (phenotype_id)
-               WHERE r.source_id = %s AND p.phenotype_name = %s
-                 AND m.measurement_type IS NOT DISTINCT FROM %s
-                 AND m.measured_entity_id IS NOT DISTINCT FROM %s
-               LIMIT 1""",
-            (source_id, name, measurement_type, measured_entity_id),
-        ).fetchone()
-        if row:
-            return row[0]
+        """Read source phenotypes once and retain exact name/measurement keys for this load."""
+        if source_id not in self._phenotypes:
+            rows = self.cursor.execute(
+                """SELECT DISTINCT p.phenotype_id, p.phenotype_name,
+                          m.measurement_type, m.measured_entity_id
+                   FROM phenotype p
+                   JOIN phenotype_association a USING (phenotype_id)
+                   JOIN source_report r USING (phenotype_association_id)
+                   LEFT JOIN phenotype_measurement m USING (phenotype_id)
+                   WHERE r.source_id = %s""",
+                (source_id,),
+            )
+            self._phenotypes[source_id] = {
+                (phenotype_name, kind, entity_id): phenotype_id
+                for phenotype_id, phenotype_name, kind, entity_id in rows
+            }
+        phenotypes = self._phenotypes[source_id]
+        key = (name, measurement_type, measured_entity_id)
+        if key in phenotypes:
+            return phenotypes[key]
         phenotype_id = self.insert("phenotype", {"phenotype_name": name})
         if measurement_type is not None:
             self.cursor.execute(
@@ -225,6 +239,7 @@ class PhenotypeLoader:
                 (phenotype_id, measurement_type, measured_entity_id),
             )
             self.created["phenotype_measurement"] += 1
+        phenotypes[key] = phenotype_id
         return phenotype_id
 
     @lru_cache(maxsize=CACHE_SIZE)
@@ -586,7 +601,11 @@ def load_phenotypes(
                             f"{input_path}:{line_number} ({accession}): {error}",
                         ) from error
                     summary["n_records_loaded"] += 1
-                    if summary["n_records_loaded"] % PROGRESS_INTERVAL == 0:
+                    if (
+                        summary["n_records_loaded"] == INITIAL_ANALYZE_RECORDS
+                        or summary["n_records_loaded"] % PROGRESS_INTERVAL == 0
+                    ):
+                        loader.analyze(schema)
                         print(
                             f"[Loading {source_name}] {summary['n_records_loaded']:,} records "
                             f"written, not yet committed; elapsed {monotonic() - started:.0f}s",

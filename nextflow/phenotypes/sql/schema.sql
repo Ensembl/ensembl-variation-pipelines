@@ -230,4 +230,13 @@ CREATE TABLE phenotype_annotation (
     )
 );
 
+CREATE INDEX phenotype_name_idx
+    ON phenotype (phenotype_name);
+
+CREATE INDEX phenotype_association_phenotype_idx
+    ON phenotype_association (phenotype_id);
+
+CREATE INDEX source_report_association_source_idx
+    ON source_report (phenotype_association_id, source_id);
+
 COMMIT;

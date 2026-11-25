@@ -7,13 +7,13 @@ workflow CLINVAR_SYNONYMS {
     source_settings
 
     main:
-    CLINVAR_INPUTS(source_settings)
+    CLINVAR_INPUTS(source_settings + [releases: ['VCV']])
     shared_source = file("${projectDir}/../shared/src", checkIfExists: true)
     python_source = file("${projectDir}/src", checkIfExists: true)
     extraction_inputs = channel.fromList(source_settings.contexts)
-        .combine(CLINVAR_INPUTS.out.rcv_xml)
-        .map { context, rcv ->
-            tuple([id: "clinvar_${context.species_production_name}_${context.assembly}".toString()] + context, rcv, context)
+        .combine(CLINVAR_INPUTS.out.vcv_xml)
+        .map { context, vcv ->
+            tuple([id: "clinvar_${context.species_production_name}_${context.assembly}".toString()] + context, vcv, context)
         }
     EXTRACT_CLINVAR_SYNONYMS(extraction_inputs, python_source, source_contents(python_source), shared_source, source_contents(shared_source))
 

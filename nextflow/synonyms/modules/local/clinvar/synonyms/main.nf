@@ -7,7 +7,7 @@ process EXTRACT_CLINVAR_SYNONYMS {
     container 'python:3.14.0'
 
     input:
-    tuple val(meta), path(rcv_xml), val(genome_context)
+    tuple val(meta), path(vcv_xml), val(genome_context)
     path python_source, stageAs: 'synonym_src'
     val python_source_contents
     path shared_source, stageAs: 'shared_src'
@@ -33,7 +33,7 @@ process EXTRACT_CLINVAR_SYNONYMS {
     PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="${python_source}:${shared_source}" \\
     python -m synonyms.clinvar.extract \\
         ${args} \\
-        --rcv-input "${rcv_xml}" \\
+        --vcv-input "${vcv_xml}" \\
         --genome-context ${context_argument} \\
         --variant-records '${prefix}.variant_synonyms.jsonl' \\
         --allele-records '${prefix}.variant_allele_synonyms.jsonl' \\

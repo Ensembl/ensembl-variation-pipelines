@@ -10,10 +10,12 @@ __all__ = ["DEFAULT_SOURCE_CONFIG", "load_source_config", "validate_clinvar_cont
 DEFAULT_SOURCE_CONFIG = Path(__file__).resolve().parents[2] / "assets/source_config.json"
 
 
-def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
+def load_source_config(
+    path: str | Path = DEFAULT_SOURCE_CONFIG, *, clinvar_inputs=("rcv", "vcv"),
+) -> dict:
     """Load source configuration with validated contexts and resolved inputs.
 
-    Resolve nonnull RCV and VCV paths relative to the configuration file and
+    Resolve nonnull paths for the selected ClinVar inputs relative to the config and
     require existing literal files. Return the loaded dictionary with source
     names, normalized contexts and both input keys populated. Null inputs
     remain available for workflow downloads.
@@ -42,7 +44,7 @@ def load_source_config(path: str | Path = DEFAULT_SOURCE_CONFIG) -> dict:
         for name, input_path in inputs.items():
             if name not in {"rcv", "vcv"}:
                 raise ValueError(f"Unknown ClinVar input {name!r}; use 'rcv' or 'vcv'")
-            if input_path is None:
+            if name not in clinvar_inputs or input_path is None:
                 resolved_inputs[name] = None
                 continue
             if not isinstance(input_path, str) or not input_path.strip():

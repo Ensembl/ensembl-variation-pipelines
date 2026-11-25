@@ -2,6 +2,6 @@ include { CLINVAR_SYNONYMS } from './workflows/clinvar'
 include { read_source_config } from '../shared/lib/source_config'
 
 workflow {
-    source_config = read_source_config(params.source_config, "${projectDir}/.venv/bin/python")
+    source_config = read_source_config(params.source_config, "${projectDir}/.venv/bin/python", ['vcv'])
     CLINVAR_SYNONYMS(source_config.sources.ClinVar)
 }

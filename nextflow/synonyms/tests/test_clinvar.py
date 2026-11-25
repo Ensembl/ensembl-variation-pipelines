@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from synonyms.clinvar.extract import extract_synonyms, reported_synonyms, synonym_records
-from variation_sources.clinvar.extract import iter_evidence
+from variation_sources.clinvar.vcv_evidence import iter_vcv_evidence
 from variation_sources.clinvar.variants import RejectedRecord
 
 SOURCE_DATA = Path(__file__).resolve().parents[2] / "shared/tests/data"
@@ -24,7 +24,7 @@ def values(record):
 
 
 class ClinvarSynonymTests(unittest.TestCase):
-    def source(self, filename="rcv.xml", root=None):
+    def source(self, filename="vcv_synonyms.xml", root=None):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         source = Path(directory.name) / "input.xml"
@@ -32,7 +32,7 @@ class ClinvarSynonymTests(unittest.TestCase):
         return source
 
     def evidence(self, source):
-        return [data for event, data in iter_evidence(source, CONTEXT) if event == "record"]
+        return [data for event, data in iter_vcv_evidence(source, CONTEXT) if event == "record"]
 
     def run_extract(self, source, context=None):
         parent = source.parent
@@ -44,12 +44,12 @@ class ClinvarSynonymTests(unittest.TestCase):
         return variants, alleles, summary, rejections
 
     def test_real_record_separates_identifiers_and_preserves_hgvs_categories(self):
-        source = self.source("RCV000755049.9.xml")
+        source = self.source("VCV000068432.33.xml")
         variants, alleles, summary, rejected = self.run_extract(source)
         self.assertEqual(rejected, [])
         self.assertEqual(len(variants), 2)
         self.assertEqual(len(alleles), 2)
-        self.assertEqual(values(variants[1]), {"VCV000068432.32", "RCV000755049.9", "rs121908247"})
+        self.assertTrue({"VCV000068432.33", "RCV000755049.9", "rs121908247"} <= values(variants[1]))
         self.assertIn("CA185906", values(alleles[1]))
         self.assertIn("ClinVar:Allele:79323", values(alleles[1]))
         self.assertNotIn("RCV000755049.9", values(alleles[1]))
@@ -69,8 +69,12 @@ class ClinvarSynonymTests(unittest.TestCase):
         for record in (variants[1], alleles[1]):
             self.assertNotIn("locations", record)
             self.assertNotIn("component_ordinal", record)
-            self.assertEqual(record["source_report"]["rcv_accession"], "RCV000755049.9")
-            self.assertEqual(record["source_report"]["source_version"], "2026-09-28")
+            self.assertIn("RCV000755049.9", record["source_report"]["rcv_accessions"])
+            self.assertEqual(record["source_report"]["variation_id"], 68432)
+            self.assertEqual(record["source_report"]["submissions"], [
+                {"scv_accession": "SCV001963387.1", "record_status": "current"},
+            ])
+            self.assertIsNone(record["source_report"]["source_version"])
             for item in record["synonyms"]:
                 self.assertNotEqual(item["source"], "RefSeq")
                 self.assertNotIn("reported_types", item)
@@ -94,37 +98,45 @@ class ClinvarSynonymTests(unittest.TestCase):
             self.assertNotIn("evidence_input", header)
         self.assertEqual(variants[0]["metadata"]["file_checksums"], alleles[0]["metadata"]["file_checksums"])
         self.assertEqual(summary["source_records_seen"], 3)
-        self.assertEqual(summary["variant_records_emitted"], 2)
+        self.assertEqual(summary["variant_records_emitted"], 3)
         self.assertEqual(summary["allele_records_emitted"], 2)
-        self.assertEqual(summary["variant_synonyms_emitted"], 6)
+        self.assertEqual(summary["variant_synonyms_emitted"], 7)
         self.assertEqual(summary["allele_synonyms_emitted"], 3)
-        self.assertEqual(summary["synonyms_emitted"], 9)
-        self.assertEqual(summary["synonym_resolution_states"], {"source_only": 9})
-        self.assertEqual(rejected[0]["reason"], "unsupported_genotype_set")
+        self.assertEqual(summary["synonyms_emitted"], 10)
+        self.assertEqual(summary["synonym_resolution_states"], {"source_only": 10})
+        self.assertEqual(rejected, [])
+        self.assertEqual(values(variants[3]), {"VCV000000003.1"})
+        self.assertIn("missing_genotype_members", [w[0] for w in variants[3]["source_report"]["warnings"]])
+        self.assertEqual(variants[1]["source_report"]["rcv_accessions"], ["RCV000000001.1", "RCV000000004.2"])
+        self.assertIsNone(variants[1]["source_report"]["rcv_accession"])
+        self.assertEqual(variants[2]["source_report"]["rcv_accessions"], [])
         self.assertIn("rs999999", values(variants[2]))
         self.assertEqual(alleles[2]["allele_identifier"], "ClinVar:Allele:11")
 
     def haplotype(self, one_member=False):
-        root = ET.parse(SOURCE_DATA / "rcv.xml").getroot()
-        measure_set = root.find("ClinVarSet/ReferenceClinVarAssertion/MeasureSet")
-        measure_set.set("Type", "Haplotype, single variant" if one_member else "Haplotype")
-        ET.SubElement(measure_set, "XRef", DB="ClinGen", ID="CA100")
-        first = measure_set.find("Measure")
-        ET.SubElement(first, "XRef", DB="ClinGen", ID="CA101")
-        ET.SubElement(first, "XRef", DB="OMIM", ID="103600.0054", Type="Allelic variant")
+        root = ET.parse(SOURCE_DATA / "vcv_synonyms.xml").getroot()
+        record = root.find("VariationArchive/ClassifiedRecord")
+        first = record.find("SimpleAllele")
+        record.remove(first)
+        haplotype = ET.SubElement(record, "Haplotype")
+        ET.SubElement(ET.SubElement(haplotype, "XRefList"), "XRef", DB="ClinGen", ID="CA100")
+        haplotype.append(first)
+        xrefs = first.find("XRefList")
+        ET.SubElement(xrefs, "XRef", DB="ClinGen", ID="CA101")
+        ET.SubElement(xrefs, "XRef", DB="OMIM", ID="103600.0054", Type="Allelic variant")
         ET.SubElement(first, "CanonicalSPDI").text = "NC_000001.11:99:A:G"
         if not one_member:
             second = copy.deepcopy(first)
-            second.set("ID", "12")
-            second.find("XRef").set("ID", "12345")
-            second.find("XRef[@DB='ClinGen']").set("ID", "CA102")
-            second.find("XRef[@DB='OMIM']").set("ID", "103600.0055")
-            second.find("AttributeSet/Attribute").text = "NM_000001.1:c.200C>T"
+            second.set("AlleleID", "12")
+            second.find("XRefList/XRef").set("ID", "12345")
+            second.find("XRefList/XRef[@DB='ClinGen']").set("ID", "CA102")
+            second.find("XRefList/XRef[@DB='OMIM']").set("ID", "103600.0055")
+            second.find("HGVSlist/HGVS/NucleotideExpression/Expression").text = "NM_000001.1:c.200C>T"
             second.find("CanonicalSPDI").text = "NC_000001.11:199:C:T"
-            location = second.find("SequenceLocation")
+            location = second.find("Location/SequenceLocation")
             location.set("referenceAlleleVCF", "C")
             location.set("alternateAlleleVCF", "T")
-            measure_set.append(second)
+            haplotype.append(second)
         return root
 
     def test_haplotype_members_keep_variant_and_allele_links_without_promoting_aliases(self):
@@ -132,7 +144,7 @@ class ClinvarSynonymTests(unittest.TestCase):
         records = synonym_records(evidence, "ClinVar")
         parent, first_variant, second_variant = records["variant"]
         unassigned, first, second = records["allele"]
-        self.assertEqual(values(parent), {"VCV000000001.1", "RCV000000001.1"})
+        self.assertEqual(values(parent), {"VCV000000001.1", "RCV000000001.1", "RCV000000004.2"})
         self.assertEqual(values(first_variant), {"rs699"})
         self.assertEqual(values(second_variant), {"rs12345"})
         self.assertIsNone(first_variant["variant_identifier"])
@@ -184,8 +196,8 @@ class ClinvarSynonymTests(unittest.TestCase):
                 self.assertIn(code, [w[0] for w in record["source_report"]["warnings"]])
 
     def test_affected_allele_comes_from_requested_assembly(self):
-        root = ET.parse(SOURCE_DATA / "rcv.xml").getroot()
-        measure = root.find("ClinVarSet/ReferenceClinVarAssertion/MeasureSet/Measure")
+        root = ET.parse(SOURCE_DATA / "vcv_synonyms.xml").getroot()
+        measure = root.find("VariationArchive/ClassifiedRecord/SimpleAllele/Location")
         other = copy.deepcopy(measure.find("SequenceLocation"))
         other.set("Assembly", "GRCh37")
         other.set("referenceAlleleVCF", "T")
@@ -194,6 +206,64 @@ class ClinvarSynonymTests(unittest.TestCase):
         source = self.source(root=root)
         _, alleles, _, _ = self.run_extract(source, {**CONTEXT, "assembly": "GRCh37"})
         self.assertEqual(alleles[1]["affected_allele"]["alternate"], "C")
+
+    def test_missing_requested_assembly_retains_reported_synonyms(self):
+        variants, alleles, summary, rejected = self.run_extract(
+            self.source(), {**CONTEXT, "assembly": "GRCh37"},
+        )
+        self.assertEqual(rejected, [])
+        self.assertEqual(summary["source_records_rejected"], 0)
+        self.assertIn("rs699", values(variants[1]))
+        self.assertIn("NC_000001.11:g.100A>G", values(alleles[1]))
+        for record in (variants[1], alleles[1]):
+            self.assertIn("missing_requested_assembly_location", [w[0] for w in record["source_report"]["warnings"]])
+            self.assertTrue(all(item["resolution"]["state"] == "source_only" for item in record["synonyms"]))
+        self.assertEqual(alleles[1]["affected_allele"], {
+            "reference": None, "alternate": None, "representation": "vcf",
+        })
+
+    def test_genotype_keeps_parent_and_nested_haplotype_synonyms_separate(self):
+        root = ET.parse(SOURCE_DATA / "vcv_synonyms.xml").getroot()
+        records = root.findall("VariationArchive")
+        classified = records[2].find("ClassifiedRecord")
+        genotype = classified.find("Genotype")
+        haplotype = ET.SubElement(genotype, "Haplotype", VariationID="45")
+        nested = copy.deepcopy(records[0].find("ClassifiedRecord/SimpleAllele"))
+        nested.remove(nested.find("Location"))
+        haplotype.append(nested)
+        ET.SubElement(haplotype, "Name").text = "Reported haplotype"
+        genotype.append(copy.deepcopy(records[1].find("IncludedRecord/SimpleAllele")))
+        ET.SubElement(genotype, "Name").text = "Reported genotype"
+        ET.SubElement(genotype, "VariationType").text = "Diplotype"
+        annotations = ET.SubElement(genotype, "HGVSlist")
+        hgvs = ET.SubElement(annotations, "HGVS", Type="coding")
+        expression = ET.SubElement(hgvs, "NucleotideExpression")
+        ET.SubElement(expression, "Expression").text = "NM_000001.1:c.[100A>G];[200C>T]"
+        xrefs = ET.SubElement(genotype, "XRefList")
+        ET.SubElement(xrefs, "XRef", DB="ClinGen", ID="CA1234")
+        rcv = ET.SubElement(classified, "RCVList")
+        ET.SubElement(rcv, "RCVAccession", Accession="RCV000000003", Version="1")
+
+        variants, alleles, _, rejected = self.run_extract(self.source(root=root))
+        self.assertEqual(rejected, [])
+        parent, nested_haplotype, nested_variant, direct_variant = variants[3:]
+        nested_allele, direct_allele = alleles[3:]
+        self.assertEqual(parent["variant_type"], "Diplotype")
+        self.assertEqual(values(parent), {
+            "VCV000000003.1", "RCV000000003.1", "Reported genotype",
+            "NM_000001.1:c.[100A>G];[200C>T]", "CA1234",
+        })
+        self.assertEqual(values(nested_haplotype), {"VCV000000045", "Reported haplotype"})
+        self.assertEqual(nested_haplotype["parent_variant_identifier"], "VCV000000003.1")
+        self.assertEqual(values(nested_variant), {"rs699"})
+        self.assertEqual(values(direct_variant), {"rs999999"})
+        self.assertEqual(nested_variant["parent_variant_identifier"], "VCV000000045")
+        self.assertEqual(nested_allele["parent_variant_identifier"], "VCV000000045")
+        self.assertEqual(direct_allele["parent_variant_identifier"], "VCV000000003.1")
+        self.assertIsNone(nested_allele["affected_allele"]["alternate"])
+        self.assertIn("missing_requested_assembly_location", [w[0] for w in nested_allele["source_report"]["warnings"]])
+        self.assertEqual(direct_allele["affected_allele"]["alternate"], "T")
+        self.assertEqual(direct_allele["source_report"]["warnings"], [])
 
     def test_duplicates_and_hgvs_fallback_categories(self):
         evidence = self.evidence(self.source())[0]
@@ -220,14 +290,14 @@ class ClinvarSynonymTests(unittest.TestCase):
         self.assertEqual([item["reported_type"] for item in result["allele"] if item["type"] == "name"], ["Preferred", "Alternate"])
 
     def test_missing_identifiers_reject_source_without_partial_records(self):
-        root = ET.parse(SOURCE_DATA / "rcv.xml").getroot()
-        del root.find("ClinVarSet/ReferenceClinVarAssertion/MeasureSet").attrib["Acc"]
+        root = ET.parse(SOURCE_DATA / "vcv_synonyms.xml").getroot()
+        del root.find("VariationArchive").attrib["Accession"]
         variants, alleles, summary, rejections = self.run_extract(self.source(root=root))
-        self.assertEqual(len(variants), 2)
+        self.assertEqual(len(variants), 3)
         self.assertEqual(len(alleles), 2)
         self.assertEqual(summary["rejections_by_reason"]["missing_variant_identifier"], 1)
-        self.assertEqual(rejections[0]["rcv_accession"], "RCV000000001.1")
-        self.assertIn("evidence", rejections[0])
+        self.assertEqual(rejections[0]["rcv_accessions"], ["RCV000000001.1", "RCV000000004.2"])
+        self.assertEqual(rejections[0]["variation_id"], 1)
 
     def test_mismatched_components_are_rejected(self):
         evidence = self.evidence(self.source())[0]
@@ -235,15 +305,15 @@ class ClinvarSynonymTests(unittest.TestCase):
         with self.assertRaisesRegex(RejectedRecord, "allele_component_count_mismatch"):
             synonym_records(evidence, "ClinVar")
 
-    def test_historical_and_overlapping_assertions_remain_separate(self):
-        root = ET.parse(SOURCE_DATA / "rcv.xml").getroot()
-        records = root.findall("ClinVarSet")
+    def test_historical_and_overlapping_archives_remain_separate(self):
+        root = ET.parse(SOURCE_DATA / "vcv_synonyms.xml").getroot()
+        records = root.findall("VariationArchive")
         ET.SubElement(records[0], "RecordStatus").text = "replaced"
-        records[1].find("ReferenceClinVarAssertion/MeasureSet/Measure/XRef").set("ID", "699")
+        records[1].find("IncludedRecord/SimpleAllele/XRefList/XRef").set("ID", "699")
         variants, _, _, _ = self.run_extract(self.source(root=root))
         self.assertEqual(sum("rs699" in values(record) for record in variants[1:]), 2)
         self.assertEqual(variants[1]["source_report"]["record_status"], "replaced")
-        self.assertNotEqual(variants[1]["source_report"]["rcv_accession"], variants[2]["source_report"]["rcv_accession"])
+        self.assertNotEqual(variants[1]["source_report"]["vcv_accession"], variants[2]["source_report"]["vcv_accession"])
 
     def test_complete_compressed_input_is_read_again_on_rerun(self):
         source = self.source()
@@ -252,21 +322,23 @@ class ClinvarSynonymTests(unittest.TestCase):
             handle.write(source.read_bytes())
         self.run_extract(compressed)
         root = ET.parse(source).getroot()
-        last = copy.deepcopy(root.findall("ClinVarSet")[1])
-        last.find("ReferenceClinVarAssertion/ClinVarAccession").set("Acc", "RCV000000099")
+        last = copy.deepcopy(root.findall("VariationArchive")[1])
+        last.set("Accession", "VCV000000099")
+        last.set("VariationID", "99")
+        last.find("IncludedRecord/SimpleAllele").set("VariationID", "99")
         root.append(last)
         with gzip.open(compressed, "wb") as handle:
             handle.write(ET.tostring(root))
         variants, alleles, summary, _ = self.run_extract(compressed)
         self.assertEqual(summary["source_records_seen"], 4)
-        self.assertEqual(len(variants), 4)
+        self.assertEqual(len(variants), 5)
         self.assertEqual(len(alleles), 4)
-        self.assertEqual(variants[-1]["source_report"]["rcv_accession"], "RCV000000099.1")
+        self.assertEqual(variants[-1]["source_report"]["vcv_accession"], "VCV000000099.1")
         self.assertEqual({path.name for path in source.parent.iterdir()}, {
             "input.xml", "input.xml.gz", "variants.jsonl", "alleles.jsonl", "summary.json", "rejections.jsonl"})
 
     def test_empty_release_has_both_headers_and_zero_counts(self):
-        variants, alleles, summary, rejected = self.run_extract(self.source(root=ET.Element("ReleaseSet", Dated="2026-01-01")))
+        variants, alleles, summary, rejected = self.run_extract(self.source(root=ET.Element("ClinVarVariationRelease", ReleaseDate="2026-01-01")))
         self.assertEqual((len(variants), len(alleles)), (1, 1))
         self.assertEqual(summary["source_records_seen"], 0)
         self.assertEqual(rejected, [])
@@ -276,7 +348,7 @@ class ClinvarSynonymTests(unittest.TestCase):
         for allele_path in (source, source.parent / "variants.jsonl"):
             with self.assertRaisesRegex(ValueError, "must be distinct"):
                 extract_synonyms(source, CONTEXT, source.parent / "variants.jsonl", allele_path, source.parent / "summary.json")
-        source.write_text('<ReleaseSet Dated="2026-01-01"><ClinVarSet>')
+        source.write_text('<ClinVarVariationRelease ReleaseDate="2026-01-01"><VariationArchive>')
         with self.assertRaises(ET.ParseError):
             self.run_extract(source)
 

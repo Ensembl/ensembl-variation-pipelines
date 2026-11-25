@@ -2,8 +2,8 @@
   "sources": {
     "ClinVar": {
       "inputs": {
-        "rcv": "../../../shared/tests/data/RCV000755049.9.xml",
-        "vcv": "../../../shared/tests/data/vcv.xml"
+        "rcv": "unavailable-rcv.xml",
+        "vcv": "../../../shared/tests/data/VCV000068432.33.xml"
       },
       "contexts": [
         {

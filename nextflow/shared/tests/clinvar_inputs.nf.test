@@ -33,10 +33,17 @@ nextflow_workflow {
             }
         }
         then {
+            def readXml = { path ->
+                new java.util.zip.GZIPInputStream(new File(path.toString()).newInputStream()).withCloseable {
+                    it.getText('UTF-8').trim()
+                }
+            }
             assertAll(
                 { assert workflow.success },
                 { assert file(workflow.out.rcv_xml[0]).name == 'ClinVarRCVRelease_00-latest.xml.gz' },
-                { assert file(workflow.out.vcv_xml[0]).name == 'ClinVarVCVRelease_00-latest.xml.gz' }
+                { assert file(workflow.out.vcv_xml[0]).name == 'ClinVarVCVRelease_00-latest.xml.gz' },
+                { assert readXml(workflow.out.rcv_xml[0]) == '<ReleaseSet Dated="2000-01-01"/>' },
+                { assert readXml(workflow.out.vcv_xml[0]) == '<ClinVarVariationRelease ReleaseDate="2000-01-01"/>' }
             )
         }
     }

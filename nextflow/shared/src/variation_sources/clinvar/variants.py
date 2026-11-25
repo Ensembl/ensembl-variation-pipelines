@@ -65,11 +65,11 @@ def integer(
         return None
 
 
-def versioned_accession(element: ET.Element | None) -> str | None:
-    """Return Acc with its optional Version suffix, or None when Acc is absent."""
+def versioned_accession(element: ET.Element | None, *, attribute: str = "Acc") -> str | None:
+    """Return an accession with its optional Version suffix."""
     if element is None:
         return None
-    accession = element.get("Acc")
+    accession = element.get(attribute)
     if not accession:
         return None
     version = element.get("Version")
@@ -282,26 +282,14 @@ def parse_variant(
     }
 
 
-def parse_measure(
-    measure: ET.Element,
-    assembly: str,
-    reported_identifier: str | None,
-    *,
-    warnings: list[tuple[str, str | None, str]] | None = None,
-    include_allele_evidence: bool = False,
-) -> dict[str, Any]:
-    """Return allele evidence and genes from one Measure on assembly.
-
-    Use reported_identifier as the primary identifier, retain source aliases
-    and structural attributes, and prefer primary RefSeq placements. Append
-    numeric diagnostics to warnings when supplied. Raise RejectedRecord if
-    no location matches the requested assembly.
-    Include raw allele identifiers, names, SPDI and HGVS only when requested.
-    """
+def parse_cross_references(
+    elements: Iterable[ET.Element], *, include_allele_evidence: bool,
+) -> tuple[list[str], list[str], list[dict]]:
+    """Extract shared dbSNP, dbVar, OMIM and ClinGen identifiers."""
     alternative_identifiers = []
     omim_ids = []
     cross_references = []
-    for xref in measure.findall("XRef"):
+    for xref in elements:
         database = xref.get("DB")
         identifier = xref.get("ID")
         if not identifier:
@@ -318,7 +306,55 @@ def parse_measure(
             cross_references.append({
                 "source": database, "value": identifier, "type": xref.get("Type"),
             })
+    return unique(alternative_identifiers), unique(omim_ids), cross_references
 
+
+def locations_for_assembly(
+    elements: list[ET.Element], assembly: str, *, warnings: list | None, allele_id: str | None,
+    required: bool = True,
+) -> list[dict[str, Any]]:
+    """Parse placements on the requested assembly and prefer RefSeq chromosomes."""
+    locations = preferred_locations(
+        [
+            parse_location(location, warnings=warnings, measure_id=allele_id)
+            for location in elements
+            if location.get("Assembly") == assembly
+        ]
+    )
+    if required and not locations:
+        raise RejectedRecord(
+            "missing_requested_assembly_location",
+            {
+                "requested_assembly": assembly,
+                "available_assemblies": unique(
+                    location.get("Assembly")
+                    for location in elements
+                    if location.get("Assembly")
+                ),
+            },
+        )
+    return locations
+
+
+def parse_measure(
+    measure: ET.Element,
+    assembly: str,
+    reported_identifier: str | None,
+    *,
+    warnings: list[tuple[str, str | None, str]] | None = None,
+    include_allele_evidence: bool = False,
+) -> dict[str, Any]:
+    """Return allele evidence and genes from one Measure on assembly.
+
+    Use reported_identifier as the primary identifier, retain source aliases
+    and structural attributes, and prefer primary RefSeq placements. Append
+    numeric diagnostics to warnings when supplied. Raise RejectedRecord if
+    no location matches the requested assembly.
+    Include raw allele identifiers, names, SPDI and HGVS only when requested.
+    """
+    alternative_identifiers, omim_ids, cross_references = parse_cross_references(
+        measure.findall("XRef"), include_allele_evidence=include_allele_evidence,
+    )
     structural_attributes = {}
     hgvs = []
     for attribute in measure.findall("./AttributeSet/Attribute"):
@@ -331,25 +367,9 @@ def parse_measure(
             if value not in values:
                 values.append(value)
 
-    locations = preferred_locations(
-        [
-            parse_location(location, warnings=warnings, measure_id=measure.get("ID"))
-            for location in measure.findall("SequenceLocation")
-            if location.get("Assembly") == assembly
-        ]
+    locations = locations_for_assembly(
+        measure.findall("SequenceLocation"), assembly, warnings=warnings, allele_id=measure.get("ID"),
     )
-    if not locations:
-        raise RejectedRecord(
-            "missing_requested_assembly_location",
-            {
-                "requested_assembly": assembly,
-                "available_assemblies": unique(
-                    location.get("Assembly")
-                    for location in measure.findall("SequenceLocation")
-                    if location.get("Assembly")
-                ),
-            },
-        )
     genes = []
     for value in measure.findall("./MeasureRelationship/Symbol/ElementValue"):
         if value.get("Type") == "Preferred" and text(value):
@@ -359,7 +379,7 @@ def parse_measure(
         "reported_genes": unique(gene for gene in genes if gene),
         "reported_variant": {
             "identifier": reported_identifier,
-            "alternative_identifiers": unique(alternative_identifiers),
+            "alternative_identifiers": alternative_identifiers,
             "variant_type": measure.get("Type"),
             "locations": locations,
             "structural_attributes": structural_attributes,
@@ -387,7 +407,7 @@ def parse_measure(
         result["allele_evidence"] = [{
             "ordinal": 1,
             "allele_id": measure.get("ID"),
-            "omim_ids": unique(omim_ids),
+            "omim_ids": omim_ids,
             "cross_references": unique(cross_references),
             "names": names,
             "spdi": [

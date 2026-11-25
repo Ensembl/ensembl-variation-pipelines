@@ -1,0 +1,74 @@
+nextflow_pipeline {
+    name 'ClinVar XML to variant synonyms'
+    script 'main.nf'
+    tag 'pipeline'
+    tag 'clinvar'
+    tag 'clinvar/synonyms'
+
+    test('Extract synonyms for both assemblies from local VCV with an unavailable RCV input') {
+        when {
+            params {
+                source_config = "$baseDir/tests/data/source_config.json"
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assert workflow.success
+            // One real CACNA1A record exercises SPDI, HGVS and rsID provenance.
+            for (assembly in ['GRCh38', 'GRCh37']) {
+                def directory = "$outputDir/results/clinvar/homo_sapiens/$assembly"
+                def rows = file("$directory/synonyms/clinvar.variant_synonyms.jsonl").readLines()
+                def parser = new groovy.json.JsonSlurper()
+                def header = parser.parseText(rows[0]).metadata
+                def record = parser.parseText(rows[1])
+                def alleleRows = file("$directory/synonyms/clinvar.variant_allele_synonyms.jsonl").readLines()
+                def allele = parser.parseText(alleleRows[1])
+                assert alleleRows.size() == 2
+                assert parser.parseText(alleleRows[0]).metadata.target_level == 'allele'
+                assert rows.size() == 2
+                assert header.genome_context.assembly == assembly
+                assert header.source_version == null
+                assert header.artifact_kind == 'source_evidence'
+                assert header.synonym_schema_version == 1
+                assert record.source_report.rcv_accessions.any { it.startsWith('RCV000755049.') }
+                assert record.source_report.vcv_accession == 'VCV000068432.33'
+                assert record.source_report.variation_id == 68432
+                assert !file("$outputDir/results/clinvar/inputs").exists()
+                assert record.source_report.source_version == null
+                assert record.synonyms.every {
+                    it.resolution.state == 'source_only' &&
+                    it.resolution.variant_id == null && it.resolution.variant_allele_id == null
+                }
+                assert allele.synonyms.any { it.type == 'SPDI' && it.value == 'NC_000019.10:13235692:C:T' }
+                assert allele.synonyms.any { it.type == 'HGVS' && it.value == 'NM_001127222.2:c.4988G>A' }
+                assert record.synonyms.any { it.source == 'dbSNP' && it.value == 'rs121908247' }
+                assert !record.synonyms.any { it.source == 'ClinGen' }
+                assert allele.synonyms.any { it.source == 'ClinGen' && it.value == 'CA185906' }
+                assert allele.affected_allele.alternate == 'T'
+                assert !record.containsKey('locations')
+                assert !allele.containsKey('locations')
+                assert !allele.containsKey('component_ordinal')
+                assert !file("$directory/evidence").exists()
+                assert file("$directory/synonyms/rejections.jsonl").text == ''
+            }
+        }
+    }
+
+    test('stub downloads only VCV and publishes synonym outputs') {
+        options '-stub-run'
+        when {
+            params {
+                outdir = "$outputDir/results"
+            }
+        }
+        then {
+            assert workflow.success
+            def inputs = new File("$outputDir/results/clinvar/inputs").list()
+            assert inputs.toList() == ['ClinVarVCVRelease_00-latest.xml.gz']
+            def directory = "$outputDir/results/clinvar/homo_sapiens/GRCh38/synonyms"
+            assert file("$directory/clinvar.variant_synonyms.jsonl").exists()
+            assert file("$directory/clinvar.variant_allele_synonyms.jsonl").exists()
+            assert file("$directory/clinvar.summary.json").exists()
+        }
+    }
+}

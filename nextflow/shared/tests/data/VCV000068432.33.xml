@@ -1,0 +1,128 @@
+<ClinVarResult-Set>
+  <VariationArchive VariationID="68432" VariationName="NM_001127222.2(CACNA1A):c.4988G&gt;A (p.Arg1663Gln)" VariationType="single nucleotide variant" Accession="VCV000068432" Version="33" RecordType="classified" NumberOfSubmissions="21" NumberOfSubmitters="20" DateLastUpdated="2026-10-24" DateCreated="2013-10-22" MostRecentSubmission="2026-10-18">
+    <RecordStatus>current</RecordStatus>
+    <Species>Homo sapiens</Species>
+    <ClassifiedRecord>
+      <SimpleAllele AlleleID="79323" VariationID="68432">
+        <Name>NM_001127222.2(CACNA1A):c.4988G&gt;A (p.Arg1663Gln)</Name>
+        <CanonicalSPDI>NC_000019.10:13235692:C:T</CanonicalSPDI>
+        <VariantType>single nucleotide variant</VariantType>
+        <Location>
+          <CytogeneticLocation>19p13.13</CytogeneticLocation>
+          <SequenceLocation Assembly="GRCh38" AssemblyAccessionVersion="GCF_000001405.38" forDisplay="true" AssemblyStatus="current" Chr="19" Accession="NC_000019.10" start="13235693" stop="13235693" display_start="13235693" display_stop="13235693" variantLength="1" positionVCF="13235693" referenceAlleleVCF="C" alternateAlleleVCF="T" />
+          <SequenceLocation Assembly="GRCh37" AssemblyAccessionVersion="GCF_000001405.25" AssemblyStatus="previous" Chr="19" Accession="NC_000019.9" start="13346507" stop="13346507" display_start="13346507" display_stop="13346507" variantLength="1" positionVCF="13346507" referenceAlleleVCF="C" alternateAlleleVCF="T" />
+        </Location>
+        <HGVSlist>
+          <HGVS Type="genomic">
+            <NucleotideExpression sequenceAccessionVersion="LRG_7" sequenceAccession="LRG_7">
+              <Expression>LRG_7:g.275768G&gt;A</Expression>
+            </NucleotideExpression>
+          </HGVS>
+          <HGVS Type="coding">
+            <NucleotideExpression sequenceAccessionVersion="LRG_7t1" sequenceAccession="LRG_7t1">
+              <Expression>LRG_7t1:c.4991G&gt;A</Expression>
+            </NucleotideExpression>
+            <ProteinExpression sequenceAccessionVersion="LRG_7p1" sequenceAccession="LRG_7p1" change="p.Arg1664Gln">
+              <Expression>LRG_7p1:p.Arg1664Gln</Expression>
+            </ProteinExpression>
+          </HGVS>
+          <HGVS Assembly="GRCh38" Type="genomic, top-level">
+            <NucleotideExpression sequenceAccessionVersion="NC_000019.10" sequenceAccession="NC_000019" sequenceVersion="10" change="g.13235693C&gt;T" Assembly="GRCh38">
+              <Expression>NC_000019.10:g.13235693C&gt;T</Expression>
+            </NucleotideExpression>
+          </HGVS>
+          <HGVS Type="genomic">
+            <NucleotideExpression sequenceAccessionVersion="NG_011569.1" sequenceAccession="NG_011569" sequenceVersion="1" change="g.275768G&gt;A">
+              <Expression>NG_011569.1:g.275768G&gt;A</Expression>
+            </NucleotideExpression>
+          </HGVS>
+          <HGVS Type="coding">
+            <NucleotideExpression sequenceAccessionVersion="NM_000068.4" sequenceAccession="NM_000068" sequenceVersion="4" change="c.5006G&gt;A">
+              <Expression>NM_000068.4:c.5006G&gt;A</Expression>
+            </NucleotideExpression>
+            <ProteinExpression sequenceAccessionVersion="NP_000059.3" sequenceAccession="NP_000059" sequenceVersion="3" change="p.Arg1669Gln" singleLetterProteinChange="R1669Q">
+              <Expression>NP_000059.3:p.Arg1669Gln</Expression>
+            </ProteinExpression>
+            <MolecularConsequence ID="SO:0001583" Type="missense variant" DB="SO" />
+          </HGVS>
+          <HGVS Type="coding">
+            <NucleotideExpression sequenceAccessionVersion="NM_001127221.2" sequenceAccession="NM_001127221" sequenceVersion="2" change="c.4991G&gt;A" MANEPlusClinical="true">
+              <Expression>NM_001127221.2:c.4991G&gt;A</Expression>
+            </NucleotideExpression>
+            <ProteinExpression sequenceAccessionVersion="NP_001120693.1" sequenceAccession="NP_001120693" sequenceVersion="1" change="p.Arg1664Gln" singleLetterProteinChange="R1664Q">
+              <Expression>NP_001120693.1:p.Arg1664Gln</Expression>
+            </ProteinExpression>
+            <MolecularConsequence ID="SO:0001583" Type="missense variant" DB="SO" />
+          </HGVS>
+          <HGVS Type="coding">
+            <NucleotideExpression sequenceAccessionVersion="NM_001127222.2" sequenceAccession="NM_001127222" sequenceVersion="2" change="c.4988G&gt;A" MANESelect="true">
+              <Expression>NM_001127222.2:c.4988G&gt;A</Expression>
+            </NucleotideExpression>
+            <ProteinExpression sequenceAccessionVersion="NP_001120694.1" sequenceAccession="NP_001120694" sequenceVersion="1" change="p.Arg1663Gln" singleLetterProteinChange="R1663Q">
+              <Expression>NP_001120694.1:p.Arg1663Gln</Expression>
+            </ProteinExpression>
+            <MolecularConsequence ID="SO:0001583" Type="missense variant" DB="SO" />
+          </HGVS>
+          <HGVS Type="coding">
+            <NucleotideExpression sequenceAccessionVersion="NM_001174080.2" sequenceAccession="NM_001174080" sequenceVersion="2" change="c.4997G&gt;A">
+              <Expression>NM_001174080.2:c.4997G&gt;A</Expression>
+            </NucleotideExpression>
+            <ProteinExpression sequenceAccessionVersion="NP_001167551.1" sequenceAccession="NP_001167551" sequenceVersion="1" change="p.Arg1666Gln" singleLetterProteinChange="R1666Q">
+              <Expression>NP_001167551.1:p.Arg1666Gln</Expression>
+            </ProteinExpression>
+            <MolecularConsequence ID="SO:0001583" Type="missense variant" DB="SO" />
+          </HGVS>
+          <HGVS Type="coding">
+            <NucleotideExpression sequenceAccessionVersion="NM_023035.3" sequenceAccession="NM_023035" sequenceVersion="3" change="c.5006G&gt;A">
+              <Expression>NM_023035.3:c.5006G&gt;A</Expression>
+            </NucleotideExpression>
+            <ProteinExpression sequenceAccessionVersion="NP_075461.2" sequenceAccession="NP_075461" sequenceVersion="2" change="p.Arg1669Gln" singleLetterProteinChange="R1669Q">
+              <Expression>NP_075461.2:p.Arg1669Gln</Expression>
+            </ProteinExpression>
+            <MolecularConsequence ID="SO:0001583" Type="missense variant" DB="SO" />
+          </HGVS>
+          <HGVS Assembly="GRCh37" Type="genomic, top-level">
+            <NucleotideExpression sequenceAccessionVersion="NC_000019.9" sequenceAccession="NC_000019" sequenceVersion="9" change="g.13346507C&gt;T" Assembly="GRCh37">
+              <Expression>NC_000019.9:g.13346507C&gt;T</Expression>
+            </NucleotideExpression>
+          </HGVS>
+        </HGVSlist>
+        <XRefList>
+          <XRef ID="CA185906" DB="ClinGen" />
+          <XRef ID="VAR_063691" DB="UniProtKB/Swiss-Prot" />
+          <XRef Type="rs" ID="121908247" DB="dbSNP" />
+        </XRefList>
+      </SimpleAllele>
+      <RCVList>
+        <RCVAccession Accession="RCV000059302" Version="14">
+        </RCVAccession>
+        <RCVAccession Accession="RCV000157057" Version="9">
+        </RCVAccession>
+        <RCVAccession Accession="RCV000406556" Version="18">
+        </RCVAccession>
+        <RCVAccession Accession="RCV000415457" Version="9">
+        </RCVAccession>
+        <RCVAccession Accession="RCV000653331" Version="16">
+        </RCVAccession>
+        <RCVAccession Accession="RCV000679889" Version="10">
+        </RCVAccession>
+        <RCVAccession Accession="RCV000755049" Version="9">
+        </RCVAccession>
+        <RCVAccession Accession="RCV002311540" Version="10">
+        </RCVAccession>
+        <RCVAccession Accession="RCV002273953" Version="9">
+        </RCVAccession>
+        <RCVAccession Accession="RCV003152591" Version="15">
+        </RCVAccession>
+        <RCVAccession Accession="RCV006893799" Version="1">
+        </RCVAccession>
+      </RCVList>
+      <ClinicalAssertionList>
+        <ClinicalAssertion ID="3851527" SubmissionDate="2021-10-04" ContributesToAggregateClassification="false" DateLastUpdated="2021-10-08" DateCreated="2021-10-08">
+          <ClinVarAccession Accession="SCV001963387" DateUpdated="2021-10-08" DateCreated="2021-10-08" Type="SCV" Version="1" SubmitterName="Diagnostic Laboratory, Department of Genetics, University Medical Center Groningen" OrgID="506382" OrganizationCategory="laboratory" OrgAbbreviation="DL-UMCG" />
+          <RecordStatus>current</RecordStatus>
+        </ClinicalAssertion>
+      </ClinicalAssertionList>
+    </ClassifiedRecord>
+  </VariationArchive>
+</ClinVarResult-Set>

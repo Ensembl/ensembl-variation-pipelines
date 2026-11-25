@@ -30,7 +30,10 @@ process DOWNLOAD_CLINVAR {
 
     stub:
     def prefix = task.ext.prefix ?: meta.id
+    def release_xml = release_type == 'VCV' ?
+        '<ClinVarVariationRelease ReleaseDate="2000-01-01"/>' :
+        '<ReleaseSet Dated="2000-01-01"/>'
     """
-    printf '<ReleaseSet Dated="2000-01-01"/>\\n' | gzip -c > '${prefix}.xml.gz'
+    printf '%s\\n' '${release_xml}' | gzip -c > '${prefix}.xml.gz'
     """
 }

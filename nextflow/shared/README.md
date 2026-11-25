@@ -1,8 +1,8 @@
 # Shared variation source components
 
 Reusable Nextflow DSL2 modules and a dependency-free Python package for ClinVar
-source extraction. Phenotypes consumes the common code; synonyms can use the
-same extractor before applying its own mapping and staging rules.
+source extraction. Phenotypes and synonyms use the shared parsers before
+applying their own mapping and staging rules.
 
 These are repository-local modules following current
 [nf-core component principles](https://nf-co.re/docs/specifications/components/modules/general):
@@ -17,7 +17,7 @@ source is staged explicitly, rather than relying on a published BioConda package
 | Component | Contract |
 | --- | --- |
 | `modules/local/clinvar/download` | Input `[meta, release_type, url]`; output `xml: [meta, release_type, xml_gz]` |
-| `workflows/clinvar_inputs` | Input settings map with `inputs.rcv` and `inputs.vcv`; outputs `rcv_xml` and `vcv_xml` as reusable value channels |
+| `workflows/clinvar_inputs` | Input settings map with `inputs.rcv`, `inputs.vcv` and optional `releases`. Requested releases are emitted as reusable value channels. |
 | `modules/local/clinvar/extract` | Input `[meta, rcv_xml, genome_context]`, shared source directory, and source contents manifest; outputs `records`, `summary`, and `rejections`, each `[meta, file]` |
 | `lib/source_files.nf` | Build a sorted Python filename/content manifest so nested source edits invalidate the task cache |
 
@@ -101,31 +101,10 @@ and does not read any pipeline's assets itself.
 
 ## Reuse from synonyms
 
-From `nextflow/synonyms/workflows/clinvar.nf`, import:
-
-```nextflow
-include { CLINVAR_INPUTS } from '../../shared/workflows/clinvar_inputs/main'
-include { EXTRACT_CLINVAR } from '../../shared/modules/local/clinvar/extract/main'
-include { source_contents } from '../../shared/lib/source_files'
-```
-
-Inside the consumer workflow, assuming validated `source_settings`:
-
-```nextflow
-CLINVAR_INPUTS(source_settings)
-shared_source = file("${projectDir}/../shared/src", checkIfExists: true)
-extraction_inputs = channel.fromList(source_settings.contexts)
-    .combine(CLINVAR_INPUTS.out.rcv_xml)
-    .map { context, xml ->
-        tuple([id: "clinvar_${context.assembly}".toString()], xml, context)
-    }
-EXTRACT_CLINVAR(extraction_inputs, shared_source, source_contents(shared_source))
-```
-
-Consume `EXTRACT_CLINVAR.out.records` through a synonym-specific adapter before
-loading the synonyms datastore. The extraction JSONL is not a canonical synonym
-table or a Parquet loader. Canonical variant matching, somatic-status policy,
-reconciliation, Parquet staging and datastore loading remain consumer work.
+The [synonyms consumer](../synonyms/README.md) requests only the VCV release
+from `CLINVAR_INPUTS` and streams it with the shared `iter_vcv_evidence` iterator.
+It writes source-aware synonym JSONL with VCV and RCV accessions, HGVS,
+canonical SPDI, variant names and database identifiers where reported.
 
 ## Python package and evidence
 
@@ -140,9 +119,16 @@ Other Python consumers can install this directory or declare the same local depe
 
 `python -m variation_sources.clinvar.extract` streams RCV XML/XML.GZ and writes a
 JSONL metadata header followed by variant evidence. It retains release date,
-input checksum, source statuses, RCV/VCV identifiers, allele IDs, reported HGVS,
+input checksum, source statuses, RCV/VCV identifiers, allele IDs, reported names,
+HGVS and canonical SPDI (in each record's `allele_evidence`),
 dbSNP/dbVar references, requested-assembly placements, genes, haplotype components
 and SCV accessions. It applies no phenotype or classification eligibility filter.
+The extractor enables `parse_variant(..., include_allele_evidence=True)` to
+collect names, SPDI, HGVS and direct Measure OMIM cross-reference IDs during
+the existing Measure traversal. HGVS attributes retain their full reported
+genomic, coding or protein annotation types
+It also retains ClinGen cross-references from MeasureSet and allele-level XRef elements, including those under Name and AttributeSet. This option
+defaults to false, so phenotype callers omit the extra extraction and output.
 It does not generate HGVS/SPDI, lift coordinates, resolve dbSNP merge chains,
 or establish biological equivalence. Non-current statuses are retained as
 evidence for downstream policy. Unsupported representations and absent assembly
@@ -153,8 +139,6 @@ The supported MeasureSet types remain `Variant`, `Haplotype`, and
 placement policy prefers primary RefSeq `NC_` locations when present. Haplotype
 component identifiers remain attached to their components and are never promoted
 to parent synonyms. Assembly UUID may be null; ClinVar requires an assembly label.
-RCV extraction alone does not cover VCV-only variants; add a VCV evidence adapter
-before claiming complete ClinVar synonym coverage.
 
 ## Database configuration
 

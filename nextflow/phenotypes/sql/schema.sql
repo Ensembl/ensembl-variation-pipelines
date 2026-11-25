@@ -6,7 +6,7 @@ BEGIN;
 
 CREATE TABLE entity (
     entity_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    identifier TEXT NOT NULL UNIQUE,
+    identifier TEXT UNIQUE,
     type TEXT NOT NULL,
     label TEXT NOT NULL
 );
@@ -110,7 +110,8 @@ CREATE TABLE source_report (
     reported_comparison_allele TEXT,
     reported_allele_role TEXT,
     reported_relationship_type TEXT,
-    reported_biological_context TEXT
+    reported_biological_context TEXT,
+    reported_analysis_context TEXT
 );
 
 CREATE TABLE reported_entity (
@@ -203,7 +204,7 @@ CREATE TABLE phenotype_evidence (
 CREATE TABLE phenotype_statistic (
     phenotype_statistic_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     phenotype_evidence_id BIGINT NOT NULL REFERENCES phenotype_evidence (phenotype_evidence_id) ON DELETE CASCADE,
-    statistic_type TEXT NOT NULL,
+    statistic_type TEXT,
     value NUMERIC,
     unit TEXT,
     direction TEXT,
@@ -228,5 +229,14 @@ CREATE TABLE phenotype_annotation (
         (source_report_id IS NOT NULL) <> (phenotype_assessment_id IS NOT NULL)
     )
 );
+
+CREATE INDEX phenotype_name_idx
+    ON phenotype (phenotype_name);
+
+CREATE INDEX phenotype_association_phenotype_idx
+    ON phenotype_association (phenotype_id);
+
+CREATE INDEX source_report_association_source_idx
+    ON source_report (phenotype_association_id, source_id);
 
 COMMIT;

@@ -1,5 +1,6 @@
 include { CLINVAR } from './clinvar'
 include { G2P } from './g2p'
+include { GWASCATALOG } from './gwascatalog'
 include { LOAD_PHENOTYPES } from '../modules/local/load/main'
 include { read_source_config } from '../../shared/lib/source_config'
 
@@ -29,6 +30,13 @@ workflow PHENOTYPES {
         parsed_records = parsed_records.mix(G2P.out.records)
         parsed_warnings = parsed_warnings.mix(G2P.out.warnings)
         parsed_rejections = parsed_rejections.mix(G2P.out.rejections)
+    }
+
+    if (source_config.sources.containsKey('GWAS_Catalog')) {
+        GWASCATALOG(source_config.sources['GWAS_Catalog'])
+        parsed_records = parsed_records.mix(GWASCATALOG.out.records)
+        parsed_warnings = parsed_warnings.mix(GWASCATALOG.out.warnings)
+        parsed_rejections = parsed_rejections.mix(GWASCATALOG.out.rejections)
     }
 
     LOAD_PHENOTYPES(parsed_records, channel.value(database_env), channel.value(params.replace), python_source, shared_source)
